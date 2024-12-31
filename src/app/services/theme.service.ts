@@ -22,6 +22,7 @@ export class ThemeService {
 	public setInitialTheme(renderer: Renderer2 | null): void {
 		if (isPlatformBrowser(this.platformId)) {
 			this.renderer = renderer;
+			// Prevent flicker by detecting the theme preference before rendering
 			const darkMode = window.matchMedia(this.themeQuery).matches;
 			this.applyTheme(darkMode);
 		}
@@ -42,10 +43,8 @@ export class ThemeService {
 		const body = document.body;
 		if (isDarkMode) {
 			this.renderer.addClass(body, "dark");
-			this.renderer.removeClass(body, "none");
 		} else {
 			this.renderer.removeClass(body, "dark");
-			this.renderer.addClass(body, "none");
 		}
 	}
 }
