@@ -1,11 +1,8 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
-  selector: 'app-published',
-  imports: [],
-  templateUrl: './published.component.html',
-  styleUrl: './published.component.scss'
+	selector: "app-published",
+	imports: [],
+	templateUrl: "./published.component.html",
 })
-export class PublishedComponent {
-
-}
+export class PublishedComponent {}
