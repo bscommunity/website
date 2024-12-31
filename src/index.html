@@ -15,9 +15,27 @@
   <app-root></app-root>
 
   <script>
-    // Check if the browser supports prefers-color-scheme
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.body.classList.add('dark');
+    // Check if the browser supports localStorage
+    if (typeof localStorage !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      // console.log(savedTheme);
+
+      if (savedTheme == "dark") {
+        // console.log('Dark theme saved');
+        document.body.classList.add(savedTheme);
+      } else if (savedTheme !== "light") {
+        // console.log('No theme saved');
+        // Default to system preference if no theme is saved
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark');
+        }
+      }
+    } else {
+      // console.log('No localStorage');
+      // Fallback for environments without localStorage
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+      }
     }
   </script>
 </body>

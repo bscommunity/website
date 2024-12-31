@@ -19,17 +19,16 @@ export class ThemeService {
 		return false;
 	}
 
-	public setInitialTheme(renderer: Renderer2 | null): void {
+	public setBrowserColorScheme(): void {
 		if (isPlatformBrowser(this.platformId)) {
-			this.renderer = renderer;
-			// Prevent flicker by detecting the theme preference before rendering
 			const darkMode = window.matchMedia(this.themeQuery).matches;
 			this.applyTheme(darkMode);
 		}
 	}
 
-	public listenToThemeChanges(): void {
+	public listenToThemeChanges(renderer: Renderer2): void {
 		if (isPlatformBrowser(this.platformId)) {
+			this.renderer = renderer;
 			const mediaQueryList = window.matchMedia(this.themeQuery);
 			mediaQueryList.addEventListener("change", (event) => {
 				this.applyTheme(event.matches);
