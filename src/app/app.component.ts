@@ -40,7 +40,6 @@ export class AppComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.themeService.setInitialTheme(this.renderer);
-		this.themeService.listenToThemeChanges();
+		this.themeService.listenToThemeChanges(this.renderer);
 	}
 }

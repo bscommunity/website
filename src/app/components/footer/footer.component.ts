@@ -10,6 +10,8 @@ import { MatButtonModule } from "@angular/material/button";
 
 // biome-ignore lint/style/useImportType: ThemeService is used as dependency injection token
 import { ThemeService } from "../../services/theme.service";
+// biome-ignore lint/style/useImportType: StorageService is used as dependency injection token
+import { StorageService } from "../../services/storage.service";
 
 @Component({
 	selector: "app-footer",
@@ -19,7 +21,10 @@ import { ThemeService } from "../../services/theme.service";
 export class FooterComponent implements OnInit {
 	private document = inject(DOCUMENT);
 
-	constructor(private themeService: ThemeService) {}
+	constructor(
+		private storageService: StorageService,
+		private themeService: ThemeService,
+	) {}
 
 	theme: string | null = null;
 
@@ -30,17 +35,19 @@ export class FooterComponent implements OnInit {
 	];
 
 	ngOnInit(): void {
-		this.theme = this.themeService.isDarkMode() ? "dark" : "light";
+		this.theme = this.storageService.getItem("theme") ?? null;
 	}
 
 	onThemeChange(event: MatSelectChange) {
-		console.log(event.value);
 		if (event.value === "light") {
 			this.document.body.classList.remove("dark");
+			this.storageService.setItem("theme", "light");
 		} else if (event.value === "dark") {
 			this.document.body.classList.add("dark");
+			this.storageService.setItem("theme", "dark");
 		} else {
-			this.themeService.setInitialTheme(null);
+			this.themeService.setBrowserColorScheme();
+			this.storageService.removeItem("theme");
 		}
 	}
 }
