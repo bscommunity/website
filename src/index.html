@@ -13,6 +13,13 @@
 
 <body class="mat-typography">
   <app-root></app-root>
+
+  <script>
+    // Check if the browser supports prefers-color-scheme
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark');
+    }
+  </script>
 </body>
 
 </html>
