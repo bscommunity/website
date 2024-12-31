@@ -30,9 +30,10 @@
 							{
 								"glob": "**/*",
 								"input": "public"
-							}
+							},
+							"src/assets"
 						],
-						"styles": ["src/styles.scss"],
+						"styles": ["src/styles.scss", "src/styles/tokens.scss"],
 						"scripts": [],
 						"server": "src/main.server.ts",
 						"outputMode": "server",
@@ -89,7 +90,8 @@
 							{
 								"glob": "**/*",
 								"input": "public"
-							}
+							},
+							"src/assets"
 						],
 						"styles": ["src/styles.scss"],
 						"scripts": []

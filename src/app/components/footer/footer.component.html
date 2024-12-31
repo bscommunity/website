@@ -1,0 +1,22 @@
+<footer>
+    <p>footer works!</p>
+    <mat-select [(value)]="theme" canSelectNullableOptions (selectionChange)="onThemeChange($event)">
+        @for (option of options; track option) {
+        <mat-option [value]="option.value">{{option.label}}</mat-option>
+        }
+    </mat-select>
+    <!-- <div class="flex flex-row items-center justify-between">
+        <div>
+
+        </div>
+        <ul>
+
+        </ul>
+    </div>
+    <div class="flex flex-row items-center justify-between">
+
+        <button mat-icon-button>
+            Share feedback
+        </button>
+    </div> -->
+</footer>
