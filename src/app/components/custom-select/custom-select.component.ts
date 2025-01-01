@@ -31,7 +31,6 @@ export interface Option {
 	selector: "app-custom-select",
 	imports: [CommonModule, MatIconModule, MatRippleModule],
 	templateUrl: "./custom-select.component.html",
-	styleUrls: ["./custom-select.component.scss"],
 })
 export class CustomSelectComponent implements AfterViewInit {
 	@ViewChild("dropdown") dropdown!: ElementRef;
