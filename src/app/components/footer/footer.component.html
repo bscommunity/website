@@ -18,34 +18,12 @@
                         </a>
                     </div>
                 </div>
-                <p>&#64;2025. Made with ❤️ by <a href="https://discord.com" class="hover:underline">meninocoiso</a></p>
+                <p>&#64;2025. Made with ❤️ by <a href="https://discord.com" target="_blank"
+                        class="hover:underline">meninocoiso</a></p>
             </div>
             <div class="flex flex-row items-center justify-start gap-9">
-                <!-- 
-                <mat-form-field class="w-32">
-                    <mat-select [(value)]="theme" (selectionChange)="onThemeChange($event)"
-                        panelClass="select-dropdown">
-                        <mat-select-trigger>
-                            <mat-icon class="text-on-surface mr-2.5" aria-hidden="false" aria-label="Theme icon"
-                                inline="true">
-                                {{currentThemeOption.icon}}
-                            </mat-icon>
-{{currentThemeOption.label}}
-                        </mat-select-trigger>
-                        @for (option of themeOptions; track option) {
-                        <mat-option [value]="option">
-                            <mat-icon>
-                                {{option.icon}}
-                            </mat-icon>
-                            {{option.label}}
-                        </mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field> -->
-
-                <!-- parent.component.html -->
-                <app-custom-select [options]="options"></app-custom-select>
-
+                <app-custom-select [options]="themeOptions" [selectedOption]="theme"
+                    (selectionChange)="onThemeChange($event)"></app-custom-select>
 
                 <!--  <mat-form-field class="w-28">
                     <mat-select value="en" class="w-fit" disabled>
