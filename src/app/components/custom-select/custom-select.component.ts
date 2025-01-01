@@ -45,9 +45,10 @@ export class CustomSelectComponent implements AfterViewInit {
 
 	@Input() options: Option[] = [];
 	@Input() selectedOption: Option | null = null;
-	dropdownOpen = false;
-
 	@Output() selectionChange = new EventEmitter<Option>();
+
+	dropdownOpen = false;
+	highlightedIndex = -1;
 
 	/*  */
 
@@ -113,6 +114,8 @@ export class CustomSelectComponent implements AfterViewInit {
 	selectOption(option: Option): void {
 		this.selectedOption = option;
 		this.selectionChange.emit(option);
+		this.highlightedIndex = -1;
+
 		/* setTimeout(() => {
 			this.dropdownOpen = false;
 		}, 0); */
@@ -127,7 +130,10 @@ export class CustomSelectComponent implements AfterViewInit {
 
 		if (this.dropdownOpen) {
 			// console.log("Adjusting");
+			this.highlightedIndex = 0;
 			this.adjustDropdownPosition();
+		} else {
+			this.highlightedIndex = -1;
 		}
 	}
 
@@ -146,6 +152,42 @@ export class CustomSelectComponent implements AfterViewInit {
 	onDocumentClick(event: Event) {
 		if (!this.elementRef.nativeElement.contains(event.target)) {
 			this.dropdownOpen = false;
+		}
+	}
+
+	@HostListener("document:keydown", ["$event"])
+	handleKeydown(event: KeyboardEvent) {
+		if (this.dropdownOpen) {
+			switch (event.key) {
+				case "ArrowDown":
+					this.highlightedIndex =
+						(this.highlightedIndex + 1) % this.options.length;
+					event.preventDefault();
+					break;
+				case "ArrowUp":
+					this.highlightedIndex =
+						(this.highlightedIndex - 1 + this.options.length) %
+						this.options.length;
+					event.preventDefault();
+					break;
+				case "Enter":
+				case " ":
+					this.selectOption(this.options[this.highlightedIndex]);
+					event.preventDefault();
+					break;
+				case "Escape":
+					this.dropdownOpen = false;
+					event.preventDefault();
+					break;
+				case "Tab":
+					this.dropdownOpen = false;
+					break;
+			}
+		} else {
+			if (event.key === "Enter" || event.key === " ") {
+				this.toggleDropdown();
+				event.preventDefault();
+			}
 		}
 	}
 }

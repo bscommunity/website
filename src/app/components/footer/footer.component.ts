@@ -1,5 +1,5 @@
 // biome-ignore lint/style/useImportType: OnInit is used as implementation of an interface
-import { Component, inject, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -18,9 +18,6 @@ import { StorageService } from "../../services/storage.service";
 	selector: "app-footer",
 	imports: [MatButtonModule, MatIconModule, CustomSelectComponent],
 	templateUrl: "./footer.component.html",
-	// Encapsulation has to be disabled in order for the
-	// component style to apply to the select panel.
-	encapsulation: ViewEncapsulation.None,
 	styleUrl: "./footer.component.scss",
 })
 export class FooterComponent implements OnInit {
@@ -35,16 +32,6 @@ export class FooterComponent implements OnInit {
 		{ label: "Auto", value: "auto", icon: "tonality" },
 		{ label: "Light", value: "light", icon: "wb_sunny" },
 		{ label: "Dark", value: "dark", icon: "nights_stay" },
-		/* { value: "option1", label: "Option 1", icon: "home" },
-		{ value: "option2", label: "Option 2", icon: "star" },
-		{ value: "option3", label: "Option 3", icon: "favorite" },
-		{ value: "option4", label: "Option 4", icon: "favorite_border" },
-		{ value: "option5", label: "Option 5", icon: "favorite" },
-		{ value: "option6", label: "Option 6", icon: "favorite_border" },
-		{ value: "option7", label: "Option 7", icon: "favorite" },
-		{ value: "option8", label: "Option 8", icon: "favorite_border" },
-		{ value: "option9", label: "Option 9", icon: "favorite" },
-		{ value: "option10", label: "Option 10", icon: "favorite_border" }, */
 	];
 
 	theme: Option = this.themeOptions[0]; // Default selection
@@ -53,13 +40,6 @@ export class FooterComponent implements OnInit {
 		{ label: "English", value: "en" },
 		{ label: "Spanish", value: "es" },
 	];
-
-	options: Option[] = [
-		{ value: "option1", label: "Option 1", icon: "home" },
-		{ value: "option2", label: "Option 2", icon: "star" },
-		// Add more options as needed
-	];
-	selectedOption: Option = this.options[0]; // Default selection
 
 	ngOnInit(): void {
 		this.theme =
