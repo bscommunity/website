@@ -35,7 +35,7 @@ export class FooterComponent implements OnInit {
 		{ label: "Auto", value: "auto", icon: "tonality" },
 		{ label: "Light", value: "light", icon: "wb_sunny" },
 		{ label: "Dark", value: "dark", icon: "nights_stay" },
-		{ value: "option1", label: "Option 1", icon: "home" },
+		/* { value: "option1", label: "Option 1", icon: "home" },
 		{ value: "option2", label: "Option 2", icon: "star" },
 		{ value: "option3", label: "Option 3", icon: "favorite" },
 		{ value: "option4", label: "Option 4", icon: "favorite_border" },
@@ -44,7 +44,7 @@ export class FooterComponent implements OnInit {
 		{ value: "option7", label: "Option 7", icon: "favorite" },
 		{ value: "option8", label: "Option 8", icon: "favorite_border" },
 		{ value: "option9", label: "Option 9", icon: "favorite" },
-		{ value: "option10", label: "Option 10", icon: "favorite_border" },
+		{ value: "option10", label: "Option 10", icon: "favorite_border" }, */
 	];
 
 	theme: Option = this.themeOptions[0]; // Default selection

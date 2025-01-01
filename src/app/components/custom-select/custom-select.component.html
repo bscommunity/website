@@ -15,17 +15,24 @@
         <mat-icon class="ml-2">arrow_drop_down</mat-icon>
     </div>
     <!-- Dropdown -->
-    <div #dropdown *ngIf="dropdownOpen" [ngClass]="{
-        'shadow-top': showTopShadow,
-        'shadow-bottom': showBottomShadow
-      }"
+    <div #dropdown *ngIf="dropdownOpen"
         class="absolute mt-2 w-full bg-surface-container border border-none rounded-lg overflow-hidden shadow-lg z-10 max-h-60 overflow-y-auto"
         (scroll)="onDropdownScroll($event)">
         <!-- Dropdown options -->
+        @if (showTopShadow) {
+        <div
+            class="sticky top-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-b from-surface-container to-transparent z-20">
+        </div>
+        }
         <div matRipple *ngFor="let option of options" (click)="selectOption(option)"
             class="flex items-center space-x-2 px-4 py-2 hover:bg-secondary-container cursor-pointer">
             <mat-icon inline>{{ option.icon }}</mat-icon>
             <span>{{ option.label }}</span>
         </div>
+        @if (showBottomShadow) {
+        <div
+            class="sticky bottom-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-t from-surface-container to-transparent z-20">
+        </div>
+        }
     </div>
 </div>
