@@ -31,13 +31,23 @@ export class FooterComponent implements OnInit {
 		private themeService: ThemeService,
 	) {}
 
-	theme: string | null = null;
-
-	themeOptions = [
-		{ label: "Auto", value: null },
-		{ label: "Light", value: "light" },
-		{ label: "Dark", value: "dark" },
+	themeOptions: Option[] = [
+		{ label: "Auto", value: "auto", icon: "tonality" },
+		{ label: "Light", value: "light", icon: "wb_sunny" },
+		{ label: "Dark", value: "dark", icon: "nights_stay" },
+		{ value: "option1", label: "Option 1", icon: "home" },
+		{ value: "option2", label: "Option 2", icon: "star" },
+		{ value: "option3", label: "Option 3", icon: "favorite" },
+		{ value: "option4", label: "Option 4", icon: "favorite_border" },
+		{ value: "option5", label: "Option 5", icon: "favorite" },
+		{ value: "option6", label: "Option 6", icon: "favorite_border" },
+		{ value: "option7", label: "Option 7", icon: "favorite" },
+		{ value: "option8", label: "Option 8", icon: "favorite_border" },
+		{ value: "option9", label: "Option 9", icon: "favorite" },
+		{ value: "option10", label: "Option 10", icon: "favorite_border" },
 	];
+
+	theme: Option = this.themeOptions[0]; // Default selection
 
 	languageOptions = [
 		{ label: "English", value: "en" },
@@ -45,26 +55,29 @@ export class FooterComponent implements OnInit {
 	];
 
 	options: Option[] = [
-		{ value: "option1", viewValue: "Option 1", icon: "home" },
-		{ value: "option2", viewValue: "Option 2", icon: "star" },
+		{ value: "option1", label: "Option 1", icon: "home" },
+		{ value: "option2", label: "Option 2", icon: "star" },
 		// Add more options as needed
 	];
 	selectedOption: Option = this.options[0]; // Default selection
 
 	ngOnInit(): void {
-		this.theme = this.storageService.getItem("theme") ?? null;
+		this.theme =
+			this.themeOptions.find(
+				(option) => option.value === this.storageService.getItem("theme"),
+			) || this.themeOptions[0];
 	}
 
-	/* onThemeChange(event: MatSelectChange) {
-		if (event.value === "light") {
+	onThemeChange(option: Option) {
+		if (option.value === "light") {
 			this.document.body.classList.remove("dark");
 			this.storageService.setItem("theme", "light");
-		} else if (event.value === "dark") {
+		} else if (option.value === "dark") {
 			this.document.body.classList.add("dark");
 			this.storageService.setItem("theme", "dark");
 		} else {
 			this.themeService.setBrowserColorScheme();
 			this.storageService.removeItem("theme");
 		}
-	} */
+	}
 }
