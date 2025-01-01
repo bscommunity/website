@@ -37,6 +37,16 @@ export class AppComponent implements OnInit {
 			"logo",
 			sanitizer.bypassSecurityTrustResourceUrl("assets/images/logo.svg"),
 		);
+
+		iconRegistry.addSvgIcon(
+			"github",
+			sanitizer.bypassSecurityTrustResourceUrl("assets/images/github.svg"),
+		);
+
+		iconRegistry.addSvgIcon(
+			"discord",
+			sanitizer.bypassSecurityTrustResourceUrl("assets/images/discord.svg"),
+		);
 	}
 
 	ngOnInit(): void {
