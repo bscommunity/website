@@ -24,6 +24,7 @@ module.exports = {
 				"on-background": "var(--mat-sys-on-background)",
 				surface: "var(--mat-sys-surface)",
 				"on-surface": "var(--mat-sys-on-surface)",
+				"surface-container-low": "var(--mat-sys-surface-container-low)",
 				outline: "var(--mat-sys-outline)",
 				error: "var(--mat-sys-error)",
 				"error-container": "var(--mat-sys-error-container)",

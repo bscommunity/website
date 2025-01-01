@@ -1,0 +1,27 @@
+<div class="relative inline-block w-full" (click)="toggleDropdown()">
+    <!-- Trigger -->
+    <div
+        class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 cursor-pointer">
+        <!-- Trigger Content -->
+        <ng-container *ngIf="selectedOption; else placeholder">
+            <div class="flex items-center space-x-2">
+                <mat-icon>{{ selectedOption.icon }}</mat-icon>
+                <span>{{ selectedOption.viewValue }}</span>
+            </div>
+        </ng-container>
+        <ng-template #placeholder>
+            <span>Select an option</span>
+        </ng-template>
+        <mat-icon class="ml-2">arrow_drop_down</mat-icon>
+    </div>
+    <!-- Dropdown -->
+    <div #dropdown *ngIf="dropdownOpen"
+        class="absolute mt-2 w-full bg-secondary-container border border-none rounded-lg overflow-hidden shadow-lg z-10 max-h-52 overflow-y-auto">
+        <!-- Dropdown options -->
+        <div *ngFor="let option of options" (click)="selectOption(option)"
+            class="flex items-center space-x-2 px-4 py-2 hover:bg-on-secondary-container hover:text-secondary-container cursor-pointer">
+            <mat-icon>{{ option.icon }}</mat-icon>
+            <span>{{ option.viewValue }}</span>
+        </div>
+    </div>
+</div>
