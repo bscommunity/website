@@ -20,9 +20,23 @@
         </button>
 
         <button class="flex flex-row items-center justify-end pl-2 gap-2 bg-secondary-container h-10 rounded-full"
-            type="button">
+            type="button" [matMenuTriggerFor]="menu">
             <mat-icon>keyboard_arrow_down</mat-icon>
             <img class="rounded-full w-10 h-10" src="https://github.com/theduardomaciel.png" />
         </button>
+        <mat-menu #menu="matMenu" xPosition="before" class="mt-2">
+            <button mat-menu-item>
+                <mat-icon>dialpad</mat-icon>
+                <span>Redial</span>
+            </button>
+            <button mat-menu-item disabled>
+                <mat-icon>voicemail</mat-icon>
+                <span>Check voice mail</span>
+            </button>
+            <button mat-menu-item>
+                <mat-icon>notifications_off</mat-icon>
+                <span>Disable alerts</span>
+            </button>
+        </mat-menu>
     </div>
 </nav>
