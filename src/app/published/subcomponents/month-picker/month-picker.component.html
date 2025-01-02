@@ -1,0 +1,10 @@
+<mat-slider
+	min="0"
+	[max]="rangeMonthsAmount"
+	step="1"
+	showTickMarks
+	discrete
+	[displayWith]="formatLabel.bind(this)"
+>
+	<input matSliderThumb />
+</mat-slider>
