@@ -41,20 +41,13 @@ export class FilterPanelComponent {
 		{ name: "Jazz" },
 		{ name: "Blues" },
 		{ name: "Classical" },
-		{ name: "Country" },
 		{ name: "Folk" },
-		{ name: "Reggae" },
 		{ name: "Rap" },
 		{ name: "Hip-Hop" },
 		{ name: "R&B" },
 		{ name: "Dance" },
-		{ name: "Chillout" },
 		{ name: "Soundtrack" },
-		{ name: "Instrumental" },
-		{ name: "Acoustic" },
 		{ name: "Latin" },
-		{ name: "Samba" },
-		{ name: "Bossa Nova" },
 	];
 
 	versions: ExpansionPanelData[] = [{ name: "Default" }, { name: "Deluxe" }];
