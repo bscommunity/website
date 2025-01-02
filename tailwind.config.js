@@ -38,6 +38,6 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [],
-	darkMode: "class", // Ativa o modo escuro baseado em uma classe
+	plugins: [require("tailwindcss-animate")],
+	darkMode: "class", // Enables dark mode with the class attribute
 };
