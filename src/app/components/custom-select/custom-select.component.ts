@@ -24,7 +24,7 @@ import { MatRippleModule } from "@angular/material/core";
 export interface Option {
 	value: string;
 	label: string;
-	icon: string;
+	icon?: string;
 }
 
 @Component({
@@ -48,6 +48,7 @@ export class CustomSelectComponent implements AfterViewInit {
 	@Output() selectionChange = new EventEmitter<Option>();
 
 	dropdownOpen = false;
+	dropdownSide: "up" | "down" = "down";
 	highlightedIndex = -1;
 
 	adjustDropdownPosition() {
@@ -55,7 +56,8 @@ export class CustomSelectComponent implements AfterViewInit {
 			return;
 		}
 
-		const triggerRect = this.elementRef.nativeElement.getBoundingClientRect();
+		const triggerRect =
+			this.elementRef.nativeElement.getBoundingClientRect();
 		const dropdownHeight = this.dropdown.nativeElement.offsetHeight;
 		const viewportHeight = window.innerHeight;
 
@@ -70,14 +72,20 @@ export class CustomSelectComponent implements AfterViewInit {
 				`${triggerRect.height + 10}px`,
 			);
 			this.renderer.setStyle(this.dropdown.nativeElement, "top", "auto");
+			this.dropdownSide = "up";
 		} else {
 			// Position below
 			this.renderer.setStyle(
 				this.dropdown.nativeElement,
 				"top",
-				`${triggerRect.height}px`,
+				`${triggerRect.height + 20}px`,
 			);
-			this.renderer.setStyle(this.dropdown.nativeElement, "bottom", "auto");
+			this.renderer.setStyle(
+				this.dropdown.nativeElement,
+				"bottom",
+				"auto",
+			);
+			this.dropdownSide = "down";
 		}
 	}
 
