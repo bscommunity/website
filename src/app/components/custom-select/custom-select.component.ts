@@ -11,7 +11,7 @@ import {
 	Output,
 	EventEmitter,
 	Inject,
-	PLATFORM_ID,
+	PLATFORM_ID, OnDestroy,
 } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
@@ -32,12 +32,12 @@ export interface Option {
 	imports: [CommonModule, MatIconModule, MatRippleModule],
 	templateUrl: "./custom-select.component.html",
 })
-export class CustomSelectComponent implements AfterViewInit {
+export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 	@ViewChild("dropdown") dropdown!: ElementRef;
 
 	constructor(
 		// biome-ignore lint/complexity/noBannedTypes: Object is used in the constructor
-		@Inject(PLATFORM_ID) private platformId: Object,
+		@Inject(PLATFORM_ID) private platformId: object,
 		private renderer: Renderer2,
 		private elementRef: ElementRef,
 		private cdr: ChangeDetectorRef,
