@@ -10,7 +10,7 @@ export class ThemeService {
 	private renderer: Renderer2 | null = null;
 
 	// biome-ignore lint/complexity/noBannedTypes: This is a service
-	constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+	constructor(@Inject(PLATFORM_ID) private platformId: object) {}
 
 	public isDarkMode(): boolean {
 		if (isPlatformBrowser(this.platformId)) {
