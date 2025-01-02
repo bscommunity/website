@@ -27,7 +27,7 @@
         <li matRipple *ngFor="let option of options; let i = index" (click)="selectOption(option)" role="option"
             [attr.aria-selected]="highlightedIndex === i" [ngClass]="{
                 'bg-secondary-container': highlightedIndex === i,
-            }" class="flex items-center space-x-2 px-4 py-2 hover:bg-secondary-container cursor-pointer">
+            }" class="flex items-center space-x-2 px-4 py-3 hover:bg-secondary-container cursor-pointer">
             <mat-icon inline>{{ option.icon }}</mat-icon>
             <span>{{ option.label }}</span>
         </li>

@@ -64,6 +64,11 @@
             inverse-secondary: #d2bfe4,
             inverse-tertiary: #ffb0d0,
         ));
+
+    @include mat.menu-overrides((container-shape: 0.5rem,
+            item-with-icon-leading-spacing: 1rem,
+            item-with-icon-trailing-spacing: 2rem,
+        ));
 }
 
 /* Dark Theme */

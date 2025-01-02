@@ -2,18 +2,26 @@
     <mat-icon svgIcon="logo" class="text-on-secondary-container" aria-hidden="false" aria-label="Site logo"></mat-icon>
     <ul class="flex flex-row items-center justify-center gap-4">
         <li>
-            <button mat-stroked-button>Overview</button>
+            <a mat-stroked-button [routerLink]="['/overview']" [routerLinkActiveOptions]="{exact: true}"
+                routerLinkActive="!bg-primary !text-on-primary !border-primary">Overview
+            </a>
         </li>
         <li>
-            <button mat-stroked-button>Published</button>
+            <a mat-stroked-button [routerLink]="['/published']" [routerLinkActiveOptions]="{exact: true}"
+                routerLinkActive="!bg-primary !text-on-primary !border-primary">Published</a>
         </li>
         <li>
-            <button mat-stroked-button>Upload</button>
+            <a mat-stroked-button class="!pl-8">
+                <mat-icon>cloud_upload</mat-icon>
+                Upload
+            </a>
         </li>
     </ul>
 
     <div class="flex flex-row items-center justify-end gap-4">
-        <button class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10">
+        <button mat-ripple
+            class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 opacity-50"
+            (click)="openWarning()">
             <span class="leading-none text-lg">
                 <mat-icon inline="true">notifications</mat-icon>
             </span>
@@ -25,17 +33,13 @@
             <img class="rounded-full w-10 h-10" src="https://github.com/theduardomaciel.png" />
         </button>
         <mat-menu #menu="matMenu" xPosition="before" class="mt-2">
-            <button mat-menu-item>
-                <mat-icon>dialpad</mat-icon>
-                <span>Redial</span>
+            <button disabled disabledInteractive mat-menu-item (click)="openWarning()">
+                <mat-icon>settings</mat-icon>
+                <span>Settings</span>
             </button>
-            <button mat-menu-item disabled>
-                <mat-icon>voicemail</mat-icon>
-                <span>Check voice mail</span>
-            </button>
-            <button mat-menu-item>
-                <mat-icon>notifications_off</mat-icon>
-                <span>Disable alerts</span>
+            <button mat-menu-item class="pr-12">
+                <mat-icon>logout</mat-icon>
+                <span>Sign-out</span>
             </button>
         </mat-menu>
     </div>

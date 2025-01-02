@@ -50,8 +50,6 @@ export class CustomSelectComponent implements AfterViewInit {
 	dropdownOpen = false;
 	highlightedIndex = -1;
 
-	/*  */
-
 	adjustDropdownPosition() {
 		if (typeof window === "undefined") {
 			return;
@@ -116,10 +114,6 @@ export class CustomSelectComponent implements AfterViewInit {
 		this.selectionChange.emit(option);
 		this.highlightedIndex = -1;
 
-		/* setTimeout(() => {
-			this.dropdownOpen = false;
-		}, 0); */
-
 		this.dropdownOpen = false;
 		this.cdr.detectChanges(); // Manually trigger change detection
 	}
@@ -130,7 +124,6 @@ export class CustomSelectComponent implements AfterViewInit {
 
 		if (this.dropdownOpen) {
 			// console.log("Adjusting");
-			this.highlightedIndex = 0;
 			this.adjustDropdownPosition();
 		} else {
 			this.highlightedIndex = -1;
