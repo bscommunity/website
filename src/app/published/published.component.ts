@@ -4,10 +4,11 @@ import {
 	type Option,
 } from "../components/custom-select/custom-select.component";
 import { MatIconModule } from "@angular/material/icon";
+import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
 
 @Component({
 	selector: "app-published",
-	imports: [MatIconModule, CustomSelectComponent],
+	imports: [MatIconModule, CustomSelectComponent, FilterPanelComponent],
 	templateUrl: "./published.component.html",
 })
 export class PublishedComponent {

@@ -1,0 +1,68 @@
+import { Component, signal } from "@angular/core";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { MatIconModule } from "@angular/material/icon";
+import { MatSliderModule } from "@angular/material/slider";
+import { MatChipsModule } from "@angular/material/chips";
+import {
+	ExpansionPanelComponent,
+	ExpansionPanelData,
+} from "../expansion-panel.component";
+import { MonthPickerComponent } from "../month-picker/month-picker.component";
+
+@Component({
+	selector: "app-filter-panel",
+	imports: [
+		MatIconModule,
+		MatExpansionModule,
+		MatSliderModule,
+		MatChipsModule,
+		ExpansionPanelComponent,
+		MonthPickerComponent,
+	],
+	templateUrl: "./filter-panel.component.html",
+})
+export class FilterPanelComponent {
+	categories: ExpansionPanelData[] = [
+		{ name: "Charts" },
+		{ name: "Tourpasses" },
+		{ name: "Themes" },
+	];
+
+	difficulties: ExpansionPanelData[] = [
+		{ name: "Normal" },
+		{ name: "Hard" },
+		{ name: "Extreme" },
+	];
+
+	genres: ExpansionPanelData[] = [
+		{ name: "Pop" },
+		{ name: "Rock" },
+		{ name: "Metal" },
+		{ name: "Jazz" },
+		{ name: "Blues" },
+		{ name: "Classical" },
+		{ name: "Country" },
+		{ name: "Folk" },
+		{ name: "Reggae" },
+		{ name: "Rap" },
+		{ name: "Hip-Hop" },
+		{ name: "R&B" },
+		{ name: "Dance" },
+		{ name: "Chillout" },
+		{ name: "Soundtrack" },
+		{ name: "Instrumental" },
+		{ name: "Acoustic" },
+		{ name: "Latin" },
+		{ name: "Samba" },
+		{ name: "Bossa Nova" },
+	];
+
+	versions: ExpansionPanelData[] = [{ name: "Default" }, { name: "Deluxe" }];
+
+	readonly datePanelOpenState = signal(false);
+
+	onFilterChange(item: ExpansionPanelData[] | null): void {
+		// Change filters here
+		console.log(item);
+	}
+}

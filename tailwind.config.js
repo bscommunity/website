@@ -28,6 +28,7 @@ module.exports = {
 				"on-surface-container": "var(--mat-sys-on-surface-container)",
 				"surface-container-low": "var(--mat-sys-surface-container-low)",
 				"on-surface-container-low": "var(--mat-sys-on-surface-container-low)",
+				"inverse-on-surface": "var(--mat-sys-inverse-on-surface)",
 				outline: "var(--mat-sys-outline)",
 				error: "var(--mat-sys-error)",
 				"error-container": "var(--mat-sys-error-container)",

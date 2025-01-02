@@ -1,0 +1,45 @@
+<div
+	class="flex flex-col items-start justify-start p-4 gap-4 bg-surface-container-low border border-inverse-on-surface rounded-2xl"
+>
+	<div class="pl-6 pt-2">
+		<h6>Filters</h6>
+	</div>
+
+	<div class="flex flex-col items-start justify-start gap-1 w-full">
+		<app-expansion-panel
+			title="Categories"
+			[data]="categories"
+			(dataChange)="onFilterChange($event)"
+		></app-expansion-panel>
+
+		<app-expansion-panel
+			title="Difficulties"
+			[data]="difficulties"
+			(dataChange)="onFilterChange($event)"
+		></app-expansion-panel>
+
+		<app-expansion-panel
+			title="Genres"
+			[data]="genres"
+			(dataChange)="onFilterChange($event)"
+		></app-expansion-panel>
+
+		<app-expansion-panel
+			title="Versions"
+			[data]="versions"
+			(dataChange)="onFilterChange($event)"
+		></app-expansion-panel>
+
+		<mat-expansion-panel
+			class="!shadow-none w-full"
+			[expanded]="datePanelOpenState"
+			(opened)="datePanelOpenState.set(true)"
+			(closed)="datePanelOpenState.set(false)"
+		>
+			<mat-expansion-panel-header>
+				<mat-panel-title> Published at </mat-panel-title>
+			</mat-expansion-panel-header>
+			<app-month-picker class="flex w-full"></app-month-picker>
+		</mat-expansion-panel>
+	</div>
+</div>
