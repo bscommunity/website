@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useImportType: Renderer2 is used as dependency injection token
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -14,7 +13,6 @@ import { FooterComponent } from "./components/footer/footer.component";
 import { DomSanitizer } from "@angular/platform-browser";
 import { MatIconRegistry, MatIconModule } from "@angular/material/icon";
 
-// biome-ignore lint/style/useImportType: Service is used as dependency injection token
 import { ThemeService } from "./services/theme.service";
 
 @Component({

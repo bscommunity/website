@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useImportType: ElementRef is used as dependency injection token
 import {
 	Component,
 	Input,
@@ -37,7 +36,6 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 	@ViewChild("dropdown") dropdown!: ElementRef;
 
 	constructor(
-		// biome-ignore lint/complexity/noBannedTypes: Object is used in the constructor
 		@Inject(PLATFORM_ID) private platformId: object,
 		private renderer: Renderer2,
 		private elementRef: ElementRef,
