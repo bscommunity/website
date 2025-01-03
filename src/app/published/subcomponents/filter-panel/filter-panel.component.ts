@@ -8,6 +8,7 @@ import {
 	ExpansionPanelData,
 } from "../expansion-panel.component";
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
+import { Difficulty } from "@/lib/data";
 
 @Component({
 	selector: "app-filter-panel",
@@ -28,11 +29,11 @@ export class FilterPanelComponent {
 		{ name: "Themes" },
 	];
 
-	difficulties: ExpansionPanelData[] = [
-		{ name: "Normal" },
-		{ name: "Hard" },
-		{ name: "Extreme" },
-	];
+	difficulties: ExpansionPanelData[] = Object.values(Difficulty).map(
+		(name) => ({
+			name,
+		}),
+	);
 
 	genres: ExpansionPanelData[] = [
 		{ name: "Pop" },
