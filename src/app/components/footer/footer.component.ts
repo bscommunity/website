@@ -1,18 +1,16 @@
-// biome-ignore lint/style/useImportType: OnInit is used as implementation of an interface
 import { Component, inject, OnInit } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+
 import {
 	CustomSelectComponent,
 	type Option,
-} from "../custom-select/custom-select.component";
+} from "@/components/custom-select/custom-select.component";
 
-// biome-ignore lint/style/useImportType: ThemeService is used as dependency injection token
-import { ThemeService } from "../../services/theme.service";
-// biome-ignore lint/style/useImportType: StorageService is used as dependency injection token
-import { StorageService } from "../../services/storage.service";
+import { ThemeService } from "@/services/theme.service";
+import { StorageService } from "@/services/storage.service";
 
 @Component({
 	selector: "app-footer",
@@ -44,7 +42,8 @@ export class FooterComponent implements OnInit {
 	ngOnInit(): void {
 		this.theme =
 			this.themeOptions.find(
-				(option) => option.value === this.storageService.getItem("theme"),
+				(option) =>
+					option.value === this.storageService.getItem("theme"),
 			) || this.themeOptions[0];
 	}
 

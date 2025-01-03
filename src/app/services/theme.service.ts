@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useImportType: Service is used as dependency injection token
 import { Injectable, Renderer2, Inject, PLATFORM_ID } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
 
@@ -9,7 +8,6 @@ export class ThemeService {
 	private themeQuery = "(prefers-color-scheme: dark)";
 	private renderer: Renderer2 | null = null;
 
-	// biome-ignore lint/complexity/noBannedTypes: This is a service
 	constructor(@Inject(PLATFORM_ID) private platformId: object) {}
 
 	public isDarkMode(): boolean {
