@@ -1,5 +1,5 @@
 <button
-	class="relative inline-block w-full"
+	class="relative inline-block w-full {{ class }}"
 	(click)="toggleDropdown()"
 	(keypress)="toggleDropdown()"
 	role="combobox"
@@ -11,7 +11,7 @@
 		matRipple
 		tabindex="0"
 		aria-controls="options-list"
-		class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 cursor-pointer"
+		class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 cursor-pointer h-full"
 	>
 		<!-- Trigger Content -->
 		<ng-container *ngIf="selectedOption; else placeholder">

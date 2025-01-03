@@ -35,17 +35,19 @@ export class AppComponent implements OnInit {
 
 		iconRegistry.addSvgIcon(
 			"logo",
-			sanitizer.bypassSecurityTrustResourceUrl("assets/images/logo.svg"),
+			sanitizer.bypassSecurityTrustResourceUrl("assets/logos/logo.svg"),
 		);
 
 		iconRegistry.addSvgIcon(
 			"github",
-			sanitizer.bypassSecurityTrustResourceUrl("assets/images/github.svg"),
+			sanitizer.bypassSecurityTrustResourceUrl("assets/logos/github.svg"),
 		);
 
 		iconRegistry.addSvgIcon(
 			"discord",
-			sanitizer.bypassSecurityTrustResourceUrl("assets/images/discord.svg"),
+			sanitizer.bypassSecurityTrustResourceUrl(
+				"assets/logos/discord.svg",
+			),
 		);
 	}
 

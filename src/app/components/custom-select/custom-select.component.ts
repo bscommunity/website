@@ -11,7 +11,8 @@ import {
 	Output,
 	EventEmitter,
 	Inject,
-	PLATFORM_ID, OnDestroy,
+	PLATFORM_ID,
+	OnDestroy,
 } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
@@ -42,6 +43,8 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 		private elementRef: ElementRef,
 		private cdr: ChangeDetectorRef,
 	) {}
+
+	@Input() class = "";
 
 	@Input() options: Option[] = [];
 	@Input() selectedOption: Option | null = null;

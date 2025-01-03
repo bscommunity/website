@@ -3,15 +3,75 @@
 >
 	<app-filter-panel class="w-1/3 max-w-md"></app-filter-panel>
 	<div class="flex flex-col items-start justify-start gap-9 w-full">
-		<div class="flex flex-row items-center justify-between">
-			<span>
-				<label for=""></label>
+		<div class="flex flex-row items-center justify-start w-full gap-4">
+			<div class="flex flex-1 relative">
+				<span class="text-xl">
+					<mat-icon
+						inline
+						class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
+						>search</mat-icon
+					>
+				</span>
+				<input
+					class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
+					type="text"
+					placeholder="Search for charts, tourpasses and themes..."
+				/>
+			</div>
+			<span class="flex flex-row items-center justify-end gap-4 h-full">
+				<label class="min-w-fit" for="sort-by">Sort by</label>
 				<app-custom-select
+					class="h-full"
+					id="sort-by"
 					[options]="sortOptions"
 					[selectedOption]="sortBy"
 				></app-custom-select>
 			</span>
 		</div>
-		<ul class="flex flex-col items-start justify-start"></ul>
+		@if (charts.length > 0) {
+			<ul class="flex flex-col items-start justify-start w-full">
+				<app-list-section class="w-full" title="June 2024">
+					@for (chart of charts; track $index) {
+						<app-chart
+							[name]="chart.name"
+							[artist]="chart.artist"
+							[coverUrl]="chart.coverUrl"
+							[duration]="chart.duration"
+							[notesAmount]="chart.notesAmount"
+							[difficulty]="chart.difficulty"
+							[isDeluxe]="chart.isDeluxe"
+							[ranking]="chart.ranking"
+							[tendency]="chart.tendency"
+						></app-chart>
+					}
+				</app-list-section>
+			</ul>
+		} @else {
+			<div
+				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+			>
+				<div class="flex flex-col items-center justify-center gap-4">
+					<span class="text-6xl"
+						><mat-icon inline
+							>sentiment_dissatisfied</mat-icon
+						></span
+					>
+					<h1>We couldn't find anything based on your search</h1>
+					<p class="max-w-[50%] text-center">
+						Try removing some filters or searching for something
+						else
+					</p>
+				</div>
+				<button
+					class="!flex-row-reverse"
+					mat-stroked-button
+					(click)="clearFilters()"
+					(keypress)="clearFilters()"
+				>
+					<p>Clear filters</p>
+					<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
+				</button>
+			</div>
+		}
 	</div>
 </main>
