@@ -22,7 +22,7 @@
 			"@/lib/*": [
 				"lib/*"
 			],
-			"@/components": [
+			"@/components/*": [
 				"app/components/*"
 			]
 		}
