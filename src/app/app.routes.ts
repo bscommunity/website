@@ -1,9 +1,9 @@
 import type { Routes } from "@angular/router";
 
 // Routes
-import { PageNotFoundComponent } from "./page-not-found/page-not-found.component";
-import { PublishedComponent } from "./published/published.component";
-import { OverviewComponent } from "./overview/overview.component";
+import { PageNotFoundComponent } from "./routes/page-not-found/page-not-found.component";
+import { PublishedComponent } from "./routes/published/published.component";
+import { OverviewComponent } from "./routes/overview/overview.component";
 
 export const routes: Routes = [
 	{ path: "overview", component: OverviewComponent, title: "Overview" },
