@@ -1,1 +1,190 @@
-<p>chart works!</p>
+<main
+	class="flex flex-row items-start justify-center w-full min-h-screen px-24 pt-9 pb-14 gap-16"
+>
+	<aside class="flex flex-col items-start justify-start gap-6">
+		<img
+			class="w-72 h-72 min-w-72 aspect-square rounded-lg"
+			src="https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1"
+			alt="The Prodigy"
+		/>
+		<app-aside-section title="Chart Info" class="w-full">
+			<app-aside-container
+				class="w-full"
+				icon="timer"
+				info="2m30s"
+			></app-aside-container>
+			<app-aside-container
+				class="w-full"
+				icon="music_note"
+				info="234 notes"
+			></app-aside-container>
+		</app-aside-section>
+		<app-aside-section title="Files" class="w-full">
+			<a class="w-full cursor-pointer" href="" download>
+				<app-aside-container
+					class="w-full"
+					asideContainerClass="hover:bg-surface-container-low"
+					info="Download .zip"
+				></app-aside-container>
+			</a>
+		</app-aside-section>
+	</aside>
+	<div class="flex flex-col items-start justify-start gap-9 flex-1">
+		<div class="flex flex-col items-start justify-start gap-2 relative">
+			<h1 class="font-medium text-5xl">We Live Forever</h1>
+			<h2 class="text-3xl">The Prodigy</h2>
+		</div>
+		<app-chart-section class="w-full" title="Known Issues">
+			<ul
+				class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
+			>
+				@if (knownIssues.length > 0) {
+					@for (issue of knownIssues; track $index) {
+						<li
+							class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
+							[ngClass]="{
+								'border-b border-b-inverse-on-surface':
+									$index !== knownIssues.length - 1,
+							}"
+						>
+							<span>• {{ issue }}</span>
+							<div
+								class="flex flex-row items-center justify-end gap-2"
+							>
+								<button
+									mat-icon-button
+									matTooltip="Remove issue"
+									matTooltipPosition="above"
+									matTooltipShowDelay="375"
+									matTooltipClass="!text-sm"
+									(click)="removeIssue($index)"
+								>
+									<span
+										class="text-lg align-middle leading-none"
+									>
+										<mat-icon inline
+											>playlist_remove</mat-icon
+										>
+									</span>
+								</button>
+								<button
+									mat-icon-button
+									matTooltip="Close issue"
+									matTooltipPosition="above"
+									matTooltipShowDelay="375"
+									matTooltipClass="!text-sm"
+									(click)="removeIssue($index)"
+								>
+									<span
+										class="text-lg align-middle leading-none"
+									>
+										<mat-icon inline
+											>playlist_add_check</mat-icon
+										>
+									</span>
+								</button>
+							</div>
+						</li>
+					}
+				} @else {
+					<div
+						class="flex flex-col items-center justify-center gap-4 w-full py-9"
+					>
+						<span class="text-4xl"
+							><mat-icon inline>airwave</mat-icon></span
+						>
+						<h1 class="text-base font-medium">
+							There are currently no known issues
+						</h1>
+						<p class="text-sm text-center">
+							New added issues will be listed here
+						</p>
+					</div>
+				}
+				@if (addIssueInputVisible()) {
+					<li
+						class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm animate-pulse border-t border-t-inverse-on-surface"
+					>
+						<span class="w-full">
+							•
+							<input
+								id="addIssue"
+								class="bg-transparent outline-none border-none w-3/4"
+								[(ngModel)]="newIssue"
+								(keydown.enter)="addIssue()"
+								type="text"
+								placeholder="Describe the issue..."
+						/></span>
+						<div
+							class="flex flex-row items-center justify-end gap-2"
+						>
+							<button
+								mat-raised-button
+								class="!bg-transparent"
+								(click)="cancelAddIssue()"
+							>
+								Cancel
+							</button>
+							<button mat-raised-button (click)="addIssue()">
+								<mat-icon>playlist_add</mat-icon>
+								Add
+							</button>
+						</div>
+					</li>
+				}
+			</ul>
+			@if (!addIssueInputVisible()) {
+				<span class="flex items-center justify-end w-full">
+					<button
+						mat-stroked-button
+						(click)="addIssueInputVisible.set(true)"
+					>
+						<mat-icon>add_playlist</mat-icon>
+						Add new issue
+					</button>
+				</span>
+			}
+		</app-chart-section>
+		<app-chart-section class="w-full" title="Contributors">
+			<app-table
+				class="w-full"
+				[columns]="contributorsColumns"
+				[data]="contributorsData"
+			></app-table>
+			<span class="flex items-center justify-end w-full">
+				<button mat-stroked-button>
+					<mat-icon>add</mat-icon>
+					Add new contributor
+				</button>
+			</span>
+		</app-chart-section>
+		<app-chart-section class="w-full" title="Versions">
+			<span class="flex items-center justify-end w-full">
+				<button mat-stroked-button>
+					<mat-icon>publish</mat-icon>
+					Publish new version
+				</button>
+			</span>
+		</app-chart-section>
+		<app-chart-section class="w-full" title="Danger Zone">
+			<ul
+				class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container overflow-hidden"
+			>
+				<li
+					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-3 text-sm"
+				>
+					<div class="flex flex-col items-start justify-start gap-1">
+						<h6 class="font-medium">Delete this chart</h6>
+						<p>
+							Once you delete a chart, there is no going back.
+							Please be certain.
+						</p>
+					</div>
+					<button mat-raised-button class="!bg-red-100/5">
+						Delete this chart
+					</button>
+				</li>
+			</ul>
+		</app-chart-section>
+	</div>
+</main>
