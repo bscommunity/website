@@ -1,69 +1,95 @@
-<footer class="flex flex-col items-center justify-start px-24 py-9 gap-4 w-full bg-surface-container-low text-sm">
-    <div class="flex flex-row items-start justify-between w-full">
-        <!-- Left Column -->
-        <div class="flex flex-col items-start justify-normal gap-9">
-            <div class="flex flex-col items-start justify-start gap-4">
-                <div class="flex flex-row items-center justify-start gap-6">
-                    <mat-icon svgIcon="logo" class="text-on-secondary-container" aria-hidden="false"
-                        aria-label="Site logo"></mat-icon>
-                    <div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
-                    <div class="flex flex-row items-center justify-start gap-4">
-                        <a href="https://discord.com" target="_blank" class="h-8">
-                            <mat-icon svgIcon="discord" inline="true" class="text-on-surface" aria-hidden="false"
-                                aria-label="Discord logo"></mat-icon>
-                        </a>
-                        <a href="https://github.com" target="_blank" class="h-8">
-                            <mat-icon svgIcon="github" inline="true" class="text-on-surface" aria-hidden="false"
-                                aria-label="GitHub logo"></mat-icon>
-                        </a>
-                    </div>
-                </div>
-                <p>&#64;2025. Made with ❤️ by <a href="https://discord.com" target="_blank"
-                        class="hover:underline">meninocoiso</a></p>
-            </div>
-            <div class="flex flex-row items-center justify-start gap-9">
-                <app-custom-select [options]="themeOptions" [selectedOption]="theme"
-                    (selectionChange)="onThemeChange($event)"></app-custom-select>
+<footer
+	class="flex flex-col items-center justify-start px-24 py-9 gap-4 w-full bg-surface-container-low text-sm"
+>
+	<div class="flex flex-row items-start justify-between w-full">
+		<!-- Left Column -->
+		<div class="flex flex-col items-start justify-normal gap-9">
+			<div class="flex flex-col items-start justify-start gap-4">
+				<div class="flex flex-row items-center justify-start gap-6">
+					<mat-icon
+						svgIcon="logo"
+						class="text-on-secondary-container"
+						aria-hidden="false"
+						aria-label="Site logo"
+					></mat-icon>
+					<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
+					<div class="flex flex-row items-center justify-start gap-4">
+						<a
+							href="https://discord.com"
+							target="_blank"
+							class="h-8"
+						>
+							<mat-icon
+								svgIcon="discord"
+								inline="true"
+								class="text-on-surface"
+								aria-hidden="false"
+								aria-label="Discord logo"
+							></mat-icon>
+						</a>
+						<a
+							href="https://github.com"
+							target="_blank"
+							class="h-8"
+						>
+							<mat-icon
+								svgIcon="github"
+								inline="true"
+								class="text-on-surface"
+								aria-hidden="false"
+								aria-label="GitHub logo"
+							></mat-icon>
+						</a>
+					</div>
+				</div>
+				<p>&#64;2025. Made with ❤️ from community, for community.</p>
+			</div>
+			<div class="flex flex-row items-center justify-start gap-9">
+				<app-custom-select
+					[options]="themeOptions"
+					[selectedOption]="theme"
+					(selectionChange)="onThemeChange($event)"
+				></app-custom-select>
 
-                <!--  <mat-form-field class="w-28">
+				<!--  <mat-form-field class="w-28">
                     <mat-select value="en" class="w-fit" disabled>
                         @for (option of languageOptions; track option) {
                         <mat-option [value]="option.value">{{option.label}}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field> -->
-            </div>
-        </div>
+			</div>
+		</div>
 
-        <!-- Sections -->
-        <ul class="flex flex-row items-center justify-end gap-20">
-            <li class="flex flex-col items-start justify-start gap-6">
-                <h3 class="uppercase">Resources</h3>
-                <ul class="flex flex-col items-start justify-start gap-5">
-                    <li><a href="#">Community</a></li>
-                    <li><a href="#">Blog</a></li>
-                </ul>
-            </li>
-            <li class="flex flex-col items-start justify-start gap-6">
-                <h3 class="uppercase">Help</h3>
-                <ul class="flex flex-col items-start justify-start gap-5">
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Support</a></li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-    <div class="flex flex-row items-center justify-between w-full">
-        <!-- Status -->
-        <div class="flex flex-row items-center justify-start gap-2.5">
-            <div class="w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
-            Partially Degraded Services
-            <!-- External link icon -->
-        </div>
+		<!-- Sections -->
+		<ul class="flex flex-row items-center justify-end gap-20">
+			<li class="flex flex-col items-start justify-start gap-6">
+				<h3 class="uppercase">Resources</h3>
+				<ul class="flex flex-col items-start justify-start gap-5">
+					<li><a href="#">Community</a></li>
+					<li><a href="#">Blog</a></li>
+				</ul>
+			</li>
+			<li class="flex flex-col items-start justify-start gap-6">
+				<h3 class="uppercase">Help</h3>
+				<ul class="flex flex-col items-start justify-start gap-5">
+					<li><a href="#">Documentation</a></li>
+					<li><a href="#">Support</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div class="flex flex-row items-center justify-between w-full">
+		<!-- Status -->
+		<div class="flex flex-row items-center justify-start gap-2.5">
+			<div class="w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
+			Partially Degraded Services
+			<!-- External link icon -->
+		</div>
 
-        <button mat-flat-button>
-            <mat-icon class="!ml-0.5" inline="true">comment</mat-icon>
-            Share feedback
-        </button>
-    </div>
+		<button mat-flat-button>
+			<mat-icon class="!ml-0.5" inline="true">comment</mat-icon>
+			Share feedback
+		</button>
+	</div>
 </footer>
