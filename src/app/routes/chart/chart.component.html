@@ -150,6 +150,7 @@
 				class="w-full"
 				[columns]="contributorsColumns"
 				[data]="contributorsData"
+				[actions]="contributorsActions"
 			></app-table>
 			<span class="flex items-center justify-end w-full">
 				<button mat-stroked-button>
@@ -159,6 +160,12 @@
 			</span>
 		</app-chart-section>
 		<app-chart-section class="w-full" title="Versions">
+			<app-table
+				class="w-full"
+				[columns]="versionsColumns"
+				[data]="versionsData"
+				[actions]="versionsActions"
+			></app-table>
 			<span class="flex items-center justify-end w-full">
 				<button mat-stroked-button>
 					<mat-icon>publish</mat-icon>
