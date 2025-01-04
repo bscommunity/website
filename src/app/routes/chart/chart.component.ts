@@ -12,6 +12,7 @@ import { AsideContainerComponent } from "./subcomponents/aside-container.compone
 import { ChartSectionComponent } from "./subcomponents/chart-section.component";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import {
+	Action,
 	TableColumn,
 	TableComponent,
 } from "./subcomponents/table/table.component";
@@ -49,6 +50,45 @@ const CONTRIBUTORS: Contributor[] = [
 		name: "jane789",
 		image_url: "https://example.com/jane789.jpg",
 		roles: [Role.CHART],
+	},
+];
+
+interface Version {
+	id: string;
+	publishedAt: Date;
+	chart_url: string;
+	downloads?: number;
+	known_issues: string[];
+}
+
+const VERSIONS: Version[] = [
+	{
+		id: "1.0.0",
+		publishedAt: new Date("2021-01-01"),
+		chart_url: "https://example.com/1.0.0",
+		downloads: 100,
+		known_issues: [
+			"Incorrect note placed at 03m12s",
+			"Unsynchronized section after drop",
+			"Wrong direction swipe effect",
+		],
+	},
+	{
+		id: "1.1.0",
+		publishedAt: new Date("2021-02-01"),
+		chart_url: "https://example.com/1.1.0",
+		downloads: 200,
+		known_issues: [
+			"Unsynchronized section after drop",
+			"Wrong direction swipe effect",
+		],
+	},
+	{
+		id: "1.2.0",
+		publishedAt: new Date("2021-03-01"),
+		chart_url: "https://example.com/1.2.0",
+		downloads: 300,
+		known_issues: ["Wrong direction swipe effect"],
 	},
 ];
 
@@ -118,4 +158,72 @@ export class ChartComponent {
 	];
 
 	contributorsData = CONTRIBUTORS;
+
+	contributorsActions: Action<Contributor>[] = [
+		{
+			description: "View profile",
+			icon: "visibility",
+			callback: () => {
+				this.openSnackBar("View profile clicked", "Close");
+			},
+		},
+		{
+			description: "Send message",
+			icon: "message",
+			callback: () => {
+				this.openSnackBar("Send message clicked", "Close");
+			},
+		},
+		{
+			description: "Remove",
+			icon: "delete",
+			callback: () => {
+				this.openSnackBar("Remove clicked", "Close");
+			},
+		},
+	];
+
+	versionsColumns: TableColumn<Version>[] = [
+		{
+			columnDef: "id",
+			header: "Version",
+			cell: (item: Version) => `${item.id}`,
+		},
+		{
+			columnDef: "publishedAt",
+			header: "Published At",
+			cell: (item: Version) => `${item.publishedAt.toDateString()}`,
+		},
+		{
+			columnDef: "downloads",
+			header: "Downloads",
+			cell: (item: Version) => `${item.downloads}`,
+		},
+	];
+
+	versionsData = VERSIONS;
+
+	versionsActions: Action<Version>[] = [
+		{
+			description: "View chart",
+			icon: "visibility",
+			callback: () => {
+				this.openSnackBar("View chart clicked", "Close");
+			},
+		},
+		{
+			description: "Download",
+			icon: "download",
+			callback: () => {
+				this.openSnackBar("Download clicked", "Close");
+			},
+		},
+		{
+			description: "Report issue",
+			icon: "report",
+			callback: () => {
+				this.openSnackBar("Report issue clicked", "Close");
+			},
+		},
+	];
 }

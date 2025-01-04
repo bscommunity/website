@@ -94,6 +94,29 @@
 	.mat-mdc-slider {
 		width: 100%;
 	}
+
+	.mat-mdc-header-row {
+		background-color: var(--mat-sys-secondary-container);
+		border: none;
+	}
+
+	.mat-mdc-header-cell {
+		border: none;
+		text-align: center;
+	}
+
+	.mat-mdc-header-cell:first-child {
+		text-align: left;
+	}
+
+	.mat-mdc-cell {
+		border-color: var(--mat-sys-inverse-on-surface);
+		text-align: center;
+	}
+
+	.mat-mdc-cell:first-child {
+		text-align: left;
+	}
 }
 
 /* Dark Theme */

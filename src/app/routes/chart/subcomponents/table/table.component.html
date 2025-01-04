@@ -1,14 +1,44 @@
-<div class="table-container">
+<div class="rounded-lg border border-inverse-on-surface overflow-hidden">
 	<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-		<ng-container
-			*ngFor="let column of columns"
-			[matColumnDef]="column.columnDef"
-		>
-			<th mat-header-cell *matHeaderCellDef>{{ column.header }}</th>
-			<td mat-cell *matCellDef="let element">
-				{{ column.cell(element) }}
-			</td>
-		</ng-container>
+		@for (column of columns; track $index) {
+			<ng-container [matColumnDef]="column.columnDef">
+				<th mat-header-cell *matHeaderCellDef>{{ column.header }}</th>
+				<td mat-cell *matCellDef="let element">
+					{{ column.cell(element) }}
+				</td>
+			</ng-container>
+		}
+
+		@if (actions && actions.length > 0) {
+			<ng-container matColumnDef="actions">
+				<th mat-header-cell *matHeaderCellDef>Actions</th>
+				<td mat-cell *matCellDef="let element">
+					<div
+						class="flex flex-row items-center justify-center gap-2"
+					>
+						@for (action of actions; track $index) {
+							<button
+								mat-ripple
+								matTooltip="{{ action.description }}"
+								matTooltipPosition="above"
+								matTooltipShowDelay="375"
+								matTooltipClass="!text-sm"
+								(click)="action.callback(element)"
+								class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90"
+							>
+								<span
+									class="text-base align-middle leading-none"
+								>
+									<mat-icon inline>{{
+										action.icon
+									}}</mat-icon>
+								</span>
+							</button>
+						}
+					</div>
+				</td>
+			</ng-container>
+		}
 
 		<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 		<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
