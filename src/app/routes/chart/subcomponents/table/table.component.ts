@@ -57,8 +57,23 @@ export class TableComponent<T> implements OnInit {
 		return this.sanitizer.bypassSecurityTrustHtml(content);
 	}
 
+	@Input() set data(data: T[]) {
+		this._data = data;
+		this.updateDataSource();
+	}
+	get data(): T[] {
+		return this._data;
+	}
+	private _data: T[] = [];
+
+	private updateDataSource() {
+		this.dataSource = new MatTableDataSource(this.data);
+		if (this.matSort) {
+			this.dataSource.sort = this.matSort;
+		}
+	}
+
 	@Input() columns: TableColumn<T>[] = [];
-	@Input() data: T[] = [];
 	@Input() actions: Action<T>[] | undefined;
 
 	@ViewChild(MatSort) set matSort(ms: MatSort) {
