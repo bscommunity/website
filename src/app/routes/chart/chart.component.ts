@@ -16,6 +16,8 @@ import {
 	TableColumn,
 	TableComponent,
 } from "./subcomponents/table/table.component";
+import { MatDialog } from "@angular/material/dialog";
+import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
 
 enum Role {
 	OWNER = "Owner",
@@ -112,9 +114,61 @@ const lastVersionId = VERSIONS[VERSIONS.length - 1].id;
 })
 export class ChartComponent {
 	private _snackBar = inject(MatSnackBar);
+	readonly dialog = inject(MatDialog);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
+	}
+
+	openRemoveIssueConfirmationDialog(index: number): void {
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Issue",
+				description:
+					"Are you sure you want to remove this issue? It will not appear as closed for other users.",
+			},
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				this.removeIssue(index);
+				subscription.unsubscribe();
+			}
+		});
+	}
+
+	openCloseIssueConfirmationDialog(index: number): void {
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Close Issue",
+				description:
+					"Are you sure you want to close this issue? It will appear in patch notes as fixed.",
+			},
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				this.removeIssue(index);
+				subscription.unsubscribe();
+			}
+		});
+	}
+
+	openRemoveContributorConfirmationDialog(contributor: Contributor): void {
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Contributor",
+				description:
+					"Are you sure you want to remove this contributor? The user access to the chart will be lost.",
+			},
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				this.removeContributor(contributor);
+				subscription.unsubscribe();
+			}
+		});
 	}
 
 	// Set by chart version
@@ -141,10 +195,13 @@ export class ChartComponent {
 		this.knownIssues.push(this.newIssue);
 		this.newIssue = "";
 		this.addIssueInputVisible.set(false);
+
+		this.openSnackBar("Issue added with success!", "Close");
 	}
 
 	removeIssue(index: number) {
 		this.knownIssues.splice(index, 1);
+		this.openSnackBar("Issue removed with success!", "Close");
 	}
 
 	contributorsColumns: TableColumn<Contributor>[] = [
@@ -167,12 +224,20 @@ export class ChartComponent {
 		{
 			description: "Remove",
 			icon: "remove_circle_outline",
-			callback: () => {
-				this.openSnackBar("Remove clicked", "Close");
-			},
+			callback: this.openRemoveContributorConfirmationDialog.bind(this),
 			disabled: (item: Contributor) => item.roles.includes(Role.OWNER),
 		},
 	];
+
+	removeContributor(contributor: Contributor) {
+		this.contributorsData = this.contributorsData.filter(
+			(c) => c.name !== contributor.name,
+		);
+
+		console.log("Novo", this.contributorsData);
+
+		this.openSnackBar("Contributor removed with success!", "Close");
+	}
 
 	versionsColumns: TableColumn<Version>[] = [
 		{

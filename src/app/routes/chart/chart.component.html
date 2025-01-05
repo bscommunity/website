@@ -57,7 +57,11 @@
 									matTooltipPosition="above"
 									matTooltipShowDelay="375"
 									matTooltipClass="!text-sm"
-									(click)="removeIssue($index)"
+									(click)="
+										openRemoveIssueConfirmationDialog(
+											$index
+										)
+									"
 								>
 									<span
 										class="text-lg align-middle leading-none"
@@ -73,7 +77,9 @@
 									matTooltipPosition="above"
 									matTooltipShowDelay="375"
 									matTooltipClass="!text-sm"
-									(click)="removeIssue($index)"
+									(click)="
+										openCloseIssueConfirmationDialog($index)
+									"
 								>
 									<span
 										class="text-lg align-middle leading-none"
