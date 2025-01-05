@@ -9,10 +9,12 @@ import {
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
-import { MatTableDataSource, MatTableModule } from "@angular/material/table";
+import { MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
 import { MatSort, MatSortModule, SortDirection } from "@angular/material/sort";
+import { Observable, ReplaySubject } from "rxjs";
+import { DataSource } from "@angular/cdk/collections";
 
 export interface TableColumn<T> {
 	columnDef: string;
@@ -38,6 +40,27 @@ export class SafeHtmlPipe implements PipeTransform {
 	}
 }
 
+class CustomDataSource<T> extends DataSource<T> {
+	private dataStream = new ReplaySubject<T[]>(1);
+
+	constructor(initialData: T[]) {
+		super();
+		this.setData(initialData);
+	}
+
+	connect(): Observable<T[]> {
+		return this.dataStream.asObservable();
+	}
+
+	disconnect() {
+		this.dataStream.complete();
+	}
+
+	setData(data: T[]) {
+		this.dataStream.next(data);
+	}
+}
+
 @Component({
 	selector: "app-table",
 	templateUrl: "./table.component.html",
@@ -59,31 +82,24 @@ export class TableComponent<T> implements OnInit {
 
 	@Input() set data(data: T[]) {
 		this._data = data;
-		this.updateDataSource();
+		if (this.dataSource) {
+			this.dataSource.setData(this._data);
+		}
 	}
 	get data(): T[] {
 		return this._data;
 	}
 	private _data: T[] = [];
 
-	private updateDataSource() {
-		this.dataSource = new MatTableDataSource(this.data);
-		if (this.matSort) {
-			this.dataSource.sort = this.matSort;
-		}
-	}
-
 	@Input() columns: TableColumn<T>[] = [];
 	@Input() actions: Action<T>[] | undefined;
 
-	@ViewChild(MatSort) set matSort(ms: MatSort) {
-		this.dataSource.sort = ms;
-	}
+	@ViewChild(MatSort) matSort!: MatSort;
 	@Input() initialSortColumn = "";
 	@Input() initialSortDirection: SortDirection = "asc";
 
 	displayedColumns: string[] = [];
-	dataSource!: MatTableDataSource<T>;
+	dataSource!: CustomDataSource<T>;
 
 	ngOnInit() {
 		this.displayedColumns = this.columns.map((c) => c.columnDef);
@@ -91,6 +107,14 @@ export class TableComponent<T> implements OnInit {
 			this.displayedColumns.push("actions");
 		}
 
-		this.dataSource = new MatTableDataSource(this.data);
+		this.dataSource = new CustomDataSource(this.data);
+	}
+
+	addData(newItem: T) {
+		this.data = [...this.data, newItem];
+	}
+
+	removeData(itemToRemove: T) {
+		this.data = this.data.filter((item) => item !== itemToRemove);
 	}
 }

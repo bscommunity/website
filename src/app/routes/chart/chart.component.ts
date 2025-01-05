@@ -1,4 +1,10 @@
-import { Component, inject, signal } from "@angular/core";
+import {
+	ChangeDetectorRef,
+	Component,
+	inject,
+	signal,
+	ViewChild,
+} from "@angular/core";
 
 import { NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -6,18 +12,18 @@ import { FormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatDialog } from "@angular/material/dialog";
 
 import { AsideSectionComponent } from "./subcomponents/aside-section.component";
 import { AsideContainerComponent } from "./subcomponents/aside-container.component";
 import { ChartSectionComponent } from "./subcomponents/chart-section.component";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
 import {
 	Action,
 	TableColumn,
 	TableComponent,
 } from "./subcomponents/table/table.component";
-import { MatDialog } from "@angular/material/dialog";
-import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
 
 enum Role {
 	OWNER = "Owner",
@@ -116,6 +122,8 @@ export class ChartComponent {
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
+	constructor(private cdr: ChangeDetectorRef) {}
+
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
 	}
@@ -201,8 +209,11 @@ export class ChartComponent {
 
 	removeIssue(index: number) {
 		this.knownIssues.splice(index, 1);
+		this.cdr.detectChanges();
 		this.openSnackBar("Issue removed with success!", "Close");
 	}
+
+	@ViewChild(TableComponent) contributorTable!: TableComponent<Contributor>;
 
 	contributorsColumns: TableColumn<Contributor>[] = [
 		{
@@ -230,12 +241,7 @@ export class ChartComponent {
 	];
 
 	removeContributor(contributor: Contributor) {
-		this.contributorsData = this.contributorsData.filter(
-			(c) => c.name !== contributor.name,
-		);
-
-		console.log("Novo", this.contributorsData);
-
+		this.contributorTable.removeData(contributor);
 		this.openSnackBar("Contributor removed with success!", "Close");
 	}
 
