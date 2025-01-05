@@ -59,7 +59,8 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 
 		const triggerRect =
 			this.elementRef.nativeElement.getBoundingClientRect();
-		const dropdownHeight = this.dropdown.nativeElement.offsetHeight;
+		const dropdown = this.dropdown.nativeElement;
+		const dropdownHeight = dropdown.offsetHeight;
 		const viewportHeight = window.innerHeight;
 
 		const spaceBelow = viewportHeight - triggerRect.bottom;
@@ -68,25 +69,31 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 		if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
 			// Position above
 			this.renderer.setStyle(
-				this.dropdown.nativeElement,
+				dropdown,
 				"bottom",
-				`${triggerRect.height + 10}px`,
+				`${triggerRect.height}px`,
 			);
-			this.renderer.setStyle(this.dropdown.nativeElement, "top", "auto");
+			this.renderer.setStyle(dropdown, "top", "auto");
 			this.dropdownSide = "up";
 		} else {
 			// Position below
-			this.renderer.setStyle(
-				this.dropdown.nativeElement,
-				"top",
-				`${triggerRect.height + 20}px`,
-			);
-			this.renderer.setStyle(
-				this.dropdown.nativeElement,
-				"bottom",
-				"auto",
-			);
+			this.renderer.setStyle(dropdown, "top", `${triggerRect.height}px`);
+			this.renderer.setStyle(dropdown, "bottom", "auto");
 			this.dropdownSide = "down";
+		}
+
+		// Adjust width to match trigger element
+		this.renderer.setStyle(dropdown, "width", `${triggerRect.width}px`);
+
+		// Ensure dropdown doesn't overflow viewport
+		const dropdownRect = dropdown.getBoundingClientRect();
+		if (dropdownRect.bottom > viewportHeight) {
+			const overflow = dropdownRect.bottom - viewportHeight;
+			this.renderer.setStyle(
+				dropdown,
+				"max-height",
+				`${dropdownHeight - overflow}px`,
+			);
 		}
 	}
 
@@ -173,7 +180,6 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 					event.preventDefault();
 					break;
 				case "Enter":
-				case " ":
 					this.selectOption(this.options[this.highlightedIndex]);
 					event.preventDefault();
 					break;
@@ -186,7 +192,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 					break;
 			}
 		} else {
-			if (event.key === "Enter" || event.key === " ") {
+			if (event.key === "Enter") {
 				this.toggleDropdown();
 				event.preventDefault();
 			}

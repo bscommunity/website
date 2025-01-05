@@ -4,7 +4,7 @@
 	(keypress)="toggleDropdown()"
 	role="combobox"
 	aria-controls="options-list"
-	aria-expanded="false"
+	[attr.aria-expanded]="dropdownOpen"
 >
 	<!-- Trigger -->
 	<div
