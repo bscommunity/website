@@ -1,9 +1,18 @@
-import { Component, Input, OnInit } from "@angular/core";
+import {
+	Component,
+	Input,
+	OnInit,
+	Pipe,
+	PipeTransform,
+	ViewChild,
+} from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
+import { MatSort, MatSortModule, SortDirection } from "@angular/material/sort";
 
 export interface TableColumn<T> {
 	columnDef: string;
@@ -14,18 +23,49 @@ export interface TableColumn<T> {
 export interface Action<T> {
 	description: string;
 	icon: string;
+	disabled: (item: T) => boolean;
 	callback: (item: T) => void;
+}
+
+@Pipe({
+	name: "safeHtml",
+})
+export class SafeHtmlPipe implements PipeTransform {
+	constructor(private sanitizer: DomSanitizer) {}
+
+	transform(value: string): SafeHtml {
+		return this.sanitizer.bypassSecurityTrustHtml(value);
+	}
 }
 
 @Component({
 	selector: "app-table",
 	templateUrl: "./table.component.html",
-	imports: [MatTableModule, MatIconModule, MatTooltipModule, MatRippleModule],
+	imports: [
+		MatTableModule,
+		MatSortModule,
+		MatIconModule,
+		MatTooltipModule,
+		MatRippleModule,
+		SafeHtmlPipe,
+	],
 })
 export class TableComponent<T> implements OnInit {
+	constructor(private sanitizer: DomSanitizer) {}
+
+	sanitizeContent(content: string): SafeHtml {
+		return this.sanitizer.bypassSecurityTrustHtml(content);
+	}
+
 	@Input() columns: TableColumn<T>[] = [];
 	@Input() data: T[] = [];
 	@Input() actions: Action<T>[] | undefined;
+
+	@ViewChild(MatSort) set matSort(ms: MatSort) {
+		this.dataSource.sort = ms;
+	}
+	@Input() initialSortColumn = "";
+	@Input() initialSortDirection: SortDirection = "asc";
 
 	displayedColumns: string[] = [];
 	dataSource!: MatTableDataSource<T>;

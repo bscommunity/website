@@ -105,18 +105,22 @@
 		text-align: center;
 	}
 
-	.mat-mdc-header-cell:first-child {
-		text-align: left;
+	.mat-sort-header-container {
+		justify-content: center;
 	}
+
+	/* .mat-mdc-header-cell:first-child {
+		text-align: left;
+	} */
 
 	.mat-mdc-cell {
 		border-color: var(--mat-sys-inverse-on-surface);
 		text-align: center;
 	}
 
-	.mat-mdc-cell:first-child {
+	/* .mat-mdc-cell:first-child {
 		text-align: left;
-	}
+	} */
 }
 
 /* Dark Theme */

@@ -18,6 +18,7 @@ import {
 } from "./subcomponents/table/table.component";
 
 enum Role {
+	OWNER = "Owner",
 	CHART = "Chart",
 	SYNC = "Sync",
 	EFFECTS = "Effects",
@@ -32,23 +33,23 @@ interface Contributor {
 
 const CONTRIBUTORS: Contributor[] = [
 	{
-		name: "kyle421",
-		image_url: "https://example.com/kyle421.jpg",
-		roles: [Role.CHART, Role.TESTING],
+		name: "meninocoiso",
+		image_url: "https://github.com/theduardomaciel.png",
+		roles: [Role.OWNER, Role.CHART, Role.TESTING],
 	},
 	{
 		name: "sarah123",
-		image_url: "https://example.com/sarah123.jpg",
+		image_url: "https://github.com/jamesber.png",
 		roles: [Role.SYNC],
 	},
 	{
 		name: "james456",
-		image_url: "https://example.com/james456.jpg",
+		image_url: "https://github.com/ocosmo55.png",
 		roles: [Role.EFFECTS],
 	},
 	{
 		name: "jane789",
-		image_url: "https://example.com/jane789.jpg",
+		image_url: "https://github.com/teste123.png",
 		roles: [Role.CHART],
 	},
 ];
@@ -66,7 +67,7 @@ const VERSIONS: Version[] = [
 		id: "1.0.0",
 		publishedAt: new Date("2021-01-01"),
 		chart_url: "https://example.com/1.0.0",
-		downloads: 100,
+		downloads: 84,
 		known_issues: [
 			"Incorrect note placed at 03m12s",
 			"Unsynchronized section after drop",
@@ -77,7 +78,7 @@ const VERSIONS: Version[] = [
 		id: "1.1.0",
 		publishedAt: new Date("2021-02-01"),
 		chart_url: "https://example.com/1.1.0",
-		downloads: 200,
+		downloads: 221,
 		known_issues: [
 			"Unsynchronized section after drop",
 			"Wrong direction swipe effect",
@@ -87,10 +88,12 @@ const VERSIONS: Version[] = [
 		id: "1.2.0",
 		publishedAt: new Date("2021-03-01"),
 		chart_url: "https://example.com/1.2.0",
-		downloads: 300,
+		downloads: 325,
 		known_issues: ["Wrong direction swipe effect"],
 	},
 ];
+
+const lastVersionId = VERSIONS[VERSIONS.length - 1].id;
 
 @Component({
 	selector: "app-chart",
@@ -148,7 +151,8 @@ export class ChartComponent {
 		{
 			columnDef: "name",
 			header: "Name",
-			cell: (item: Contributor) => `${item.name}`,
+			cell: (item: Contributor) =>
+				`<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.image_url}" alt="${item.name}" /> ${item.name}<span />`,
 		},
 		{
 			columnDef: "roles",
@@ -161,25 +165,12 @@ export class ChartComponent {
 
 	contributorsActions: Action<Contributor>[] = [
 		{
-			description: "View profile",
-			icon: "visibility",
-			callback: () => {
-				this.openSnackBar("View profile clicked", "Close");
-			},
-		},
-		{
-			description: "Send message",
-			icon: "message",
-			callback: () => {
-				this.openSnackBar("Send message clicked", "Close");
-			},
-		},
-		{
 			description: "Remove",
-			icon: "delete",
+			icon: "remove_circle_outline",
 			callback: () => {
 				this.openSnackBar("Remove clicked", "Close");
 			},
+			disabled: (item: Contributor) => item.roles.includes(Role.OWNER),
 		},
 	];
 
@@ -205,25 +196,29 @@ export class ChartComponent {
 
 	versionsActions: Action<Version>[] = [
 		{
-			description: "View chart",
-			icon: "visibility",
-			callback: () => {
-				this.openSnackBar("View chart clicked", "Close");
-			},
-		},
-		{
 			description: "Download",
 			icon: "download",
 			callback: () => {
 				this.openSnackBar("Download clicked", "Close");
 			},
+			disabled: () => false,
 		},
 		{
-			description: "Report issue",
-			icon: "report",
+			description: "Switch version",
+			icon: "swap_horiz",
 			callback: () => {
-				this.openSnackBar("Report issue clicked", "Close");
+				this.openSnackBar("Switch version clicked", "Close");
 			},
+			disabled: (item: Version) => item.id === lastVersionId,
+		},
+		{
+			description: "Delete version",
+			icon: "delete_forever",
+			callback: () => {
+				this.openSnackBar("Delete version clicked", "Close");
+			},
+			disabled: (item: Version) =>
+				item.id === "1.0.0" || item.id === lastVersionId,
 		},
 	];
 }
