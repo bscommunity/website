@@ -1,39 +1,15 @@
 <main
-	class="flex flex-row items-start justify-center w-full min-h-screen px-wrapper pt-9 pb-14 gap-16"
+	class="flex flex-col md:flex-row items-start justify-center w-full min-h-screen px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 >
-	<aside class="flex flex-col items-start justify-start gap-6">
-		<img
-			class="w-72 h-72 min-w-72 aspect-square rounded-lg"
-			src="https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1"
-			alt="The Prodigy"
-		/>
-		<app-aside-section title="Chart Info" class="w-full">
-			<app-aside-container
-				class="w-full"
-				icon="timer"
-				info="2m30s"
-			></app-aside-container>
-			<app-aside-container
-				class="w-full"
-				icon="music_note"
-				info="234 notes"
-			></app-aside-container>
-		</app-aside-section>
-		<app-aside-section title="Files" class="w-full">
-			<a class="w-full cursor-pointer" href="" download>
-				<app-aside-container
-					class="w-full"
-					asideContainerClass="hover:bg-surface-container-low"
-					info="Download .zip"
-				></app-aside-container>
-			</a>
-		</app-aside-section>
-	</aside>
-	<div class="flex flex-col items-start justify-start gap-9 flex-1">
+	<app-aside class="hidden md:flex"></app-aside>
+	<div
+		class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
+	>
 		<div class="flex flex-col items-start justify-start gap-2 relative">
 			<h1 class="font-medium text-5xl">We Live Forever</h1>
 			<h2 class="text-3xl">The Prodigy</h2>
 		</div>
+		<app-aside class="flex w-full md:hidden"></app-aside>
 		<app-chart-section class="w-full" title="Known Issues">
 			<ul
 				class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
@@ -199,7 +175,7 @@
 				class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container overflow-hidden"
 			>
 				<li
-					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-3 text-sm"
+					class="flex flex-col md:flex-row items-center justify-between w-full gap-2 font-normal px-4 py-3 text-sm"
 				>
 					<div class="flex flex-col items-start justify-start gap-1">
 						<h6 class="font-medium">Delete this chart</h6>

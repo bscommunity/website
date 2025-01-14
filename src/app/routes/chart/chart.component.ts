@@ -15,8 +15,6 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
-import { AsideSectionComponent } from "./subcomponents/aside-section.component";
-import { AsideContainerComponent } from "./subcomponents/aside-container.component";
 import { ChartSectionComponent } from "./subcomponents/chart-section.component";
 import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
 import {
@@ -24,6 +22,7 @@ import {
 	TableColumn,
 	TableComponent,
 } from "./subcomponents/table/table.component";
+import { AsideComponent } from "./subcomponents/aside.component";
 
 enum Role {
 	OWNER = "Owner",
@@ -116,8 +115,7 @@ const lastVersionId = VERSIONS[VERSIONS.length - 1].id;
 		MatButtonModule,
 		MatIconModule,
 		MatTooltipModule,
-		AsideSectionComponent,
-		AsideContainerComponent,
+		AsideComponent,
 		ChartSectionComponent,
 		TableComponent,
 	],
