@@ -34,6 +34,7 @@ enum Role {
 }
 
 interface Contributor {
+	id: string;
 	name: string;
 	image_url: string;
 	roles: Role[];
@@ -41,21 +42,25 @@ interface Contributor {
 
 const CONTRIBUTORS: Contributor[] = [
 	{
+		id: "1",
 		name: "meninocoiso",
 		image_url: "https://github.com/theduardomaciel.png",
 		roles: [Role.OWNER, Role.CHART, Role.TESTING],
 	},
 	{
+		id: "2",
 		name: "sarah123",
 		image_url: "https://github.com/jamesber.png",
 		roles: [Role.SYNC],
 	},
 	{
+		id: "3",
 		name: "james456",
 		image_url: "https://github.com/ocosmo55.png",
 		roles: [Role.EFFECTS],
 	},
 	{
+		id: "4",
 		name: "jane789",
 		image_url: "https://github.com/teste123.png",
 		roles: [Role.CHART],
@@ -128,6 +133,14 @@ export class ChartComponent {
 		this._snackBar.open(message, action);
 	}
 
+	/* Issues Section */
+
+	knownIssues = [
+		"Incorrect note placed at 03m12s",
+		"Unsynchronized section after drop",
+		"Wrong direction swipe effect",
+	];
+
 	openRemoveIssueConfirmationDialog(index: number): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
@@ -162,30 +175,6 @@ export class ChartComponent {
 		});
 	}
 
-	openRemoveContributorConfirmationDialog(contributor: Contributor): void {
-		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-			data: {
-				title: "Remove Contributor",
-				description:
-					"Are you sure you want to remove this contributor? The user access to the chart will be lost.",
-			},
-		});
-
-		const subscription = dialogRef.afterClosed().subscribe((result) => {
-			if (result === "ok") {
-				this.removeContributor(contributor);
-				subscription.unsubscribe();
-			}
-		});
-	}
-
-	// Set by chart version
-	knownIssues = [
-		"Incorrect note placed at 03m12s",
-		"Unsynchronized section after drop",
-		"Wrong direction swipe effect",
-	];
-
 	readonly addIssueInputVisible = signal(false);
 	newIssue = "";
 
@@ -213,7 +202,27 @@ export class ChartComponent {
 		this.openSnackBar("Issue removed with success!", "Close");
 	}
 
-	@ViewChild(TableComponent) contributorTable!: TableComponent<Contributor>;
+	/* Contributors Section */
+
+	@ViewChild("contributorTable")
+	contributorTable!: TableComponent<Contributor>;
+
+	openRemoveContributorConfirmationDialog(contributor: Contributor): void {
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Contributor",
+				description:
+					"Are you sure you want to remove this contributor? The user access to the chart will be lost.",
+			},
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				this.removeContributor(contributor);
+				subscription.unsubscribe();
+			}
+		});
+	}
 
 	contributorsColumns: TableColumn<Contributor>[] = [
 		{
@@ -243,6 +252,27 @@ export class ChartComponent {
 	removeContributor(contributor: Contributor) {
 		this.contributorTable.removeData(contributor);
 		this.openSnackBar("Contributor removed with success!", "Close");
+	}
+
+	/* Versions Section */
+
+	@ViewChild("versionTable") versionTable!: TableComponent<Version>;
+
+	openRemoveVersionConfirmationDialog(version: Version): void {
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Version",
+				description:
+					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+			},
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				this.removeVersion(version);
+				subscription.unsubscribe();
+			}
+		});
 	}
 
 	versionsColumns: TableColumn<Version>[] = [
@@ -285,11 +315,14 @@ export class ChartComponent {
 		{
 			description: "Delete version",
 			icon: "delete_forever",
-			callback: () => {
-				this.openSnackBar("Delete version clicked", "Close");
-			},
+			callback: this.openRemoveVersionConfirmationDialog.bind(this),
 			disabled: (item: Version) =>
 				item.id === "1.0.0" || item.id === lastVersionId,
 		},
 	];
+
+	removeVersion(version: Version) {
+		this.versionTable.removeData(version);
+		this.openSnackBar("Version removed with success!", "Close");
+	}
 }

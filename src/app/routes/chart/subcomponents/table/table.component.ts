@@ -1,4 +1,5 @@
 import {
+	AfterViewInit,
 	Component,
 	Input,
 	OnInit,
@@ -9,12 +10,10 @@ import {
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
-import { MatTableModule } from "@angular/material/table";
+import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
 import { MatSort, MatSortModule, SortDirection } from "@angular/material/sort";
-import { Observable, ReplaySubject } from "rxjs";
-import { DataSource } from "@angular/cdk/collections";
 
 export interface TableColumn<T> {
 	columnDef: string;
@@ -40,27 +39,6 @@ export class SafeHtmlPipe implements PipeTransform {
 	}
 }
 
-class CustomDataSource<T> extends DataSource<T> {
-	private dataStream = new ReplaySubject<T[]>(1);
-
-	constructor(initialData: T[]) {
-		super();
-		this.setData(initialData);
-	}
-
-	connect(): Observable<T[]> {
-		return this.dataStream.asObservable();
-	}
-
-	disconnect() {
-		this.dataStream.complete();
-	}
-
-	setData(data: T[]) {
-		this.dataStream.next(data);
-	}
-}
-
 @Component({
 	selector: "app-table",
 	templateUrl: "./table.component.html",
@@ -73,33 +51,24 @@ class CustomDataSource<T> extends DataSource<T> {
 		SafeHtmlPipe,
 	],
 })
-export class TableComponent<T> implements OnInit {
+export class TableComponent<T> implements OnInit, AfterViewInit {
 	constructor(private sanitizer: DomSanitizer) {}
 
 	sanitizeContent(content: string): SafeHtml {
 		return this.sanitizer.bypassSecurityTrustHtml(content);
 	}
 
-	@Input() set data(data: T[]) {
-		this._data = data;
-		if (this.dataSource) {
-			this.dataSource.setData(this._data);
-		}
-	}
-	get data(): T[] {
-		return this._data;
-	}
-	private _data: T[] = [];
-
+	@Input() data: T[] = [];
 	@Input() columns: TableColumn<T>[] = [];
 	@Input() actions: Action<T>[] | undefined;
 
-	@ViewChild(MatSort) matSort!: MatSort;
+	@ViewChild(MatSort) sort!: MatSort;
+	@Input() hasSorting = "";
 	@Input() initialSortColumn = "";
 	@Input() initialSortDirection: SortDirection = "asc";
 
 	displayedColumns: string[] = [];
-	dataSource!: CustomDataSource<T>;
+	dataSource!: MatTableDataSource<T>;
 
 	ngOnInit() {
 		this.displayedColumns = this.columns.map((c) => c.columnDef);
@@ -107,14 +76,22 @@ export class TableComponent<T> implements OnInit {
 			this.displayedColumns.push("actions");
 		}
 
-		this.dataSource = new CustomDataSource(this.data);
+		this.dataSource = new MatTableDataSource(this.data);
+	}
+
+	ngAfterViewInit(): void {
+		this.dataSource.sort = this.sort;
 	}
 
 	addData(newItem: T) {
 		this.data = [...this.data, newItem];
+		this.dataSource.data = this.data;
 	}
 
 	removeData(itemToRemove: T) {
 		this.data = this.data.filter((item) => item !== itemToRemove);
+		this.dataSource.data = this.data;
+		console.log("Removed item", itemToRemove);
+		console.log("New data", this.dataSource.data);
 	}
 }

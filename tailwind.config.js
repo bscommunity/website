@@ -6,6 +6,9 @@ module.exports = {
 	],
 	theme: {
 		extend: {
+			spacing: {
+				"wrapper": "var(--wrapper)",
+			},
 			colors: {
 				// Usando variáveis CSS para temas dinâmicos
 				primary: "var(--mat-sys-primary)",

@@ -45,3 +45,21 @@ body {
 	background: var(--mat-sys-background);
 	color: var(--mat-sys-on-surface);
 }
+
+.hide-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+:root {
+	--wrapper: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+	:root {
+		--wrapper: 6rem;
+	}
+}
