@@ -1,49 +1,73 @@
 <footer
-	class="flex flex-col items-center justify-start px-wrapper py-9 gap-4 w-full bg-surface-container-low text-sm"
+	class="flex flex-col items-center justify-start px-wrapper py-9 gap-4 w-full bg-surface-container-low text-sm gap-9"
 >
-	<div class="flex flex-row items-start justify-between w-full">
-		<!-- Left Column -->
-		<div class="flex flex-col items-start justify-normal gap-9">
-			<div class="flex flex-col items-start justify-start gap-4">
-				<div class="flex flex-row items-center justify-start gap-6">
-					<mat-icon
-						svgIcon="logo"
-						class="text-on-secondary-container"
-						aria-hidden="false"
-						aria-label="Site logo"
-					></mat-icon>
-					<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
-					<div class="flex flex-row items-center justify-start gap-4">
-						<a
-							href="https://discord.com"
-							target="_blank"
-							class="h-8"
-						>
-							<mat-icon
-								svgIcon="discord"
-								inline="true"
-								class="text-on-surface"
-								aria-hidden="false"
-								aria-label="Discord logo"
-							></mat-icon>
-						</a>
-						<a
-							href="https://github.com"
-							target="_blank"
-							class="h-8"
-						>
-							<mat-icon
-								svgIcon="github"
-								inline="true"
-								class="text-on-surface"
-								aria-hidden="false"
-								aria-label="GitHub logo"
-							></mat-icon>
-						</a>
-					</div>
+	<div
+		class="flex flex-col md:flex-row items-start justify-between w-full gap-9"
+	>
+		<div class="flex flex-col items-start justify-start gap-4">
+			<div class="flex flex-row items-center justify-start gap-6">
+				<mat-icon
+					svgIcon="logo"
+					class="text-on-secondary-container"
+					aria-hidden="false"
+					aria-label="Site logo"
+				></mat-icon>
+				<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
+				<div class="flex flex-row items-center justify-start gap-4">
+					<a href="https://discord.com" target="_blank" class="h-8">
+						<mat-icon
+							svgIcon="discord"
+							inline="true"
+							class="text-on-surface"
+							aria-hidden="false"
+							aria-label="Discord logo"
+						></mat-icon>
+					</a>
+					<a href="https://github.com" target="_blank" class="h-8">
+						<mat-icon
+							svgIcon="github"
+							inline="true"
+							class="text-on-surface"
+							aria-hidden="false"
+							aria-label="GitHub logo"
+						></mat-icon>
+					</a>
 				</div>
-				<p>&#64;2025. Made with ❤️ from community, for community.</p>
 			</div>
+			<p>&#64;2025. Made with ❤️ from community, for community.</p>
+		</div>
+
+		<!-- Sections -->
+		<ul
+			class="flex flex-row items-center justify-end gap-20 order-1 md:order-2"
+		>
+			<li class="flex flex-col items-start justify-start gap-6">
+				<h3 class="uppercase">Resources</h3>
+				<ul class="flex flex-col items-start justify-start gap-5">
+					<li><a href="#">Community</a></li>
+					<li><a href="#">Blog</a></li>
+				</ul>
+			</li>
+			<li class="flex flex-col items-start justify-start gap-6">
+				<h3 class="uppercase">Help</h3>
+				<ul class="flex flex-col items-start justify-start gap-5">
+					<li><a href="#">Documentation</a></li>
+					<li><a href="#">Support</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div class="flex flex-row items-center justify-between gap-6 w-full">
+		<!-- Status -->
+		<div class="flex flex-row items-center justify-start gap-2.5">
+			<div class="min-w-1.5 min-h-1.5 bg-yellow-400 rounded-full"></div>
+			Partially Degraded Services
+			<!-- External link icon -->
+		</div>
+
+		<div
+			class="flex flex-col items-start justify-normal gap-9 order-2 md:order-1"
+		>
 			<div class="flex flex-row items-center justify-start gap-9">
 				<app-custom-select
 					[options]="themeOptions"
@@ -61,35 +85,9 @@
 			</div>
 		</div>
 
-		<!-- Sections -->
-		<ul class="flex flex-row items-center justify-end gap-20">
-			<li class="flex flex-col items-start justify-start gap-6">
-				<h3 class="uppercase">Resources</h3>
-				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">Community</a></li>
-					<li><a href="#">Blog</a></li>
-				</ul>
-			</li>
-			<li class="flex flex-col items-start justify-start gap-6">
-				<h3 class="uppercase">Help</h3>
-				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">Documentation</a></li>
-					<li><a href="#">Support</a></li>
-				</ul>
-			</li>
-		</ul>
-	</div>
-	<div class="flex flex-row items-center justify-between w-full">
-		<!-- Status -->
-		<div class="flex flex-row items-center justify-start gap-2.5">
-			<div class="w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
-			Partially Degraded Services
-			<!-- External link icon -->
-		</div>
-
-		<button mat-flat-button>
+		<!-- <button mat-flat-button>
 			<mat-icon class="!ml-0.5" inline="true">comment</mat-icon>
 			Share feedback
-		</button>
+		</button> -->
 	</div>
 </footer>
