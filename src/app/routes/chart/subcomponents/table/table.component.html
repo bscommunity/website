@@ -3,6 +3,7 @@
 		mat-table
 		[dataSource]="dataSource"
 		matSort
+		[matSortDisabled]="!hasSorting.length"
 		[matSortActive]="initialSortColumn"
 		[matSortDirection]="initialSortDirection"
 		class="mat-elevation-z8"

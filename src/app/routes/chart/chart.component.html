@@ -1,5 +1,5 @@
 <main
-	class="flex flex-row items-start justify-center w-full min-h-screen px-24 pt-9 pb-14 gap-16"
+	class="flex flex-row items-start justify-center w-full min-h-screen px-wrapper pt-9 pb-14 gap-16"
 >
 	<aside class="flex flex-col items-start justify-start gap-6">
 		<img
@@ -153,13 +153,19 @@
 		</app-chart-section>
 		<app-chart-section class="w-full" title="Contributors">
 			<app-table
+				#contributorTable
 				class="w-full"
 				[columns]="contributorsColumns"
 				[data]="contributorsData"
 				[actions]="contributorsActions"
 			></app-table>
 			<span class="flex items-center justify-end w-full">
-				<button mat-stroked-button>
+				<button
+					mat-stroked-button
+					(click)="
+						openSnackBar('Feature not implemented yet', 'Close')
+					"
+				>
 					<mat-icon>add</mat-icon>
 					Add new contributor
 				</button>
@@ -167,15 +173,22 @@
 		</app-chart-section>
 		<app-chart-section class="w-full" title="Versions">
 			<app-table
+				#versionTable
 				class="w-full"
 				[columns]="versionsColumns"
 				[data]="versionsData"
 				[actions]="versionsActions"
+				hasSorting="true"
 				initialSortColumn="id"
 				initialSortDirection="desc"
 			></app-table>
 			<span class="flex items-center justify-end w-full">
-				<button mat-stroked-button>
+				<button
+					mat-stroked-button
+					(click)="
+						openSnackBar('Feature not implemented yet', 'Close')
+					"
+				>
 					<mat-icon>publish</mat-icon>
 					Publish new version
 				</button>
