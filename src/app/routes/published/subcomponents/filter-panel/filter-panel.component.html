@@ -7,24 +7,28 @@
 
 	<div class="flex flex-col items-start justify-start gap-1 w-full">
 		<app-expansion-panel
+			class="w-full"
 			title="Categories"
 			[data]="categories"
 			(dataChange)="onFilterChange($event)"
 		></app-expansion-panel>
 
 		<app-expansion-panel
+			class="w-full"
 			title="Difficulties"
 			[data]="difficulties"
 			(dataChange)="onFilterChange($event)"
 		></app-expansion-panel>
 
 		<app-expansion-panel
+			class="w-full"
 			title="Genres"
 			[data]="genres"
 			(dataChange)="onFilterChange($event)"
 		></app-expansion-panel>
 
 		<app-expansion-panel
+			class="w-full"
 			title="Versions"
 			[data]="versions"
 			(dataChange)="onFilterChange($event)"

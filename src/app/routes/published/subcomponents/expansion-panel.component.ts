@@ -20,12 +20,12 @@ export interface ExpansionPanelData {
 	],
 	template: `
 		<mat-expansion-panel
-			class="!shadow-none"
+			class="!shadow-none !w-full"
 			[expanded]="panelOpenState"
 			(opened)="panelOpenState.set(true)"
 			(closed)="panelOpenState.set(false)"
 		>
-			<mat-expansion-panel-header>
+			<mat-expansion-panel-header class="!w-full">
 				<mat-panel-title> {{ title }} </mat-panel-title>
 			</mat-expansion-panel-header>
 			<mat-chip-set [ariaLabel]="title">
@@ -42,7 +42,7 @@ export interface ExpansionPanelData {
 	`,
 })
 export class ExpansionPanelComponent {
-	readonly panelOpenState = signal(true);
+	readonly panelOpenState = signal(false);
 	@Input() title = "";
 	@Input() data: ExpansionPanelData[] | null = null;
 	@Output() dataChange = new EventEmitter<ExpansionPanelData[] | null>();
