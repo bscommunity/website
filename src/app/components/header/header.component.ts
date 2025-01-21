@@ -7,6 +7,8 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatRippleModule } from "@angular/material/core";
+import { UploadDialog } from "../upload/upload.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
 	selector: "app-header",
@@ -22,6 +24,7 @@ import { MatRippleModule } from "@angular/material/core";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
+	readonly dialog = inject(MatDialog);
 	private _snackBar = inject(MatSnackBar);
 
 	openWarning() {
@@ -33,5 +36,13 @@ export class HeaderComponent {
 				verticalPosition: "bottom",
 			},
 		);
+	}
+
+	openUploadDialog() {
+		const dialogRef = this.dialog.open(UploadDialog);
+
+		dialogRef.afterClosed().subscribe((result) => {
+			console.log(`Dialog result: ${result}`);
+		});
 	}
 }
