@@ -1,43 +1,54 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Website</title>
+		<base href="/" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+			rel="stylesheet"
+		/>
+	</head>
 
-<head>
-  <meta charset="utf-8">
-  <title>Website</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
-</head>
+	<body class="mat-typography">
+		<app-root></app-root>
 
-<body class="mat-typography">
-  <app-root></app-root>
+		<script>
+			// Check if the browser supports localStorage
+			if (typeof localStorage !== "undefined") {
+				const savedTheme = localStorage.getItem("theme");
+				// console.log(savedTheme);
 
-  <script>
-    // Check if the browser supports localStorage
-    if (typeof localStorage !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      // console.log(savedTheme);
-
-      if (savedTheme == "dark") {
-        // console.log('Dark theme saved');
-        document.body.classList.add(savedTheme);
-      } else if (savedTheme !== "light") {
-        // console.log('No theme saved');
-        // Default to system preference if no theme is saved
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.body.classList.add('dark');
-        }
-      }
-    } else {
-      // console.log('No localStorage');
-      // Fallback for environments without localStorage
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-      }
-    }
-  </script>
-</body>
-
+				if (savedTheme == "dark") {
+					// console.log('Dark theme saved');
+					document.body.classList.add(savedTheme);
+				} else if (savedTheme !== "light") {
+					// console.log('No theme saved');
+					// Default to system preference if no theme is saved
+					if (
+						window.matchMedia &&
+						window.matchMedia("(prefers-color-scheme: dark)")
+							.matches
+					) {
+						document.body.classList.add("dark");
+					}
+				}
+			} else {
+				// console.log('No localStorage');
+				// Fallback for environments without localStorage
+				if (
+					window.matchMedia &&
+					window.matchMedia("(prefers-color-scheme: dark)").matches
+				) {
+					document.body.classList.add("dark");
+				}
+			}
+		</script>
+	</body>
 </html>
