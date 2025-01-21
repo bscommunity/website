@@ -91,6 +91,12 @@
 		)
 	);
 
+	@include mat.dialog-overrides(
+		(
+			subhead-size: 1.65rem,
+		)
+	);
+
 	.mat-mdc-slider {
 		width: 100%;
 	}
