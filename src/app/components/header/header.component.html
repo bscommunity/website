@@ -39,10 +39,14 @@
 				>
 			</li>
 			<li>
-				<a mat-stroked-button class="!pl-8">
+				<button
+					mat-stroked-button
+					class="!pl-8"
+					(click)="openUploadDialog()"
+				>
 					<mat-icon>cloud_upload</mat-icon>
 					Upload
-				</a>
+				</button>
 			</li>
 		</ul>
 
