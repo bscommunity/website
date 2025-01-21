@@ -1,12 +1,20 @@
 import { Injectable, inject } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
+
 import { MatDialog } from "@angular/material/dialog";
+
 import { UploadDialogSection1Component } from "./sections/section1.component";
 import { UploadDialogSection2Component } from "./sections/section2.component";
+
+import { Difficulty } from "@/lib/data";
 
 export interface UploadFormData {
 	contentType: string;
 	title: string;
+	artist: string;
+	album: string;
+	difficulty: Difficulty;
+	isDeluxe: boolean;
 }
 
 @Injectable({
@@ -23,6 +31,10 @@ export class UploadDialogService {
 		return {
 			contentType: "",
 			title: "",
+			artist: "",
+			album: "",
+			difficulty: Difficulty.Hard,
+			isDeluxe: false,
 			// ... other initial values
 		};
 	}
@@ -44,7 +56,7 @@ export class UploadDialogService {
 		const dialogRef = this.dialog.open<
 			UploadDialogSection1Component | UploadDialogSection2Component
 		>(this.getStepComponent(), {
-			/* width: "500px", */
+			// width: "500px",
 			disableClose: this.currentStepSubject.value === 0,
 			data: this.formData,
 		});
