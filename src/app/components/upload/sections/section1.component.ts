@@ -47,10 +47,18 @@ import { UploadFormData } from "../upload.component";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSection1Component {
+	contentType = "";
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
 
 	constructor(
 		public dialogRef: MatDialogRef<UploadDialogSection1Component>,
 		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
-	) {}
+	) {
+		this.contentType = formData.contentType;
+	}
+
+	ngOnDestroy() {
+		// Reset local state when component is destroyed
+		this.contentType = "";
+	}
 }

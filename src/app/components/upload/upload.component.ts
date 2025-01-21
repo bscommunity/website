@@ -6,6 +6,7 @@ import { UploadDialogSection2Component } from "./sections/section2.component";
 
 export interface UploadFormData {
 	contentType: string;
+	title: string;
 }
 
 @Injectable({
@@ -18,14 +19,25 @@ export class UploadDialogService {
 	private currentStepSubject = new BehaviorSubject<number>(0);
 	currentStep$ = this.currentStepSubject.asObservable();
 
+	private getInitialFormData(): UploadFormData {
+		return {
+			contentType: "",
+			title: "",
+			// ... other initial values
+		};
+	}
+
 	// Store form data
-	private formData: UploadFormData = {
-		contentType: "",
-	};
+	private formData: UploadFormData = this.getInitialFormData();
 
 	open() {
 		this.currentStepSubject.next(0);
 		this.openCurrentStep();
+	}
+
+	private reset() {
+		this.currentStepSubject.next(0);
+		this.formData = this.getInitialFormData();
 	}
 
 	private openCurrentStep() {
@@ -49,7 +61,10 @@ export class UploadDialogService {
 					this.openCurrentStep();
 				} else {
 					this.submitForm();
+					this.reset();
 				}
+			} else {
+				this.reset();
 			}
 		});
 	}
