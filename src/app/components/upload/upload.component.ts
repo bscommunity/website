@@ -91,7 +91,6 @@ export class UploadDialogService {
 			this.openCurrentStep();
 		} else {
 			this.submitForm();
-			this.reset();
 		}
 	}
 
@@ -158,6 +157,8 @@ export class UploadDialogService {
 		// Handle form submission
 		// ...
 
+		console.log("Form submitted after all:", this.formData);
+
 		// Open success dialog
 		this.dialog.open(UploadDialogSuccessComponent, {
 			disableClose: true,
@@ -166,13 +167,16 @@ export class UploadDialogService {
 				title: this.formData.title,
 				artist: this.formData.artist,
 				difficulty: this.formData.difficulty,
-				coverUrl: "https://example.com/cover.jpg",
-				duration: 64000,
+				coverUrl:
+					"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg",
+				duration: 653,
 				notesAmount: 346,
 				isDeluxe: this.formData.isDeluxe,
 				isExplicit: this.formData.isExplicit,
 			},
 		});
+
+		this.reset();
 
 		/* 
 		this.dialog.open(UploadDialogErrorComponent);

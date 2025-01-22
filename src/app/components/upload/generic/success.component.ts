@@ -22,15 +22,24 @@ import { UploadSuccessData } from "../upload.component";
 			</p>
 			<div class="relative w-full">
 				<app-chart
+					class="pointer-events-none"
 					[artist]="formData.artist"
-					[title]="formData.title"
+					[name]="formData.title"
 					[artist]="formData.artist"
 					[coverUrl]="formData.coverUrl"
 					[difficulty]="formData.difficulty"
 					[duration]="formData.duration"
+					[notesAmount]="formData.notesAmount"
 					[isDeluxe]="formData.isDeluxe"
 					[isExplicit]="formData.isExplicit"
 				></app-chart>
+				<div
+					class="absolute right-8 top-1/2 -translate-y-1/2 px-5 py-2 rotate-[-4.55deg] justify-center items-center flex overflow-hidden stamp-effect border-[6px] border-secondary-container select-none"
+				>
+					<p class="text-xl font-bold text-secondary-container">
+						SUBMITTED
+					</p>
+				</div>
 			</div>
 		</mat-dialog-content>
 		<mat-dialog-actions align="center">
