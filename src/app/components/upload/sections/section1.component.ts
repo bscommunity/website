@@ -11,7 +11,7 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { UploadFormData } from "../upload.component";
+import { initialFormData, UploadFormData } from "../upload.component";
 
 @Component({
 	selector: "app-upload-dialog-section1",
@@ -72,7 +72,7 @@ export class UploadDialogSection1Component {
 		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
 	) {
 		this.form = this.fb.group({
-			contentType: [""],
+			contentType: [initialFormData.contentType],
 		});
 	}
 

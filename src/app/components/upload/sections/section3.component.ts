@@ -25,7 +25,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { UploadFormData } from "../upload.component";
+import { initialFormData, UploadFormData } from "../upload.component";
 
 @Component({
 	selector: "app-upload-dialog-section3",
@@ -42,7 +42,7 @@ import { UploadFormData } from "../upload.component";
 					<input
 						type="text"
 						matInput
-						formControlName="chart_url"
+						formControlName="chartUrl"
 						placeholder="https://example.com/chart.zip"
 					/>
 					@if (
@@ -106,7 +106,10 @@ export class UploadDialogSection3Component implements OnInit {
 		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
 	) {
 		this.form = this.fb.group({
-			chart_url: ["", [Validators.required, zipUrlValidator()]],
+			chartUrl: [
+				initialFormData.chartUrl,
+				[Validators.required, zipUrlValidator()],
+			],
 		});
 	}
 
@@ -116,7 +119,7 @@ export class UploadDialogSection3Component implements OnInit {
 	}
 
 	get chartUrlControl() {
-		return this.form.get("chart_url");
+		return this.form.get("chartUrl");
 	}
 
 	onSubmit() {
