@@ -25,7 +25,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { initialFormData, UploadFormData } from "../upload.component";
+import { initialFormData, UploadFormData } from "../upload.service";
 
 @Component({
 	selector: "app-upload-dialog-section3",
