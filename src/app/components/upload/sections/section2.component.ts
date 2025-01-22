@@ -32,9 +32,7 @@ import { Difficulty } from "@/lib/data";
 	template: `
 		<h2 mat-dialog-title>Chart details</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content
-				class="mat-typography !flex flex-col gap-2 !pb-0"
-			>
+			<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 				<p class="mb-2">
 					Fill in the details for your chart submission. Make sure all
 					the required fields are filled before proceeding

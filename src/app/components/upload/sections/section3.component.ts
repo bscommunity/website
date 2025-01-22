@@ -32,9 +32,7 @@ import { UploadFormData } from "../upload.component";
 	template: `
 		<h2 mat-dialog-title>Linking</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content
-				class="mat-typography !flex flex-col gap-2 !pb-0"
-			>
+			<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 				<p class="mb-2">
 					Provide the URL to your chart file. Ensure your file meets
 					the submission guidelines.
@@ -66,15 +64,21 @@ import { UploadFormData } from "../upload.component";
 					>
 				</mat-form-field>
 			</mat-dialog-content>
-			<mat-dialog-actions align="end">
+			<mat-dialog-actions align="center">
 				<button
+					class="!w-[49%]"
 					mat-button
 					type="button"
 					(click)="dialogRef.close('back')"
 				>
 					Back
 				</button>
-				<button mat-button type="submit" [disabled]="form.invalid">
+				<button
+					class="!w-[49%]"
+					mat-flat-button
+					type="submit"
+					[disabled]="form.invalid"
+				>
 					Continue
 				</button>
 			</mat-dialog-actions>
@@ -123,6 +127,8 @@ export class UploadDialogSection3Component implements OnInit {
 }
 
 export function zipUrlValidator(): ValidatorFn {
+	const urlPattern = /^https:\/\/.*\/[a-zA-Z0-9-_]+\.zip$/i;
+
 	return (control: AbstractControl): { [key: string]: any } | null => {
 		if (!control.value) {
 			return null;
@@ -135,25 +141,16 @@ export function zipUrlValidator(): ValidatorFn {
 			return { invalidUrl: true };
 		}
 
-		// Check if it ends with .zip
-		const endsWithZip = control.value.toLowerCase().endsWith(".zip");
-
 		// Check if it's a valid HTTPS URL
 		const isHttps = control.value.toLowerCase().startsWith("https://");
 
-		if (!endsWithZip && !isHttps) {
-			return {
-				invalidZipUrl: true,
-				notHttps: true,
-			};
-		}
-
-		if (!endsWithZip) {
-			return { invalidZipUrl: true };
-		}
-
 		if (!isHttps) {
 			return { notHttps: true };
+		}
+
+		// Check if the URL matches our pattern with /{key}.zip at the end
+		if (!urlPattern.test(control.value)) {
+			return { invalidZipUrl: true };
 		}
 
 		return null;
