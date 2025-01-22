@@ -91,6 +91,7 @@ import { Difficulty } from "@/lib/data";
 					<mat-form-field
 						subscriptSizing="dynamic"
 						id="last"
+						class="w-1/3"
 						appearance="outline"
 					>
 						<mat-label>Difficulty</mat-label>
@@ -110,6 +111,12 @@ import { Difficulty } from "@/lib/data";
 						formControlName="isDeluxe"
 					>
 						Is deluxe?
+					</mat-slide-toggle>
+					<mat-slide-toggle
+						labelPosition="before"
+						formControlName="isExplicit"
+					>
+						Is explicit?
 					</mat-slide-toggle>
 				</div>
 			</mat-dialog-content>
