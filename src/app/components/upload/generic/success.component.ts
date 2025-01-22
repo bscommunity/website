@@ -14,7 +14,7 @@ import { UploadSuccessData } from "../upload.service";
 @Component({
 	selector: "app-upload-dialog-success",
 	template: `
-		<h2 mat-dialog-title>Disclaimer</h2>
+		<h2 mat-dialog-title>Success!</h2>
 		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 			<p class="mb-2">
 				Your chart was submitted successfully and is ready for review or
@@ -34,10 +34,19 @@ import { UploadSuccessData } from "../upload.service";
 					[isExplicit]="formData.isExplicit"
 				></app-chart>
 				<div
-					class="absolute right-8 top-1/2 -translate-y-1/2 px-5 py-2 rotate-[-4.55deg] justify-center items-center flex overflow-hidden stamp-effect border-[6px] border-secondary-container select-none"
+					class="absolute right-8 top-[45%] -translate-y-1/2 rotate-[-4.55deg]"
 				>
-					<p class="text-xl font-bold text-secondary-container">
-						SUBMITTED
+					<div
+						class="px-5 py-2 justify-center items-center flex overflow-hidden stamp-effect border-[6px] border-secondary-container select-none"
+					>
+						<p class="text-xl font-bold text-secondary-container">
+							SUBMITTED
+						</p>
+					</div>
+					<p
+						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary-container opacity-80 w-full text-center"
+					>
+						v1.0 | 32a76726
 					</p>
 				</div>
 			</div>

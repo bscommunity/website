@@ -1,39 +1,43 @@
-import { environment } from "environments/environment";
-
 const ITUNES_API_URL = "https://itunes.apple.com/search";
-const LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/";
-const LASTFM_API_KEY = environment.lastFmApiKey;
 
 /**
- * Find album name using Last.fm API
+ * Find album name using track name and artist name
  */
-async function findAlbumFromTrack(
+/**
+ * Find album cover URL using iTunes Search API
+ */
+async function findAlbumCoverFromTrack(
 	track: string,
 	artist: string,
 ): Promise<string> {
+	// Construct the search query
 	const query = new URLSearchParams({
-		method: "track.getInfo",
-		artist: artist,
-		track: track,
-		api_key: LASTFM_API_KEY,
-		format: "json",
+		term: `${track} ${artist}`,
+		entity: "song",
+		limit: "1",
 	}).toString();
 
-	console.log(query);
-
-	const response = await fetch(`${LASTFM_API_URL}?${query}`);
+	// Fetch data from iTunes Search API
+	const response = await fetch(`https://itunes.apple.com/search?${query}`);
 
 	if (!response.ok) {
-		throw new Error(`Last.fm API error: ${response.statusText}`);
+		throw new Error(`iTunes API error: ${response.statusText}`);
 	}
 
 	const data = await response.json();
 
-	if (!data.track?.album?.title) {
-		throw new Error(`No album found for track "${track}" by "${artist}"`);
+	// Check if results are available
+	if (!data.results || data.results.length === 0) {
+		throw new Error(
+			`No results found for track "${track}" by artist "${artist}"`,
+		);
 	}
 
-	return data.track.album.title;
+	// Extract the artwork URL
+	const artworkUrl100 = data.results[0].artworkUrl100;
+
+	// Return higher resolution version of the artwork
+	return artworkUrl100.replace("100x100", "600x600");
 }
 
 /**
@@ -51,7 +55,7 @@ export async function getCoverArtUrl(
 			console.warn(
 				"Album not provided, attempting to search for it using track name.",
 			);
-			album = await findAlbumFromTrack(track, artist);
+			return await findAlbumCoverFromTrack(track, artist);
 		}
 
 		// If we still don't have an album name, we can't proceed
