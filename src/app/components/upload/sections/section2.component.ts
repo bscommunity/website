@@ -23,8 +23,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { UploadFormData } from "../upload.component";
-
+import { initialFormData, UploadFormData } from "../upload.component";
 import { Difficulty } from "@/lib/data";
 
 @Component({
@@ -151,11 +150,12 @@ export class UploadDialogSection2Component implements OnInit {
 		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
 	) {
 		this.form = this.fb.group({
-			title: ["", Validators.required],
-			artist: ["", Validators.required],
-			album: ["", Validators.required],
-			difficulty: [Difficulty.Normal],
-			isDeluxe: [false],
+			title: [initialFormData.title, Validators.required],
+			artist: [initialFormData.artist, Validators.required],
+			album: [initialFormData.album, Validators.required],
+			difficulty: [initialFormData.difficulty],
+			isDeluxe: [initialFormData.isDeluxe],
+			isExplicit: [initialFormData.isExplicit],
 		});
 	}
 

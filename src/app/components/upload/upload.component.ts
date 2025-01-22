@@ -6,8 +6,11 @@ import { MatDialog } from "@angular/material/dialog";
 import { UploadDialogSection1Component } from "./sections/section1.component";
 import { UploadDialogSection2Component } from "./sections/section2.component";
 import { UploadDialogSection3Component } from "./sections/section3.component";
+
 import { UploadDialogDisclaimerComponent } from "./generic/disclaimer.component";
 import { UploadDialogLoadingComponent } from "./generic/loading.component";
+import { UploadDialogSuccessComponent } from "./generic/success.component";
+import { UploadDialogErrorComponent } from "./generic/error.component";
 
 const stepComponents = [
 	UploadDialogSection1Component,
@@ -28,10 +31,35 @@ export interface UploadFormData {
 	title: string;
 	artist: string;
 	album: string;
-	chart_url: string;
+	chartUrl: string;
 	difficulty: Difficulty;
 	isDeluxe: boolean;
+	isExplicit: boolean;
 }
+
+export interface UploadSuccessData {
+	id: string;
+	title: string;
+	artist: string;
+	difficulty: Difficulty;
+	coverUrl: string;
+	duration: number;
+	notesAmount: number;
+	isDeluxe: boolean;
+	isExplicit: boolean;
+}
+
+export const initialFormData: UploadFormData = {
+	contentType: "",
+	title: "",
+	artist: "",
+	album: "",
+	chartUrl: "",
+	difficulty: Difficulty.Normal,
+	isDeluxe: false,
+	isExplicit: false,
+	// ... other initial values
+};
 
 @Injectable({
 	providedIn: "root",
@@ -43,21 +71,8 @@ export class UploadDialogService {
 	private currentStepSubject = new BehaviorSubject<number>(0);
 	currentStep$ = this.currentStepSubject.asObservable();
 
-	private getInitialFormData(): UploadFormData {
-		return {
-			contentType: "",
-			title: "",
-			artist: "",
-			album: "",
-			chart_url: "",
-			difficulty: Difficulty.Normal,
-			isDeluxe: false,
-			// ... other initial values
-		};
-	}
-
 	// Store form data
-	private formData: UploadFormData = this.getInitialFormData();
+	private formData: UploadFormData = initialFormData;
 
 	open() {
 		this.currentStepSubject.next(0);
@@ -66,7 +81,7 @@ export class UploadDialogService {
 
 	private reset() {
 		this.currentStepSubject.next(0);
-		this.formData = this.getInitialFormData();
+		this.formData = initialFormData;
 	}
 
 	private moveToNextStep() {
@@ -121,22 +136,46 @@ export class UploadDialogService {
 		return stepComponents.length;
 	}
 
-	private submitForm() {
+	private async submitForm() {
 		// Handle final form submission
 		console.log("Form submitted:", this.formData);
 
 		// Open loading dialog
 		this.dialog.open(UploadDialogLoadingComponent, {
 			disableClose: true,
-			data: this.formData,
+			/* data: this.formData, */
 		});
 
 		// Simulate a delay
-		setTimeout(() => {
-			this.dialog.closeAll();
-		}, 2000);
+		const promise = new Promise((resolve) => {
+			setTimeout(resolve, 3000);
+		});
+
+		await promise;
+
+		this.dialog.closeAll();
 
 		// Handle form submission
 		// ...
+
+		// Open success dialog
+		this.dialog.open(UploadDialogSuccessComponent, {
+			disableClose: true,
+			data: {
+				id: "32a76726",
+				title: this.formData.title,
+				artist: this.formData.artist,
+				difficulty: this.formData.difficulty,
+				coverUrl: "https://example.com/cover.jpg",
+				duration: 64000,
+				notesAmount: 346,
+				isDeluxe: this.formData.isDeluxe,
+				isExplicit: this.formData.isExplicit,
+			},
+		});
+
+		/* 
+		this.dialog.open(UploadDialogErrorComponent);
+		*/
 	}
 }

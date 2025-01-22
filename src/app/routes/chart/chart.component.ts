@@ -69,7 +69,7 @@ const CONTRIBUTORS: Contributor[] = [
 interface Version {
 	id: string;
 	publishedAt: Date;
-	chart_url: string;
+	chartUrl: string;
 	downloads?: number;
 	known_issues: string[];
 }
@@ -78,7 +78,7 @@ const VERSIONS: Version[] = [
 	{
 		id: "1.0.0",
 		publishedAt: new Date("2021-01-01"),
-		chart_url: "https://example.com/1.0.0",
+		chartUrl: "https://example.com/1.0.0",
 		downloads: 84,
 		known_issues: [
 			"Incorrect note placed at 03m12s",
@@ -89,7 +89,7 @@ const VERSIONS: Version[] = [
 	{
 		id: "1.1.0",
 		publishedAt: new Date("2021-02-01"),
-		chart_url: "https://example.com/1.1.0",
+		chartUrl: "https://example.com/1.1.0",
 		downloads: 221,
 		known_issues: [
 			"Unsynchronized section after drop",
@@ -99,7 +99,7 @@ const VERSIONS: Version[] = [
 	{
 		id: "1.2.0",
 		publishedAt: new Date("2021-03-01"),
-		chart_url: "https://example.com/1.2.0",
+		chartUrl: "https://example.com/1.2.0",
 		downloads: 325,
 		known_issues: ["Wrong direction swipe effect"],
 	},
