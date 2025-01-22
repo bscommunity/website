@@ -142,9 +142,6 @@ export class UploadDialogService {
 	}
 
 	private async submitForm() {
-		// Handle final form submission
-		console.log("Form submitted:", this.formData);
-
 		// Open loading dialog
 		this.dialog.open(UploadDialogLoadingComponent, {
 			disableClose: true,
@@ -155,11 +152,13 @@ export class UploadDialogService {
 
 		// Handle cover art retrieval
 		try {
-			cover_url = await getCoverArtUrl(
+			const { coverUrl, albumName } = await getCoverArtUrl(
 				this.formData.artist,
 				this.formData.title,
 				this.formData.album,
 			);
+			cover_url = coverUrl;
+			this.formData.album = albumName;
 		} catch (error) {
 			this.dialog.closeAll();
 
@@ -175,10 +174,10 @@ export class UploadDialogService {
 
 		// Handle form submission
 		// ...
-
-		this.dialog.closeAll();
+		console.log("Form submitted:", this.formData);
 
 		// Open success dialog
+		this.dialog.closeAll();
 		this.dialog.open(UploadDialogSuccessComponent, {
 			disableClose: true,
 			data: {

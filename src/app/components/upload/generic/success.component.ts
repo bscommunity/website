@@ -46,7 +46,7 @@ import { UploadSuccessData } from "../upload.service";
 					<p
 						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary-container opacity-80 w-full text-center"
 					>
-						v1.0 | 32a76726
+						v1.0 | {{ formData.id }}
 					</p>
 				</div>
 			</div>
