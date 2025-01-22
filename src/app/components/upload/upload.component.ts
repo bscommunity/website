@@ -5,6 +5,7 @@ import { MatDialog } from "@angular/material/dialog";
 
 import { UploadDialogSection1Component } from "./sections/section1.component";
 import { UploadDialogSection2Component } from "./sections/section2.component";
+import { UploadDialogSection3Component } from "./sections/section3.component";
 
 import { Difficulty } from "@/lib/data";
 
@@ -13,6 +14,7 @@ export interface UploadFormData {
 	title: string;
 	artist: string;
 	album: string;
+	chart_url: string;
 	difficulty: Difficulty;
 	isDeluxe: boolean;
 }
@@ -33,7 +35,8 @@ export class UploadDialogService {
 			title: "",
 			artist: "",
 			album: "",
-			difficulty: Difficulty.Hard,
+			chart_url: "",
+			difficulty: Difficulty.Normal,
 			isDeluxe: false,
 			// ... other initial values
 		};
@@ -54,15 +57,22 @@ export class UploadDialogService {
 
 	private openCurrentStep() {
 		const dialogRef = this.dialog.open<
-			UploadDialogSection1Component | UploadDialogSection2Component
+			| UploadDialogSection1Component
+			| UploadDialogSection2Component
+			| UploadDialogSection3Component
 		>(this.getStepComponent(), {
 			// width: "500px",
-			disableClose: this.currentStepSubject.value === 0,
+			disableClose: this.currentStepSubject.value !== 0,
 			data: this.formData,
 		});
 
 		dialogRef.afterClosed().subscribe((result) => {
-			if (result) {
+			if (result === "back") {
+				// Go back to previous step
+				const previousStep = this.currentStepSubject.value - 1;
+				this.currentStepSubject.next(previousStep);
+				this.openCurrentStep();
+			} else if (result) {
 				// Update form data with result
 				this.formData = { ...this.formData, ...result };
 
@@ -87,13 +97,15 @@ export class UploadDialogService {
 				return UploadDialogSection1Component;
 			case 1:
 				return UploadDialogSection2Component;
+			case 2:
+				return UploadDialogSection3Component;
 			default:
 				throw new Error("Invalid step");
 		}
 	}
 
 	private getTotalSteps(): number {
-		return 2;
+		return 3;
 	}
 
 	private submitForm() {

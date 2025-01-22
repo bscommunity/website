@@ -97,6 +97,12 @@
 		)
 	);
 
+	@include mat.form-field-overrides(
+		(
+			subscript-text-size: 0.8rem,
+		)
+	);
+
 	.mat-mdc-slider {
 		width: 100%;
 	}
@@ -122,6 +128,14 @@
 	.mat-mdc-cell {
 		border-color: var(--mat-sys-inverse-on-surface);
 		text-align: center;
+	}
+
+	.mat-mdc-notch-piece.mdc-notched-outline__notch {
+		border-right-width: 0px !important;
+	}
+
+	.mat-mdc-slide-toggle .mdc-switch:enabled + .mdc-label {
+		margin-right: 1rem;
 	}
 
 	/* .mat-mdc-cell:first-child {
