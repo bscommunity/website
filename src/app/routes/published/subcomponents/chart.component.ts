@@ -38,7 +38,7 @@ export interface ChartProps {
 				<img
 					[src]="coverUrl"
 					alt="Cover"
-					class="w-full h-full aspect-square"
+					class="w-full h-full aspect-square object-cover"
 				/>
 				@if (difficultyIcon) {
 					<img

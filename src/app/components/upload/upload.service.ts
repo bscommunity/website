@@ -25,12 +25,13 @@ type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
 	: never;
 
 import { Difficulty } from "@/lib/data";
+import { getCoverArtUrl } from "@/lib/assets";
 
 export interface UploadFormData {
 	contentType: string;
 	title: string;
 	artist: string;
-	album: string;
+	album?: string;
 	chartUrl: string;
 	difficulty: Difficulty;
 	isDeluxe: boolean;
@@ -47,6 +48,11 @@ export interface UploadSuccessData {
 	notesAmount: number;
 	isDeluxe: boolean;
 	isExplicit: boolean;
+}
+
+export interface UploadErrorData {
+	message: string;
+	error: any;
 }
 
 export const initialFormData: UploadFormData = {
@@ -145,19 +151,32 @@ export class UploadDialogService {
 			/* data: this.formData, */
 		});
 
-		// Simulate a delay
-		const promise = new Promise((resolve) => {
-			setTimeout(resolve, 3000);
-		});
+		let cover_url = null;
 
-		await promise;
+		// Handle cover art retrieval
+		try {
+			cover_url = await getCoverArtUrl(
+				this.formData.artist,
+				this.formData.title,
+				this.formData.album,
+			);
+		} catch (error) {
+			this.dialog.closeAll();
 
-		this.dialog.closeAll();
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "Failed to retrieve cover art.",
+					error,
+				},
+			});
+
+			return;
+		}
 
 		// Handle form submission
 		// ...
 
-		console.log("Form submitted after all:", this.formData);
+		this.dialog.closeAll();
 
 		// Open success dialog
 		this.dialog.open(UploadDialogSuccessComponent, {
@@ -167,8 +186,7 @@ export class UploadDialogService {
 				title: this.formData.title,
 				artist: this.formData.artist,
 				difficulty: this.formData.difficulty,
-				coverUrl:
-					"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg",
+				coverUrl: cover_url,
 				duration: 653,
 				notesAmount: 346,
 				isDeluxe: this.formData.isDeluxe,
@@ -177,9 +195,5 @@ export class UploadDialogService {
 		});
 
 		this.reset();
-
-		/* 
-		this.dialog.open(UploadDialogErrorComponent);
-		*/
 	}
 }
