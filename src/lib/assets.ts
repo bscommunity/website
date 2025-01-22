@@ -1,15 +1,17 @@
 const ITUNES_API_URL = "https://itunes.apple.com/search";
 
+interface AlbumCoverData {
+	coverUrl: string;
+	albumName?: string;
+}
+
 /**
- * Find album name using track name and artist name
- */
-/**
- * Find album cover URL using iTunes Search API
+ * Find album name and cover using track and artist name from iTunes API
  */
 async function findAlbumCoverFromTrack(
 	track: string,
 	artist: string,
-): Promise<string> {
+): Promise<AlbumCoverData> {
 	// Construct the search query
 	const query = new URLSearchParams({
 		term: `${track} ${artist}`,
@@ -37,7 +39,10 @@ async function findAlbumCoverFromTrack(
 	const artworkUrl100 = data.results[0].artworkUrl100;
 
 	// Return higher resolution version of the artwork
-	return artworkUrl100.replace("100x100", "600x600");
+	return {
+		coverUrl: artworkUrl100.replace("100x100", "600x600"),
+		albumName: data.results[0].collectionName,
+	};
 }
 
 /**
@@ -48,7 +53,7 @@ export async function getCoverArtUrl(
 	artist: string,
 	track?: string,
 	album?: string | null,
-): Promise<string> {
+): Promise<AlbumCoverData> {
 	try {
 		// If album is not provided but track is, try to find the album
 		if (!album?.trim() && track?.trim()) {
@@ -80,7 +85,12 @@ export async function getCoverArtUrl(
 		}
 
 		// Get higher resolution version of the artwork
-		return data.results[0].artworkUrl100.replace("100x100", "600x600");
+		return {
+			coverUrl: data.results[0].artworkUrl100.replace(
+				"100x100",
+				"600x600",
+			),
+		};
 	} catch (error) {
 		// Wrap all errors in a consistent format
 		throw new Error(
