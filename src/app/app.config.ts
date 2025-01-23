@@ -2,7 +2,7 @@ import {
 	type ApplicationConfig,
 	provideZoneChangeDetection,
 } from "@angular/core";
-import { provideRouter } from "@angular/router";
+import { provideRouter, withComponentInputBinding } from "@angular/router";
 
 import { routes } from "./app.routes";
 import {
@@ -12,16 +12,25 @@ import {
 import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 
 import { MatIconRegistry } from "@angular/material/icon";
-import { provideHttpClient } from "@angular/common/http";
+import {
+	provideHttpClient,
+	withFetch,
+	withInterceptors,
+} from "@angular/common/http";
+
+import { authInterceptor } from "./auth/auth.interceptor";
+import { fakeBackendInterceptor } from "./services/api/fake-backend.interceptor";
 
 export const appConfig: ApplicationConfig = {
 	providers: [
+		MatIconRegistry, // MatIconRegistry config
 		provideZoneChangeDetection({ eventCoalescing: true }),
-		provideRouter(routes),
+		provideRouter(routes, withComponentInputBinding()),
 		provideClientHydration(withEventReplay()),
 		provideAnimationsAsync(),
-		// MatIconRegistry config
-		MatIconRegistry,
-		provideHttpClient(),
+		provideHttpClient(
+			withFetch(),
+			withInterceptors([authInterceptor, fakeBackendInterceptor]),
+		),
 	],
 };

@@ -81,6 +81,6 @@ export class UploadDialogSuccessComponent {
 
 	onAccessButtonClicked() {
 		this.dialogRef.close();
-		this.router.navigate(["/chart"]);
+		this.router.navigate([`chart/${this.formData.id}`]);
 	}
 }

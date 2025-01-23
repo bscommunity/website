@@ -3,7 +3,8 @@ import { Component, Input } from "@angular/core";
 
 import { MatIconModule } from "@angular/material/icon";
 
-import { difficultiesIcons, Difficulty } from "@/lib/data";
+import { Difficulty } from "@/models/enums/difficulty.enum";
+import { difficultiesIcons } from "assets/difficulties";
 
 export enum Tendency {
 	Up = "up",
