@@ -24,7 +24,7 @@ type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
 	? R
 	: never;
 
-import { Difficulty } from "@/lib/data";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 import { getCoverArtUrl } from "@/lib/assets";
 
 export interface UploadFormData {

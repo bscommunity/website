@@ -16,7 +16,7 @@ import {
 	Tendency,
 } from "./subcomponents/chart.component";
 
-import { Difficulty } from "@/lib/data";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-published",

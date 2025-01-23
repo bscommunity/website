@@ -2,6 +2,8 @@ import {
 	ChangeDetectorRef,
 	Component,
 	inject,
+	Input,
+	OnInit,
 	signal,
 	ViewChild,
 } from "@angular/core";
@@ -23,89 +25,12 @@ import {
 	TableComponent,
 } from "./subcomponents/table/table.component";
 import { AsideComponent } from "./subcomponents/aside.component";
-
-enum Role {
-	OWNER = "Owner",
-	CHART = "Chart",
-	SYNC = "Sync",
-	EFFECTS = "Effects",
-	TESTING = "Testing",
-}
-
-interface Contributor {
-	id: string;
-	name: string;
-	image_url: string;
-	roles: Role[];
-}
-
-const CONTRIBUTORS: Contributor[] = [
-	{
-		id: "1",
-		name: "meninocoiso",
-		image_url: "https://github.com/theduardomaciel.png",
-		roles: [Role.OWNER, Role.CHART, Role.TESTING],
-	},
-	{
-		id: "2",
-		name: "sarah123",
-		image_url: "https://github.com/jamesber.png",
-		roles: [Role.SYNC],
-	},
-	{
-		id: "3",
-		name: "james456",
-		image_url: "https://github.com/ocosmo55.png",
-		roles: [Role.EFFECTS],
-	},
-	{
-		id: "4",
-		name: "jane789",
-		image_url: "https://github.com/teste123.png",
-		roles: [Role.CHART],
-	},
-];
-
-interface Version {
-	id: string;
-	publishedAt: Date;
-	chartUrl: string;
-	downloads?: number;
-	known_issues: string[];
-}
-
-const VERSIONS: Version[] = [
-	{
-		id: "1.0.0",
-		publishedAt: new Date("2021-01-01"),
-		chartUrl: "https://example.com/1.0.0",
-		downloads: 84,
-		known_issues: [
-			"Incorrect note placed at 03m12s",
-			"Unsynchronized section after drop",
-			"Wrong direction swipe effect",
-		],
-	},
-	{
-		id: "1.1.0",
-		publishedAt: new Date("2021-02-01"),
-		chartUrl: "https://example.com/1.1.0",
-		downloads: 221,
-		known_issues: [
-			"Unsynchronized section after drop",
-			"Wrong direction swipe effect",
-		],
-	},
-	{
-		id: "1.2.0",
-		publishedAt: new Date("2021-03-01"),
-		chartUrl: "https://example.com/1.2.0",
-		downloads: 325,
-		known_issues: ["Wrong direction swipe effect"],
-	},
-];
-
-const lastVersionId = VERSIONS[VERSIONS.length - 1].id;
+import { ActivatedRoute } from "@angular/router";
+import { ChartModel } from "@/models/chart.model";
+import { ContributorModel } from "@/models/contributor.model";
+import { VersionModel } from "@/models/version.model";
+import { Role } from "@/models/enums/role.enum";
+import { PageNotFoundComponent } from "../not-found/not-found.component";
 
 @Component({
 	selector: "app-chart",
@@ -118,26 +43,32 @@ const lastVersionId = VERSIONS[VERSIONS.length - 1].id;
 		AsideComponent,
 		ChartSectionComponent,
 		TableComponent,
+		PageNotFoundComponent,
 	],
 	templateUrl: "./chart.component.html",
 })
-export class ChartComponent {
+export class ChartComponent implements OnInit {
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
-	constructor(private cdr: ChangeDetectorRef) {}
+	constructor(
+		private cdr: ChangeDetectorRef,
+		private route: ActivatedRoute,
+	) {}
+
+	chart: ChartModel | null = null;
+
+	ngOnInit(): void {
+		// Access resolved data
+		this.chart = this.route.snapshot.data["chart"];
+		// console.log("Resolved Chart Data:", this.chart);
+	}
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
 	}
 
 	/* Issues Section */
-
-	knownIssues = [
-		"Incorrect note placed at 03m12s",
-		"Unsynchronized section after drop",
-		"Wrong direction swipe effect",
-	];
 
 	openRemoveIssueConfirmationDialog(index: number): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -187,7 +118,7 @@ export class ChartComponent {
 			return;
 		}
 
-		this.knownIssues.push(this.newIssue);
+		this.chart?.knownIssues.push(this.newIssue);
 		this.newIssue = "";
 		this.addIssueInputVisible.set(false);
 
@@ -195,7 +126,7 @@ export class ChartComponent {
 	}
 
 	removeIssue(index: number) {
-		this.knownIssues.splice(index, 1);
+		this.chart?.knownIssues.splice(index, 1);
 		this.cdr.detectChanges();
 		this.openSnackBar("Issue removed with success!", "Close");
 	}
@@ -203,9 +134,11 @@ export class ChartComponent {
 	/* Contributors Section */
 
 	@ViewChild("contributorTable")
-	contributorTable!: TableComponent<Contributor>;
+	contributorTable!: TableComponent<ContributorModel>;
 
-	openRemoveContributorConfirmationDialog(contributor: Contributor): void {
+	openRemoveContributorConfirmationDialog(
+		contributor: ContributorModel,
+	): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Contributor",
@@ -222,41 +155,40 @@ export class ChartComponent {
 		});
 	}
 
-	contributorsColumns: TableColumn<Contributor>[] = [
+	contributorsColumns: TableColumn<ContributorModel>[] = [
 		{
 			columnDef: "name",
 			header: "Name",
-			cell: (item: Contributor) =>
-				`<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.image_url}" alt="${item.name}" /> ${item.name}<span />`,
+			cell: (item: ContributorModel) =>
+				`<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.imageUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`,
 		},
 		{
 			columnDef: "roles",
 			header: "Roles",
-			cell: (item: Contributor) => `${item.roles.join(", ")}`,
+			cell: (item: ContributorModel) => `${item.roles.join(", ")}`,
 		},
 	];
 
-	contributorsData = CONTRIBUTORS;
-
-	contributorsActions: Action<Contributor>[] = [
+	contributorsActions: Action<ContributorModel>[] = [
 		{
 			description: "Remove",
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
-			disabled: (item: Contributor) => item.roles.includes(Role.OWNER),
+			disabled: (item: ContributorModel) =>
+				item.roles.includes(Role.OWNER),
 		},
 	];
 
-	removeContributor(contributor: Contributor) {
+	removeContributor(contributor: ContributorModel) {
 		this.contributorTable.removeData(contributor);
 		this.openSnackBar("Contributor removed with success!", "Close");
 	}
 
 	/* Versions Section */
 
-	@ViewChild("versionTable") versionTable!: TableComponent<Version>;
+	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
 
-	openRemoveVersionConfirmationDialog(version: Version): void {
+	openRemoveVersionConfirmationDialog(version: VersionModel): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Version",
@@ -273,27 +205,27 @@ export class ChartComponent {
 		});
 	}
 
-	versionsColumns: TableColumn<Version>[] = [
+	versionsColumns: TableColumn<VersionModel>[] = [
 		{
 			columnDef: "id",
 			header: "Version",
-			cell: (item: Version) => `${item.id}`,
+			cell: (item: VersionModel) => `${item.index}`,
 		},
 		{
 			columnDef: "publishedAt",
 			header: "Published At",
-			cell: (item: Version) => `${item.publishedAt.toDateString()}`,
+			cell: (item: VersionModel) => `${item.publishedAt.toDateString()}`,
 		},
 		{
 			columnDef: "downloads",
 			header: "Downloads",
-			cell: (item: Version) => `${item.downloads}`,
+			cell: (item: VersionModel) => `${item.downloadsAmount ?? 0}`,
 		},
 	];
 
-	versionsData = VERSIONS;
+	lastVersionId = this.chart?.versions[this.chart?.versions.length - 1].index;
 
-	versionsActions: Action<Version>[] = [
+	versionsActions: Action<VersionModel>[] = [
 		{
 			description: "Download",
 			icon: "download",
@@ -308,18 +240,18 @@ export class ChartComponent {
 			callback: () => {
 				this.openSnackBar("Switch version clicked", "Close");
 			},
-			disabled: (item: Version) => item.id === lastVersionId,
+			disabled: (item: VersionModel) => item.index === this.lastVersionId,
 		},
 		{
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (item: Version) =>
-				item.id === "1.0.0" || item.id === lastVersionId,
+			disabled: (item: VersionModel) =>
+				item.index === 1 || item.index === this.lastVersionId,
 		},
 	];
 
-	removeVersion(version: Version) {
+	removeVersion(version: VersionModel) {
 		this.versionTable.removeData(version);
 		this.openSnackBar("Version removed with success!", "Close");
 	}

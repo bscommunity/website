@@ -24,7 +24,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
 import { initialFormData, UploadFormData } from "../upload.service";
-import { Difficulty } from "@/lib/data";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-upload-dialog-section2",

@@ -8,7 +8,7 @@ import {
 	ExpansionPanelData,
 } from "../expansion-panel.component";
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { Difficulty } from "@/lib/data";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-filter-panel",

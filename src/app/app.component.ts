@@ -17,9 +17,9 @@ import { ThemeService } from "./services/theme.service";
 
 @Component({
 	selector: "app-root",
+	templateUrl: "./app.component.html",
 	imports: [MatIconModule, RouterOutlet, HeaderComponent, FooterComponent],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
 	constructor(
