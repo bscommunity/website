@@ -14,6 +14,7 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { MatIconRegistry, MatIconModule } from "@angular/material/icon";
 
 import { ThemeService } from "./services/theme.service";
+import { AuthService } from "./auth/auth.service";
 
 @Component({
 	selector: "app-root",
@@ -23,6 +24,7 @@ import { ThemeService } from "./services/theme.service";
 })
 export class AppComponent implements OnInit {
 	constructor(
+		public authService: AuthService,
 		private themeService: ThemeService,
 		private renderer: Renderer2,
 	) {
