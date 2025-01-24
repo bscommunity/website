@@ -5,23 +5,22 @@ import {
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
 } from "@angular/router";
-import { Observable, of } from "rxjs";
-import { catchError } from "rxjs/operators";
-import { ChartsService } from "@/services/api/charts.service";
+import { ChartService } from "@/services/api/chart.service";
+import { ChartModel } from "@/models/chart.model";
 
 @Injectable({
 	providedIn: "root",
 })
 export class ChartResolver implements Resolve<any> {
 	constructor(
-		private chartsService: ChartsService,
+		private chartService: ChartService,
 		private router: Router,
 	) {}
 
-	resolve(
+	async resolve(
 		route: ActivatedRouteSnapshot,
 		state: RouterStateSnapshot,
-	): Observable<any> {
+	): Promise<ChartModel | null> {
 		const chartId = route.paramMap.get("id");
 
 		if (!chartId) {
@@ -30,18 +29,19 @@ export class ChartResolver implements Resolve<any> {
 			this.router.navigate(["404"], {
 				info: { error: "Chart ID not provided" },
 			});
-			return of(null);
+			return null;
 		}
 
-		return this.chartsService.getChartById(chartId).pipe(
-			catchError((error) => {
-				console.error("Error fetching chart", error);
+		try {
+			const chart = await this.chartService.getChartById(chartId);
+			return chart;
+		} catch (error) {
+			console.error("Error fetching chart", error);
 
-				this.router.navigate(["404"], {
-					info: { error },
-				});
-				return of(null);
-			}),
-		);
+			this.router.navigate(["404"], {
+				info: { error },
+			});
+			return null;
+		}
 	}
 }
