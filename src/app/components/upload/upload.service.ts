@@ -26,29 +26,17 @@ type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
 
 import { Difficulty } from "@/models/enums/difficulty.enum";
 import { getCoverArtUrl } from "@/lib/assets";
+import { AuthService } from "app/auth/auth.service";
+import { Router } from "@angular/router";
+import { ChartModel, MutateChartModel } from "@/models/chart.model";
+import { ChartService } from "@/services/api/chart.service";
 
-export interface UploadFormData {
+export type UploadFormData = MutateChartModel & {
+	// Form data
 	contentType: string;
-	title: string;
-	artist: string;
-	album?: string;
 	chartUrl: string;
-	difficulty: Difficulty;
-	isDeluxe: boolean;
-	isExplicit: boolean;
-}
-
-export interface UploadSuccessData {
-	id: string;
-	title: string;
-	artist: string;
-	difficulty: Difficulty;
-	coverUrl: string;
-	duration: number;
-	notesAmount: number;
-	isDeluxe: boolean;
-	isExplicit: boolean;
-}
+	album?: string;
+};
 
 export interface UploadErrorData {
 	message: string;
@@ -57,21 +45,27 @@ export interface UploadErrorData {
 
 export const initialFormData: UploadFormData = {
 	contentType: "",
-	title: "",
-	artist: "",
-	album: "",
 	chartUrl: "",
+	album: "",
+	//
+	track: "",
+	artist: "",
+	coverUrl: "",
 	difficulty: Difficulty.Normal,
 	isDeluxe: false,
 	isExplicit: false,
-	// ... other initial values
+	// ... any other initial values added later
 };
 
 @Injectable({
 	providedIn: "root",
 })
 export class UploadDialogService {
+	private router = inject(Router);
 	private dialog = inject(MatDialog);
+
+	private chartService = inject(ChartService);
+	private authService = inject(AuthService);
 
 	// Track the current step
 	private currentStepSubject = new BehaviorSubject<number>(0);
@@ -142,6 +136,17 @@ export class UploadDialogService {
 	}
 
 	private async submitForm() {
+		if (!this.authService.isLoggedIn()) {
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "You must be logged in to submit content.",
+					error: null,
+				},
+			});
+			this.router.navigate(["/login"]);
+			return;
+		}
+
 		// Open loading dialog
 		this.dialog.open(UploadDialogLoadingComponent, {
 			disableClose: true,
@@ -154,7 +159,7 @@ export class UploadDialogService {
 		try {
 			const { coverUrl, albumName } = await getCoverArtUrl(
 				this.formData.artist,
-				this.formData.title,
+				this.formData.track,
 				this.formData.album,
 			);
 			cover_url = coverUrl;
@@ -176,23 +181,47 @@ export class UploadDialogService {
 		// ...
 		console.log("Form submitted:", this.formData);
 
-		// Open success dialog
-		this.dialog.closeAll();
-		this.dialog.open(UploadDialogSuccessComponent, {
-			disableClose: true,
-			data: {
-				id: "32a76726",
-				title: this.formData.title,
-				artist: this.formData.artist,
-				difficulty: this.formData.difficulty,
+		try {
+			const response = await this.chartService.createChart({
+				...this.formData,
 				coverUrl: cover_url,
-				duration: 653,
-				notesAmount: 346,
-				isDeluxe: this.formData.isDeluxe,
-				isExplicit: this.formData.isExplicit,
-			},
-		});
+			});
 
-		this.reset();
+			if (!response) {
+				this.dialog.open(UploadDialogErrorComponent, {
+					data: {
+						message: "Failed to submit chart.",
+						error: null,
+					},
+				});
+				return;
+			}
+
+			// Open success dialog
+			this.dialog.closeAll();
+			this.dialog.open(UploadDialogSuccessComponent, {
+				disableClose: true,
+				data: {
+					id: response.id,
+					track: response.track,
+					artist: response.artist,
+					difficulty: response.difficulty,
+					coverUrl: cover_url,
+					duration: response.versions[0].duration,
+					notesAmount: response.versions[0].notesAmount,
+					isDeluxe: response.isDeluxe,
+					isExplicit: response.isExplicit,
+				},
+			});
+
+			this.reset();
+		} catch (error) {
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "Failed to submit chart.",
+					error,
+				},
+			});
+		}
 	}
 }

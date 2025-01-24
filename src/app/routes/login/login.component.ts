@@ -26,7 +26,7 @@ export class LoginComponent {
 					?.split("=")[1];
 
 				// Navigate to the redirectUrl or the default route
-				this.router.navigate([redirectUrl || "/chart/1"]);
+				this.router.navigate([redirectUrl || "/"]);
 			},
 			error: (err) => {
 				console.error("Login failed", err);

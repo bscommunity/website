@@ -4,6 +4,7 @@ import { isPlatformBrowser } from "@angular/common";
 import { BehaviorSubject, tap, catchError, of, Observable } from "rxjs";
 import { toSignal, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { UserModel } from "@/models/user.model";
+import { apiUrl } from "@/services/api/api";
 
 interface LoginResponse {
 	user: UserModel;
@@ -16,6 +17,7 @@ interface LoginResponse {
 export class AuthService {
 	private readonly TOKEN_NAME = "bscm_auth";
 	private readonly USER_OBJECT_NAME = "bscm_user";
+
 	private platformId = inject(PLATFORM_ID);
 	private http = inject(HttpClient);
 
@@ -46,7 +48,7 @@ export class AuthService {
 	login(): Observable<LoginResponse> {
 		console.log("Logging in...");
 
-		return this.http.get<LoginResponse>("/api/login").pipe(
+		return this.http.get<LoginResponse>(`${apiUrl}/login`).pipe(
 			tap((response) => {
 				console.log("Logged in successfully. Got token:", response);
 

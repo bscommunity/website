@@ -157,7 +157,7 @@ export class UploadDialogSection2Component implements OnInit {
 		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
 	) {
 		this.form = this.fb.group({
-			title: [initialFormData.title, Validators.required],
+			track: [initialFormData.track, Validators.required],
 			artist: [initialFormData.artist, Validators.required],
 			album: [initialFormData.album],
 			difficulty: [initialFormData.difficulty],
