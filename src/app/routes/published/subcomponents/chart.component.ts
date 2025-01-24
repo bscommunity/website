@@ -13,7 +13,7 @@ export enum Tendency {
 }
 
 export interface ChartProps {
-	name: string;
+	track: string;
 	artist: string;
 	coverUrl: string;
 	duration: number;
@@ -61,7 +61,7 @@ export interface ChartProps {
 						<p
 							class="text-base font-medium overflow-hidden text-ellipsis line-clamp-1"
 						>
-							{{ name }}
+							{{ track }}
 						</p>
 						@if (isDeluxe) {
 							<img
@@ -73,7 +73,7 @@ export interface ChartProps {
 						@if (isExplicit) {
 							<mat-icon inline>explicit</mat-icon>
 						}
-						@if (ranking && name.length < 20) {
+						@if (ranking && track.length < 20) {
 							<div
 								class="ml-auto flex flex-row items-center justify-start gap-2 text-secondary"
 							>
@@ -113,7 +113,7 @@ export interface ChartProps {
 	`,
 })
 export class ChartComponent implements ChartProps {
-	@Input() name = "";
+	@Input() track = "";
 	@Input() artist = "";
 	@Input() coverUrl = "";
 	@Input({

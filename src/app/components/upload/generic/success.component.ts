@@ -7,9 +7,9 @@ import {
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { ChartComponent } from "app/routes/published/subcomponents/chart.component";
 
-import { UploadSuccessData } from "../upload.service";
+import { ChartComponent } from "app/routes/published/subcomponents/chart.component";
+import { SuccessDialogData } from "../upload.service";
 
 @Component({
 	selector: "app-upload-dialog-success",
@@ -23,15 +23,14 @@ import { UploadSuccessData } from "../upload.service";
 			<div class="relative w-full">
 				<app-chart
 					class="pointer-events-none"
-					[artist]="formData.artist"
-					[name]="formData.title"
-					[artist]="formData.artist"
-					[coverUrl]="formData.coverUrl"
-					[difficulty]="formData.difficulty"
-					[duration]="formData.duration"
-					[notesAmount]="formData.notesAmount"
-					[isDeluxe]="formData.isDeluxe"
-					[isExplicit]="formData.isExplicit"
+					[artist]="data.artist"
+					[track]="data.track"
+					[coverUrl]="data.coverUrl"
+					[difficulty]="data.difficulty"
+					[isDeluxe]="data.isDeluxe"
+					[isExplicit]="data.isExplicit"
+					[duration]="data.duration"
+					[notesAmount]="data.notesAmount"
 				></app-chart>
 				<div
 					class="absolute right-8 top-[45%] -translate-y-1/2 rotate-[-4.55deg]"
@@ -46,7 +45,7 @@ import { UploadSuccessData } from "../upload.service";
 					<p
 						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary-container opacity-80 w-full text-center"
 					>
-						v1.0 | {{ formData.id }}
+						v1.0 | {{ data.id }}
 					</p>
 				</div>
 			</div>
@@ -75,12 +74,12 @@ import { UploadSuccessData } from "../upload.service";
 export class UploadDialogSuccessComponent {
 	constructor(
 		public dialogRef: MatDialogRef<UploadDialogSuccessComponent>,
-		@Inject(MAT_DIALOG_DATA) public formData: UploadSuccessData,
+		@Inject(MAT_DIALOG_DATA) public data: SuccessDialogData,
 		private router: Router,
 	) {}
 
 	onAccessButtonClicked() {
 		this.dialogRef.close();
-		this.router.navigate([`chart/${this.formData.id}`]);
+		this.router.navigate([`chart/${this.data.id}`]);
 	}
 }

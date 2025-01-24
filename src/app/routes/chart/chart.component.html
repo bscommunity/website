@@ -15,13 +15,13 @@
 				<ul
 					class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
 				>
-					@if (chart.knownIssues.length > 0) {
-						@for (issue of chart.knownIssues; track $index) {
+					@if (knownIssues.length > 0) {
+						@for (issue of knownIssues; track $index) {
 							<li
 								class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
 								[ngClass]="{
 									'border-b border-b-inverse-on-surface':
-										$index !== chart.knownIssues.length - 1,
+										$index !== knownIssues.length - 1,
 								}"
 							>
 								<span>• {{ issue }}</span>

@@ -70,6 +70,13 @@ export class ChartComponent implements OnInit {
 
 	/* Issues Section */
 
+	// Get the latest version known issues
+	latestVersionIndex = this.chart?.versions.length
+		? this.chart.versions.length - 1
+		: -1;
+	knownIssues =
+		this.chart?.versions[this.latestVersionIndex].knownIssues ?? [];
+
 	openRemoveIssueConfirmationDialog(index: number): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
@@ -118,7 +125,11 @@ export class ChartComponent implements OnInit {
 			return;
 		}
 
-		this.chart?.knownIssues.push(this.newIssue);
+		this.chart?.versions[this.latestVersionIndex]?.knownIssues.push({
+			description: this.newIssue,
+			index: this.latestVersionIndex,
+			createdAt: new Date(),
+		});
 		this.newIssue = "";
 		this.addIssueInputVisible.set(false);
 
@@ -126,7 +137,10 @@ export class ChartComponent implements OnInit {
 	}
 
 	removeIssue(index: number) {
-		this.chart?.knownIssues.splice(index, 1);
+		this.chart?.versions[this.latestVersionIndex]?.knownIssues.splice(
+			index,
+			1,
+		);
 		this.cdr.detectChanges();
 		this.openSnackBar("Issue removed with success!", "Close");
 	}

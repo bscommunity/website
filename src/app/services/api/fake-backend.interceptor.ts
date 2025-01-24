@@ -48,7 +48,7 @@ export const fakeBackendInterceptor: HttpInterceptorFn = (req, next) => {
 
 const chart: ChartModel = {
 	id: "1",
-	name: "Example Chart",
+	track: "Example Chart",
 	contributors: [
 		{
 			user: {
@@ -138,7 +138,6 @@ const chart: ChartModel = {
 	],
 	artist: "Example Artist",
 	coverUrl: "https://example.com/cover.png",
-	description: "This is an example chart",
 	difficulty: Difficulty.Hard,
 	isDeluxe: false,
 	isExplicit: false,
