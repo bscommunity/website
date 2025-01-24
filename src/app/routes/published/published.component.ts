@@ -57,7 +57,7 @@ export class PublishedComponent {
 
 	charts: ChartProps[] = [
 		{
-			name: "We Live Forever",
+			track: "We Live Forever",
 			artist: "The Prodigy",
 			coverUrl:
 				"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1",
@@ -69,7 +69,7 @@ export class PublishedComponent {
 			tendency: Tendency.Up,
 		},
 		{
-			name: "Flashback",
+			track: "Flashback",
 			artist: "MIYAVI",
 			coverUrl:
 				"https://th.bing.com/th/id/OIP.sXOr2sC37lJeTDq0xCTf0wAAAA?rs=1&pid=ImgDetMain",
@@ -82,7 +82,7 @@ export class PublishedComponent {
 			tendency: Tendency.Down,
 		},
 		{
-			name: "We Live Forever For The Time",
+			track: "We Live Forever For The Time",
 			artist: "The Prodigy",
 			coverUrl:
 				"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1",

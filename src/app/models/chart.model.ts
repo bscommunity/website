@@ -14,7 +14,6 @@ export const Chart = z.object({
 	isFeatured: z.boolean(),
 	versions: Version.array(),
 	contributors: Contributor.array(),
-	knownIssues: z.string().array(),
 });
 
 export type ChartModel = z.infer<typeof Chart>;
@@ -23,7 +22,6 @@ const chartSchema = Chart.omit({
 	id: true,
 	versions: true,
 	contributors: true,
-	knownIssues: true,
 	isFeatured: true,
 });
 export type MutateChartModel = z.infer<typeof chartSchema>;

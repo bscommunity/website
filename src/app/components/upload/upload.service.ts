@@ -43,6 +43,11 @@ export interface UploadErrorData {
 	error: any;
 }
 
+export type SuccessDialogData = ChartModel & {
+	notesAmount: number;
+	duration: number;
+};
+
 export const initialFormData: UploadFormData = {
 	contentType: "",
 	chartUrl: "",
