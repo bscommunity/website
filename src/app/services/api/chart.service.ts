@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
 import { ChartModel, MutateChartModel } from "@/models/chart.model";
-import { apiUrl } from "./api";
+import { apiUrl } from ".";
 
 @Injectable({
 	providedIn: "root",

@@ -7,6 +7,7 @@ export const Version = z.object({
 	index: z.number(),
 	duration: z.number(),
 	notesAmount: z.number(),
+	effectsAmount: z.number(),
 	bpm: z.number(),
 	chartUrl: z.string(),
 	downloadsAmount: z.number().optional().default(0),

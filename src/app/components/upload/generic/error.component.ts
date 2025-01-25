@@ -7,6 +7,7 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { UploadErrorData } from "../upload.service";
+import { Router } from "@angular/router";
 
 @Component({
 	selector: "app-upload-dialog-error",
@@ -32,7 +33,7 @@ import { UploadErrorData } from "../upload.service";
 				class="!w-full !mb-2"
 				mat-button
 				type="button"
-				(click)="dialogRef.close()"
+				(click)="onClose()"
 			>
 				Close
 			</button>
@@ -43,7 +44,16 @@ import { UploadErrorData } from "../upload.service";
 })
 export class UploadDialogErrorComponent {
 	constructor(
+		private router: Router,
 		public dialogRef: MatDialogRef<UploadDialogErrorComponent>,
 		@Inject(MAT_DIALOG_DATA) public data: UploadErrorData,
 	) {}
+
+	onClose() {
+		if (this.data.redirectTo) {
+			this.router.navigate([this.data.redirectTo]);
+		}
+
+		this.dialogRef.close();
+	}
 }

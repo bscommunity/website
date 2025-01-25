@@ -6,13 +6,17 @@ import { PublishedComponent } from "./routes/published/published.component";
 import { OverviewComponent } from "./routes/overview/overview.component";
 import { ChartComponent } from "./routes/chart/chart.component";
 
+// Auth Routes
+import { LoginComponent } from "./routes/auth/login/login.component";
+import { OAuthCallbackComponent } from "./routes/auth/callback/callback.component";
+
 // Resolvers
 import { ChartResolver } from "./routes/chart/chart-resolver.service";
-import { LoginComponent } from "./routes/login/login.component";
 import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
 } from "./auth/auth.guard";
+import { TestComponent } from "./routes/test.component";
 
 export const routes: Routes = [
 	{
@@ -20,6 +24,12 @@ export const routes: Routes = [
 		component: LoginComponent,
 		canActivate: [redirectIfAuthenticatedGuard],
 		title: "Login",
+	},
+	{
+		path: "callback",
+		component: OAuthCallbackComponent,
+		canActivate: [redirectIfAuthenticatedGuard],
+		title: "Authenticating...",
 	},
 	{
 		path: "overview",
@@ -38,6 +48,10 @@ export const routes: Routes = [
 		component: ChartComponent,
 		resolve: { chart: ChartResolver },
 		canActivate: [isAuthenticatedGuard],
+	},
+	{
+		path: "test",
+		component: TestComponent,
 	},
 	{ path: "", redirectTo: "/published", pathMatch: "full" }, // Redirect to published
 	{ path: "**", title: "Oops. 404", component: PageNotFoundComponent }, // Should be the last

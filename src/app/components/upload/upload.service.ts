@@ -41,6 +41,7 @@ export type UploadFormData = MutateChartModel & {
 export interface UploadErrorData {
 	message: string;
 	error: any;
+	redirectTo?: string;
 }
 
 export type SuccessDialogData = ChartModel & {
