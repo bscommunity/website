@@ -26,6 +26,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
 import { initialFormData, UploadFormData } from "../upload.service";
+import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 
 @Component({
 	selector: "app-upload-dialog-section3",
@@ -63,6 +64,7 @@ import { initialFormData, UploadFormData } from "../upload.service";
 						>Must be a direct link to the .zip file</mat-hint
 					>
 				</mat-form-field>
+				<app-file-upload></app-file-upload>
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
 				<button
@@ -94,6 +96,7 @@ import { initialFormData, UploadFormData } from "../upload.service";
 		MatInputModule,
 		MatSlideToggleModule,
 		ReactiveFormsModule,
+		FileUploadComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })

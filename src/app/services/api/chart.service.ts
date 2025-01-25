@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 
 import { ChartModel, MutateChartModel } from "@/models/chart.model";
 import { apiUrl } from ".";
@@ -21,9 +21,9 @@ export class ChartService {
 	}
 
 	// Read
-	async getAllCharts(): Promise<ChartModel[]> {
+	getAllCharts(): Observable<ChartModel[]> {
 		console.log("Fetching all charts");
-		return await firstValueFrom(this.http.get<ChartModel[]>(this.apiUrl));
+		return this.http.get<ChartModel[]>(this.apiUrl);
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
