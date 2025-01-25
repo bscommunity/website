@@ -31,9 +31,6 @@ export class AuthService {
 	private readonly USER_OBJECT_NAME = "bscm_user";
 
 	private platformId = inject(PLATFORM_ID);
-	private cookieService = inject(CookieService);
-	private http = inject(HttpClient);
-	private router = inject(Router);
 
 	private _isLoggedIn$ = new BehaviorSubject<boolean>(false);
 	isLoggedIn$ = this._isLoggedIn$.asObservable();
@@ -46,7 +43,10 @@ export class AuthService {
 		return token;
 	}
 
-	constructor() {
+	constructor(
+		private cookieService: CookieService,
+		private http: HttpClient,
+	) {
 		this.initializeAuthState();
 	}
 
@@ -60,51 +60,33 @@ export class AuthService {
 		return `https://discord.com/oauth2/authorize?client_id=${environment.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(environment.REDIRECT_URI)}&scope=identify+email`;
 	}
 
-	login(code: string) {
+	async login(code: string) {
 		console.log("Sending request to backend...");
 
 		try {
-			this.http
-				.post<LoginResponse>(`${apiUrl}/login`, { code })
-				.subscribe({
-					next: ({ user, token }) => {
-						console.log(
-							"Logged in successfully. Got token:",
-							token,
-						);
+			const response = await firstValueFrom(
+				this.http.post<LoginResponse>(`${apiUrl}/login`, { code }),
+			);
 
-						console.log("Setting cookies...");
+			console.log("Logged in successfully. Got token:", response.token);
 
-						this.cookieService.set(this.TOKEN_NAME, token, {
-							expires: new Date(
-								Date.now() + 7 * 24 * 60 * 60 * 1000,
-							), // 7 days
-							path: "/",
-						});
-						this.cookieService.set(
-							this.USER_OBJECT_NAME,
-							JSON.stringify(user),
-							{
-								expires: new Date(
-									Date.now() + 7 * 24 * 60 * 60 * 1000,
-								), // 7 days
-								path: "/",
-							},
-						);
-						this._isLoggedIn$.next(true);
+			console.log("Setting cookies...");
 
-						console.log(
-							"All cookies: ",
-							this.cookieService.getAll(),
-						);
+			this.cookieService.set(this.TOKEN_NAME, response.token, {
+				expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+				path: "/",
+			});
+			this.cookieService.set(
+				this.USER_OBJECT_NAME,
+				JSON.stringify(response.user),
+				{
+					expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+					path: "/",
+				},
+			);
 
-						// this.router.navigate(["/"]);
-					},
-					error: (error) => {
-						console.error("Failed to log in:", error);
-						throw error;
-					},
-				});
+			this._isLoggedIn$.next(true);
+			return true;
 		} catch (error) {
 			this._isLoggedIn$.next(false);
 
