@@ -19,7 +19,6 @@ import {
 } from "@angular/common/http";
 
 import { authInterceptor } from "./auth/auth.interceptor";
-import { fakeBackendInterceptor } from "./services/api/fake-backend.interceptor";
 
 export const appConfig: ApplicationConfig = {
 	providers: [
@@ -28,9 +27,6 @@ export const appConfig: ApplicationConfig = {
 		provideRouter(routes, withComponentInputBinding()),
 		provideClientHydration(withEventReplay()),
 		provideAnimationsAsync(),
-		provideHttpClient(
-			withFetch(),
-			withInterceptors([authInterceptor, fakeBackendInterceptor]),
-		),
+		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 	],
 };

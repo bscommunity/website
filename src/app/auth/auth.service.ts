@@ -1,22 +1,14 @@
 import { Injectable, inject, PLATFORM_ID } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { isPlatformBrowser } from "@angular/common";
-import {
-	BehaviorSubject,
-	tap,
-	catchError,
-	of,
-	Observable,
-	firstValueFrom,
-} from "rxjs";
-import { toSignal, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { BehaviorSubject, firstValueFrom } from "rxjs";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 import { environment } from "environments/environment";
 import { apiUrl } from "@/services/api";
 
 import { UserModel } from "@/models/user.model";
 import { CookieService } from "@/services/cookie.service";
-import { Router } from "@angular/router";
 
 interface LoginResponse {
 	user: UserModel;
@@ -29,6 +21,7 @@ interface LoginResponse {
 export class AuthService {
 	private readonly TOKEN_NAME = "bscm_auth";
 	private readonly USER_OBJECT_NAME = "bscm_user";
+	private readonly TOKEN_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 	private platformId = inject(PLATFORM_ID);
 
@@ -64,28 +57,29 @@ export class AuthService {
 		console.log("Sending request to backend...");
 
 		try {
+			// Send the code to the backend
 			const response = await firstValueFrom(
 				this.http.post<LoginResponse>(`${apiUrl}/login`, { code }),
 			);
 
-			console.log("Logged in successfully. Got token:", response.token);
-
-			console.log("Setting cookies...");
-
+			// Set the token and user object in cookies
 			this.cookieService.set(this.TOKEN_NAME, response.token, {
-				expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+				expires: new Date(Date.now() + this.TOKEN_DURATION),
 				path: "/",
 			});
+
 			this.cookieService.set(
 				this.USER_OBJECT_NAME,
 				JSON.stringify(response.user),
 				{
-					expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+					expires: new Date(Date.now() + this.TOKEN_DURATION),
 					path: "/",
 				},
 			);
 
+			// Update the auth state
 			this._isLoggedIn$.next(true);
+
 			return true;
 		} catch (error) {
 			this._isLoggedIn$.next(false);

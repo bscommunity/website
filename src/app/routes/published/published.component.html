@@ -1,7 +1,29 @@
 <main
 	class="flex flex-col md:flex-row items-start justify-center w-full min-h-screen px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
-	@if (!filters.length && !charts.length) {
+	@if (charts === null) {
+		<div
+			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+		>
+			<div class="flex flex-col items-center justify-center gap-4">
+				<span class="text-6xl"
+					><mat-icon inline>deployed_code_alert</mat-icon></span
+				>
+				<h1 class="text-2xl">
+					Oops, something went wrong while fetching your charts
+				</h1>
+				<p class="max-w-[65%] text-center">
+					Please try again later or check Discord if the problem
+					persists
+				</p>
+			</div>
+		</div>
+	} @else if (charts === undefined) {
+		<mat-progress-spinner
+			diameter="48"
+			mode="indeterminate"
+		></mat-progress-spinner>
+	} @else if (!filters.length && !charts.length) {
 		<div class="flex flex-col items-center justify-start gap-6 w-full">
 			<div
 				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -35,7 +57,7 @@
 				</div>
 				<button class="!min-w-fit" mat-flat-button>
 					<mat-icon
-						class="min-w-5"
+						class="!max-w-5"
 						svgIcon="discord"
 						inline="true"
 						aria-hidden="false"
@@ -88,13 +110,19 @@
 								[track]="chart.track"
 								[artist]="chart.artist"
 								[coverUrl]="chart.coverUrl"
-								[duration]="chart.duration"
-								[notesAmount]="chart.notesAmount"
+								[duration]="
+									chart.versions[chart.versions.length - 1]
+										.duration
+								"
+								[notesAmount]="
+									chart.versions[chart.versions.length - 1]
+										.notesAmount
+								"
 								[difficulty]="chart.difficulty"
 								[isDeluxe]="chart.isDeluxe"
-								[ranking]="chart.ranking"
-								[tendency]="chart.tendency"
 							></app-chart>
+							<!-- [ranking]="chart.ranking"
+								[tendency]="chart.tendency" -->
 						}
 					</app-list-section>
 				</ul>

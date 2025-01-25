@@ -37,31 +37,23 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 					the required fields are filled before proceeding
 				</p>
 
-				<div class="flex flex-row items-center justify-between last">
-					<mat-form-field appearance="outline">
-						<mat-label>Title</mat-label>
-						<input
-							type="text"
-							matInput
-							formControlName="track"
-							placeholder="We Live Forever"
-						/>
-						@if (
-							form.get("track")?.hasError("required") &&
-							form.get("track")?.touched
-						) {
-							<mat-error
-								>Track is <strong>required</strong></mat-error
-							>
-						}
-					</mat-form-field>
-					<mat-slide-toggle
-						labelPosition="before"
-						formControlName="isExplicit"
-					>
-						Is explicit?
-					</mat-slide-toggle>
-				</div>
+				<mat-form-field appearance="outline">
+					<mat-label>Title</mat-label>
+					<input
+						type="text"
+						matInput
+						formControlName="track"
+						placeholder="We Live Forever"
+					/>
+					@if (
+						form.get("track")?.hasError("required") &&
+						form.get("track")?.touched
+					) {
+						<mat-error
+							>Track is <strong>required</strong></mat-error
+						>
+					}
+				</mat-form-field>
 
 				<mat-form-field appearance="outline">
 					<mat-label>Artist</mat-label>
@@ -80,6 +72,39 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 						>
 					}
 				</mat-form-field>
+
+				<div class="flex flex-row items-center justify-between last">
+					<mat-form-field
+						subscriptSizing="dynamic"
+						id="last"
+						class="w-1/3"
+						appearance="outline"
+					>
+						<mat-label>Difficulty</mat-label>
+						<mat-select formControlName="difficulty">
+							@for (
+								difficulty of difficulties;
+								track difficulty
+							) {
+								<mat-option [value]="difficulty">
+									{{ getDifficultyLabel(difficulty) }}
+								</mat-option>
+							}
+						</mat-select>
+					</mat-form-field>
+					<mat-slide-toggle
+						labelPosition="before"
+						formControlName="isDeluxe"
+					>
+						Is deluxe?
+					</mat-slide-toggle>
+					<mat-slide-toggle
+						labelPosition="before"
+						formControlName="isExplicit"
+					>
+						Is explicit?
+					</mat-slide-toggle>
+				</div>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
 				<button
@@ -120,6 +145,8 @@ export class UploadDialogSection2Component implements OnInit {
 		this.form = this.fb.group({
 			track: [initialFormData.track, Validators.required],
 			artist: [initialFormData.artist, Validators.required],
+			difficulty: [initialFormData.difficulty],
+			isDeluxe: [initialFormData.isDeluxe],
 			isExplicit: [initialFormData.isExplicit],
 		});
 	}

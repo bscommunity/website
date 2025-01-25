@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { MatIconModule } from "@angular/material/icon";
@@ -10,13 +10,12 @@ import {
 } from "@/components/custom-select/custom-select.component";
 import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
-import {
-	ChartComponent,
-	ChartProps,
-	Tendency,
-} from "./subcomponents/chart.component";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
-import { Difficulty } from "@/models/enums/difficulty.enum";
+import { ChartComponent } from "./subcomponents/chart.component";
+
+import { ChartModel } from "@/models/chart.model";
+import { ChartService } from "@/services/api/chart.service";
 
 @Component({
 	selector: "app-published",
@@ -28,10 +27,16 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 		ListSectionComponent,
 		ChartComponent,
 		RouterLink,
+		MatProgressSpinnerModule,
 	],
 	templateUrl: "./published.component.html",
 })
-export class PublishedComponent {
+export class PublishedComponent implements OnInit {
+	constructor(
+		private chartService: ChartService,
+		private cdr: ChangeDetectorRef,
+	) {}
+
 	sortOptions: Option[] = [
 		{
 			label: "Newest",
@@ -55,45 +60,29 @@ export class PublishedComponent {
 
 	filters = [];
 
-	charts: ChartProps[] = [
-		{
-			track: "We Live Forever",
-			artist: "The Prodigy",
-			coverUrl:
-				"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1",
-			duration: 256,
-			notesAmount: 325,
-			difficulty: Difficulty.Extreme,
-			isDeluxe: true,
-			ranking: 35,
-			tendency: Tendency.Up,
-		},
-		{
-			track: "Flashback",
-			artist: "MIYAVI",
-			coverUrl:
-				"https://th.bing.com/th/id/OIP.sXOr2sC37lJeTDq0xCTf0wAAAA?rs=1&pid=ImgDetMain",
-			duration: 180,
-			notesAmount: 685,
-			difficulty: Difficulty.Extreme,
-			isDeluxe: false,
-			isExplicit: true,
-			ranking: 64,
-			tendency: Tendency.Down,
-		},
-		{
-			track: "We Live Forever For The Time",
-			artist: "The Prodigy",
-			coverUrl:
-				"https://i0.wp.com/lyricsfa.com/wp-content/uploads/2018/10/The-Prodigy-Lyrics.jpg?fit=1000%2C1000&ssl=1",
-			duration: 256,
-			notesAmount: 341,
-			difficulty: Difficulty.Hard,
-			isDeluxe: true,
-			ranking: 12,
-			tendency: Tendency.Up,
-		},
-	];
+	charts: ChartModel[] | undefined | null = undefined;
+
+	ngOnInit(): void {
+		// Access resolved data
+		this.chartService.getAllCharts().subscribe({
+			next: (response) => {
+				console.log("Resolved charts data:", this.charts);
+
+				this.charts = response;
+				this.cdr.detectChanges();
+
+				console.log(this.charts);
+			},
+			error: (error) => {
+				console.error("Error fetching charts:", error);
+
+				this.charts = null;
+				this.cdr.detectChanges();
+
+				console.log(this.charts);
+			},
+		});
+	}
 
 	clearFilters() {
 		// Clear filters

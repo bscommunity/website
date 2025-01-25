@@ -1,5 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+	mode: 'jit',
+	content: [
+		'./src/**/*.{html,ts}', // Adjust the paths to match your project structure
+	],
 	content: [
 		"./src/**/*.{html,ts}", // Inclua os arquivos do projeto
 		"./node_modules/@angular/material/**/*.js", // Adicione o Angular Material
