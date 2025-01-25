@@ -1,10 +1,22 @@
 import { Injectable, inject, PLATFORM_ID } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { isPlatformBrowser } from "@angular/common";
-import { BehaviorSubject, tap, catchError, of, Observable } from "rxjs";
+import {
+	BehaviorSubject,
+	tap,
+	catchError,
+	of,
+	Observable,
+	firstValueFrom,
+} from "rxjs";
 import { toSignal, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+
+import { environment } from "environments/environment";
+import { apiUrl } from "@/services/api";
+
 import { UserModel } from "@/models/user.model";
-import { apiUrl } from "@/services/api/api";
+import { CookieService } from "@/services/cookie.service";
+import { Router } from "@angular/router";
 
 interface LoginResponse {
 	user: UserModel;
@@ -19,7 +31,9 @@ export class AuthService {
 	private readonly USER_OBJECT_NAME = "bscm_user";
 
 	private platformId = inject(PLATFORM_ID);
+	private cookieService = inject(CookieService);
 	private http = inject(HttpClient);
+	private router = inject(Router);
 
 	private _isLoggedIn$ = new BehaviorSubject<boolean>(false);
 	isLoggedIn$ = this._isLoggedIn$.asObservable();
@@ -27,10 +41,7 @@ export class AuthService {
 	isLoggedIn = toSignal(this._isLoggedIn$, { initialValue: false });
 
 	get token(): string {
-		if (!isPlatformBrowser(this.platformId)) {
-			throw new Error("Cannot access token on server");
-		}
-		const token = this.getCookie(this.TOKEN_NAME);
+		const token = this.cookieService.get(this.TOKEN_NAME);
 		if (!token) throw new Error("No token found in cookies");
 		return token;
 	}
@@ -41,71 +52,72 @@ export class AuthService {
 
 	private initializeAuthState() {
 		if (isPlatformBrowser(this.platformId)) {
-			this._isLoggedIn$.next(!!this.getCookie(this.TOKEN_NAME));
+			this._isLoggedIn$.next(!!this.cookieService.get(this.TOKEN_NAME));
 		}
 	}
 
-	login(): Observable<LoginResponse> {
-		console.log("Logging in...");
+	getOAuthUrl(): string {
+		return `https://discord.com/oauth2/authorize?client_id=${environment.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(environment.REDIRECT_URI)}&scope=identify+email`;
+	}
 
-		return this.http.get<LoginResponse>(`${apiUrl}/login`).pipe(
-			tap((response) => {
-				console.log("Logged in successfully. Got token:", response);
+	login(code: string) {
+		console.log("Sending request to backend...");
 
-				if (isPlatformBrowser(this.platformId)) {
-					this.setCookie(this.TOKEN_NAME, response.token, 7);
-					this.setCookie(
-						this.USER_OBJECT_NAME,
-						JSON.stringify(response.user),
-						7,
-					);
-					this._isLoggedIn$.next(true);
-				}
-			}),
-			catchError((error) => {
-				console.error("Failed to log in:", error);
+		try {
+			this.http
+				.post<LoginResponse>(`${apiUrl}/login`, { code })
+				.subscribe({
+					next: ({ user, token }) => {
+						console.log(
+							"Logged in successfully. Got token:",
+							token,
+						);
 
-				this._isLoggedIn$.next(false);
-				return of(error);
-			}),
-		);
+						console.log("Setting cookies...");
+
+						this.cookieService.set(this.TOKEN_NAME, token, {
+							expires: new Date(
+								Date.now() + 7 * 24 * 60 * 60 * 1000,
+							), // 7 days
+							path: "/",
+						});
+						this.cookieService.set(
+							this.USER_OBJECT_NAME,
+							JSON.stringify(user),
+							{
+								expires: new Date(
+									Date.now() + 7 * 24 * 60 * 60 * 1000,
+								), // 7 days
+								path: "/",
+							},
+						);
+						this._isLoggedIn$.next(true);
+
+						console.log(
+							"All cookies: ",
+							this.cookieService.getAll(),
+						);
+
+						// this.router.navigate(["/"]);
+					},
+					error: (error) => {
+						console.error("Failed to log in:", error);
+						throw error;
+					},
+				});
+		} catch (error) {
+			this._isLoggedIn$.next(false);
+
+			console.error("Failed to log in:", error);
+			throw error;
+		}
 	}
 
 	logout() {
 		if (isPlatformBrowser(this.platformId)) {
-			this.deleteCookie(this.TOKEN_NAME);
-			this.deleteCookie(this.USER_OBJECT_NAME);
+			this.cookieService.delete(this.TOKEN_NAME);
+			this.cookieService.delete(this.USER_OBJECT_NAME);
 			this._isLoggedIn$.next(false);
 		}
-	}
-
-	private setCookie(name: string, value: string, days: number) {
-		if (!isPlatformBrowser(this.platformId)) return;
-
-		const date = new Date();
-		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-		const expires = `expires=${date.toUTCString()}`;
-		document.cookie = `${name}=${encodeURIComponent(value)};${expires};path=/;SameSite=Strict;Secure`;
-	}
-
-	private getCookie(name: string): string | null {
-		if (!isPlatformBrowser(this.platformId)) return null;
-
-		const cookieName = `${name}=`;
-		const decodedCookie = decodeURIComponent(document.cookie);
-		const cookieArray = decodedCookie.split(";");
-
-		for (let cookie of cookieArray) {
-			cookie = cookie.trim();
-			if (cookie.startsWith(cookieName)) {
-				return cookie.substring(cookieName.length);
-			}
-		}
-		return null;
-	}
-
-	private deleteCookie(name: string) {
-		if (!isPlatformBrowser(this.platformId)) return;
-		document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 	}
 }
