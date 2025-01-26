@@ -34,13 +34,13 @@ import {
 	MutateChartModel,
 } from "@/models/chart.model";
 import { ChartService } from "@/services/api/chart.service";
-import { ChartFileData } from "@/services/decode.service";
+import { ChartFileData, DecodeService } from "@/services/decode.service";
 
 export type UploadFormData = CreateChartModel & {
 	// Form data
 	contentType: string;
 	chartUrl: string;
-	chartFileData?: ChartFileData;
+	chartFile: File | undefined;
 };
 
 export interface UploadErrorData {
@@ -57,7 +57,7 @@ export type SuccessDialogData = ChartModel & {
 export const initialFormData: UploadFormData = {
 	contentType: "",
 	chartUrl: "",
-	chartFileData: undefined,
+	chartFile: undefined,
 	//
 	track: "",
 	artist: "",
@@ -81,6 +81,7 @@ export class UploadDialogService {
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
 
+	private decodeService = inject(DecodeService);
 	private chartService = inject(ChartService);
 	private authService = inject(AuthService);
 
@@ -165,6 +166,32 @@ export class UploadDialogService {
 			return;
 		}
 
+		if (!this.formData.chartFile) {
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "No chart file selected.",
+					error: null,
+				},
+			});
+			return;
+		}
+
+		try {
+			const chartFileData = await this.decodeService.decodeChartFile(
+				this.formData.chartFile,
+			);
+
+			Object.assign(this.formData, chartFileData);
+		} catch (error) {
+			console.error("Failed to extract chart data:", error);
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "Failed to extract chart data.",
+					error,
+				},
+			});
+		}
+
 		if (this.formData.duration === 0 || this.formData.notesAmount === 0) {
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
@@ -202,16 +229,10 @@ export class UploadDialogService {
 			return;
 		}
 
-		// Handle form submission
-		const data: CreateChartModel = {
-			...this.formData,
-			...this.formData.chartFileData,
-		};
-
-		console.log("Form submitted with the following data:", data);
+		console.log("Form submitted with the following data:", this.formData);
 
 		try {
-			const response = await this.chartService.createChart(data);
+			const response = await this.chartService.createChart(this.formData);
 
 			if (!response) {
 				this.dialog.open(UploadDialogErrorComponent, {
