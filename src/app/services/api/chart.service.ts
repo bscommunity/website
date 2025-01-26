@@ -2,7 +2,11 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 
-import { ChartModel, MutateChartModel } from "@/models/chart.model";
+import {
+	ChartModel,
+	CreateChartModel,
+	MutateChartModel,
+} from "@/models/chart.model";
 import { apiUrl } from ".";
 
 @Injectable({
@@ -13,7 +17,7 @@ export class ChartService {
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Create
-	async createChart(chart: MutateChartModel): Promise<ChartModel> {
+	async createChart(chart: CreateChartModel): Promise<ChartModel> {
 		console.log("Creating chart:", chart);
 		return await firstValueFrom(
 			this.http.post<ChartModel>(this.apiUrl, chart),

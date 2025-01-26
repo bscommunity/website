@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 
-interface ChartFileData {
+export interface ChartFileData {
 	notesAmount: number;
 	effectsAmount: number;
 	bpm: number;
@@ -55,7 +55,8 @@ export class DecodeService {
 
 	private countEffects(content: string): number {
 		const eventsSection = this.getSection(content, "Events");
-		const effectPattern = /\d+\s*=\s*E\s*".*?"/g;
+		// Match lines that define effects (E) but exclude those containing "section"
+		const effectPattern = /\d+\s*=\s*E\s*"(?!section\b).*?"/g;
 		const matches = eventsSection.match(effectPattern);
 		return matches ? matches.length : 0;
 	}
