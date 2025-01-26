@@ -3,7 +3,9 @@ import {
 	Component,
 	ElementRef,
 	EventEmitter,
+	forwardRef,
 	inject,
+	Input,
 	Output,
 	signal,
 	ViewChild,
@@ -15,19 +17,55 @@ import { MatDialog } from "@angular/material/dialog";
 
 // Components
 import { UploadDialogErrorComponent } from "../upload/generic/error.component";
+import {
+	ControlValueAccessor,
+	NG_VALUE_ACCESSOR,
+	ReactiveFormsModule,
+} from "@angular/forms";
 
 @Component({
 	selector: "app-file-upload",
-	imports: [MatButtonModule],
 	templateUrl: "./file-upload.component.html",
 	styleUrl: "./file-upload.component.scss",
+	imports: [MatButtonModule, ReactiveFormsModule],
+	providers: [
+		{
+			provide: NG_VALUE_ACCESSOR,
+			useExisting: forwardRef(() => FileUploadComponent),
+			multi: true,
+		},
+	],
 })
-export class FileUploadComponent {
+export class FileUploadComponent implements ControlValueAccessor {
 	constructor(private decodeService: DecodeService) {}
+
+	// Form value
+	private _value: File | null = null;
+
+	// ControlValueAccessor callbacks
+	private onChange: (value: File | null) => void = () => {};
+	private onTouched: () => void = () => {};
+
+	// Update the file value and propagate changes
+	writeValue(value: File | null): void {
+		this._value = value;
+	}
+
+	registerOnChange(fn: (value: File | null) => void): void {
+		this.onChange = fn;
+	}
+
+	registerOnTouched(fn: () => void): void {
+		this.onTouched = fn;
+	}
+
+	setDisabledState?(isDisabled: boolean): void {
+		// Handle the disabled state if necessary
+	}
 
 	// Get section HTML component reference
 	@ViewChild("container") container!: ElementRef;
-	@Output() onFileDecoded = new EventEmitter<ChartFileData>();
+	@Input() formControlName!: string;
 
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
@@ -70,14 +108,14 @@ export class FileUploadComponent {
 	}
 
 	processFiles(files: FileList): void {
-		Array.from(files).forEach((file) => {
-			if (file.name.endsWith(".chart")) {
-				this.extractInfo(file);
-			} else {
-				console.error("Invalid file type:", file.name);
-				this.onInvalidFile();
-			}
-		});
+		const file = files[0];
+		if (file && file.name.endsWith(".chart")) {
+			this.extractInfo(file);
+			this._value = file;
+			this.onChange(file); // Notify parent form of the change
+		} else {
+			this.onInvalidFile();
+		}
 	}
 
 	extractInfo(file: File): void {
