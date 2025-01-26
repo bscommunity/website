@@ -28,14 +28,19 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 import { getCoverArtUrl } from "@/lib/assets";
 import { AuthService } from "app/auth/auth.service";
 import { Router } from "@angular/router";
-import { ChartModel, MutateChartModel } from "@/models/chart.model";
+import {
+	ChartModel,
+	CreateChartModel,
+	MutateChartModel,
+} from "@/models/chart.model";
 import { ChartService } from "@/services/api/chart.service";
+import { ChartFileData } from "@/services/decode.service";
 
-export type UploadFormData = MutateChartModel & {
+export type UploadFormData = CreateChartModel & {
 	// Form data
 	contentType: string;
 	chartUrl: string;
-	album?: string;
+	chartFileData?: ChartFileData;
 };
 
 export interface UploadErrorData {
@@ -52,14 +57,20 @@ export type SuccessDialogData = ChartModel & {
 export const initialFormData: UploadFormData = {
 	contentType: "",
 	chartUrl: "",
-	album: "",
+	chartFileData: undefined,
 	//
 	track: "",
 	artist: "",
+	album: "",
 	coverUrl: "",
 	difficulty: Difficulty.Normal,
 	isDeluxe: false,
 	isExplicit: false,
+	//
+	duration: 0,
+	notesAmount: 0,
+	bpm: 0,
+	effectsAmount: 0,
 	// ... any other initial values added later
 };
 
@@ -142,6 +153,7 @@ export class UploadDialogService {
 	}
 
 	private async submitForm() {
+		// Check if user is logged in
 		if (!this.authService.isLoggedIn()) {
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
@@ -153,26 +165,33 @@ export class UploadDialogService {
 			return;
 		}
 
-		// Open loading dialog
-		this.dialog.open(UploadDialogLoadingComponent, {
-			disableClose: true,
-			/* data: this.formData, */
-		});
+		if (this.formData.duration === 0 || this.formData.notesAmount === 0) {
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					message: "No valid chart data found.",
+					error: null,
+				},
+			});
+			return;
+		}
 
-		let cover_url = null;
+		// Open loading dialog
+		this.dialog.open(UploadDialogLoadingComponent, { disableClose: true });
 
 		// Handle cover art retrieval
 		try {
 			const { coverUrl, albumName } = await getCoverArtUrl(
 				this.formData.artist,
 				this.formData.track,
-				this.formData.album,
 			);
-			cover_url = coverUrl;
-			this.formData.album = albumName;
+
+			this.formData.coverUrl = coverUrl;
+
+			if (albumName) {
+				this.formData.album = albumName;
+			}
 		} catch (error) {
 			this.dialog.closeAll();
-
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
 					message: "Failed to retrieve cover art.",
@@ -184,14 +203,15 @@ export class UploadDialogService {
 		}
 
 		// Handle form submission
-		// ...
-		console.log("Form submitted:", this.formData);
+		const data: CreateChartModel = {
+			...this.formData,
+			...this.formData.chartFileData,
+		};
+
+		console.log("Form submitted with the following data:", data);
 
 		try {
-			const response = await this.chartService.createChart({
-				...this.formData,
-				coverUrl: cover_url,
-			});
+			const response = await this.chartService.createChart(data);
 
 			if (!response) {
 				this.dialog.open(UploadDialogErrorComponent, {
@@ -212,7 +232,7 @@ export class UploadDialogService {
 					track: response.track,
 					artist: response.artist,
 					difficulty: response.difficulty,
-					coverUrl: cover_url,
+					coverUrl: response.coverUrl,
 					duration: response.versions[0].duration,
 					notesAmount: response.versions[0].notesAmount,
 					isDeluxe: response.isDeluxe,
@@ -222,6 +242,7 @@ export class UploadDialogService {
 
 			this.reset();
 		} catch (error) {
+			this.dialog.closeAll();
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
 					message: "Failed to submit chart.",

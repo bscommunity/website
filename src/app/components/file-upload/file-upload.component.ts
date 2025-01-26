@@ -1,9 +1,20 @@
-import { DecodeService } from "@/services/decode.service";
-import { Component, ElementRef, inject, ViewChild } from "@angular/core";
+import { ChartFileData, DecodeService } from "@/services/decode.service";
+import {
+	Component,
+	ElementRef,
+	EventEmitter,
+	inject,
+	Output,
+	signal,
+	ViewChild,
+} from "@angular/core";
+
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { UploadDialogErrorComponent } from "../upload/generic/error.component";
 import { MatDialog } from "@angular/material/dialog";
+
+// Components
+import { UploadDialogErrorComponent } from "../upload/generic/error.component";
 
 @Component({
 	selector: "app-file-upload",
@@ -16,9 +27,12 @@ export class FileUploadComponent {
 
 	// Get section HTML component reference
 	@ViewChild("container") container!: ElementRef;
+	@Output() onFileDecoded = new EventEmitter<ChartFileData>();
 
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
+
+	currentFileName = signal<string | null>(null);
 
 	onInvalidFile(): void {
 		this._snackBar.open("Invalid file type", "Close", {
@@ -70,6 +84,7 @@ export class FileUploadComponent {
 		const data = this.decodeService.decodeChartFile(file);
 		data.then((chartData) => {
 			console.log("Chart data:", chartData);
+			this.currentFileName.set(file.name);
 		}).catch((error) => {
 			console.error("Failed to extract chart data:", error);
 			this.dialog.open(UploadDialogErrorComponent, {

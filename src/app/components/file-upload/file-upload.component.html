@@ -7,13 +7,27 @@
 >
 	<p>Chart file</p>
 	<div class="flex flex-row items-center justify-end gap-3">
-		<p class="select-none">Drag and drop here, or</p>
-		<button class="!p-0" mat-flat-button>
+		@if (currentFileName() != null) {
+			<p class="italic">
+				{{
+					currentFileName()!.length > 20
+						? currentFileName()!.substring(0, 20) + "..."
+						: currentFileName()
+				}}
+			</p>
+		} @else {
+			<p class="select-none">Drag and drop here, or</p>
+		}
+		<button type="button" class="!p-0" mat-flat-button>
 			<label
 				class="flex w-full h-full px-4 py-2.5 cursor-pointer"
 				for="file-upload"
 			>
-				Select the file
+				@if (currentFileName()) {
+					Change
+				} @else {
+					Select the file
+				}
 				<input
 					id="file-upload"
 					class="hidden"

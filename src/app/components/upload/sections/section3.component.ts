@@ -27,6 +27,7 @@ import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
 import { initialFormData, UploadFormData } from "../upload.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
+import { ChartFileData } from "@/services/decode.service";
 
 @Component({
 	selector: "app-upload-dialog-section3",
@@ -64,7 +65,9 @@ import { FileUploadComponent } from "@/components/file-upload/file-upload.compon
 						>Must be a direct link to the .zip file</mat-hint
 					>
 				</mat-form-field>
-				<app-file-upload></app-file-upload>
+				<app-file-upload
+					(onFileDecoded)="onChartFileDecode($event)"
+				></app-file-upload>
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
 				<button
@@ -102,6 +105,7 @@ import { FileUploadComponent } from "@/components/file-upload/file-upload.compon
 })
 export class UploadDialogSection3Component implements OnInit {
 	form: FormGroup;
+	chartFileData: ChartFileData | null = null;
 
 	constructor(
 		private fb: FormBuilder,
@@ -125,9 +129,16 @@ export class UploadDialogSection3Component implements OnInit {
 		return this.form.get("chartUrl");
 	}
 
+	onChartFileDecode(data: ChartFileData) {
+		this.chartFileData = data;
+	}
+
 	onSubmit() {
 		if (this.form.valid) {
-			this.dialogRef.close(this.form.value);
+			this.dialogRef.close({
+				...this.form.value,
+				chartFileData: this.chartFileData,
+			});
 		}
 	}
 }
