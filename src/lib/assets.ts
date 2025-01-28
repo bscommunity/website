@@ -1,17 +1,19 @@
 const ITUNES_API_URL = "https://itunes.apple.com/search";
 
-interface AlbumCoverData {
+interface MediaInfo {
 	coverUrl: string;
-	albumName?: string;
+	album?: string;
+	track?: string;
+	artist?: string;
 }
 
 /**
- * Find album name and cover using track and artist name from iTunes API
+ * Find media information (album cover, etc.) using track and artist names
  */
-async function findAlbumCoverFromTrack(
+export async function getMediaInfo(
 	track: string,
 	artist: string,
-): Promise<AlbumCoverData> {
+): Promise<MediaInfo> {
 	// Construct the search query
 	const query = new URLSearchParams({
 		term: `${track} ${artist}`,
@@ -21,6 +23,8 @@ async function findAlbumCoverFromTrack(
 
 	// Fetch data from iTunes Search API
 	const response = await fetch(`https://itunes.apple.com/search?${query}`);
+
+	console.log("response", response);
 
 	if (!response.ok) {
 		throw new Error(`iTunes API error: ${response.statusText}`);
@@ -41,7 +45,9 @@ async function findAlbumCoverFromTrack(
 	// Return higher resolution version of the artwork
 	return {
 		coverUrl: artworkUrl100.replace("100x100", "600x600"),
-		albumName: data.results[0].collectionName,
+		album: data.results[0].collectionName,
+		track: data.results[0].trackName,
+		artist: data.results[0].artistName,
 	};
 }
 
@@ -49,18 +55,18 @@ async function findAlbumCoverFromTrack(
  * Get album cover art URL using artist and album name
  * If album is not provided, attempts to find it using track name via Last.fm
  */
-export async function getCoverArtUrl(
+/* async function getCoverArtUrl(
 	artist: string,
 	track?: string,
 	album?: string | null,
-): Promise<AlbumCoverData> {
+): Promise<MediaInfo> {
 	try {
 		// If album is not provided but track is, try to find the album
 		if (!album?.trim() && track?.trim()) {
 			console.warn(
 				"Album not provided, attempting to search for it using track name.",
 			);
-			return await findAlbumCoverFromTrack(track, artist);
+			return await getMediaInfo(track, artist);
 		}
 
 		// If we still don't have an album name, we can't proceed
@@ -98,3 +104,4 @@ export async function getCoverArtUrl(
 		);
 	}
 }
+ */

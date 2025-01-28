@@ -38,6 +38,7 @@ export class ChartResolver implements Resolve<any> {
 		} catch (error) {
 			console.error("Error fetching chart", error);
 
+			// In the future, redirect to 404 only if not found
 			this.router.navigate(["404"], {
 				info: { error },
 			});

@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 
 export interface ChartFileData {
+	duration: number; // in seconds
 	notesAmount: number;
 	effectsAmount: number;
 	bpm: number;
-	duration: number; // in seconds
 }
 
 @Injectable({

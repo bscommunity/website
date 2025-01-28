@@ -45,7 +45,7 @@ import { SuccessDialogData } from "../upload.service";
 					<p
 						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary-container opacity-80 w-full text-center"
 					>
-						v1.0 | {{ data.id }}
+						v1.0 | {{ data.id.split("-")[0] }}
 					</p>
 				</div>
 			</div>

@@ -65,10 +65,12 @@ import { ChartFileData } from "@/services/decode.service";
 						>Must be a direct link to the .zip file</mat-hint
 					>
 				</mat-form-field>
-				<app-file-upload formControlName="chartFile"></app-file-upload>
+				<app-file-upload
+					(onFileDecoded)="onFileDecoded($event)"
+				></app-file-upload>
 				@if (
-					this.form.get("chartFile")?.hasError("required") &&
-					this.form.get("chartFile")?.touched
+					this.form.get("chartFileData")?.hasError("required") &&
+					this.form.get("chartFileData")?.touched
 				) {
 					<mat-error
 						>Chart file metadata is
@@ -123,7 +125,7 @@ export class UploadDialogSection3Component implements OnInit {
 				initialFormData.chartUrl,
 				[Validators.required, zipUrlValidator()],
 			],
-			chartFile: [undefined, Validators.required],
+			chartFileData: [null, Validators.required],
 		});
 	}
 
@@ -134,6 +136,16 @@ export class UploadDialogSection3Component implements OnInit {
 
 	get chartUrlControl() {
 		return this.form.get("chartUrl");
+	}
+
+	onFileDecoded(chartFileData: ChartFileData | null): void {
+		if (chartFileData) {
+			this.form.get("chartFileData")?.setValue(chartFileData); // Set the file value in the form
+			this.form.get("chartFileData")?.setErrors(null); // Clear validation errors
+		} else {
+			this.form.get("chartFileData")?.setValue(null); // Clear the file value
+			this.form.get("chartFileData")?.setErrors({ required: true }); // Add required error
+		}
 	}
 
 	onSubmit() {
