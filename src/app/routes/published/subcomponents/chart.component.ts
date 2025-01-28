@@ -137,6 +137,6 @@ export class ChartComponent implements ChartProps {
 
 function transformDuration(value: number): string {
 	const minutes = Math.floor(value / 60);
-	const seconds = value % 60;
+	const seconds = Math.floor(value % 60);
 	return `${minutes}m${seconds}s`;
 }

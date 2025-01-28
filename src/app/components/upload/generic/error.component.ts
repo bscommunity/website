@@ -16,17 +16,23 @@ import { Router } from "@angular/router";
 
 		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 			<p class="mb-2">
-				An unexpected error occurred while processing your request:
+				@if (data.title) {
+					{{ data.title }}
+				} @else if (data.title !== null) {
+					An unexpected error occurred while processing your request:
+				}
 				{{ data.message }}
 				<br />
 				Please try again or
 				<a class="underline" href="https://github.com/">check issues</a>
 				if the problem persists.
 			</p>
-			<details class="w-full overflow-hidden">
-				<summary><strong>Error details</strong></summary>
-				<pre>{{ data.error }}</pre>
-			</details>
+			@if (data.error) {
+				<details class="w-full overflow-x-auto">
+					<summary><strong>Error details</strong></summary>
+					<pre>{{ data.error }}</pre>
+				</details>
+			}
 		</mat-dialog-content>
 		<mat-dialog-actions align="center">
 			<button

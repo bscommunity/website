@@ -1,4 +1,5 @@
 import { Injectable, inject } from "@angular/core";
+import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 
 import { MatDialog } from "@angular/material/dialog";
@@ -24,26 +25,26 @@ type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
 	? R
 	: never;
 
-import { Difficulty } from "@/models/enums/difficulty.enum";
-import { getCoverArtUrl } from "@/lib/assets";
-import { AuthService } from "app/auth/auth.service";
-import { Router } from "@angular/router";
-import {
-	ChartModel,
-	CreateChartModel,
-	MutateChartModel,
-} from "@/models/chart.model";
+// Lib
+import { getMediaInfo } from "@/lib/assets";
+
+// Services
 import { ChartService } from "@/services/api/chart.service";
-import { ChartFileData, DecodeService } from "@/services/decode.service";
+import { ChartFileData } from "@/services/decode.service";
+import { AuthService } from "app/auth/auth.service";
+
+// Models
+import { ChartModel, CreateChartModel } from "@/models/chart.model";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 
 export type UploadFormData = CreateChartModel & {
-	// Form data
-	contentType: string;
+	contentType: string; // Omitted when submitting
 	chartUrl: string;
-	chartFile: File | undefined;
+	chartFileData: ChartFileData | null;
 };
 
 export interface UploadErrorData {
+	title?: string | null;
 	message: string;
 	error: any;
 	redirectTo?: string;
@@ -57,7 +58,7 @@ export type SuccessDialogData = ChartModel & {
 export const initialFormData: UploadFormData = {
 	contentType: "",
 	chartUrl: "",
-	chartFile: undefined,
+	chartFileData: null,
 	//
 	track: "",
 	artist: "",
@@ -81,7 +82,6 @@ export class UploadDialogService {
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
 
-	private decodeService = inject(DecodeService);
 	private chartService = inject(ChartService);
 	private authService = inject(AuthService);
 
@@ -138,7 +138,7 @@ export class UploadDialogService {
 				// Move to next step
 				this.moveToNextStep();
 			} else {
-				this.reset();
+				/* this.reset(); */
 			}
 		});
 	}
@@ -166,56 +166,28 @@ export class UploadDialogService {
 			return;
 		}
 
-		if (!this.formData.chartFile) {
-			this.dialog.open(UploadDialogErrorComponent, {
-				data: {
-					message: "No chart file selected.",
-					error: null,
-				},
-			});
-			return;
-		}
-
-		try {
-			const chartFileData = await this.decodeService.decodeChartFile(
-				this.formData.chartFile,
-			);
-
-			Object.assign(this.formData, chartFileData);
-		} catch (error) {
-			console.error("Failed to extract chart data:", error);
-			this.dialog.open(UploadDialogErrorComponent, {
-				data: {
-					message: "Failed to extract chart data.",
-					error,
-				},
-			});
-		}
-
-		if (this.formData.duration === 0 || this.formData.notesAmount === 0) {
-			this.dialog.open(UploadDialogErrorComponent, {
-				data: {
-					message: "No valid chart data found.",
-					error: null,
-				},
-			});
-			return;
-		}
-
 		// Open loading dialog
 		this.dialog.open(UploadDialogLoadingComponent, { disableClose: true });
 
-		// Handle cover art retrieval
+		// Handle track data retrieval (cover art, track and artist names confirmation)
 		try {
-			const { coverUrl, albumName } = await getCoverArtUrl(
-				this.formData.artist,
+			const { coverUrl, album, artist, track } = await getMediaInfo(
 				this.formData.track,
+				this.formData.artist,
 			);
 
 			this.formData.coverUrl = coverUrl;
 
-			if (albumName) {
-				this.formData.album = albumName;
+			if (album) {
+				this.formData.album = album;
+			}
+
+			if (artist) {
+				this.formData.artist = artist;
+			}
+
+			if (track) {
+				this.formData.track = track;
 			}
 		} catch (error) {
 			this.dialog.closeAll();
@@ -225,14 +197,25 @@ export class UploadDialogService {
 					error,
 				},
 			});
+			/* this.reset(); */
 
 			return;
 		}
 
-		console.log("Form submitted with the following data:", this.formData);
+		// Handle chart data submission (basic and first version creation)
+		const { contentType, chartFileData, ...rest } = this.formData;
 
+		const data: CreateChartModel = {
+			...rest,
+			...chartFileData,
+		};
+
+		console.log("Form submitted with the following data:", data);
+
+		// Submit chart data
 		try {
-			const response = await this.chartService.createChart(this.formData);
+			const response = await this.chartService.createChart(data);
+			console.log("Chart submitted successfully:", response);
 
 			if (!response) {
 				this.dialog.open(UploadDialogErrorComponent, {
@@ -241,6 +224,8 @@ export class UploadDialogService {
 						error: null,
 					},
 				});
+
+				/* this.reset(); */
 				return;
 			}
 
@@ -260,16 +245,18 @@ export class UploadDialogService {
 					isExplicit: response.isExplicit,
 				},
 			});
-
-			this.reset();
 		} catch (error) {
+			console.error("Failed to submit chart:", error);
+
 			this.dialog.closeAll();
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
-					message: "Failed to submit chart.",
+					title: "Failed to submit chart.",
 					error,
 				},
 			});
 		}
+
+		/* this.reset(); */
 	}
 }
