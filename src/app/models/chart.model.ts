@@ -16,7 +16,7 @@ export const Chart = z.object({
 
 	// Relations
 	versions: Version.array(),
-	contributors: Contributor.array(),
+	contributors: Contributor.array().optional(),
 });
 
 export type ChartModel = z.infer<typeof Chart>;

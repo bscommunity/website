@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 
 import {
+	Chart,
 	ChartModel,
 	CreateChartModel,
 	MutateChartModel,
@@ -32,9 +33,19 @@ export class ChartService {
 
 	async getChartById(id: string): Promise<ChartModel> {
 		console.log("Fetching chart with ID:", id);
-		return await firstValueFrom(
-			this.http.get<ChartModel>(`${this.apiUrl}/${id}`),
+
+		const response = await firstValueFrom(
+			this.http.get<unknown>(`${this.apiUrl}/${id}`),
 		);
+
+		try {
+			// Validate the response using the Zod schema
+			const parsedData = Chart.parse(response);
+			return parsedData;
+		} catch (error) {
+			console.error("Invalid data structure received:", error);
+			throw new Error("Failed to fetch valid chart data");
+		}
 	}
 
 	// Update

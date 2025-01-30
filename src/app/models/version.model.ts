@@ -2,7 +2,7 @@ import { z } from "zod";
 import { KnownIssue } from "./known-issue.model";
 
 export const Version = z.object({
-	id: z.string(),
+	id: z.number(),
 	chartId: z.string(),
 	index: z.number(),
 	duration: z.number(),

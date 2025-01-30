@@ -6,6 +6,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 import { difficultiesIcons } from "assets/difficulties";
 
+import { transformDuration } from "@/lib/time";
+
 export enum Tendency {
 	Up = "up",
 	Down = "down",
@@ -133,10 +135,4 @@ export class ChartComponent implements ChartProps {
 	tendencyDown = Tendency.Down;
 
 	difficultyIcon = difficultiesIcons[this.difficulty] || null;
-}
-
-function transformDuration(value: number): string {
-	const minutes = Math.floor(value / 60);
-	const seconds = Math.floor(value % 60);
-	return `${minutes}m${seconds}s`;
 }
