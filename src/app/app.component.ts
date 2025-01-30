@@ -5,7 +5,7 @@ import {
 	Renderer2,
 	inject,
 } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
+import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
 
 import { HeaderComponent } from "./components/header/header.component";
 import { FooterComponent } from "./components/footer/footer.component";
@@ -15,6 +15,7 @@ import { MatIconRegistry, MatIconModule } from "@angular/material/icon";
 
 import { ThemeService } from "./services/theme.service";
 import { AuthService } from "./auth/auth.service";
+import { filter } from "rxjs";
 
 @Component({
 	selector: "app-root",
@@ -23,11 +24,15 @@ import { AuthService } from "./auth/auth.service";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+	showHeaderFooter = false;
+
 	constructor(
 		public authService: AuthService,
 		private themeService: ThemeService,
+		private router: Router,
 		private renderer: Renderer2,
 	) {
+		// Registering custom icons
 		const iconRegistry = inject(MatIconRegistry);
 		const sanitizer = inject(DomSanitizer);
 
@@ -54,6 +59,24 @@ export class AppComponent implements OnInit {
 				"assets/logos/discord.svg",
 			),
 		);
+
+		// Hiding header/footer on specific routes (e.g., login, signup)
+		this.router.events
+			.pipe(filter((event) => event instanceof NavigationEnd))
+			.subscribe((event) => {
+				// List of routes to exclude header and footer
+				const dashboardRoutes = [
+					"/overview",
+					"/published",
+					"/chart",
+					"/settings",
+				];
+
+				this.showHeaderFooter =
+					dashboardRoutes.includes(
+						(event as NavigationEnd).urlAfterRedirects,
+					) && authService.isLoggedIn();
+			});
 	}
 
 	ngOnInit(): void {

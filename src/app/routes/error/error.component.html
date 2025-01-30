@@ -7,25 +7,31 @@
 		<h1
 			class="font-bold text-5xl md:text-left md:leading-snug md:max-w-[70%]"
 		>
-			This Beat Dropped... the Page!
+			Oops! We Hit a Wrong Note :(
 		</h1>
-		<span class="text-5xl md:absolute bottom-0 left-60"
-			><mat-icon inline="true">music_off</mat-icon></span
-		>
 	</span>
 	<h2 class="text-left text-lg font-medium lg:max-w-[40%]">
-		Looks like this page missed the rhythm... Let’s get you back on track!
+		Something’s off with your request. Let’s hit refresh and try again
+		@if (error) {
+			, or check the error below for more details.
+		}
 	</h2>
-	<a
-		href="/"
+	@if (error) {
+		<details class="w-full overflow-x-auto cursor-pointer">
+			<summary><strong>Error details</strong></summary>
+			<pre>{{ error }}</pre>
+		</details>
+	}
+	<button
+		(click)="reloadPage()"
 		class="text-on-primary max-md:w-full md:!px-24 !py-6"
 		mat-flat-button
 	>
-		Return to home
-	</a>
+		Try Again
+	</button>
 	<!-- Background icon -->
 	<span
 		class="absolute top-1/2 right-1/2 lg:-right-[1%] max-sm:-translate-x-1/2 -translate-y-[40%] rotate-12 opacity-50 pointer-events-none select-none -z-10 text-[700px] bg-gradient-to-tr from-[rgba(153,153,153,0.45)] to-[rgba(255,255,255,0)] bg-clip-text text-transparent"
-		><mat-icon inline="true">warning</mat-icon></span
+		><mat-icon inline="true">disc_full</mat-icon></span
 	>
 </main>

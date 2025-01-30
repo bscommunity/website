@@ -1,7 +1,7 @@
-@if (authService.isLoggedIn()) {
+@if (showHeaderFooter) {
 	<app-header></app-header>
 }
 <router-outlet />
-@if (authService.isLoggedIn()) {
+@if (showHeaderFooter) {
 	<app-footer></app-footer>
 }

@@ -2,11 +2,11 @@ import {
 	ChangeDetectorRef,
 	Component,
 	inject,
-	Input,
 	OnInit,
 	signal,
 	ViewChild,
 } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 
 import { NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -17,6 +17,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
+// Components
 import { ChartSectionComponent } from "./subcomponents/chart-section.component";
 import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
 import {
@@ -25,12 +26,12 @@ import {
 	TableComponent,
 } from "./subcomponents/table/table.component";
 import { AsideComponent } from "./subcomponents/aside.component";
-import { ActivatedRoute } from "@angular/router";
+
+// Models
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { Role } from "@/models/enums/role.enum";
-import { PageNotFoundComponent } from "../not-found/not-found.component";
 
 @Component({
 	selector: "app-chart",
@@ -43,7 +44,6 @@ import { PageNotFoundComponent } from "../not-found/not-found.component";
 		AsideComponent,
 		ChartSectionComponent,
 		TableComponent,
-		PageNotFoundComponent,
 	],
 	templateUrl: "./chart.component.html",
 })
@@ -57,11 +57,16 @@ export class ChartComponent implements OnInit {
 	) {}
 
 	chart: ChartModel | null = null;
+	latestVersion: VersionModel | undefined = undefined;
 
 	ngOnInit(): void {
 		// Access resolved data
 		this.chart = this.route.snapshot.data["chart"];
 		// console.log("Resolved Chart Data:", this.chart);
+
+		this.latestVersion = this.chart?.versions.at(-1);
+
+		console.log("Latest Version:", this.latestVersion?.publishedAt);
 	}
 
 	openSnackBar(message: string, action: string) {
@@ -71,11 +76,7 @@ export class ChartComponent implements OnInit {
 	/* Issues Section */
 
 	// Get the latest version known issues
-	latestVersionIndex = this.chart?.versions.length
-		? this.chart.versions.length - 1
-		: -1;
-	knownIssues =
-		this.chart?.versions[this.latestVersionIndex].knownIssues ?? [];
+	knownIssues = this.latestVersion?.knownIssues ?? [];
 
 	openRemoveIssueConfirmationDialog(index: number): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -125,9 +126,9 @@ export class ChartComponent implements OnInit {
 			return;
 		}
 
-		this.chart?.versions[this.latestVersionIndex]?.knownIssues.push({
+		this.chart?.versions.at(-1)?.knownIssues.push({
 			description: this.newIssue,
-			index: this.latestVersionIndex,
+			index: this.chart.versions.length,
 			createdAt: new Date(),
 		});
 		this.newIssue = "";
@@ -137,10 +138,7 @@ export class ChartComponent implements OnInit {
 	}
 
 	removeIssue(index: number) {
-		this.chart?.versions[this.latestVersionIndex]?.knownIssues.splice(
-			index,
-			1,
-		);
+		this.chart?.versions.at(-1)?.knownIssues.splice(index, 1);
 		this.cdr.detectChanges();
 		this.openSnackBar("Issue removed with success!", "Close");
 	}
