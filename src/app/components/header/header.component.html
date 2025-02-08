@@ -67,13 +67,37 @@
 				[matMenuTriggerFor]="menu"
 			>
 				<mat-icon>keyboard_arrow_down</mat-icon>
-				<img
-					class="rounded-full w-10 h-10"
-					src="https://github.com/theduardomaciel.png"
-					alt="User profile picture"
-				/>
+				@if (this.user?.imageUrl) {
+					<img
+						class="rounded-full w-10 h-10"
+						src="https://github.com/theduardomaciel.png"
+						alt="User profile picture"
+					/>
+				} @else {
+					<div
+						class="rounded-full w-10 h-10 flex items-center justify-center bg-primary-container"
+					>
+						<span>
+							{{ this.user?.username?.charAt(0) }}
+						</span>
+					</div>
+				}
 			</button>
 			<mat-menu #menu="matMenu" xPosition="before" class="mt-2">
+				<button
+					disabled
+					disabledInteractive
+					mat-menu-item
+					(click)="openProfile()"
+				>
+					<mat-icon>account_circle</mat-icon>
+					<span class="flex flex-col">
+						Profile
+						<span class="text-xs">
+							&#64;{{ this.user?.username }}
+						</span>
+					</span>
+				</button>
 				<button
 					disabled
 					disabledInteractive

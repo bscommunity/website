@@ -36,6 +36,12 @@ export class AuthService {
 		return token;
 	}
 
+	get user(): UserModel {
+		const user = this.cookieService.get(this.USER_OBJECT_NAME);
+		if (!user) throw new Error("No user object found in cookies");
+		return JSON.parse(user);
+	}
+
 	constructor(
 		private cookieService: CookieService,
 		private http: HttpClient,
