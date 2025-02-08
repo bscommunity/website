@@ -20,7 +20,7 @@
 			</div>
 		</div>
 	} @else if (charts === undefined) {
-		<div class="flex flex-1 items-center justify-center">
+		<div class="flex w-screen h-screen items-start justify-center">
 			<mat-progress-spinner
 				diameter="48"
 				mode="indeterminate"
@@ -78,20 +78,9 @@
 			<div
 				class="flex flex-col md:flex-row items-center justify-start w-full gap-4"
 			>
-				<div class="max-md:w-full md:flex md:flex-1 relative">
-					<span class="text-xl">
-						<mat-icon
-							inline
-							class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
-							>search</mat-icon
-						>
-					</span>
-					<input
-						class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
-						type="text"
-						placeholder="Search for charts, tourpasses and themes..."
-					/>
-				</div>
+				<app-searchbar
+					class="flex flex-1 max-md:w-full relative"
+				></app-searchbar>
 				<span
 					class="flex flex-row items-center justify-end gap-4 h-full"
 				>
