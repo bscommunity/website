@@ -5,7 +5,7 @@ export const User = z.object({
 	username: z.string(),
 	// Contributing users email's are not shown
 	email: z.string().email().optional(),
-	imageUrl: z.string().optional(),
+	imageUrl: z.string().optional().nullable(),
 	discordId: z.string(),
 	createdAt: z.coerce.date(),
 });
