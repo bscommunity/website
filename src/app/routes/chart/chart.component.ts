@@ -187,7 +187,7 @@ export class ChartComponent implements OnInit {
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
 			disabled: (item: ContributorModel) =>
-				item.roles.includes(Role.OWNER),
+				item.roles.includes(Role.AUTHOR),
 		},
 	];
 

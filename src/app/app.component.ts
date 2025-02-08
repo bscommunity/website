@@ -64,7 +64,6 @@ export class AppComponent implements OnInit {
 		this.router.events
 			.pipe(filter((event) => event instanceof NavigationEnd))
 			.subscribe((event) => {
-				// List of routes to exclude header and footer
 				const dashboardRoutes = [
 					"/overview",
 					"/published",
@@ -73,9 +72,9 @@ export class AppComponent implements OnInit {
 				];
 
 				this.showHeaderFooter =
-					dashboardRoutes.includes(
-						(event as NavigationEnd).urlAfterRedirects,
-					) && authService.isLoggedIn();
+					(event.url.startsWith("/chart") ||
+						dashboardRoutes.includes(event.url)) &&
+					authService.isLoggedIn();
 			});
 	}
 

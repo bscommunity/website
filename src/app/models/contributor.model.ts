@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { User } from "./user.model";
+import { ContributorUser } from "./user.model";
 import { Role } from "./enums/role.enum";
 
 export const Contributor = z.object({
-	user: User,
+	user: ContributorUser,
 	roles: z.nativeEnum(Role).array(),
 	joinedAt: z.coerce.date(),
 });

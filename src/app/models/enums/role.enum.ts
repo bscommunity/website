@@ -1,7 +1,5 @@
 export enum Role {
-	OWNER = "Owner",
-	CHART = "Chart",
-	SYNC = "Sync",
-	EFFECTS = "Effects",
-	TESTING = "Testing",
+	AUTHOR = "Author",
+	EDITOR = "Editor",
+	REVIEWER = "Reviewer",
 }
