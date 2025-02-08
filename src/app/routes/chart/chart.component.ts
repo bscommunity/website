@@ -20,6 +20,7 @@ import { MatDialog } from "@angular/material/dialog";
 // Components
 import { ChartSectionComponent } from "./subcomponents/chart-section.component";
 import { ConfirmationDialogComponent } from "./dialogs/confirmation/confirmation-dialog.component";
+import { AddContributorDialogComponent } from "./dialogs/add-contributor/add-contributor-dialog.component";
 import {
 	Action,
 	TableColumn,
@@ -31,7 +32,7 @@ import { AsideComponent } from "./subcomponents/aside.component";
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
-import { Role } from "@/models/enums/role.enum";
+import { ContributorRole } from "@/models/enums/role.enum";
 
 @Component({
 	selector: "app-chart",
@@ -148,6 +149,23 @@ export class ChartComponent implements OnInit {
 	@ViewChild("contributorTable")
 	contributorTable!: TableComponent<ContributorModel>;
 
+	openAddContributorConfirmationDialog(): void {
+		const dialogRef = this.dialog.open(AddContributorDialogComponent, {
+			data: {
+				contributors: this.chart?.contributors,
+			},
+			width: "450px",
+		});
+
+		const subscription = dialogRef.afterClosed().subscribe((result) => {
+			if (result === "ok") {
+				// ...
+				this.openSnackBar("Contributor added with success!", "Close");
+				subscription.unsubscribe();
+			}
+		});
+	}
+
 	openRemoveContributorConfirmationDialog(
 		contributor: ContributorModel,
 	): void {
@@ -196,7 +214,7 @@ export class ChartComponent implements OnInit {
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
 			disabled: (item: ContributorModel) =>
-				item.roles.includes(Role.AUTHOR),
+				item.roles.includes(ContributorRole.AUTHOR),
 		},
 	];
 

@@ -67,21 +67,10 @@
 				[matMenuTriggerFor]="menu"
 			>
 				<mat-icon>keyboard_arrow_down</mat-icon>
-				@if (this.user?.imageUrl) {
-					<img
-						class="rounded-full w-10 h-10"
-						src="https://github.com/theduardomaciel.png"
-						alt="User profile picture"
-					/>
-				} @else {
-					<div
-						class="rounded-full w-10 h-10 flex items-center justify-center bg-primary-container"
-					>
-						<span>
-							{{ this.user?.username?.charAt(0) }}
-						</span>
-					</div>
-				}
+				<app-avatar
+					[src]="this.user?.imageUrl"
+					[alt]="this.user?.username"
+				></app-avatar>
 			</button>
 			<mat-menu #menu="matMenu" xPosition="before" class="mt-2">
 				<button

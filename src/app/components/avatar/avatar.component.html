@@ -1,0 +1,17 @@
+@if (src) {
+	<img
+		class="rounded-full"
+		[ngStyle]="{ width: size + 'px', height: size + 'px' }"
+		[src]="src"
+		[alt]="alt"
+	/>
+} @else {
+	<div
+		class="rounded-full flex items-center justify-center bg-primary-container"
+		[ngStyle]="{ width: size + 'px', height: size + 'px' }"
+	>
+		<span>
+			{{ alt?.charAt(0) }}
+		</span>
+	</div>
+}

@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { SimplifiedUser } from "./user.model";
-import { Role } from "./enums/role.enum";
+import { ContributorRole } from "./enums/role.enum";
 
 export const Contributor = z.object({
 	user: SimplifiedUser,
-	roles: z.nativeEnum(Role).array(),
+	roles: z.nativeEnum(ContributorRole).array(),
 	joinedAt: z.coerce.date(),
 });
 

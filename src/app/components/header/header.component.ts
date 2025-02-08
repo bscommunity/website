@@ -16,6 +16,7 @@ import { MatRippleModule } from "@angular/material/core";
 import { UploadDialogService } from "../upload/upload.service";
 import { AuthService } from "app/auth/auth.service";
 import type { UserModel } from "@/models/user.model";
+import { AvatarComponent } from "../avatar/avatar.component";
 
 @Component({
 	selector: "app-header",
@@ -27,6 +28,7 @@ import type { UserModel } from "@/models/user.model";
 		MatRippleModule,
 		RouterLink,
 		RouterLinkActive,
+		AvatarComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
