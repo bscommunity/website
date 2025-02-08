@@ -2,6 +2,7 @@ export enum Role {
 	AUTHOR = "Author",
 	CHART = "Chart",
 	AUDIO = "Audio",
-	TESTING = "Testing",
+	REVISION = "Revision",
 	EFFECTS = "Effects",
+	SYNC = "Sync",
 }
