@@ -72,8 +72,8 @@ export class AppComponent implements OnInit {
 				];
 
 				this.showHeaderFooter =
-					(event.url.startsWith("/chart") ||
-						dashboardRoutes.includes(event.url)) &&
+					(event.urlAfterRedirects.startsWith("/chart") ||
+						dashboardRoutes.includes(event.urlAfterRedirects)) &&
 					authService.isLoggedIn();
 			});
 	}

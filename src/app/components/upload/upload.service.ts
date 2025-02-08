@@ -245,14 +245,14 @@ export class UploadDialogService {
 					isExplicit: response.isExplicit,
 				},
 			});
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Failed to submit chart:", error);
 
 			this.dialog.closeAll();
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
 					title: "Failed to submit chart.",
-					error,
+					error: error.error,
 				},
 			});
 		}

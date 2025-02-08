@@ -61,6 +61,7 @@ export class PublishedComponent implements OnInit {
 	filters = [];
 
 	charts: ChartModel[] | undefined | null = undefined;
+	error: string = "";
 
 	ngOnInit(): void {
 		// Access resolved data
@@ -75,6 +76,7 @@ export class PublishedComponent implements OnInit {
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
+				this.error = error.message;
 
 				this.charts = null;
 				this.cdr.detectChanges();

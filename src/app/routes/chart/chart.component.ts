@@ -66,7 +66,7 @@ export class ChartComponent implements OnInit {
 
 		this.latestVersion = this.chart?.versions.at(-1);
 
-		console.log("Latest Version:", this.latestVersion?.publishedAt);
+		// console.log("Latest Version:", this.latestVersion?.publishedAt);
 	}
 
 	openSnackBar(message: string, action: string) {
@@ -172,7 +172,16 @@ export class ChartComponent implements OnInit {
 			columnDef: "name",
 			header: "Name",
 			cell: (item: ContributorModel) =>
-				`<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.imageUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`,
+				item.user.imageUrl
+					? `<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.imageUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`
+					: `
+					<span class="flex items-center justify-center gap-3 select-none pointer-events-none"><div
+						class="rounded-full w-5 h-5 flex items-center justify-center bg-primary-container"
+					>
+						<span class="text-[10px]">
+							${item.user.username.charAt(0)}
+						</span>
+					</div> ${item.user.username}<span />`,
 		},
 		{
 			columnDef: "roles",
@@ -235,8 +244,6 @@ export class ChartComponent implements OnInit {
 		},
 	];
 
-	lastVersionId = this.chart?.versions[this.chart?.versions.length - 1].index;
-
 	versionsActions: Action<VersionModel>[] = [
 		{
 			description: "Download",
@@ -252,14 +259,15 @@ export class ChartComponent implements OnInit {
 			callback: () => {
 				this.openSnackBar("Switch version clicked", "Close");
 			},
-			disabled: (item: VersionModel) => item.index === this.lastVersionId,
+			disabled: (item: VersionModel) =>
+				item.index === this.latestVersion?.index,
 		},
 		{
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
 			disabled: (item: VersionModel) =>
-				item.index === 1 || item.index === this.lastVersionId,
+				item.index === 1 || item.index === this.latestVersion?.index,
 		},
 	];
 
