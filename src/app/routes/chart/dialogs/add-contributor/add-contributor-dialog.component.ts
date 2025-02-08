@@ -1,4 +1,10 @@
-import { Component, inject, signal } from "@angular/core";
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	inject,
+	signal,
+} from "@angular/core";
 
 import { MatButtonModule } from "@angular/material/button";
 import {
@@ -30,6 +36,7 @@ export interface DialogData {
 @Component({
 	selector: "app-add-contributor-dialog",
 	templateUrl: "./add-contributor-dialog.component.html",
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		MatButtonModule,
 		MatIconModule,
@@ -48,22 +55,38 @@ export class AddContributorDialogComponent {
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	readonly roles = signal(Object.values(ContributorRole));
-	readonly selectedRoles = signal<ContributorRole[]>([]);
+	readonly selectedRoles = signal<Map<string, ContributorRole[]>>(
+		// Initialize a Map with existing contributors and their roles
+		new Map(this.data.contributors.map((c) => [c.user.username, c.roles])),
+	);
 
-	toggleRole(_: MatChipSelectionChange, role: ContributorRole): void {
-		this.selectedRoles.update((roles) => {
-			const index = roles.indexOf(role);
-			if (index < 0) {
-				return [...roles, role];
+	toggleRole(
+		event: MatChipSelectionChange,
+		username: string,
+		role: ContributorRole,
+	): void {
+		const currentMap = new Map(this.selectedRoles()); // Create a new Map from current state
+		const userRoles = currentMap.get(username) || [];
+
+		if (event.selected) {
+			// Add role if it doesn't exist
+			if (!userRoles.includes(role)) {
+				currentMap.set(username, [...userRoles, role]);
 			}
+		} else {
+			// Remove role
+			currentMap.set(
+				username,
+				userRoles.filter((r) => r !== role),
+			);
+		}
 
-			roles.splice(index, 1);
-			return [...roles];
-		});
+		this.selectedRoles.set(currentMap);
 	}
 
-	isRoleSelected(role: ContributorRole): boolean {
-		return this.selectedRoles().includes(role);
+	isRoleSelected(username: string, role: ContributorRole): boolean {
+		const userRoles = this.selectedRoles().get(username) || [];
+		return userRoles.includes(role);
 	}
 
 	onCancelClick(): void {

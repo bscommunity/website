@@ -22,12 +22,20 @@
 				></div>
 				<!-- Roles selector -->
 				<mat-chip-set aria-label="Enter reactive form keywords">
-					@for (keyword of roles(); track keyword) {
+					@for (role of roles(); track role) {
 						<mat-chip-option
-							[selected]="isRoleSelected(keyword)"
-							(selectionChange)="toggleRole($event, keyword)"
+							[selected]="
+								isRoleSelected(contributor.user.username, role)
+							"
+							(selectionChange)="
+								toggleRole(
+									$event,
+									contributor.user.username,
+									role
+								)
+							"
 						>
-							{{ keyword }}
+							{{ role }}
 						</mat-chip-option>
 					}
 				</mat-chip-set>
