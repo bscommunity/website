@@ -229,6 +229,9 @@ export class UploadDialogService {
 				return;
 			}
 
+			// Cache chart data
+			// this.chartService.addChartToCache(response);
+
 			// Open success dialog
 			this.dialog.closeAll();
 			this.dialog.open(UploadDialogSuccessComponent, {

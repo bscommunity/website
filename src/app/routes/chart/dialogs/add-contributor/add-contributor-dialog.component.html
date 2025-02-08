@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Add contributor</h2>
+<mat-dialog-content>
+	<p class="mb-4">Tag some creators to add them to your chart credits</p>
+	<app-searchbar class="w-full mb-4"></app-searchbar>
+	<ul class="flex flex-col items-center justify-start w-full py-4">
+		@for (contributor of data.contributors; track $index) {
+			<li class="flex flex-col items-start justify-start w-full">
+				<div
+					class="flex flex-row items-center justify-start gap-4 mb-2"
+				>
+					<app-avatar
+						[src]="contributor.user.imageUrl"
+						[alt]="contributor.user.username"
+					></app-avatar>
+					<span class="text-base font-medium">{{
+						contributor.user.username
+					}}</span>
+				</div>
+				<!-- Separator -->
+				<div
+					class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"
+				></div>
+				<!-- Roles selector -->
+				<mat-chip-set aria-label="Enter reactive form keywords">
+					@for (keyword of roles(); track keyword) {
+						<mat-chip-option
+							[selected]="isRoleSelected(keyword)"
+							(selectionChange)="toggleRole($event, keyword)"
+						>
+							{{ keyword }}
+						</mat-chip-option>
+					}
+				</mat-chip-set>
+			</li>
+		}
+	</ul>
+</mat-dialog-content>
+<mat-dialog-actions>
+	<button mat-button mat-dialog-close="cancel">Cancel</button>
+	<button mat-button mat-dialog-close="ok" cdkFocusInitial>Add</button>
+</mat-dialog-actions>
