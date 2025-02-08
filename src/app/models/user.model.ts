@@ -12,11 +12,11 @@ export const User = z.object({
 
 export type UserModel = z.infer<typeof User>;
 
-export const ContributorUser = User.omit({
+export const SimplifiedUser = User.omit({
 	email: true,
 	discordId: true,
 	id: true,
 	createdAt: true,
 });
 
-export type ContributorUserModel = z.infer<typeof ContributorUser>;
+export type SimplifiedUserModel = z.infer<typeof SimplifiedUser>;
