@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	OnInit,
+} from "@angular/core";
 
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 
@@ -10,6 +15,7 @@ import { MatRippleModule } from "@angular/material/core";
 
 import { UploadDialogService } from "../upload/upload.service";
 import { AuthService } from "app/auth/auth.service";
+import type { UserModel } from "@/models/user.model";
 
 @Component({
 	selector: "app-header",
@@ -24,7 +30,7 @@ import { AuthService } from "app/auth/auth.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(UploadDialogService);
 
@@ -32,6 +38,19 @@ export class HeaderComponent {
 		private authService: AuthService,
 		private router: Router,
 	) {}
+
+	user: UserModel | null = null;
+
+	ngOnInit(): void {
+		this.user = this.authService.user;
+		/* this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
+			if (isLoggedIn) {
+				this.user = this.authService.user;
+			} else {
+				this.user = null;
+			}
+		}); */
+	}
 
 	openWarning() {
 		this._snackBar.open(
@@ -43,6 +62,8 @@ export class HeaderComponent {
 			},
 		);
 	}
+
+	openProfile() {}
 
 	openUploadDialog() {
 		this.uploadDialog.open();
