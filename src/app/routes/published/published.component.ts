@@ -16,6 +16,7 @@ import { ChartComponent } from "./subcomponents/chart.component";
 
 import { ChartModel } from "@/models/chart.model";
 import { ChartService } from "@/services/api/chart.service";
+import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 
 @Component({
 	selector: "app-published",
@@ -28,6 +29,7 @@ import { ChartService } from "@/services/api/chart.service";
 		ChartComponent,
 		RouterLink,
 		MatProgressSpinnerModule,
+		SearchbarComponent,
 	],
 	templateUrl: "./published.component.html",
 })
@@ -67,7 +69,7 @@ export class PublishedComponent implements OnInit {
 		// Access resolved data
 		this.chartService.getAllCharts().subscribe({
 			next: (response) => {
-				console.log("Resolved charts data:", this.charts);
+				// console.log("Resolved charts data:", this.charts);
 
 				this.charts = response;
 				this.cdr.detectChanges();
