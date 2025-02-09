@@ -1,7 +1,50 @@
 <h2 mat-dialog-title>Add contributor</h2>
 <mat-dialog-content>
 	<p class="mb-4">Tag some creators to add them to your chart credits</p>
-	<app-searchbar class="w-full mb-4"></app-searchbar>
+	<app-searchbar
+		#searchbar
+		[debounceDuration]="2500"
+		[onSearch]="onSearch"
+		[autoComplete]="auto"
+		placeholder="Search for community members"
+		class="w-full mb-4"
+	>
+		<mat-autocomplete
+			class="mt-2"
+			#auto="matAutocomplete"
+			(optionSelected)="onOptionSelected($event)"
+		>
+			@if (queryContributors === undefined) {
+				<mat-option class="pointer-events-none select-none">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="24"
+					></mat-progress-spinner>
+				</mat-option>
+			} @else if (queryContributors?.length === 0) {
+				<mat-option
+					class="w-full flex items-center justify-center pointer-events-none select-none"
+				>
+					<p class="text-center w-full">No results found</p>
+				</mat-option>
+			} @else {
+				@for (user of queryContributors; track $index) {
+					<mat-option [value]="user.username">
+						<span
+							class="flex flex-row items-center justify-start gap-4"
+						>
+							<app-avatar
+								[size]="32"
+								[src]="user.imageUrl"
+								alt="{{ user.username }}"
+							/>
+							{{ user.username }}
+						</span>
+					</mat-option>
+				}
+			}
+		</mat-autocomplete>
+	</app-searchbar>
 	<ul class="flex flex-col items-center justify-start w-full py-4">
 		@for (contributor of data.contributors; track $index) {
 			<li class="flex flex-col items-start justify-start w-full">
@@ -45,5 +88,7 @@
 </mat-dialog-content>
 <mat-dialog-actions>
 	<button mat-button mat-dialog-close="cancel">Cancel</button>
-	<button mat-button mat-dialog-close="ok" cdkFocusInitial>Add</button>
+	<button mat-button mat-dialog-close="ok" [disabled]="!hasChanges">
+		Add
+	</button>
 </mat-dialog-actions>

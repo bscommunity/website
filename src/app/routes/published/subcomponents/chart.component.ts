@@ -94,7 +94,7 @@ export interface ChartProps {
 							</div>
 						}
 					</div>
-					<p class="text-sm font-medium">{{ artist }}</p>
+					<p class="text-sm font-medium line-clamp-1">{{ artist }}</p>
 				</div>
 				<div
 					class="flex flex-row items-center justify-start w-full gap-4"

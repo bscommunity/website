@@ -95,12 +95,22 @@
 	@include mat.dialog-overrides(
 		(
 			subhead-size: 1.65rem,
+			actions-padding: 1.25rem 2.25rem,
+			content-padding: 1.25rem 2.25rem,
+			headline-padding: 1.25rem 2.25rem,
+			with-actions-content-padding: 1.25rem 2.25rem,
 		)
 	);
 
 	@include mat.form-field-overrides(
 		(
 			subscript-text-size: 0.8rem,
+		)
+	);
+
+	@include mat.autocomplete-overrides(
+		(
+			container-shape: 0.5rem,
 		)
 	);
 
