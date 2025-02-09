@@ -1,22 +1,26 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+// Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
+// Components
 import {
 	CustomSelectComponent,
 	type Option,
 } from "@/components/custom-select/custom-select.component";
+import { ChartComponent } from "./subcomponents/chart.component";
+import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
-import { ChartComponent } from "./subcomponents/chart.component";
-
+// Types
 import { ChartModel } from "@/models/chart.model";
+
+// Services
 import { ChartService } from "@/services/api/chart.service";
-import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 
 @Component({
 	selector: "app-published",
