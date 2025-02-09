@@ -5,18 +5,24 @@ import {
 	OnInit,
 } from "@angular/core";
 
-import { Router, RouterLink, RouterLinkActive } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 
+// Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatRippleModule } from "@angular/material/core";
 
-import { UploadDialogService } from "../upload/upload.service";
-import { AuthService } from "app/auth/auth.service";
+// Components
+import { AvatarComponent } from "@/components/avatar/avatar.component";
+
+// Types
 import type { UserModel } from "@/models/user.model";
-import { AvatarComponent } from "../avatar/avatar.component";
+
+// Services
+import { AuthService } from "@/auth/auth.service";
+import { UploadDialogService } from "@/components/upload/upload.service";
 
 @Component({
 	selector: "app-header",
@@ -36,10 +42,7 @@ export class HeaderComponent implements OnInit {
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(UploadDialogService);
 
-	constructor(
-		private authService: AuthService,
-		private router: Router,
-	) {}
+	constructor(private authService: AuthService) {}
 
 	user: UserModel | null = null;
 
@@ -73,6 +76,5 @@ export class HeaderComponent implements OnInit {
 
 	onLogoutButtonClick() {
 		this.authService.logout();
-		this.router.navigate(["/login"], { onSameUrlNavigation: "reload" });
 	}
 }

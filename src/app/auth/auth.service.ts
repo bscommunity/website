@@ -9,6 +9,7 @@ import { apiUrl } from "@/services/api";
 
 import { UserModel } from "@/models/user.model";
 import { CookieService } from "@/services/cookie.service";
+import { Router } from "@angular/router";
 
 interface LoginResponse {
 	user: UserModel;
@@ -24,6 +25,7 @@ export class AuthService {
 	private readonly TOKEN_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 	private platformId = inject(PLATFORM_ID);
+	private router = inject(Router);
 
 	private _isLoggedIn$ = new BehaviorSubject<boolean>(false);
 	isLoggedIn$ = this._isLoggedIn$.asObservable();
@@ -100,6 +102,7 @@ export class AuthService {
 			this.cookieService.delete(this.TOKEN_NAME);
 			this.cookieService.delete(this.USER_OBJECT_NAME);
 			this._isLoggedIn$.next(false);
+			this.router.navigate(["/login"], { onSameUrlNavigation: "reload" });
 		}
 	}
 }

@@ -1,0 +1,21 @@
+<app-chart-section class="w-full" title="Versions">
+	<app-table
+		#versionTable
+		class="w-full"
+		[columns]="versionsColumns"
+		[data]="versions"
+		[actions]="versionsActions"
+		hasSorting="true"
+		initialSortColumn="id"
+		initialSortDirection="desc"
+	></app-table>
+	<span class="flex items-center justify-end w-full">
+		<button
+			mat-stroked-button
+			(click)="openSnackBar('Feature not implemented yet', 'Close')"
+		>
+			<mat-icon>publish</mat-icon>
+			Publish new version
+		</button>
+	</span>
+</app-chart-section>

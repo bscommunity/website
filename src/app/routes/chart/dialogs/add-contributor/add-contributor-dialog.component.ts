@@ -2,7 +2,6 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
-	ElementRef,
 	inject,
 	signal,
 	ViewChild,
@@ -23,25 +22,19 @@ import {
 	MatAutocompleteModule,
 	MatAutocompleteSelectedEvent,
 } from "@angular/material/autocomplete";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
-import {
-	MatChipSelectionChange,
-	MatChipsModule,
-} from "@angular/material/chips";
 import { AvatarComponent } from "@/components/avatar/avatar.component";
 
 // Types
 import { ContributorModel } from "@/models/contributor.model";
-import { ContributorRole } from "@/models/enums/role.enum";
+import { SimplifiedUserModel } from "@/models/user.model";
 
 // Services
 import { UserService } from "@/services/api/user.service";
-import { firstValueFrom } from "rxjs";
-import { SimplifiedUserModel, UserModel } from "@/models/user.model";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { FormControl } from "@angular/forms";
 import { AuthService } from "app/auth/auth.service";
 
 export interface DialogData {
@@ -71,6 +64,7 @@ export class AddContributorDialogComponent {
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	readonly username: string | null = null;
+	readonly poolContributors: SimplifiedUserModel[] = [];
 
 	constructor(
 		private authService: AuthService,
@@ -83,61 +77,23 @@ export class AddContributorDialogComponent {
 		this.username = this.authService.user.username;
 	}
 
-	// Roles
-	readonly roles = signal(
-		Object.values(ContributorRole).filter((r) => r !== "Author"),
-	);
-	readonly initialData = new Map(
-		this.data.contributors.map((c) => [c.user.username, c.roles]),
-	);
-	readonly selectedRoles = signal<Map<string, ContributorRole[]>>(
-		// Initialize a Map with existing contributors and their roles
-		this.initialData,
-	);
-
-	hasChanges = false;
-
-	toggleRole(
-		event: MatChipSelectionChange,
-		username: string,
-		role: ContributorRole,
-	): void {
-		const currentMap = new Map(this.selectedRoles()); // Create a new Map from current state
-		const userRoles = currentMap.get(username) || [];
-
-		if (event.selected) {
-			// Add role if it doesn't exist
-			if (!userRoles.includes(role)) {
-				currentMap.set(username, [...userRoles, role]);
-			}
-		} else {
-			// Remove role
-			currentMap.set(
-				username,
-				userRoles.filter((r) => r !== role),
-			);
-		}
-
-		// Check if there are any changes
-		this.hasChanges = compareMaps(currentMap, this.initialData) === false;
-
-		this.selectedRoles.set(currentMap);
-	}
-
-	isRoleSelected(username: string, role: ContributorRole): boolean {
-		const userRoles = this.selectedRoles().get(username) || [];
-		return userRoles.includes(role);
-	}
-
 	// Contributors Search
 	@ViewChild("searchbar") searchbar!: SearchbarComponent;
-	queryContributors: SimplifiedUserModel[] | undefined | null = [];
+	queryContributors: SimplifiedUserModel[] | undefined | null | "start" =
+		"start";
 
 	onSearch(value: string): void {
 		console.log(`Novo input: ${value}`);
 
+		if (value.length < 2) {
+			this.queryContributors = "start";
+			this.cdr.detectChanges();
+			return;
+		}
+
 		if (!this.username) {
 			console.error("User not logged in");
+			this.onCancelClick();
 			this.authService.logout();
 		}
 
@@ -154,6 +110,13 @@ export class AddContributorDialogComponent {
 			},
 			error: (error) => {
 				console.error("Error fetching users:", error);
+
+				if (error.status === 401) {
+					console.error("User not logged in");
+					this.onCancelClick();
+					this.authService.logout();
+				}
+
 				this.queryContributors = null;
 				this.cdr.detectChanges();
 			},
@@ -161,48 +124,29 @@ export class AddContributorDialogComponent {
 	}
 
 	onOptionSelected(event: MatAutocompleteSelectedEvent): void {
-		const username = event.option.viewValue;
+		// Add the user to the pool
+		if (this.queryContributors !== "start") {
+			this.poolContributors.push(
+				this.queryContributors!.find(
+					(user) => `@${user.username}` === event.option.viewValue,
+				)!,
+			);
+			console.log("Pool contributors:", this.poolContributors);
+		}
 
+		// Reset
 		this.searchbar.clearSearch();
 		event.option.deselect();
+	}
 
-		console.log(`Selected user: ${username}`);
+	removeContributor(username: string): void {
+		const index = this.poolContributors.findIndex(
+			(user) => user.username === username,
+		);
+		this.poolContributors.splice(index, 1);
 	}
 
 	onCancelClick(): void {
 		this.dialogRef.close();
 	}
-}
-
-function compareMaps(
-	map1: Map<string, Array<ContributorRole>>,
-	map2: Map<string, Array<ContributorRole>>,
-): boolean {
-	if (map1.size !== map2.size) return false;
-
-	for (const [key, roles1] of map1) {
-		const roles2 = map2.get(key);
-		if (!roles2) return false; // Key missing in map2
-
-		if (!compareRoleArrays(roles1, roles2)) return false;
-	}
-
-	return true;
-}
-
-function compareRoleArrays(
-	arr1: ContributorRole[],
-	arr2: ContributorRole[],
-): boolean {
-	if (arr1.length !== arr2.length) return false;
-
-	const set1 = new Set(arr1.map(roleToKey));
-	const set2 = new Set(arr2.map(roleToKey));
-
-	return set1.size === set2.size && [...set1].every((key) => set2.has(key));
-}
-
-// Convert ContributorRole object to a unique key (for comparison)
-function roleToKey(role: ContributorRole): string {
-	return role.toString();
 }

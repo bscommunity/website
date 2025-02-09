@@ -14,14 +14,26 @@
 			#auto="matAutocomplete"
 			(optionSelected)="onOptionSelected($event)"
 		>
-			@if (queryContributors === undefined) {
-				<mat-option class="pointer-events-none select-none">
-					<mat-progress-spinner
-						mode="indeterminate"
-						diameter="24"
-					></mat-progress-spinner>
+			@if (queryContributors === "start") {
+				<mat-option class="pointer-events-none select-none w-full">
+					<p class="text-center w-full">Start typing to search</p>
 				</mat-option>
-			} @else if (queryContributors?.length === 0) {
+			} @else if (queryContributors === undefined) {
+				<mat-option class="pointer-events-none select-none w-full">
+					<span class="flex items-center justify-center w-full">
+						<mat-progress-spinner
+							mode="indeterminate"
+							diameter="24"
+						></mat-progress-spinner>
+					</span>
+				</mat-option>
+			} @else if (queryContributors === null) {
+				<mat-option class="pointer-events-none select-none w-full">
+					<p class="text-center w-full">
+						We found an error while fetching the data
+					</p>
+				</mat-option>
+			} @else if (queryContributors.length === 0) {
 				<mat-option
 					class="w-full flex items-center justify-center pointer-events-none select-none"
 				>
@@ -38,57 +50,60 @@
 								[src]="user.imageUrl"
 								alt="{{ user.username }}"
 							/>
-							{{ user.username }}
+							&#64;{{ user.username }}
 						</span>
 					</mat-option>
 				}
 			}
 		</mat-autocomplete>
 	</app-searchbar>
-	<ul class="flex flex-col items-center justify-start w-full py-4">
-		@for (contributor of data.contributors; track $index) {
-			<li class="flex flex-col items-start justify-start w-full">
-				<div
-					class="flex flex-row items-center justify-start gap-4 mb-2"
-				>
-					<app-avatar
-						[src]="contributor.user.imageUrl"
-						[alt]="contributor.user.username"
-					></app-avatar>
-					<span class="text-base font-medium">{{
-						contributor.user.username
-					}}</span>
-				</div>
-				<!-- Separator -->
-				<div
-					class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"
-				></div>
-				<!-- Roles selector -->
-				<mat-chip-set aria-label="Enter reactive form keywords">
-					@for (role of roles(); track role) {
-						<mat-chip-option
-							[selected]="
-								isRoleSelected(contributor.user.username, role)
-							"
-							(selectionChange)="
-								toggleRole(
-									$event,
-									contributor.user.username,
-									role
-								)
-							"
+	<ul class="flex flex-col items-center justify-start w-full pt-4">
+		@if (poolContributors.length > 0) {
+			@for (user of poolContributors; track user; let index = $index) {
+				<li class="flex flex-col items-start justify-start w-full">
+					<div
+						class="flex flex-row items-center justify-between gap-4 mb-2 w-full"
+					>
+						<span
+							class="flex flex-row items-center justify-start gap-4"
 						>
-							{{ role }}
-						</mat-chip-option>
+							<app-avatar
+								[src]="user.imageUrl"
+								[alt]="user.username"
+							></app-avatar>
+							<span class="text-base font-medium">{{
+								user.username
+							}}</span>
+						</span>
+						<button
+							mat-icon-button
+							(click)="removeContributor(user.username)"
+						>
+							<mat-icon>close</mat-icon>
+						</button>
+					</div>
+					<!-- Separator -->
+					@if (index !== data.contributors.length - 1) {
+						<div
+							class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"
+						></div>
 					}
-				</mat-chip-set>
-			</li>
+				</li>
+			}
+		} @else {
+			<div class="flex flex-col items-center justify-center gap-4 pt-4">
+				<span class="text-5xl"
+					><mat-icon inline>conditions</mat-icon></span
+				>
+				<p class="text-center w-full px-6">
+					No contributors added. <br />
+					Start adding members for them to appear here!
+				</p>
+			</div>
 		}
 	</ul>
 </mat-dialog-content>
 <mat-dialog-actions>
-	<button mat-button mat-dialog-close="cancel">Cancel</button>
-	<button mat-button mat-dialog-close="ok" [disabled]="!hasChanges">
-		Add
-	</button>
+	<button mat-button mat-dialog-close="cancel" cdkFocusInitial>Cancel</button>
+	<button mat-button mat-dialog-close="ok">Add</button>
 </mat-dialog-actions>
