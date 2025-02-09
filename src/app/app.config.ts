@@ -2,7 +2,11 @@ import {
 	type ApplicationConfig,
 	provideZoneChangeDetection,
 } from "@angular/core";
-import { provideRouter, withComponentInputBinding } from "@angular/router";
+import {
+	provideRouter,
+	TitleStrategy,
+	withComponentInputBinding,
+} from "@angular/router";
 
 import { routes } from "./app.routes";
 import {
@@ -19,14 +23,16 @@ import {
 } from "@angular/common/http";
 
 import { authInterceptor } from "./auth/auth.interceptor";
+import { ChartTitleStrategy } from "./routes/chart/chart-title.strategy";
 
 export const appConfig: ApplicationConfig = {
 	providers: [
 		MatIconRegistry, // MatIconRegistry config
 		provideZoneChangeDetection({ eventCoalescing: true }),
-		provideRouter(routes, withComponentInputBinding()),
 		provideClientHydration(withEventReplay()),
 		provideAnimationsAsync(),
 		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+		provideRouter(routes, withComponentInputBinding()),
+		{ provide: TitleStrategy, useClass: ChartTitleStrategy },
 	],
 };

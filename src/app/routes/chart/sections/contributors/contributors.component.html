@@ -1,0 +1,18 @@
+<app-chart-section class="w-full" title="Contributors">
+	<app-table
+		#contributorTable
+		class="w-full"
+		[columns]="contributorsColumns"
+		[data]="contributors ?? []"
+		[actions]="contributorsActions"
+	></app-table>
+	<span class="flex items-center justify-end w-full">
+		<button
+			mat-stroked-button
+			(click)="openAddContributorConfirmationDialog()"
+		>
+			<mat-icon>add</mat-icon>
+			Add new contributor
+		</button>
+	</span>
+</app-chart-section>

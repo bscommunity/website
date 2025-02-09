@@ -1,0 +1,96 @@
+<app-chart-section class="w-full" title="Known Issues">
+	<ul
+		class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
+	>
+		@if (knownIssues.length > 0) {
+			@for (issue of knownIssues(); track $index) {
+				<li
+					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
+					[ngClass]="{
+						'border-b border-b-inverse-on-surface':
+							$index !== knownIssues.length - 1,
+					}"
+				>
+					<span>• {{ issue }}</span>
+					<div class="flex flex-row items-center justify-end gap-2">
+						<button
+							mat-icon-button
+							matTooltip="Remove issue"
+							matTooltipPosition="above"
+							matTooltipShowDelay="375"
+							matTooltipClass="!text-sm"
+							(click)="openRemoveIssueConfirmationDialog($index)"
+						>
+							<span class="text-lg align-middle leading-none">
+								<mat-icon inline>playlist_remove</mat-icon>
+							</span>
+						</button>
+						<button
+							mat-icon-button
+							matTooltip="Close issue"
+							matTooltipPosition="above"
+							matTooltipShowDelay="375"
+							matTooltipClass="!text-sm"
+							(click)="openCloseIssueConfirmationDialog($index)"
+						>
+							<span class="text-lg align-middle leading-none">
+								<mat-icon inline>playlist_add_check</mat-icon>
+							</span>
+						</button>
+					</div>
+				</li>
+			}
+		} @else {
+			<div
+				class="flex flex-col items-center justify-center gap-4 w-full py-9"
+			>
+				<span class="text-4xl"
+					><mat-icon inline>airwave</mat-icon></span
+				>
+				<h1 class="text-base font-medium">
+					There are currently no known issues
+				</h1>
+				<p class="text-sm text-center">
+					New added issues will be listed here
+				</p>
+			</div>
+		}
+		@if (addIssueInputVisible()) {
+			<li
+				class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm animate-pulse border-t border-t-inverse-on-surface"
+			>
+				<span class="w-full">
+					•
+					<input
+						id="addIssue"
+						class="bg-transparent outline-none border-none w-3/4"
+						[(ngModel)]="newIssue"
+						(keydown.enter)="addIssue()"
+						type="text"
+						placeholder="Describe the issue..."
+				/></span>
+				<div class="flex flex-row items-center justify-end gap-2">
+					<button
+						mat-raised-button
+						class="!bg-transparent"
+						(click)="cancelAddIssue()"
+					>
+						Cancel
+					</button>
+					<button mat-raised-button (click)="addIssue()">
+						<mat-icon>playlist_add</mat-icon>
+						Add
+					</button>
+				</div>
+			</li>
+		}
+	</ul>
+	@if (!addIssueInputVisible()) {
+		<span class="flex items-center justify-end w-full">
+			<button mat-stroked-button (click)="addIssueInputVisible.set(true)">
+				<mat-icon>add_playlist</mat-icon>
+				Add new issue
+			</button>
+		</span>
+	}
+</app-chart-section>

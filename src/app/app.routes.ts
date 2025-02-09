@@ -16,7 +16,7 @@ import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
 } from "./auth/auth.guard";
-import { TestComponent } from "./routes/test.component";
+import { PageErrorComponent } from "./routes/error/error.component";
 
 export const routes: Routes = [
 	{
@@ -50,8 +50,9 @@ export const routes: Routes = [
 		canActivate: [isAuthenticatedGuard],
 	},
 	{
-		path: "test",
-		component: TestComponent,
+		path: "error",
+		component: PageErrorComponent,
+		title: "Error",
 	},
 	{ path: "", redirectTo: "/published", pathMatch: "full" }, // Redirect to published
 	{ path: "**", title: "Oops. 404", component: PageNotFoundComponent }, // Should be the last

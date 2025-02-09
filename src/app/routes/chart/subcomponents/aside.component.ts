@@ -9,7 +9,7 @@ import { transformDuration } from "@/lib/time";
 		<aside class="flex flex-col items-start justify-start gap-6 w-full">
 			<div class="absolute top-0 left-0 md:relative w-full max-md:-z-10">
 				<img
-					class="w-full opacity-50 md:opacity-100 md:w-72 md:h-72 md:min-w-72 aspect-square md:rounded-lg"
+					class="w-full opacity-50 md:opacity-100 md:w-72 aspect-square md:rounded-lg"
 					[src]="coverUrl"
 					[alt]="trackName"
 				/>
