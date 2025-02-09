@@ -36,14 +36,14 @@ import { SuccessDialogData } from "../upload.service";
 					class="absolute right-8 top-[45%] -translate-y-1/2 rotate-[-4.55deg]"
 				>
 					<div
-						class="px-5 py-2 justify-center items-center flex overflow-hidden stamp-effect border-[6px] border-secondary-container select-none"
+						class="px-5 py-2 justify-center items-center flex overflow-hidden stamp-effect border-[6px] border-secondary select-none"
 					>
-						<p class="text-xl font-bold text-secondary-container">
+						<p class="text-xl font-bold text-secondary">
 							SUBMITTED
 						</p>
 					</div>
 					<p
-						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary-container opacity-80 w-full text-center"
+						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary opacity-80 w-full text-center"
 					>
 						v1.0 | {{ data.id.split("-")[0] }}
 					</p>
