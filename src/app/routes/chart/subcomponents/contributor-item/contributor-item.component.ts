@@ -10,14 +10,20 @@ import { ContributorTagsComponent } from "../contributor-tags/contributor-tags.c
 // Models
 import { SimplifiedUserModel } from "@/models/user.model";
 import { ContributorRole } from "@/models/enums/role.enum";
+import { MatButtonModule } from "@angular/material/button";
 
 @Component({
 	selector: "app-contributor-item",
-	imports: [MatIconModule, ContributorTagsComponent, AvatarComponent],
+	imports: [
+		MatIconModule,
+		MatButtonModule,
+		ContributorTagsComponent,
+		AvatarComponent,
+	],
 	templateUrl: "./contributor-item.component.html",
 })
 export class ContributorItemComponent {
 	@Input() user!: SimplifiedUserModel;
-	@Input() roles!: WritableSignal<Array<ContributorRole>>;
+	@Input() roles!: WritableSignal<Map<string, Array<ContributorRole>>>;
 	@Input() onRemove: undefined | ((id: string) => void) = undefined;
 }

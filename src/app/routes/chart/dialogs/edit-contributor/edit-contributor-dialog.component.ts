@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	computed,
 	inject,
 	signal,
 	ViewChild,
@@ -31,6 +32,7 @@ import { UserService } from "@/services/api/user.service";
 import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
 import { ContributorService } from "@/services/api/contributor.service";
 import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
+import { compareArrays, elementToKey } from "@/lib/compare";
 
 export interface DialogData {
 	contributor: ContributorModel;
@@ -55,11 +57,15 @@ export class EditContributorDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
-	roles = signal<Array<ContributorRole>>(this.data.contributor.roles);
-	hasChanges = compareArrays(
-		this.data.contributor.roles,
-		this.roles(),
-		elementToKey,
+	roles = signal(
+		new Map([[this.data.contributor.user.id, this.data.contributor.roles]]),
+	);
+	isEqual = computed(() =>
+		compareArrays(
+			this.data.contributor.roles,
+			this.roles().get(this.data.contributor.user.id) || [],
+			elementToKey,
+		),
 	);
 
 	constructor(
