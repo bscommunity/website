@@ -12,5 +12,6 @@
 		</button>
 	</div>
 	<div class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"></div>
-	<app-contributor-tags [roles]="roles"></app-contributor-tags>
+	<app-contributor-tags [userId]="user.id" [roles]="roles">
+	</app-contributor-tags>
 </li>

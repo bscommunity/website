@@ -31,3 +31,5 @@ function compareArrays<T>(
 function elementToKey<T>(element: T): string {
 	return `${element}`;
 }
+
+export { compareArrays, compareMaps, elementToKey };

@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	computed,
 	inject,
 	OnInit,
 	signal,
@@ -38,14 +39,9 @@ import { SimplifiedUserModel } from "@/models/user.model";
 // Services
 import { UserService } from "@/services/api/user.service";
 import { AuthService } from "app/auth/auth.service";
-import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
 import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 import { ContributorRole } from "@/models/enums/role.enum";
-
-interface ContributorRoles {
-	userId: string;
-	roles: ContributorRole[];
-}
+import { compareArrays, compareMaps, elementToKey } from "@/lib/compare";
 
 export interface DialogData {
 	contributors: ContributorModel[];
@@ -76,7 +72,20 @@ export class AddContributorDialogComponent {
 
 	readonly username: string | null = null;
 
-	readonly roles: WritableSignal<ContributorRoles[]> = signal([]);
+	readonly initialData = new Map<string, ContributorRole[]>(
+		this.data.contributors.reduce((map, contributor) => {
+			map.set(contributor.user.id, contributor.roles);
+			return map;
+		}, new Map<string, ContributorRole[]>()), // Initialize the map with the contributors' roles
+	);
+	readonly roles: WritableSignal<Map<string, ContributorRole[]>> = signal(
+		this.initialData,
+	);
+	allContributorsHaveAtLeastOneRole = computed(() => {
+		// We remove 1 from the size because the logged in user is not a contributor
+		return this.roles().size - 1 === this.poolContributors.length;
+	});
+
 	readonly poolContributors: ContributorModel[] = [];
 
 	constructor(
@@ -100,20 +109,21 @@ export class AddContributorDialogComponent {
 		"start";
 
 	onSearch(value: string): void {
-		console.log(`Novo input: ${value}`);
-
+		// If the input is too short, don't query the server
 		if (value.length < 2) {
 			this.queryContributors = "start";
 			this.cdr.detectChanges();
 			return;
 		}
 
+		// If the user is not logged in, log them out
 		if (!this.username) {
 			console.error("User not logged in");
 			this.onCancelClick();
 			this.authService.logout();
 		}
 
+		// Fetch the users
 		this.queryContributors = undefined;
 		this.cdr.detectChanges();
 
