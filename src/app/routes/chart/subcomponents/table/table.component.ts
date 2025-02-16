@@ -24,8 +24,8 @@ export interface TableColumn<T> {
 export interface Action<T> {
 	description: string;
 	icon: string;
-	disabled: (item: T) => boolean;
-	callback: (item: T) => void;
+	disabled: (index: number, item: T) => boolean;
+	callback: (index: number, item: T) => void;
 }
 
 @Pipe({

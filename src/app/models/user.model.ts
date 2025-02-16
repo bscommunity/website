@@ -15,7 +15,6 @@ export type UserModel = z.infer<typeof User>;
 export const SimplifiedUser = User.omit({
 	email: true,
 	discordId: true,
-	id: true,
 	createdAt: true,
 });
 

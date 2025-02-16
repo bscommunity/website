@@ -1,36 +1,14 @@
 <h2 mat-dialog-title>Edit roles</h2>
 <mat-dialog-content>
 	<p class="mb-4">Select the roles you want to add or remove</p>
-	<div class="flex flex-col items-start justify-start w-full">
-		<div class="flex flex-row items-center justify-start gap-4 mb-2">
-			<app-avatar
-				[src]="data.contributor.user.imageUrl"
-				[alt]="data.contributor.user.username"
-			></app-avatar>
-			<span class="text-base font-medium">{{
-				data.contributor.user.username
-			}}</span>
-		</div>
-		<!-- Separator -->
-		<div
-			class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"
-		></div>
-		<!-- Roles selector -->
-		<mat-chip-set aria-label="Enter reactive form keywords">
-			@for (role of roles(); track role) {
-				<mat-chip-option
-					[selected]="isRoleSelected(role)"
-					(selectionChange)="toggleRole($event, role)"
-				>
-					{{ role }}
-				</mat-chip-option>
-			}
-		</mat-chip-set>
-	</div>
+	<app-contributor-tags
+		(hasRolesChanged)="hasChanges.set($event)"
+		[contributors]="contributor"
+	></app-contributor-tags>
 </mat-dialog-content>
 <mat-dialog-actions>
 	<button mat-button mat-dialog-close="cancel">Cancel</button>
-	<button mat-button mat-dialog-close="ok" [disabled]="!hasChanges">
+	<button mat-button mat-dialog-close="ok" [disabled]="!hasChanges()">
 		Save
 	</button>
 </mat-dialog-actions>

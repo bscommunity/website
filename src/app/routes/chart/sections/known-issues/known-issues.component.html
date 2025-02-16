@@ -2,7 +2,7 @@
 	<ul
 		class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
 	>
-		@if (knownIssues.length > 0) {
+		@if (knownIssues().length > 0) {
 			@for (issue of knownIssues(); track $index) {
 				<li
 					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
@@ -11,20 +11,8 @@
 							$index !== knownIssues.length - 1,
 					}"
 				>
-					<span>• {{ issue }}</span>
+					<span>• {{ issue.description }}</span>
 					<div class="flex flex-row items-center justify-end gap-2">
-						<button
-							mat-icon-button
-							matTooltip="Remove issue"
-							matTooltipPosition="above"
-							matTooltipShowDelay="375"
-							matTooltipClass="!text-sm"
-							(click)="openRemoveIssueConfirmationDialog($index)"
-						>
-							<span class="text-lg align-middle leading-none">
-								<mat-icon inline>playlist_remove</mat-icon>
-							</span>
-						</button>
 						<button
 							mat-icon-button
 							matTooltip="Close issue"
@@ -57,9 +45,9 @@
 		}
 		@if (addIssueInputVisible()) {
 			<li
-				class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm animate-pulse border-t border-t-inverse-on-surface"
+				class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm border-t border-t-inverse-on-surface"
 			>
-				<span class="w-full">
+				<span class="w-full animate-pulse">
 					•
 					<input
 						id="addIssue"

@@ -42,7 +42,10 @@ export class VersionsComponent {
 
 	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
 
-	openRemoveVersionConfirmationDialog(version: VersionModel): void {
+	openRemoveVersionConfirmationDialog(
+		_: number,
+		version: VersionModel,
+	): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Version",
@@ -63,7 +66,7 @@ export class VersionsComponent {
 		{
 			columnDef: "id",
 			header: "Version",
-			cell: (item: VersionModel) => `${item.index}`,
+			cell: (item: VersionModel) => `${item.id}`,
 		},
 		{
 			columnDef: "publishedAt",
@@ -92,16 +95,15 @@ export class VersionsComponent {
 			callback: () => {
 				this.openSnackBar("Switch version clicked", "Close");
 			},
-			disabled: (item: VersionModel) =>
-				item.index === this.versions[this.versions.length - 1].index,
+			disabled: (index, _) =>
+				index === 1 || index === this.versions.length - 1,
 		},
 		{
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (item: VersionModel) =>
-				item.index === 1 ||
-				item.index === this.versions[this.versions.length - 1].index,
+			disabled: (index, item: VersionModel) =>
+				index === 0 || item.downloadsAmount !== 0,
 		},
 	];
 

@@ -14,6 +14,7 @@ import { FormsModule } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatButtonModule } from "@angular/material/button";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
@@ -28,6 +29,7 @@ import { KnownIssueModel } from "@/models/known-issue.model";
 		// Modules
 		CommonModule,
 		MatIconModule,
+		MatTooltipModule,
 		MatButtonModule,
 		FormsModule,
 		// Components
@@ -37,6 +39,7 @@ import { KnownIssueModel } from "@/models/known-issue.model";
 })
 export class KnownIssuesComponent {
 	@Input() initialKnownIssues: KnownIssueModel[] = [];
+
 	knownIssues: WritableSignal<KnownIssueModel[]> = signal(
 		this.initialKnownIssues,
 	);
@@ -101,11 +104,13 @@ export class KnownIssuesComponent {
 		this.knownIssues.update((issues) => [
 			...issues,
 			{
-				description: this.newIssue,
 				index: issues.length,
+				description: this.newIssue,
 				createdAt: new Date(),
 			},
 		]);
+
+		this.cdr.detectChanges();
 
 		// Reset input
 		this.newIssue = "";

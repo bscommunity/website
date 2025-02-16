@@ -64,24 +64,20 @@ export class ContributorsComponent {
 		});
 	}
 
-	openEditContributorConfirmationDialog(contributor: ContributorModel): void {
-		const dialogRef = this.dialog.open(EditContributorDialogComponent, {
+	openEditContributorConfirmationDialog(
+		index: number,
+		contributor: ContributorModel,
+	): void {
+		this.dialog.open(EditContributorDialogComponent, {
 			data: {
 				contributor,
 			},
 			width: "450px",
 		});
-
-		const subscription = dialogRef.afterClosed().subscribe((result) => {
-			if (result === "ok") {
-				// ...
-				this.openSnackBar("Contributor edited with success!", "Close");
-				subscription.unsubscribe();
-			}
-		});
 	}
 
 	openRemoveContributorConfirmationDialog(
+		index: number,
 		contributor: ContributorModel,
 	): void {
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -134,7 +130,7 @@ export class ContributorsComponent {
 			description: "Remove",
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
-			disabled: (item: ContributorModel) =>
+			disabled: (_, item: ContributorModel) =>
 				item.roles.includes(ContributorRole.AUTHOR),
 		},
 	];

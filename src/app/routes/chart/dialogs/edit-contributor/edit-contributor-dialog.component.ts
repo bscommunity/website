@@ -4,6 +4,7 @@ import {
 	Component,
 	inject,
 	signal,
+	ViewChild,
 } from "@angular/core";
 
 // Material
@@ -17,14 +18,9 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
-import {
-	MatChipSelectionChange,
-	MatChipsModule,
-} from "@angular/material/chips";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
-import { AvatarComponent } from "@/components/avatar/avatar.component";
 
 // Types
 import { ContributorModel } from "@/models/contributor.model";
@@ -32,6 +28,8 @@ import { ContributorRole } from "@/models/enums/role.enum";
 
 // Services
 import { UserService } from "@/services/api/user.service";
+import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
+import { ContributorService } from "@/services/api/contributor.service";
 
 export interface DialogData {
 	contributor: ContributorModel;
@@ -48,73 +46,35 @@ export interface DialogData {
 		MatDialogContent,
 		MatDialogActions,
 		MatDialogClose,
-		MatChipsModule,
 		MatProgressSpinnerModule,
-		AvatarComponent,
+		ContributorTagsComponent,
 	],
 })
 export class EditContributorDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
+	readonly contributor = [this.data.contributor];
+
+	@ViewChild(ContributorTagsComponent)
+	tagsComponent!: ContributorTagsComponent;
+
+	hasChanges = signal<boolean>(false);
+
 	constructor(
-		private userService: UserService,
+		private contributorService: ContributorService,
 		private cdr: ChangeDetectorRef,
 	) {}
 
-	// Roles
-	readonly roles = signal(
-		Object.values(ContributorRole).filter((r) => r !== "Author"),
-	);
+	onSubmit(): void {
+		const updatedContributors = this.tagsComponent.getUpdatedContributors();
 
-	readonly initialRoles = [...this.data.contributor.roles];
-	readonly selectedRoles = signal<ContributorRole[]>(this.initialRoles);
+		console.log("Updated contributors:", updatedContributors);
 
-	hasChanges = false;
-
-	toggleRole(event: MatChipSelectionChange, role: ContributorRole): void {
-		const currentRoles = this.selectedRoles();
-		if (event.selected) {
-			// Add the role if it's not already selected
-			if (!currentRoles.includes(role)) {
-				this.selectedRoles.set([...currentRoles, role]);
-			}
-		} else {
-			// Remove the role if it's currently selected
-			const updatedRoles = currentRoles.filter((r) => r !== role);
-			this.selectedRoles.set(updatedRoles);
-		}
-
-		this.hasChanges = !compareRoleArrays(
-			this.initialRoles,
-			this.selectedRoles(),
-		);
-
-		this.cdr.detectChanges();
-	}
-
-	isRoleSelected(role: ContributorRole): boolean {
-		return this.selectedRoles().includes(role);
+		//this.contributorService.updateContributor()
 	}
 
 	onCancelClick(): void {
 		this.dialogRef.close();
 	}
-}
-
-function compareRoleArrays(
-	arr1: ContributorRole[],
-	arr2: ContributorRole[],
-): boolean {
-	if (arr1.length !== arr2.length) return false;
-
-	const set1 = new Set(arr1.map(roleToKey));
-	const set2 = new Set(arr2.map(roleToKey));
-
-	return set1.size === set2.size && [...set1].every((key) => set2.has(key));
-}
-
-// Convert ContributorRole object to a unique key (for comparison)
-function roleToKey(role: ContributorRole): string {
-	return role.toString();
 }

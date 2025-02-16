@@ -28,17 +28,25 @@
 					<div
 						class="flex flex-row items-center justify-center gap-2"
 					>
-						@for (action of actions; track $index) {
+						@for (
+							action of actions;
+							track $index;
+							let index = $index
+						) {
 							<button
-								[matRippleDisabled]="action.disabled(element)"
-								[disabled]="action.disabled(element)"
-								[matTooltipDisabled]="action.disabled(element)"
+								[matRippleDisabled]="
+									action.disabled(index, element)
+								"
+								[disabled]="action.disabled(index, element)"
+								[matTooltipDisabled]="
+									action.disabled(index, element)
+								"
 								mat-ripple
 								matTooltip="{{ action.description }}"
 								matTooltipPosition="above"
 								matTooltipShowDelay="375"
 								matTooltipClass="!text-sm"
-								(click)="action.callback(element)"
+								(click)="action.callback(index, element)"
 								class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90 disabled:opacity-50"
 							>
 								<span

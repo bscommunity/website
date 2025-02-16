@@ -4,7 +4,6 @@ import { KnownIssue } from "./known-issue.model";
 export const Version = z.object({
 	id: z.number(),
 	chartId: z.string(),
-	index: z.number(),
 	duration: z.number(),
 	notesAmount: z.number(),
 	effectsAmount: z.number(),
