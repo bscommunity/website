@@ -9,3 +9,10 @@ export const Contributor = z.object({
 });
 
 export type ContributorModel = z.infer<typeof Contributor>;
+
+export const SimplifiedContributor = z.object({
+	userId: z.string(),
+	roles: z.nativeEnum(ContributorRole).array(),
+});
+
+export type SimplifiedContributorModel = z.infer<typeof SimplifiedContributor>;

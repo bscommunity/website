@@ -1,0 +1,49 @@
+<ul
+	class="flex flex-col items-center justify-start w-full gap-4"
+	[ngClass]="className"
+>
+	@for (contributor of contributors; track $index; let index = $index) {
+		<li class="flex flex-col items-start justify-start w-full">
+			<div
+				class="flex flex-row items-center justify-between gap-4 mb-2 w-full"
+			>
+				<span class="flex flex-row items-center justify-start gap-4">
+					<app-avatar
+						[src]="contributor.user.imageUrl"
+						[alt]="contributor.user.username"
+					></app-avatar>
+					<span class="text-base font-medium">{{
+						contributor.user.username
+					}}</span>
+				</span>
+				<button
+					mat-icon-button
+					(click)="removeContributor(contributor.user.id)"
+				>
+					<mat-icon>close</mat-icon>
+				</button>
+			</div>
+			<!-- Separator -->
+			@if (index !== contributors.length - 1) {
+				<div
+					class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"
+				></div>
+			}
+			<!-- Roles selector -->
+			<mat-chip-set aria-label="Enter reactive form keywords">
+				@for (role of baseRoles; track role) {
+					<mat-chip-option
+						[selected]="
+							isRoleSelected(contributor.user.username, role)
+						"
+						(selectionChange)="
+							toggleRole($event, contributor.user.username, role)
+						"
+					>
+						{{ role }}
+					</mat-chip-option>
+				}
+			</mat-chip-set>
+		</li>
+	}
+</ul>
