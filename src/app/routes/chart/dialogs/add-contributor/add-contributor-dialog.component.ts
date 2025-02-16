@@ -6,6 +6,7 @@ import {
 	OnInit,
 	signal,
 	ViewChild,
+	WritableSignal,
 } from "@angular/core";
 
 // Material
@@ -38,6 +39,13 @@ import { SimplifiedUserModel } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
 import { AuthService } from "app/auth/auth.service";
 import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
+import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
+import { ContributorRole } from "@/models/enums/role.enum";
+
+interface ContributorRoles {
+	userId: string;
+	roles: ContributorRole[];
+}
 
 export interface DialogData {
 	contributors: ContributorModel[];
@@ -59,7 +67,7 @@ export interface DialogData {
 		MatAutocompleteModule,
 		SearchbarComponent,
 		AvatarComponent,
-		ContributorTagsComponent,
+		ContributorItemComponent,
 	],
 })
 export class AddContributorDialogComponent {
@@ -68,6 +76,7 @@ export class AddContributorDialogComponent {
 
 	readonly username: string | null = null;
 
+	readonly roles: WritableSignal<ContributorRoles[]> = signal([]);
 	readonly poolContributors: ContributorModel[] = [];
 
 	constructor(
@@ -78,6 +87,8 @@ export class AddContributorDialogComponent {
 		// We need to manually bind the context of the function to the class,
 		// if not, UserService will not be available in the function
 		this.onSearch = this.onSearch.bind(this);
+
+		this.roles();
 
 		// Get the username of the logged in user
 		this.username = this.authService.user.username;

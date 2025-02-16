@@ -30,6 +30,7 @@ import { ContributorRole } from "@/models/enums/role.enum";
 import { UserService } from "@/services/api/user.service";
 import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
 import { ContributorService } from "@/services/api/contributor.service";
+import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 
 export interface DialogData {
 	contributor: ContributorModel;
@@ -47,19 +48,19 @@ export interface DialogData {
 		MatDialogActions,
 		MatDialogClose,
 		MatProgressSpinnerModule,
-		ContributorTagsComponent,
+		ContributorItemComponent,
 	],
 })
 export class EditContributorDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
-	readonly contributor = [this.data.contributor];
-
-	@ViewChild(ContributorTagsComponent)
-	tagsComponent!: ContributorTagsComponent;
-
-	hasChanges = signal<boolean>(false);
+	roles = signal<Array<ContributorRole>>(this.data.contributor.roles);
+	hasChanges = compareArrays(
+		this.data.contributor.roles,
+		this.roles(),
+		elementToKey,
+	);
 
 	constructor(
 		private contributorService: ContributorService,
@@ -67,11 +68,7 @@ export class EditContributorDialogComponent {
 	) {}
 
 	onSubmit(): void {
-		const updatedContributors = this.tagsComponent.getUpdatedContributors();
-
-		console.log("Updated contributors:", updatedContributors);
-
-		//this.contributorService.updateContributor()
+		this.dialogRef.close();
 	}
 
 	onCancelClick(): void {
