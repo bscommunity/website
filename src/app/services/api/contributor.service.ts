@@ -31,23 +31,17 @@ export class ContributorService {
 		contributors: SimplifiedContributorModel[],
 	): Promise<void> {
 		console.log(`Adding ${contributors.length} contributors to ${chartId}`);
-		this.http
-			.post<
-				ContributorModel[]
-			>(`${this.apiUrl}/${chartId}/contributors`, contributors)
-			.subscribe({
-				next: (contributors) => {
-					console.log("Contributors added successfully!");
-					this.cacheService.updateChartContributors(
-						chartId,
-						contributors,
-					);
+		const response = await firstValueFrom(
+			this.http.post<ContributorModel[]>(
+				`${this.apiUrl}/${chartId}/contributors`,
+				{
+					contributors: contributors,
 				},
-				error: (error) => {
-					console.error(error);
-					throw new Error(error.message);
-				},
-			});
+			),
+		);
+
+		this.cacheService.updateChartContributors(chartId, response);
+		console.log("Contributors added successfully!", response);
 	}
 
 	// Update
@@ -75,8 +69,10 @@ export class ContributorService {
 		console.log("Deleting contributor with ID:", id);
 
 		try {
-			const response = await firstValueFrom(
-				this.http.delete<ContributorModel>(`${this.apiUrl}/${id}`),
+			await firstValueFrom(
+				this.http.delete<ContributorModel>(
+					`${this.apiUrl}/${chartId}/contributors/${id}`,
+				),
 			);
 
 			this.cacheService.deleteChartContributor(chartId, id);

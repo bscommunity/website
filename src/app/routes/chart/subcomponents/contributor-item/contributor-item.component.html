@@ -7,8 +7,8 @@
 			></app-avatar>
 			<span class="text-base font-medium">{{ user.username }}</span>
 		</span>
-		@if (onRemove) {
-			<button mat-icon-button (click)="onRemove(user.id)">
+		@if (canRemove) {
+			<button mat-icon-button (click)="remove.emit(user.id)">
 				<mat-icon>close</mat-icon>
 			</button>
 		}

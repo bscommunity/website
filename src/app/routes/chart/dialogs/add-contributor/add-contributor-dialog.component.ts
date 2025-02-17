@@ -4,15 +4,18 @@ import {
 	Component,
 	computed,
 	inject,
-	OnInit,
 	signal,
 	ViewChild,
 	WritableSignal,
 } from "@angular/core";
 
 // Material
+import {
+	MatAutocompleteModule,
+	MatAutocompleteSelectedEvent,
+} from "@angular/material/autocomplete";
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { MatChipsModule } from "@angular/material/chips";
 import {
 	MAT_DIALOG_DATA,
 	MatDialogActions,
@@ -21,30 +24,27 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
-import {
-	MatAutocompleteModule,
-	MatAutocompleteSelectedEvent,
-} from "@angular/material/autocomplete";
-import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
-import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { AvatarComponent } from "@/components/avatar/avatar.component";
+import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
+import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 
-// Types
+// Models
 import { ContributorModel } from "@/models/contributor.model";
+import { ContributorRole } from "@/models/enums/role.enum";
 import { SimplifiedUserModel } from "@/models/user.model";
 
 // Services
+import { ContributorService } from "@/services/api/contributor.service";
 import { UserService } from "@/services/api/user.service";
 import { AuthService } from "app/auth/auth.service";
-import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
-import { ContributorRole } from "@/models/enums/role.enum";
-import { compareArrays, compareMaps, elementToKey } from "@/lib/compare";
 
 export interface DialogData {
-	contributors: ContributorModel[];
+	chartId: string;
+	usersIds: string[];
 }
 
 @Component({
@@ -70,27 +70,24 @@ export class AddContributorDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<AddContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
+	readonly isLoading = signal(false);
+
 	readonly username: string | null = null;
 
-	readonly initialData = new Map<string, ContributorRole[]>(
-		this.data.contributors.reduce((map, contributor) => {
-			map.set(contributor.user.id, contributor.roles);
-			return map;
-		}, new Map<string, ContributorRole[]>()), // Initialize the map with the contributors' roles
-	);
 	readonly roles: WritableSignal<Map<string, ContributorRole[]>> = signal(
-		this.initialData,
+		new Map(),
 	);
-	allContributorsHaveAtLeastOneRole = computed(() => {
-		// We remove 1 from the size because the logged in user is not a contributor
-		return this.roles().size - 1 === this.poolContributors.length;
-	});
 
-	readonly poolContributors: ContributorModel[] = [];
+	allContributorsHaveAtLeastOneRole = computed(
+		() => this.roles().size === this.poolUsers.length,
+	);
+
+	readonly poolUsers: SimplifiedUserModel[] = [];
 
 	constructor(
 		private authService: AuthService,
 		private userService: UserService,
+		private contributorService: ContributorService,
 		private cdr: ChangeDetectorRef,
 	) {
 		// We need to manually bind the context of the function to the class,
@@ -129,20 +126,22 @@ export class AddContributorDialogComponent {
 
 		this.userService.searchUsers(value).subscribe({
 			next: (response) => {
-				console.log("Resolved users data:", response);
+				// console.log("Resolved users data:", response);
 				this.queryContributors = response.filter(
-					(user) => user.username !== this.username,
+					(user) =>
+						// The user is not the logged in user
+						user.username !== this.username &&
+						// The user is not already in the pool
+						!this.poolUsers.some(
+							(poolUser) => poolUser.id === user.id,
+						) &&
+						// The user is not already in the chart
+						!this.data.usersIds.includes(user.id),
 				);
 				this.cdr.detectChanges();
 			},
 			error: (error) => {
 				console.error("Error fetching users:", error);
-
-				if (error.status === 401) {
-					console.error("User not logged in");
-					this.onCancelClick();
-					this.authService.logout();
-				}
 
 				this.queryContributors = null;
 				this.cdr.detectChanges();
@@ -157,12 +156,12 @@ export class AddContributorDialogComponent {
 				(user) => `@${user.username}` === event.option.viewValue,
 			);
 
-			this.poolContributors.push({
-				user,
-				roles: [],
-				joinedAt: new Date(),
-			} as ContributorModel);
+			if (!user) {
+				console.error("User not found");
+				return;
+			}
 
+			this.poolUsers.push(user);
 			this.queryContributors = "start";
 		}
 
@@ -171,11 +170,45 @@ export class AddContributorDialogComponent {
 		event.option.deselect();
 	}
 
-	onRemove(id: string): void {
-		const index = this.poolContributors.findIndex(
-			(contributor) => contributor.user.id === id,
-		);
-		this.poolContributors.splice(index, 1);
+	removeContributor(id: string): void {
+		const index = this.poolUsers.findIndex((user) => user.id === id);
+		if (index === -1) {
+			console.error("User not found");
+			return;
+		}
+
+		this.poolUsers.splice(index, 1);
+	}
+
+	async onSubmit(): Promise<void> {
+		this.dialogRef.disableClose = true;
+
+		try {
+			this.isLoading.update(() => true);
+
+			await this.contributorService.addContributors(
+				this.data.chartId,
+				this.poolUsers.map((user) => ({
+					userId: user.id,
+					roles: this.roles().get(user.id) || [],
+				})),
+			);
+
+			// Close the dialog
+			this.dialogRef.close();
+
+			// Reload page to update the contributor list
+			/* this.router.navigate([this.router.url], {
+				onSameUrlNavigation: "reload",
+			}); */
+			/* window.location.reload(); */
+
+			console.log("Contributors added successfully");
+		} catch (error) {
+			console.error(error);
+		}
+
+		this.isLoading.update(() => false);
 	}
 
 	onCancelClick(): void {

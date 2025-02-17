@@ -40,11 +40,6 @@ export class ChartResolver implements Resolve<any> {
 		} catch (error: any) {
 			console.error("Error fetching chart", error);
 
-			if (error.status === 401) {
-				this.authService.logout();
-				return null;
-			}
-
 			// In the future, redirect to 404 only if not found
 			this.router.navigate(["error"], {
 				state: { error: `${error.statusText}: ${error.error.error}` },
