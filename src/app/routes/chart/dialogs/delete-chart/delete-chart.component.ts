@@ -1,3 +1,4 @@
+import { Router } from "@angular/router";
 import { Component, inject, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 
@@ -13,11 +14,11 @@ import {
 } from "@angular/material/dialog";
 import { MatFormField } from "@angular/material/form-field";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatInputModule } from "@angular/material/input";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
-import { Router } from "@angular/router";
-import { MatInputModule } from "@angular/material/input";
 
 interface DeleteChartDialogData {
 	chartId: string;
@@ -40,7 +41,9 @@ interface DeleteChartDialogData {
 	templateUrl: "./delete-chart.component.html",
 })
 export class DeleteChartComponent {
+	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<DeleteChartComponent>);
+
 	readonly data = inject<DeleteChartDialogData>(MAT_DIALOG_DATA);
 	readonly fb = inject(FormBuilder);
 
@@ -65,14 +68,17 @@ export class DeleteChartComponent {
 		this.isLoading.update(() => true);
 
 		// Delete the chart
-		try {
-			await this.chartService.deleteChart(this.data.chartId);
+		const response = await this.chartService.deleteChart(this.data.chartId);
+
+		if (response) {
 			this.router.navigate(["/"]);
-		} catch (error) {
-			console.error(error);
+			this.dialogRef.close(true);
+		} else {
+			this._matSnackBar.open("Failed to delete chart", "Dismiss", {
+				duration: 2000,
+			});
 		}
 
 		this.isLoading.update(() => false);
-		this.dialogRef.close(true);
 	}
 }

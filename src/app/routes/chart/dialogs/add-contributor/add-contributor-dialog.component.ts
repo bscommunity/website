@@ -26,6 +26,7 @@ import {
 } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
 import { AvatarComponent } from "@/components/avatar/avatar.component";
@@ -33,7 +34,6 @@ import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 
 // Models
-import { ContributorModel } from "@/models/contributor.model";
 import { ContributorRole } from "@/models/enums/role.enum";
 import { SimplifiedUserModel } from "@/models/user.model";
 
@@ -67,6 +67,7 @@ export interface DialogData {
 	],
 })
 export class AddContributorDialogComponent {
+	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<AddContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
@@ -206,6 +207,9 @@ export class AddContributorDialogComponent {
 			console.log("Contributors added successfully");
 		} catch (error) {
 			console.error(error);
+			this._matSnackBar.open("Failed to add contributors", "Close", {
+				duration: 3000,
+			});
 		}
 
 		this.isLoading.update(() => false);
