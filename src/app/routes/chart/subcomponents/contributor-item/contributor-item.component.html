@@ -7,9 +7,11 @@
 			></app-avatar>
 			<span class="text-base font-medium">{{ user.username }}</span>
 		</span>
-		<button mat-icon-button (click)="onRemove ? onRemove(user.id) : null">
-			<mat-icon>close</mat-icon>
-		</button>
+		@if (onRemove) {
+			<button mat-icon-button (click)="onRemove(user.id)">
+				<mat-icon>close</mat-icon>
+			</button>
+		}
 	</div>
 	<div class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"></div>
 	<app-contributor-tags [userId]="user.id" [roles]="roles">

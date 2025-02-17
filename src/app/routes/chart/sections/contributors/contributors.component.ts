@@ -35,6 +35,7 @@ import { ContributorRole } from "@/models/enums/role.enum";
 	templateUrl: "./contributors.component.html",
 })
 export class ContributorsComponent {
+	@Input() chartId: string = "";
 	@Input() contributors: ContributorModel[] | undefined = [];
 
 	private _snackBar = inject(MatSnackBar);
@@ -71,6 +72,7 @@ export class ContributorsComponent {
 		this.dialog.open(EditContributorDialogComponent, {
 			data: {
 				contributor,
+				chartId: this.chartId,
 			},
 			width: "450px",
 		});

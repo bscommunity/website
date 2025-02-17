@@ -48,6 +48,7 @@ export const routes: Routes = [
 		component: ChartComponent,
 		resolve: { chart: ChartResolver },
 		canActivate: [isAuthenticatedGuard],
+		runGuardsAndResolvers: "always",
 	},
 	{
 		path: "error",

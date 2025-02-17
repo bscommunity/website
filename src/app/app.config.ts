@@ -6,6 +6,7 @@ import {
 	provideRouter,
 	TitleStrategy,
 	withComponentInputBinding,
+	withRouterConfig,
 } from "@angular/router";
 
 import { routes } from "./app.routes";
@@ -32,7 +33,13 @@ export const appConfig: ApplicationConfig = {
 		provideClientHydration(withEventReplay()),
 		provideAnimationsAsync(),
 		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-		provideRouter(routes, withComponentInputBinding()),
+		provideRouter(
+			routes,
+			withComponentInputBinding(),
+			withRouterConfig({
+				onSameUrlNavigation: "reload",
+			}),
+		),
 		{ provide: TitleStrategy, useClass: ChartTitleStrategy },
 	],
 };
