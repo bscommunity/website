@@ -78,7 +78,7 @@ export class PublishedComponent implements OnInit {
 				this.charts = response;
 				this.cdr.detectChanges();
 
-				console.log(this.charts);
+				// console.log(this.charts);
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
@@ -87,7 +87,7 @@ export class PublishedComponent implements OnInit {
 				this.charts = null;
 				this.cdr.detectChanges();
 
-				console.log(this.charts);
+				// console.log(this.charts);
 			},
 		});
 	}

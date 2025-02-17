@@ -101,7 +101,7 @@ export class ContributorsComponent {
 			this.openSnackBar("Contributor removed with success!", "Close");
 		};
 
-		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+		this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Contributor",
 				description:

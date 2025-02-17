@@ -102,12 +102,16 @@ export class CacheService {
 	}
 
 	removeChart(id: string): void {
-		const cacheKey = `chart_${id}`;
-
 		// If the chart exists, we remove it from the cache
-		if (this.getChart(cacheKey)) {
-			this.cookieService.delete(cacheKey);
+		if (this.getChart(id)) {
+			this.cookieService.delete(`chart_${id}`);
 			this.decreaseChartCount();
+
+			// We also remove the chart from the list of all charts
+			const allCharts = this.getAllCharts();
+			const updatedCharts = allCharts?.filter((chart) => chart.id !== id);
+
+			this.setAllCharts(updatedCharts || []);
 		}
 	}
 
