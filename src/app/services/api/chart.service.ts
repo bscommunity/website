@@ -2,56 +2,28 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
+// Services
+import { CacheService } from "../cache.service";
+
+// Models
 import {
 	Chart,
 	ChartModel,
 	CreateChartModel,
 	MutateChartModel,
 } from "@/models/chart.model";
+
 import { apiUrl } from ".";
-import { CookieService } from "../cookie.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class ChartService {
 	constructor(
-		private cookieService: CookieService,
+		private cacheService: CacheService,
 		private http: HttpClient,
 	) {}
 	private readonly apiUrl = `${apiUrl}/charts`;
-
-	// Caching
-	addChartToCache(chart: ChartModel): void {
-		const charts = this.cookieService.get("charts");
-		const updatedCharts = charts ? [...JSON.parse(charts), chart] : [chart];
-
-		this.cookieService.set("charts", JSON.stringify(updatedCharts));
-	}
-
-	removeChartFromCache(id: string): void {
-		const charts = this.cookieService.get("charts");
-
-		if (charts) {
-			const updatedCharts = JSON.parse(charts).filter(
-				(chart: ChartModel) => chart.id !== id,
-			);
-
-			this.cookieService.set("charts", JSON.stringify(updatedCharts));
-		}
-	}
-
-	updateChartInCache(updatedChart: ChartModel): void {
-		const charts = this.cookieService.get("charts");
-
-		if (charts) {
-			const updatedCharts = JSON.parse(charts).map((chart: ChartModel) =>
-				chart.id === updatedChart.id ? updatedChart : chart,
-			);
-
-			this.cookieService.set("charts", JSON.stringify(updatedCharts));
-		}
-	}
 
 	// Create
 	async createChart(chart: CreateChartModel): Promise<ChartModel> {
@@ -63,13 +35,13 @@ export class ChartService {
 
 	// Read
 	getAllCharts(): Observable<ChartModel[]> {
-		const charts = this.cookieService.get("charts");
+		const charts = this.cacheService.getAllCharts();
 
 		if (charts) {
 			console.log(`Returning charts from cache...`);
 
 			return new Observable((subscriber) => {
-				subscriber.next(JSON.parse(charts));
+				subscriber.next(charts);
 				subscriber.complete();
 			});
 		} else {
@@ -79,24 +51,20 @@ export class ChartService {
 
 			return this.http.get<ChartModel[]>(this.apiUrl).pipe(
 				tap((fetchedCharts) => {
-					this.cookieService.set(
-						"charts",
-						JSON.stringify(fetchedCharts),
-					);
+					this.cacheService.setAllCharts(fetchedCharts);
 				}),
 			);
 		}
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
-		const cacheKey = `chart_${id}`;
-		const cachedChart = this.cookieService.get(cacheKey);
+		const cachedChart = this.cacheService.getChart(id);
 
 		if (cachedChart) {
 			console.log(`Returning chart ${id} from cache...`);
+
 			try {
-				const chart = JSON.parse(cachedChart);
-				return Chart.parse(chart);
+				return Chart.parse(cachedChart);
 			} catch (error) {
 				console.error("Error parsing cached chart:", error);
 				// Fall back to API fetch if parsing fails.
@@ -110,7 +78,7 @@ export class ChartService {
 
 		try {
 			const parsedChart = Chart.parse(response);
-			this.cookieService.set(cacheKey, JSON.stringify(parsedChart));
+			this.cacheService.addChart(parsedChart);
 			return parsedChart;
 		} catch (error) {
 			console.error("Invalid data structure received:", error);
@@ -124,16 +92,27 @@ export class ChartService {
 		chart: MutateChartModel,
 	): Promise<ChartModel> {
 		console.log("Updating chart:", chart);
-		return await firstValueFrom(
+		const updatedChart = await firstValueFrom(
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
+
+		this.cacheService.updateChart(updatedChart);
+		return updatedChart;
 	}
 
 	// Delete
-	async deleteChart(id: string): Promise<ChartModel> {
+	async deleteChart(id: string): Promise<boolean> {
 		console.log("Deleting chart with ID:", id);
-		return await firstValueFrom(
-			this.http.delete<ChartModel>(`${this.apiUrl}/${id}`),
-		);
+		try {
+			await firstValueFrom(
+				this.http.delete<ChartModel>(`${this.apiUrl}/${id}`),
+			);
+			this.cacheService.removeChart(id);
+
+			return true;
+		} catch (error) {
+			console.error("Failed to delete chart:", error);
+			return false;
+		}
 	}
 }
