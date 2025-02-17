@@ -1,4 +1,10 @@
-import { Component, Input, WritableSignal } from "@angular/core";
+import {
+	Component,
+	EventEmitter,
+	Input,
+	Output,
+	WritableSignal,
+} from "@angular/core";
 
 // Modules
 import { MatIconModule } from "@angular/material/icon";
@@ -25,5 +31,9 @@ import { MatButtonModule } from "@angular/material/button";
 export class ContributorItemComponent {
 	@Input() user!: SimplifiedUserModel;
 	@Input() roles!: WritableSignal<Map<string, Array<ContributorRole>>>;
-	@Input() onRemove: undefined | ((id: string) => void) = undefined;
+	@Input({
+		transform: (value: string) => value !== "false",
+	})
+	canRemove = false;
+	@Output() remove = new EventEmitter<string>();
 }

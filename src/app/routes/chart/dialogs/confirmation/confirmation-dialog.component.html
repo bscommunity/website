@@ -3,6 +3,22 @@
 	<p>{{ data.description }}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-	<button mat-button mat-dialog-close="cancel">Cancel</button>
-	<button mat-button mat-dialog-close="ok" cdkFocusInitial>Ok</button>
+	<button mat-button (click)="onCancel()" [disabled]="isLoading()">
+		Cancel
+	</button>
+	<button
+		mat-button
+		cdkFocusInitial
+		(click)="onSubmit()"
+		[disabled]="isLoading()"
+	>
+		@if (isLoading()) {
+			<mat-progress-spinner
+				[diameter]="16"
+				[mode]="'indeterminate'"
+			></mat-progress-spinner>
+		} @else {
+			Ok
+		}
+	</button>
 </mat-dialog-actions>

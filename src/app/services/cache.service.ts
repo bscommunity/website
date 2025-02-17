@@ -27,6 +27,7 @@ export class CacheService {
 		this.cookieService.set(
 			"chartCount",
 			(this.getChartCount() + 1).toString(),
+			{ path: "/" },
 		);
 	}
 
@@ -34,6 +35,7 @@ export class CacheService {
 		this.cookieService.set(
 			"chartCount",
 			(this.getChartCount() - 1).toString(),
+			{ path: "/" },
 		);
 	}
 
@@ -73,7 +75,7 @@ export class CacheService {
 		if (this.getChartCount() >= MAX_CACHED_CHARTS) {
 			const allCharts = this.getAllCharts(true) as CachedFullChart[];
 
-			if (!allCharts) {
+			if (!allCharts || allCharts.length === 0) {
 				return;
 			}
 
@@ -132,11 +134,13 @@ export class CacheService {
 			return;
 		}
 
+		const { contributors: oldContributors, ...rest } = chart;
+
 		this.cookieService.set(
 			`chart_${id}`,
 			JSON.stringify({
-				...chart,
-				contributors,
+				...rest,
+				contributors: [oldContributors, ...contributors],
 			}),
 		);
 	}

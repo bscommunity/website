@@ -18,7 +18,10 @@ import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirma
 import { AddContributorDialogComponent } from "../../dialogs/add-contributor/add-contributor-dialog.component";
 import { EditContributorDialogComponent } from "../../dialogs/edit-contributor/edit-contributor-dialog.component";
 
-// Types
+// Services
+import { ContributorService } from "@/services/api/contributor.service";
+
+// Models
 import { ContributorModel } from "@/models/contributor.model";
 import { ContributorRole } from "@/models/enums/role.enum";
 
@@ -40,6 +43,7 @@ export class ContributorsComponent {
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
+	readonly contributorService = inject(ContributorService);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -49,19 +53,16 @@ export class ContributorsComponent {
 	contributorTable!: TableComponent<ContributorModel>;
 
 	openAddContributorConfirmationDialog(): void {
-		const dialogRef = this.dialog.open(AddContributorDialogComponent, {
+		this.dialog.open(AddContributorDialogComponent, {
 			data: {
-				contributors: this.contributors,
+				chartId: this.chartId,
+				usersIds: this.contributors
+					? this.contributors.map(
+							(contributor) => contributor.user.id,
+						)
+					: [],
 			},
 			width: "450px",
-		});
-
-		const subscription = dialogRef.afterClosed().subscribe((result) => {
-			if (result === "ok") {
-				// ...
-				this.openSnackBar("Contributor added with success!", "Close");
-				subscription.unsubscribe();
-			}
 		});
 	}
 
@@ -82,19 +83,32 @@ export class ContributorsComponent {
 		index: number,
 		contributor: ContributorModel,
 	): void {
+		console.log("Removing contributor", contributor);
+
+		const operation = async () => {
+			const result = await this.contributorService.deleteContributor(
+				this.chartId,
+				contributor.user.id,
+			);
+
+			if (!result) {
+				throw new Error("An error occurred");
+			}
+		};
+
+		const afterOperation = () => {
+			this.removeContributor(contributor);
+			this.openSnackBar("Contributor removed with success!", "Close");
+		};
+
 		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Contributor",
 				description:
 					"Are you sure you want to remove this contributor? The user access to the chart will be lost.",
+				operation,
+				afterOperation,
 			},
-		});
-
-		const subscription = dialogRef.afterClosed().subscribe((result) => {
-			if (result === "ok") {
-				this.removeContributor(contributor);
-				subscription.unsubscribe();
-			}
 		});
 	}
 
