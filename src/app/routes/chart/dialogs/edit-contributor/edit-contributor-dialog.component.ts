@@ -34,6 +34,7 @@ import { ContributorService } from "@/services/api/contributor.service";
 import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 import { compareArrays, elementToKey } from "@/lib/compare";
 import { Router } from "@angular/router";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 export interface DialogData {
 	chartId: string;
@@ -56,6 +57,7 @@ export interface DialogData {
 	],
 })
 export class EditContributorDialogComponent {
+	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
@@ -101,6 +103,9 @@ export class EditContributorDialogComponent {
 			console.log("Updated contributor. Now reloading page...");
 		} catch (error) {
 			console.error(error);
+			this._matSnackBar.open("Failed to update contributor", "Close", {
+				duration: 3000,
+			});
 		}
 
 		this.isLoading.update(() => false);
