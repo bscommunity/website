@@ -52,8 +52,4 @@ export class ConfirmationDialogComponent {
 		this.isLoading.set(false);
 		this.dialogRef.close();
 	}
-
-	onCancel(): void {
-		this.dialogRef.close();
-	}
 }

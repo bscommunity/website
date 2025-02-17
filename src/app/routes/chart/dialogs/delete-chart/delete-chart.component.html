@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Delete chart permanently</h2>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-full">
+	<mat-dialog-content class="!flex flex-col items-start gap-4">
+		<p>
+			Are you sure you want to delete the chart
+			<strong>{{ data.chartName }}</strong
+			>? <br />
+			This action cannot be undone.
+		</p>
+		<p>
+			Please type <strong>{{ data.chartName }}</strong> to confirm.
+		</p>
+		<mat-form-field
+			appearance="outline"
+			subscriptSizing="dynamic"
+			class="w-full"
+		>
+			<input
+				matInput
+				type="text"
+				placeholder="Type chart name"
+				formControlName="chartName"
+			/>
+		</mat-form-field>
+	</mat-dialog-content>
+	<mat-dialog-actions>
+		<button mat-button mat-dialog-close="cancel" [disabled]="isLoading()">
+			Cancel
+		</button>
+		<button
+			type="submit"
+			mat-button
+			[disabled]="
+				isLoading() || !form.get('chartName')?.value || form.invalid
+			"
+		>
+			@if (isLoading()) {
+				<mat-progress-spinner
+					[diameter]="16"
+					[mode]="'indeterminate'"
+				></mat-progress-spinner>
+			} @else {
+				I'm sure
+			}
+		</button>
+	</mat-dialog-actions>
+</form>
