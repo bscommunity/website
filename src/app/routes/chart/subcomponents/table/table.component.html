@@ -16,7 +16,7 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
-					[innerHTML]="column.cell(element) | safeHtml"
+					[innerHTML]="column.cell(element, $index) | safeHtml"
 				></td>
 			</ng-container>
 		}
@@ -24,29 +24,25 @@
 		@if (actions && actions.length > 0) {
 			<ng-container matColumnDef="actions">
 				<th mat-header-cell *matHeaderCellDef>Actions</th>
-				<td mat-cell *matCellDef="let element">
+				<td mat-cell *matCellDef="let element; let i = index">
 					<div
 						class="flex flex-row items-center justify-center gap-2"
 					>
-						@for (
-							action of actions;
-							track $index;
-							let index = $index
-						) {
+						@for (action of actions; track $index) {
 							<button
 								[matRippleDisabled]="
-									action.disabled(index, element)
+									action.disabled(i, element)
 								"
-								[disabled]="action.disabled(index, element)"
+								[disabled]="action.disabled(i, element)"
 								[matTooltipDisabled]="
-									action.disabled(index, element)
+									action.disabled(i, element)
 								"
 								mat-ripple
 								matTooltip="{{ action.description }}"
 								matTooltipPosition="above"
 								matTooltipShowDelay="375"
 								matTooltipClass="!text-sm"
-								(click)="action.callback(index, element)"
+								(click)="action.callback(i, element)"
 								class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90 disabled:opacity-50"
 							>
 								<span

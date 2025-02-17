@@ -18,7 +18,7 @@ import { MatSort, MatSortModule, SortDirection } from "@angular/material/sort";
 export interface TableColumn<T> {
 	columnDef: string;
 	header: string;
-	cell: (element: T) => string;
+	cell: (element: T, index: number) => string;
 }
 
 export interface Action<T> {

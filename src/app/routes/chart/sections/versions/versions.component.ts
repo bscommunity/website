@@ -66,7 +66,7 @@ export class VersionsComponent {
 		{
 			columnDef: "id",
 			header: "Version",
-			cell: (item: VersionModel) => `${item.id}`,
+			cell: (_, index: number) => `${index}`,
 		},
 		{
 			columnDef: "publishedAt",
@@ -102,8 +102,9 @@ export class VersionsComponent {
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (index, item: VersionModel) =>
-				index === 0 || item.downloadsAmount !== 0,
+			disabled: (index, item: VersionModel) => {
+				return index === 0 || index === this.versions.length - 1;
+			},
 		},
 	];
 
