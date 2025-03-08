@@ -17,6 +17,7 @@ import {
 	redirectIfAuthenticatedGuard,
 } from "./auth/auth.guard";
 import { PageErrorComponent } from "./routes/error/error.component";
+import { LinkComponent } from "./routes/link/link.component";
 
 export const routes: Routes = [
 	{
@@ -49,6 +50,11 @@ export const routes: Routes = [
 		resolve: { chart: ChartResolver },
 		canActivate: [isAuthenticatedGuard],
 		runGuardsAndResolvers: "always",
+	},
+	{
+		path: "link/:type/:id",
+		component: LinkComponent,
+		/* resolve: { chart: ChartResolver }, */
 	},
 	{
 		path: "error",

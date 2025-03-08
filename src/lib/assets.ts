@@ -5,6 +5,8 @@ interface MediaInfo {
 	album?: string;
 	track?: string;
 	artist?: string;
+	trackUrl?: string;
+	trackPreviewUrl?: string;
 }
 
 /**
@@ -22,7 +24,7 @@ export async function getMediaInfo(
 	}).toString();
 
 	// Fetch data from iTunes Search API
-	const response = await fetch(`https://itunes.apple.com/search?${query}`);
+	const response = await fetch(`${ITUNES_API_URL}?${query}`);
 
 	console.log("response", response);
 
@@ -42,12 +44,16 @@ export async function getMediaInfo(
 	// Extract the artwork URL
 	const artworkUrl100 = data.results[0].artworkUrl100;
 
+	console.log("response", data);
+
 	// Return higher resolution version of the artwork
 	return {
 		coverUrl: artworkUrl100.replace("100x100", "600x600"),
 		album: data.results[0].collectionName,
 		track: data.results[0].trackName,
 		artist: data.results[0].artistName,
+		trackUrl: data.results[0].trackViewUrl,
+		trackPreviewUrl: data.results[0].previewUrl,
 	};
 }
 

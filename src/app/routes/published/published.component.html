@@ -1,5 +1,5 @@
 <main
-	class="flex flex-col md:flex-row items-start justify-center w-full min-h-screen px-wrapper pt-9 pb-14 gap-9 md:gap-16"
+	class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
 	@if (charts === null) {
 		<div
@@ -44,31 +44,12 @@
 					</p>
 				</div>
 			</div>
-			<div
-				class="flex flex-row items-center justify-between gap-6 bg-surface-container-low rounded-2xl px-9 py-4 w-full"
-			>
-				<div class="flex flex-row items-center justify-start gap-6">
-					<mat-icon class="min-w-6"> help </mat-icon>
-					<div class="flex flex-col items-start justify-start">
-						<p>Don’t know where to start?</p>
-						<p>
-							Meet the community on Discord and stay up to date
-							with everything you need to know to have fun
-							creating your own content!
-						</p>
-					</div>
-				</div>
-				<button class="!min-w-fit" mat-flat-button>
-					<mat-icon
-						class="!max-w-5"
-						svgIcon="discord"
-						inline="true"
-						aria-hidden="false"
-						aria-label="Discord logo"
-					></mat-icon>
-					Discord
-				</button>
-			</div>
+			<app-large-panel
+				class="w-full"
+				title="Don’t know where to start?"
+				description="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
+				[button]="{ label: 'Discord', link: '/' }"
+			></app-large-panel>
 		</div>
 	} @else {
 		<app-filter-panel

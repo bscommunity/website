@@ -21,6 +21,7 @@ import { ChartModel } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { LargePanelComponent } from "../../components/panel/large-panel.component";
 
 @Component({
 	selector: "app-published",
@@ -34,6 +35,7 @@ import { ChartService } from "@/services/api/chart.service";
 		RouterLink,
 		MatProgressSpinnerModule,
 		SearchbarComponent,
+		LargePanelComponent,
 	],
 	templateUrl: "./published.component.html",
 })

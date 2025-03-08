@@ -4,14 +4,14 @@ import { BehaviorSubject } from "rxjs";
 
 import { MatDialog } from "@angular/material/dialog";
 
-import { UploadDialogSection1Component } from "./sections/section1.component";
-import { UploadDialogSection2Component } from "./sections/section2.component";
-import { UploadDialogSection3Component } from "./sections/section3.component";
+import { UploadDialogSection1Component } from "@/components/upload/sections/section1.component";
+import { UploadDialogSection2Component } from "@/components/upload/sections/section2.component";
+import { UploadDialogSection3Component } from "@/components/upload/sections/section3.component";
 
-import { UploadDialogDisclaimerComponent } from "./generic/disclaimer.component";
-import { UploadDialogLoadingComponent } from "./generic/loading.component";
-import { UploadDialogSuccessComponent } from "./generic/success.component";
-import { UploadDialogErrorComponent } from "./generic/error.component";
+import { UploadDialogDisclaimerComponent } from "@/components/upload/generic/disclaimer.component";
+import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
+import { UploadDialogSuccessComponent } from "@/components/upload/generic/success.component";
+import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
 
 const stepComponents = [
 	UploadDialogSection1Component,
@@ -72,6 +72,10 @@ export const initialFormData: UploadFormData = {
 	notesAmount: 0,
 	bpm: 0,
 	effectsAmount: 0,
+	//
+	chartPreviewUrl: "",
+	trackPreviewUrl: "",
+	trackUrl: "",
 	// ... any other initial values added later
 };
 
@@ -171,24 +175,12 @@ export class UploadDialogService {
 
 		// Handle track data retrieval (cover art, track and artist names confirmation)
 		try {
-			const { coverUrl, album, artist, track } = await getMediaInfo(
+			const response = await getMediaInfo(
 				this.formData.track,
 				this.formData.artist,
 			);
 
-			this.formData.coverUrl = coverUrl;
-
-			if (album) {
-				this.formData.album = album;
-			}
-
-			if (artist) {
-				this.formData.artist = artist;
-			}
-
-			if (track) {
-				this.formData.track = track;
-			}
+			this.formData = { ...this.formData, ...response };
 		} catch (error) {
 			this.dialog.closeAll();
 			this.dialog.open(UploadDialogErrorComponent, {
