@@ -22,7 +22,7 @@ import type { UserModel } from "@/models/user.model";
 
 // Services
 import { AuthService } from "@/auth/auth.service";
-import { UploadDialogService } from "@/components/upload/upload.service";
+import { UploadDialogService } from "@/services/upload.service";
 
 @Component({
 	selector: "app-header",

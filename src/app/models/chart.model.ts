@@ -9,12 +9,15 @@ export const Chart = z.object({
 	track: z.string(),
 	album: z.string(),
 	coverUrl: z.string(),
+	trackUrl: z.string(),
+	trackPreviewUrl: z.string(),
 	difficulty: z.nativeEnum(Difficulty),
-	isDeluxe: z.boolean(),
-	isExplicit: z.boolean(),
-	isFeatured: z.boolean(),
+	isDeluxe: z.boolean().default(false),
+	isExplicit: z.boolean().default(false),
+	isFeatured: z.boolean().default(false),
 
 	// Relations
+	latestVersion: Version.optional(),
 	versions: Version.array(),
 	contributors: z.array(Contributor).optional(),
 });
@@ -30,6 +33,7 @@ export const CreateChartModel = Chart.omit({
 	// First version properties
 	z.object({
 		chartUrl: z.string(),
+		chartPreviewUrl: z.string().optional(),
 		duration: z.number(),
 		notesAmount: z.number(),
 		effectsAmount: z.number(),

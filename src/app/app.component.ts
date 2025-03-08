@@ -24,7 +24,8 @@ import { filter } from "rxjs";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-	showHeaderFooter = false;
+	showHeader = false;
+	showFooter = false;
 
 	constructor(
 		public authService: AuthService,
@@ -71,10 +72,16 @@ export class AppComponent implements OnInit {
 					"/settings",
 				];
 
-				this.showHeaderFooter =
-					(event.urlAfterRedirects.startsWith("/chart") ||
-						dashboardRoutes.includes(event.urlAfterRedirects)) &&
-					authService.isLoggedIn();
+				this.showHeader =
+					dashboardRoutes.some((route) =>
+						event.urlAfterRedirects.startsWith(route),
+					) && authService.isLoggedIn();
+
+				const disableFooter = ["/auth", "/error", "/not-found"];
+
+				this.showFooter = !disableFooter.some((route) =>
+					event.urlAfterRedirects.includes(route),
+				);
 			});
 	}
 

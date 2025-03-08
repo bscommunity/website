@@ -9,7 +9,7 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 
 import { ChartComponent } from "app/routes/published/subcomponents/chart.component";
-import { SuccessDialogData } from "../upload.service";
+import { SuccessDialogData } from "../../../services/upload.service";
 
 @Component({
 	selector: "app-upload-dialog-success",

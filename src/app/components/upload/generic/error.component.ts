@@ -6,7 +6,7 @@ import {
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { UploadErrorData } from "../upload.service";
+import { UploadErrorData } from "../../../services/upload.service";
 import { Router } from "@angular/router";
 
 @Component({

@@ -25,7 +25,10 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { initialFormData, UploadFormData } from "../upload.service";
+import {
+	initialFormData,
+	UploadFormData,
+} from "../../../services/upload.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
 
