@@ -11,10 +11,16 @@ import {
 
 import { ThemeService } from "@/services/theme.service";
 import { StorageService } from "@/services/storage.service";
+import { RouterLink } from "@angular/router";
 
 @Component({
 	selector: "app-footer",
-	imports: [MatButtonModule, MatIconModule, CustomSelectComponent],
+	imports: [
+		MatButtonModule,
+		MatIconModule,
+		CustomSelectComponent,
+		RouterLink,
+	],
 	templateUrl: "./footer.component.html",
 	styleUrl: "./footer.component.scss",
 })
