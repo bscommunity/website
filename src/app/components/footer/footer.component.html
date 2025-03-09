@@ -1,5 +1,5 @@
 <footer
-	class="flex flex-col items-center justify-start px-wrapper py-9 gap-4 w-full bg-surface-container-low text-sm gap-9"
+	class="flex flex-col items-center justify-start px-wrapper py-9 w-full bg-surface-container-low text-sm gap-9"
 >
 	<div
 		class="flex flex-col md:flex-row items-start justify-between w-full gap-9"
@@ -39,20 +39,33 @@
 
 		<!-- Sections -->
 		<ul
-			class="flex flex-row items-center justify-end gap-20 order-1 md:order-2"
+			class="flex flex-row items-center justify-end gap-16 order-1 md:order-2"
 		>
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Resources</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">Community</a></li>
 					<li><a href="#">Blog</a></li>
+					<li><a href="#">Community</a></li>
 				</ul>
 			</li>
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Help</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">Documentation</a></li>
 					<li><a href="#">Support</a></li>
+					<li><a href="#">Documentation</a></li>
+				</ul>
+			</li>
+			<li class="flex flex-col items-start justify-start gap-6">
+				<h3 class="uppercase">Legal</h3>
+				<ul class="flex flex-col items-start justify-start gap-5">
+					<li>
+						<a [routerLink]="['/privacy-policy']">Privacy Policy</a>
+					</li>
+					<li>
+						<a [routerLink]="['/terms-of-service']"
+							>Terms of Service</a
+						>
+					</li>
 				</ul>
 			</li>
 		</ul>
