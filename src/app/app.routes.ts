@@ -18,6 +18,8 @@ import {
 } from "./auth/auth.guard";
 import { PageErrorComponent } from "./routes/error/error.component";
 import { LinkComponent } from "./routes/link/link.component";
+import { PrivacyPolicyComponent } from "./routes/privacy-policy/privacy-policy.component";
+import { TermsOfServiceComponent } from "./routes/terms-of-service/terms-of-service.component";
 
 export const routes: Routes = [
 	{
@@ -52,9 +54,18 @@ export const routes: Routes = [
 		runGuardsAndResolvers: "always",
 	},
 	{
+		path: "privacy-policy",
+		component: PrivacyPolicyComponent,
+		title: "Our Privacy Policy: Transparency for Our Community",
+	},
+	{
+		path: "terms-of-service",
+		component: TermsOfServiceComponent,
+		title: "Our Terms of Service",
+	},
+	{
 		path: "link/:type/:id",
 		component: LinkComponent,
-		/* resolve: { chart: ChartResolver }, */
 	},
 	{
 		path: "error",

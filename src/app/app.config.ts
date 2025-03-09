@@ -6,6 +6,7 @@ import {
 	provideRouter,
 	TitleStrategy,
 	withComponentInputBinding,
+	withInMemoryScrolling,
 	withRouterConfig,
 } from "@angular/router";
 
@@ -36,6 +37,10 @@ export const appConfig: ApplicationConfig = {
 		provideRouter(
 			routes,
 			withComponentInputBinding(),
+			withInMemoryScrolling({
+				scrollPositionRestoration: "top", // Scrolls to the top on navigation
+				anchorScrolling: "enabled", // Enables anchor (fragment) scrolling
+			}),
 			withRouterConfig({
 				onSameUrlNavigation: "reload",
 			}),
