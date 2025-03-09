@@ -1,0 +1,35 @@
+#terms ol {
+	list-style-type: decimal;
+	list-style-position: outside;
+	margin-left: 1rem;
+	gap: 1rem;
+}
+
+/* Apply only to direct ol children */
+#terms ol#list > li:not(:last-child) {
+	margin-bottom: 2rem;
+}
+
+#terms h3 {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+	font-weight: 700;
+}
+
+#terms ul {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	list-style-type: disc;
+	list-style-position: inside;
+}
+
+#terms ul li {
+	text-indent: -1em;
+	margin-left: 1em;
+	margin-bottom: 0.5rem;
+}
