@@ -1,0 +1,39 @@
+<section
+	class="w-full inline-flex flex-col justify-start items-start gap-6 overflow-hidden"
+>
+	<header class="flex flex-col justify-start items-start gap-2">
+		<h3 class="relative justify-center text-3xl font-semibold leading-9">
+			Release notes for {{ release.version }} {{ icon }}
+		</h3>
+		<h4 class="relative justify-center text-base font-normal leading-snug">
+			{{ releaseDate }}
+		</h4>
+	</header>
+
+	<div class="flex flex-col justify-start items-start gap-4">
+		<p class="text-on-background text-xs font-normal leading-none">
+			If you encounter any issues, please report them on
+			<a
+				href="https://github.com"
+				target="_blank"
+				class="text-[#b8cf84] text-xs font-normal underline leading-none"
+				>the issues page</a
+			>.
+		</p>
+		<h5 class="relative justify-center text-base font-medium leading-snug">
+			{{ release.extra }}
+		</h5>
+	</div>
+
+	<app-release-template-item
+		[fixes]="release.fixes"
+	></app-release-template-item>
+
+	<app-release-template-item
+		[features]="release.features"
+	></app-release-template-item>
+
+	@if (!isLast) {
+		<div class="flex w-full h-[1px] bg-surface-container-high mt-6"></div>
+	}
+</section>

@@ -1,0 +1,60 @@
+[
+	{
+		"version": "1.2b",
+		"date": "03/09/2025",
+		"extra": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+		"features": [
+			"Introduced a dynamic updates page that showcases the latest downloaded charts seamlessly.",
+			"Enhanced deep link functionality for smoother navigation to opening levels.",
+			"Implemented a robust automatic updates system that ensures fetching works flawlessly across all scenarios.",
+			"Revamped background gradients to display colors in a vibrant and visually appealing order."
+		],
+		"fixes": [
+			{
+				"description": "Fixed downloaded charts not being shown on ‘Updates’ page",
+				"issue": 1
+			},
+			{
+				"description": "Fixed opening levels throught deep links",
+				"issue": 2
+			},
+			{
+				"description": "Fixed automatic updates fetching not working on specific scenarios",
+				"issue": 3
+			},
+			{
+				"description": "Fixed background gradients not showing the colors in the correct order",
+				"issue": 4
+			}
+		]
+	},
+	{
+		"version": "1.2a",
+		"date": "03/06/2025",
+		"extra": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+		"features": [
+			"Introduced a dynamic updates page that showcases the latest downloaded charts seamlessly.",
+			"Enhanced deep link functionality for smoother navigation to opening levels.",
+			"Implemented a robust automatic updates system that ensures fetching works flawlessly across all scenarios.",
+			"Revamped background gradients to display colors in a vibrant and visually appealing order."
+		],
+		"fixes": [
+			{
+				"description": "Fixed downloaded charts not being shown on ‘Updates’ page",
+				"issue": 1
+			},
+			{
+				"description": "Fixed opening levels throught deep links",
+				"issue": 2
+			},
+			{
+				"description": "Fixed automatic updates fetching not working on specific scenarios",
+				"issue": 3
+			},
+			{
+				"description": "Fixed background gradients not showing the colors in the correct order",
+				"issue": 4
+			}
+		]
+	}
+]

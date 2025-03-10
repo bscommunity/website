@@ -1,10 +1,19 @@
 import type { Routes } from "@angular/router";
 
 // Routes
-import { PageNotFoundComponent } from "./routes/not-found/not-found.component";
 import { PublishedComponent } from "./routes/published/published.component";
 import { OverviewComponent } from "./routes/overview/overview.component";
 import { ChartComponent } from "./routes/chart/chart.component";
+
+// Linking Routes
+import { LinkComponent } from "./routes/link/link.component";
+import { PrivacyPolicyComponent } from "./routes/privacy-policy/privacy-policy.component";
+import { TermsOfServiceComponent } from "./routes/terms-of-service/terms-of-service.component";
+import { ReleaseNotesComponent } from "./routes/release-notes/release-notes.component";
+
+// Error Routes
+import { PageErrorComponent } from "./routes/error/error.component";
+import { PageNotFoundComponent } from "./routes/not-found/not-found.component";
 
 // Auth Routes
 import { LoginComponent } from "./routes/auth/login/login.component";
@@ -16,10 +25,6 @@ import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
 } from "./auth/auth.guard";
-import { PageErrorComponent } from "./routes/error/error.component";
-import { LinkComponent } from "./routes/link/link.component";
-import { PrivacyPolicyComponent } from "./routes/privacy-policy/privacy-policy.component";
-import { TermsOfServiceComponent } from "./routes/terms-of-service/terms-of-service.component";
 
 export const routes: Routes = [
 	{
@@ -52,6 +57,11 @@ export const routes: Routes = [
 		resolve: { chart: ChartResolver },
 		canActivate: [isAuthenticatedGuard],
 		runGuardsAndResolvers: "always",
+	},
+	{
+		path: "release-notes",
+		component: ReleaseNotesComponent,
+		title: "Release Notes",
 	},
 	{
 		path: "privacy-policy",
