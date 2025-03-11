@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 
 // Services
-import { CookieService } from "./cookie.service";
+import { StorageService } from "./storage.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
@@ -19,46 +19,66 @@ interface CachedChart extends ChartModel {
 	providedIn: "root",
 })
 export class CacheService {
-	constructor(private cookieService: CookieService) {}
+	constructor(private storageService: StorageService) {}
 
 	private getChartCount(): number {
-		return parseInt(this.cookieService.get("chartCount") || "0");
+		return parseInt(this.storageService.getItem("chartCount") || "0");
+	}
+
+	private addChartKey(key: string): void {
+		let keys = [];
+		const storageKeys = this.storageService.getItem("chartKeys");
+
+		if (storageKeys) {
+			keys = JSON.parse(storageKeys);
+		}
+
+		keys.push(key);
+
+		this.storageService.setItem("chartKeys", JSON.stringify(keys));
 	}
 
 	private increaseChartCount(): void {
-		this.cookieService.set(
+		this.storageService.setItem(
 			"chartCount",
 			(this.getChartCount() + 1).toString(),
-			{ path: "/" },
 		);
 	}
 
 	private decreaseChartCount(): void {
-		this.cookieService.set(
+		this.storageService.setItem(
 			"chartCount",
 			(this.getChartCount() - 1).toString(),
-			{ path: "/" },
 		);
 	}
 
 	/**
-	 * Retrieves all charts stored in the browser's cookies.
+	 * Retrieves all charts stored in the browser's localStorage.
 	 *
-	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" cookie is found; otherwise, undefined.
+	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" object is found; otherwise, undefined.
 	 */
 	getAllCharts(): ChartModel[] | undefined {
-		const cookies = this.cookieService.getAll();
+		const keys = this.storageService.getItem("chartKeys");
 
-		const charts = Object.keys(cookies)
+		if (!keys) {
+			return undefined;
+		}
+
+		const storedItems = JSON.parse(keys) as string[];
+		const charts = storedItems
 			.filter((key) => key.startsWith("chart_"))
-			.map((key) => JSON.parse(cookies[key]));
+			.map((key) => {
+				if (key) {
+					const chart = this.storageService.getItem(key);
+					return chart ? JSON.parse(chart) : undefined;
+				}
+			});
 
 		return charts;
 	}
 
 	getChart(id: string): CachedChart | undefined {
-		const chart = this.cookieService.get(`chart_${id}`);
-
+		const chart = this.storageService.getItem(`chart_${id}`);
 		return chart ? JSON.parse(chart) : undefined;
 	}
 
@@ -83,7 +103,7 @@ export class CacheService {
 
 		// We add the new chart to the cache
 		const cacheKey = `chart_${chart.id}`;
-		this.cookieService.set(
+		this.storageService.setItem(
 			cacheKey,
 			JSON.stringify({
 				...chart,
@@ -93,6 +113,7 @@ export class CacheService {
 		);
 
 		this.increaseChartCount();
+		this.addChartKey(cacheKey);
 	}
 
 	addCharts(charts: ChartModel[]): void {
@@ -112,7 +133,7 @@ export class CacheService {
 	removeChart(id: string): void {
 		// If the chart exists, we remove it from the cache
 		if (this.getChart(id)) {
-			this.cookieService.delete(`chart_${id}`);
+			this.storageService.removeItem(`chart_${id}`);
 			this.decreaseChartCount();
 		}
 	}
@@ -124,7 +145,7 @@ export class CacheService {
 			return;
 		}
 
-		this.cookieService.set(
+		this.storageService.setItem(
 			`chart_${updatedChart.id}`,
 			JSON.stringify(updatedChart),
 		);
@@ -162,7 +183,7 @@ export class CacheService {
 			}
 		});
 
-		this.cookieService.set(
+		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
@@ -182,7 +203,7 @@ export class CacheService {
 			(contributor) => contributor.user.id !== contributorId,
 		);
 
-		this.cookieService.set(
+		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
@@ -204,7 +225,7 @@ export class CacheService {
 
 		versions.push(version);
 
-		this.cookieService.set(
+		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
@@ -224,7 +245,7 @@ export class CacheService {
 			(version) => version.id !== versionId,
 		);
 
-		this.cookieService.set(
+		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,

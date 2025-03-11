@@ -25,7 +25,7 @@ export const Chart = z.object({
 
 export type ChartModel = z.infer<typeof Chart>;
 
-export const CreateChartModel = Chart.omit({
+export const CreateChart = Chart.omit({
 	id: true,
 	isFeatured: true,
 	versions: true,
@@ -42,7 +42,7 @@ export const CreateChartModel = Chart.omit({
 		bpm: true,
 	}),
 );
-export type CreateChartModel = z.infer<typeof CreateChartModel>;
+export type CreateChartModel = z.infer<typeof CreateChart>;
 
 const chartSchema = Chart.omit({
 	id: true,
