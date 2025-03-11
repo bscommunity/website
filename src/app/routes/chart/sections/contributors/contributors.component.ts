@@ -80,7 +80,7 @@ export class ContributorsComponent {
 	}
 
 	openRemoveContributorConfirmationDialog(
-		index: number,
+		_: number,
 		contributor: ContributorModel,
 	): void {
 		console.log("Removing contributor", contributor);
@@ -97,7 +97,7 @@ export class ContributorsComponent {
 		};
 
 		const afterOperation = () => {
-			this.removeContributor(contributor);
+			this.removeContributorFromTable(contributor);
 			this.openSnackBar("Contributor removed with success!", "Close");
 		};
 
@@ -151,7 +151,7 @@ export class ContributorsComponent {
 		},
 	];
 
-	removeContributor(contributor: ContributorModel) {
+	removeContributorFromTable(contributor: ContributorModel) {
 		this.contributorTable.removeData(contributor);
 		this.openSnackBar("Contributor removed with success!", "Close");
 	}

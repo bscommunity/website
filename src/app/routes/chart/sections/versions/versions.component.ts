@@ -7,16 +7,19 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 
 // Components
-import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
 import {
 	TableComponent,
 	TableColumn,
 	Action,
 } from "../../subcomponents/table/table.component";
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+import { uploadStepComponents } from "@/services/upload.service";
 
 // Model
 import { VersionModel } from "@/models/version.model";
+import { VersionService } from "@/services/api/version.service";
 
 @Component({
 	selector: "app-chart-versions-section",
@@ -31,10 +34,13 @@ import { VersionModel } from "@/models/version.model";
 	templateUrl: "./versions.component.html",
 })
 export class VersionsComponent {
+	@Input() chartId!: string;
 	@Input() versions: VersionModel[] = [];
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
+
+	readonly versionService = inject(VersionService);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -42,23 +48,42 @@ export class VersionsComponent {
 
 	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
 
+	openAddVersionConfirmationDialog(): void {
+		this.dialog.open(uploadStepComponents[2], {
+			data: {},
+		});
+	}
+
 	openRemoveVersionConfirmationDialog(
 		_: number,
 		version: VersionModel,
 	): void {
-		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+		console.log("Removing version", version);
+
+		const operation = async () => {
+			const result = await this.versionService.deleteVersion(
+				this.chartId,
+				version.id,
+			);
+
+			if (!result) {
+				throw new Error("An error occurred");
+			}
+		};
+
+		const afterOperation = () => {
+			this.removeVersionFromTable(version);
+			this.openSnackBar("Version removed with success!", "Close");
+		};
+
+		this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Remove Version",
 				description:
 					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+				operation,
+				afterOperation,
 			},
-		});
-
-		const subscription = dialogRef.afterClosed().subscribe((result) => {
-			if (result === "ok") {
-				this.removeVersion(version);
-				subscription.unsubscribe();
-			}
 		});
 	}
 
@@ -108,7 +133,40 @@ export class VersionsComponent {
 		},
 	];
 
-	removeVersion(version: VersionModel) {
+	async addVersion(version: VersionModel) {
+		try {
+			const response = await this.versionService.addVersion(
+				this.chartId,
+				version,
+			);
+			console.log("Version added successfully:", response);
+
+			if (!response) {
+				this.dialog.open(UploadDialogErrorComponent, {
+					data: {
+						message: "Failed to submit chart.",
+						error: "No response from server.",
+					},
+				});
+				return;
+			}
+
+			this._snackBar.open("Version added with success!", "Close");
+			this.dialog.closeAll();
+		} catch (error: any) {
+			console.error("Failed to add new version:", error);
+
+			this.dialog.closeAll();
+			this.dialog.open(UploadDialogErrorComponent, {
+				data: {
+					title: "Failed to add new version.",
+					error: error.message,
+				},
+			});
+		}
+	}
+
+	removeVersionFromTable(version: VersionModel) {
 		this.versionTable.removeData(version);
 		this.openSnackBar("Version removed with success!", "Close");
 	}

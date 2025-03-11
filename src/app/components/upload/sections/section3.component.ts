@@ -77,22 +77,22 @@ import { ChartFileData } from "@/services/decode.service";
 						placeholder="https://youtu.be/BY_XwvKogC8"
 					/>
 					@if (
-						chartUrlControl?.hasError("required") &&
-						chartUrlControl?.touched
+						chartPreviewUrlControl?.hasError("required") &&
+						chartPreviewUrlControl?.touched
 					) {
 						<mat-error>URL is <strong>required</strong></mat-error>
 					} @else if (
-						chartUrlControl?.hasError("invalidUrl") ||
-						chartUrlControl?.hasError("notHttps")
+						chartPreviewUrlControl?.hasError("invalidUrl") ||
+						chartPreviewUrlControl?.hasError("notHttps")
 					) {
 						<mat-error>Please enter a valid URL</mat-error>
-					} @else if (chartUrlControl?.hasError("invalidZipUrl")) {
-						<mat-error>URL must point to a .zip file</mat-error>
+					} @else if (chartPreviewUrlControl?.hasError("pattern")) {
+						<mat-error
+							>URL must point to a "youtu.be" video</mat-error
+						>
 					}
 
-					<mat-hint align="start"
-						>Must be a direct link to the .zip file</mat-hint
-					>
+					<mat-hint align="start">Must be a "youtu.be" link</mat-hint>
 				</mat-form-field>
 				<app-file-upload
 					(onFileDecoded)="onFileDecoded($event)"
@@ -152,11 +152,11 @@ export class UploadDialogSection3Component implements OnInit {
 		this.form = this.fb.group({
 			chartUrl: [
 				initialFormData.chartUrl,
-				[Validators.required, zipUrlValidator()],
+				[Validators.required, urlValidator(), zipValidator()],
 			],
 			chartPreviewUrl: [
 				initialFormData.chartPreviewUrl,
-				[Validators.required, Validators.pattern(youtubePattern)],
+				[urlValidator(), Validators.pattern(youtubePattern)],
 			],
 			chartFileData: [null, Validators.required],
 		});
@@ -192,11 +192,9 @@ export class UploadDialogSection3Component implements OnInit {
 	}
 }
 
-const youtubePattern = /^https:\/\/youtu\.be\/[a-zA-Z0-9-_]+$/i;
+const youtubePattern = /^https:\/\/youtu\.be\/[a-zA-Z0-9-_]+(?:\?.*)?$/i;
 
-export function zipUrlValidator(): ValidatorFn {
-	const urlPattern = /^https:\/\/.*\/[a-zA-Z0-9-_]+\.zip$/i;
-
+export function urlValidator(): ValidatorFn {
 	return (control: AbstractControl): { [key: string]: any } | null => {
 		if (!control.value) {
 			return null;
@@ -214,6 +212,18 @@ export function zipUrlValidator(): ValidatorFn {
 
 		if (!isHttps) {
 			return { notHttps: true };
+		}
+
+		return null;
+	};
+}
+
+export function zipValidator(): ValidatorFn {
+	const urlPattern = /^https:\/\/.*\/[a-zA-Z0-9-_]+\.zip$/i;
+
+	return (control: AbstractControl): { [key: string]: any } | null => {
+		if (!control.value) {
+			return null;
 		}
 
 		// Check if the URL matches our pattern with /{key}.zip at the end
