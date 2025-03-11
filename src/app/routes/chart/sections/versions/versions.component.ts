@@ -126,16 +126,18 @@ export class VersionsComponent {
 		{
 			description: "Download",
 			icon: "download",
-			callback: () => {
-				this.openSnackBar("Download clicked", "Close");
-			},
+			callback: (_, item: VersionModel) =>
+				window.open(item.chartUrl, "_blank"),
 			disabled: () => false,
 		},
 		{
 			description: "Switch version",
 			icon: "swap_horiz",
 			callback: () => {
-				this.openSnackBar("Switch version clicked", "Close");
+				this.openSnackBar(
+					"Version switching is currently not implemented",
+					"Close",
+				);
 			},
 			disabled: (index, _) =>
 				index === 1 || index === this.versions.length - 1,

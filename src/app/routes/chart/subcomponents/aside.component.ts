@@ -30,7 +30,12 @@ import { transformDuration } from "@/lib/time";
 				></app-aside-container>
 			</app-aside-section>
 			<app-aside-section title="Files" class="w-full">
-				<a class="w-full cursor-pointer" [href]="chartUrl" download>
+				<a
+					class="w-full cursor-pointer"
+					[href]="chartUrl"
+					target="_blank"
+					download
+				>
 					<app-aside-container
 						class="w-full"
 						asideContainerClass="hover:bg-surface-container-low"
