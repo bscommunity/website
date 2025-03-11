@@ -15,11 +15,15 @@ import {
 } from "../../subcomponents/table/table.component";
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
-import { uploadStepComponents } from "@/services/upload.service";
+import {
+	UploadFormData,
+	uploadStepComponents,
+} from "@/services/upload.service";
 
 // Model
-import { VersionModel } from "@/models/version.model";
+import { CreateVersionModel, VersionModel } from "@/models/version.model";
 import { VersionService } from "@/services/api/version.service";
+import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
 
 @Component({
 	selector: "app-chart-versions-section",
@@ -49,8 +53,21 @@ export class VersionsComponent {
 	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
 
 	openAddVersionConfirmationDialog(): void {
-		this.dialog.open(uploadStepComponents[2], {
+		const dialogRef = this.dialog.open(uploadStepComponents[2], {
 			data: {},
+		});
+
+		dialogRef.afterClosed().subscribe((result: UploadFormData | "back") => {
+			if (result == "back") return;
+
+			console.log("Adding version", result);
+			const { chartFileData, ...rest } = result;
+			this.dialog.open(UploadDialogLoadingComponent);
+			this.addVersion({
+				chartId: this.chartId,
+				...rest,
+				...chartFileData,
+			});
 		});
 	}
 
@@ -133,7 +150,7 @@ export class VersionsComponent {
 		},
 	];
 
-	async addVersion(version: VersionModel) {
+	async addVersion(version: CreateVersionModel) {
 		try {
 			const response = await this.versionService.addVersion(
 				this.chartId,
@@ -142,6 +159,7 @@ export class VersionsComponent {
 			console.log("Version added successfully:", response);
 
 			if (!response) {
+				this.dialog.closeAll();
 				this.dialog.open(UploadDialogErrorComponent, {
 					data: {
 						message: "Failed to submit chart.",

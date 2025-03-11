@@ -6,7 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { CacheService } from "../cache.service";
 
 // Models
-import { VersionModel } from "@/models/version.model";
+import { CreateVersionModel, VersionModel } from "@/models/version.model";
 
 import { apiUrl } from ".";
 
@@ -23,14 +23,15 @@ export class VersionService {
 	// Add
 	async addVersion(
 		chartId: string,
-		version: VersionModel,
+		version: CreateVersionModel,
 	): Promise<VersionModel> {
 		console.log(`Adding a new version to chart with id ${chartId}`);
 
 		const response = await firstValueFrom(
-			this.http.post<VersionModel>(`${this.apiUrl}/${chartId}/versions`, {
+			this.http.post<VersionModel>(
+				`${this.apiUrl}/${chartId}/versions`,
 				version,
-			}),
+			),
 		);
 
 		this.cacheService.addVersion(chartId, response);
