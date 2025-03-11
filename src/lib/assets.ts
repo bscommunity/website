@@ -1,10 +1,11 @@
 import { environment } from "environments/environment";
 
 const LASTFM_API_KEY = environment.LASTFM_API_KEY;
+const SPOTIFY_API_KEY = environment.SPOTIFY_API_KEY;
 
 // Types
 import type { ITunesResponse } from "types/ITunesResponse";
-import type { LastFMResponse } from "types/LastFMResponse";
+import type { LastFMResponse } from "types/LastFmResponse";
 import type { OdesliResponse } from "types/OdesliResponse";
 
 const ITUNES_API_URL = "https://itunes.apple.com/search";
@@ -15,8 +16,11 @@ const MUSICBRAINZ_API_URL = "https://musicbrainz.org/ws/2/recording";
 // Models
 import { z } from "zod";
 import { Chart } from "@/models/chart.model";
-import { Version } from "@/models/version.model";
 import { StreamingLinkModel } from "@/models/streaming-link.model";
+
+// Services & Injections
+import { CookieService } from "@/services/cookie.service";
+import { importKey, encrypt, decrypt } from "@/lib/security";
 
 const MediaInfo = Chart.pick({
 	coverUrl: true,
@@ -35,6 +39,7 @@ export type MediaInfoModel = z.infer<typeof MediaInfo>;
 export async function getMediaInfo(
 	track: string,
 	artist: string,
+	cookieService: CookieService,
 ): Promise<MediaInfoModel> {
 	// Construct the search query
 	let query = new URLSearchParams({
@@ -48,7 +53,8 @@ export async function getMediaInfo(
 
 	// Check if results are available
 	if (iTunesData) {
-		// Return higher resolution version of the artwork
+		console.log(iTunesData);
+
 		return {
 			coverUrl: iTunesData.artworkUrl100.replace("100x100", "600x600"),
 			album: iTunesData.collectionName,
@@ -73,10 +79,34 @@ export async function getMediaInfo(
 		format: "json",
 	}).toString();
 
+	const spotifyData = await fetchSpotifyApi(
+		`q=${track} artist:${artist}&type=track&limit=1`,
+		cookieService,
+	);
+
+	if (spotifyData && spotifyData.tracks.items.length > 0) {
+		console.log(spotifyData);
+		const spotifyTrack = spotifyData.tracks.items[0];
+
+		return {
+			coverUrl: spotifyTrack.album.images[0].url,
+			album: spotifyTrack.album.name,
+			track: spotifyTrack.name,
+			artist: spotifyTrack.artists[0].name,
+			trackUrls: [
+				{
+					platform: "Spotify",
+					url: spotifyTrack.external_urls.spotify,
+				},
+			],
+		};
+	}
+
 	const lastFmData = await fetchLastfmApi(query);
 
 	// Check if results are available
 	if (lastFmData) {
+		console.log(lastFmData);
 		// Return higher resolution version of the artwork
 		return {
 			coverUrl: lastFmData.track.album.image[3]["#text"],
@@ -202,7 +232,13 @@ async function fetchLastfmApi(query: string): Promise<LastFMResponse> {
 		throw new Error(`Last.fm API error: ${response.statusText}`);
 	}
 
-	return response.json();
+	const data = await response.json();
+
+	if (data.message) {
+		throw new Error(data.message);
+	}
+
+	return data;
 }
 
 async function fetchMusicBrainzApi(url: string, query: string): Promise<any> {
@@ -215,4 +251,71 @@ async function fetchMusicBrainzApi(url: string, query: string): Promise<any> {
 	}
 
 	return response.json();
+}
+
+async function fetchSpotifyApi(
+	query: string,
+	cookieService: CookieService,
+): Promise<any> {
+	const token = await getSpotifyToken(cookieService);
+	const response = await fetch(`https://api.spotify.com/v1/search?${query}`, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Spotify API error: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+async function getSpotifyToken(cookieService: CookieService) {
+	let token = null;
+	const encryptedToken = cookieService.get("spotify_token");
+
+	if (encryptedToken) {
+		const key = await importKey(SPOTIFY_API_KEY);
+		const decrypted_token = await decrypt(JSON.parse(encryptedToken), key);
+
+		token = decrypted_token;
+		console.log("Using cached Spotify token");
+	}
+
+	if (!token) {
+		const response = await fetch("https://accounts.spotify.com/api/token", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Authorization: `Basic ${btoa(
+					`${environment.SPOTIFY_CLIENT_ID}:${environment.SPOTIFY_API_KEY}`,
+				)}`,
+			},
+			body: new URLSearchParams({
+				grant_type: "client_credentials",
+			}),
+		});
+
+		if (!response.ok) {
+			throw new Error(`Spotify API error: ${response.statusText}`);
+		}
+
+		const data = await response.json();
+
+		cookieService.set("spotify_token", data.access_token, {
+			expires: new Date(Date.now() + data.expires_in * 1000),
+		});
+
+		token = data.access_token;
+	}
+
+	const key = await importKey(environment.SPOTIFY_API_KEY);
+	const encryptedObject = await encrypt(token, key);
+
+	cookieService.set("spotify_token", JSON.stringify(encryptedObject), {
+		expires: new Date(Date.now() + 3600 * 1000),
+	});
+
+	return token;
 }

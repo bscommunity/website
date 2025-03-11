@@ -10,10 +10,7 @@
 		initialSortDirection="desc"
 	></app-table>
 	<span class="flex items-center justify-end w-full">
-		<button
-			mat-stroked-button
-			(click)="openSnackBar('Feature not implemented yet', 'Close')"
-		>
+		<button mat-stroked-button (click)="openAddVersionConfirmationDialog()">
 			<mat-icon>publish</mat-icon>
 			Publish new version
 		</button>

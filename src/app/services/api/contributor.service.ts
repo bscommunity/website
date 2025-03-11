@@ -60,7 +60,9 @@ export class ContributorService {
 			),
 		);
 
-		this.cacheService.updateChartContributor(chartId, updatedContributor);
+		this.cacheService.updateChartContributors(chartId, [
+			updatedContributor,
+		]);
 		return updatedContributor;
 	}
 

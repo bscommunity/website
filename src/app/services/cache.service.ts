@@ -6,6 +6,7 @@ import { CookieService } from "./cookie.service";
 // Models
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
+import { VersionModel } from "@/models/version.model";
 
 const MAX_CACHED_CHARTS = 5;
 
@@ -129,48 +130,43 @@ export class CacheService {
 		);
 	}
 
+	// Contributors
+
 	updateChartContributors(
 		id: string,
-		contributors: ContributorModel[],
+		newContributors: ContributorModel[],
 	): void {
 		const chart = this.getChart(id);
-
 		if (!chart) {
 			return;
 		}
 
-		const { contributors: oldContributors, ...rest } = chart;
+		// Get the current list of contributors, if any
+		const currentContributors = chart.contributors || [];
 
-		this.cookieService.set(
-			`chart_${id}`,
-			JSON.stringify({
-				...rest,
-				contributors: [oldContributors, ...contributors],
-			}),
-		);
-	}
+		// Merge contributors: update existing ones and add any new ones
+		const mergedContributors = currentContributors.map((contributor) => {
+			const updated = newContributors.find(
+				(newC) => newC.user.id === contributor.user.id,
+			);
+			return updated ? updated : contributor;
+		});
 
-	updateChartContributor(
-		id: string,
-		updatedContributor: ContributorModel,
-	): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.contributors) {
-			return;
-		}
-
-		const updatedContributors = chart.contributors?.map((contributor) =>
-			contributor.user.id === updatedContributor.user.id
-				? updatedContributor
-				: contributor,
-		);
+		newContributors.forEach((newContributor) => {
+			if (
+				!currentContributors.some(
+					(c) => c.user.id === newContributor.user.id,
+				)
+			) {
+				mergedContributors.push(newContributor);
+			}
+		});
 
 		this.cookieService.set(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
-				contributors: updatedContributors,
+				contributors: mergedContributors,
 			}),
 		);
 	}
@@ -191,6 +187,48 @@ export class CacheService {
 			JSON.stringify({
 				...chart,
 				contributors: updatedContributors,
+			}),
+		);
+	}
+
+	// Versions
+
+	addVersion(id: string, version: VersionModel): void {
+		const chart = this.getChart(id);
+
+		if (!chart) {
+			return;
+		}
+
+		const versions = chart.versions || [];
+
+		versions.push(version);
+
+		this.cookieService.set(
+			`chart_${id}`,
+			JSON.stringify({
+				...chart,
+				versions,
+			}),
+		);
+	}
+
+	removeVersion(id: string, versionId: string): void {
+		const chart = this.getChart(id);
+
+		if (!chart || !chart.versions) {
+			return;
+		}
+
+		const updatedVersions = chart.versions.filter(
+			(version) => version.id !== versionId,
+		);
+
+		this.cookieService.set(
+			`chart_${id}`,
+			JSON.stringify({
+				...chart,
+				versions: updatedVersions,
 			}),
 		);
 	}

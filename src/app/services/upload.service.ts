@@ -13,17 +13,18 @@ import { UploadDialogLoadingComponent } from "@/components/upload/generic/loadin
 import { UploadDialogSuccessComponent } from "@/components/upload/generic/success.component";
 import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
 
-const stepComponents = [
+export const uploadStepComponents = [
 	UploadDialogSection1Component,
 	UploadDialogSection2Component,
 	UploadDialogSection3Component,
 	UploadDialogDisclaimerComponent,
 ];
-type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
-	...args: any[]
-) => infer R
-	? R
-	: never;
+type StepComponentInstanceType =
+	(typeof uploadStepComponents)[number] extends new (
+		...args: any[]
+	) => infer R
+		? R
+		: never;
 
 // Lib
 import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
@@ -32,6 +33,7 @@ import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 import { ChartService } from "@/services/api/chart.service";
 import { CacheService } from "@/services/cache.service";
 import { ChartFileData } from "@/services/decode.service";
+import { CookieService } from "./cookie.service";
 import { AuthService } from "app/auth/auth.service";
 
 // Models
@@ -87,6 +89,7 @@ export class UploadDialogService {
 	private dialog = inject(MatDialog);
 
 	private chartService = inject(ChartService);
+	private cookieService = inject(CookieService);
 	private cacheService = inject(CacheService);
 	private authService = inject(AuthService);
 
@@ -149,13 +152,13 @@ export class UploadDialogService {
 	}
 
 	private getStepComponent() {
-		if (this.currentStepSubject.value >= stepComponents.length)
+		if (this.currentStepSubject.value >= uploadStepComponents.length)
 			throw new Error("Invalid step");
-		return stepComponents[this.currentStepSubject.value];
+		return uploadStepComponents[this.currentStepSubject.value];
 	}
 
 	private getTotalSteps(): number {
-		return stepComponents.length;
+		return uploadStepComponents.length;
 	}
 
 	private triggerError(message: string, error: string) {
@@ -190,6 +193,7 @@ export class UploadDialogService {
 			const response = await getMediaInfo(
 				this.formData.track,
 				this.formData.artist,
+				this.cookieService,
 			);
 
 			this.formData = { ...this.formData, ...response };
