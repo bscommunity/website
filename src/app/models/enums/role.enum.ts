@@ -5,4 +5,5 @@ export enum ContributorRole {
 	REVISION = "Revision",
 	EFFECTS = "Effects",
 	SYNC = "Sync",
+	PREVIEW = "Preview",
 }

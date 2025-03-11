@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, TitleStrategy } from "@angular/router";
+import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
 // Modules
 import { FormsModule } from "@angular/forms";
@@ -20,6 +20,7 @@ import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
+import { PageErrorComponent } from "../error/error.component";
 
 @Component({
 	selector: "app-chart",
@@ -40,14 +41,22 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 	templateUrl: "./chart.component.html",
 })
 export class ChartComponent implements OnInit {
-	constructor(private route: ActivatedRoute) {}
+	constructor(
+		private route: ActivatedRoute,
+		private router: Router,
+	) {}
 
 	chart: ChartModel | null = null;
-	latestVersion: VersionModel | undefined = undefined;
 
 	ngOnInit(): void {
 		// Access resolved data
 		this.chart = this.route.snapshot.data["chart"];
-		this.latestVersion = this.chart?.versions.at(-1);
+
+		if (!this.chart?.versions || !this.chart.contributors) {
+			console.error("Chart data is incomplete", this.chart);
+			this.router.navigate(["error"], {
+				state: { error: "Chart data is incomplete" },
+			});
+		}
 	}
 }

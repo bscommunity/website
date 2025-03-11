@@ -26,10 +26,11 @@ type StepComponentInstanceType = (typeof stepComponents)[number] extends new (
 	: never;
 
 // Lib
-import { getMediaInfo } from "@/lib/assets";
+import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { CacheService } from "@/services/cache.service";
 import { ChartFileData } from "@/services/decode.service";
 import { AuthService } from "app/auth/auth.service";
 
@@ -38,8 +39,8 @@ import { ChartModel, CreateChartModel } from "@/models/chart.model";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 
 export type UploadFormData = CreateChartModel & {
-	contentType: string; // Omitted when submitting
-	chartUrl: string;
+	// Omitted when submitting
+	contentType: string;
 	chartFileData: ChartFileData | null;
 };
 
@@ -57,25 +58,24 @@ export type SuccessDialogData = ChartModel & {
 
 export const initialFormData: UploadFormData = {
 	contentType: "",
-	chartUrl: "",
 	chartFileData: null,
 	//
 	track: "",
 	artist: "",
 	album: "",
 	coverUrl: "",
+	trackUrls: [],
+	trackPreviewUrl: "",
 	difficulty: Difficulty.Normal,
 	isDeluxe: false,
 	isExplicit: false,
 	//
+	chartUrl: "",
+	chartPreviewUrl: "",
 	duration: 0,
 	notesAmount: 0,
 	bpm: 0,
 	effectsAmount: 0,
-	//
-	chartPreviewUrl: "",
-	trackPreviewUrl: "",
-	trackUrl: "",
 	// ... any other initial values added later
 };
 
@@ -87,6 +87,7 @@ export class UploadDialogService {
 	private dialog = inject(MatDialog);
 
 	private chartService = inject(ChartService);
+	private cacheService = inject(CacheService);
 	private authService = inject(AuthService);
 
 	// Track the current step
@@ -157,6 +158,17 @@ export class UploadDialogService {
 		return stepComponents.length;
 	}
 
+	private triggerError(message: string, error: string) {
+		this.dialog.closeAll();
+		this.dialog.open(UploadDialogErrorComponent, {
+			data: {
+				message,
+				error,
+			},
+		});
+		/* this.reset(); */
+	}
+
 	private async submitForm() {
 		// Check if user is logged in
 		if (!this.authService.isLoggedIn()) {
@@ -181,16 +193,31 @@ export class UploadDialogService {
 			);
 
 			this.formData = { ...this.formData, ...response };
-		} catch (error) {
-			this.dialog.closeAll();
-			this.dialog.open(UploadDialogErrorComponent, {
-				data: {
-					message: "Failed to retrieve cover art.",
-					error,
-				},
-			});
-			/* this.reset(); */
+		} catch (error: any) {
+			this.triggerError("Failed to retrieve cover art.", error.message);
+			return;
+		}
 
+		// Handle track streaming services URL retrieval
+		try {
+			if (
+				!this.formData.trackUrls ||
+				this.formData.trackUrls.length === 0
+			) {
+				throw new Error("No track streaming URLs provided.");
+			}
+
+			this.formData.trackUrls = await getTrackStreamingLinks(
+				this.formData.trackUrls[0].url,
+				this.formData.track,
+				this.formData.artist,
+			);
+		} catch (error: any) {
+			console.error("Failed to retrieve track streaming links:", error);
+			this.triggerError(
+				"Failed to retrieve track streaming links.",
+				error.message,
+			);
 			return;
 		}
 
@@ -213,7 +240,7 @@ export class UploadDialogService {
 				this.dialog.open(UploadDialogErrorComponent, {
 					data: {
 						message: "Failed to submit chart.",
-						error: null,
+						error: "No response from server.",
 					},
 				});
 
@@ -222,7 +249,7 @@ export class UploadDialogService {
 			}
 
 			// Cache chart data
-			// this.chartService.addChartToCache(response);
+			this.cacheService.addChart(response);
 
 			// Open success dialog
 			this.dialog.closeAll();
@@ -234,8 +261,8 @@ export class UploadDialogService {
 					artist: response.artist,
 					difficulty: response.difficulty,
 					coverUrl: response.coverUrl,
-					duration: response.versions[0].duration,
-					notesAmount: response.versions[0].notesAmount,
+					duration: response.latestVersion?.duration,
+					notesAmount: response.latestVersion?.notesAmount,
 					isDeluxe: response.isDeluxe,
 					isExplicit: response.isExplicit,
 				},
@@ -247,7 +274,7 @@ export class UploadDialogService {
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
 					title: "Failed to submit chart.",
-					error: error.error,
+					error: error.message,
 				},
 			});
 		}

@@ -37,7 +37,7 @@ export class ChartService {
 	getAllCharts(): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
 
-		if (charts) {
+		if (charts && charts.length > 0) {
 			console.log(`Returning charts from cache...`);
 
 			return new Observable((subscriber) => {
@@ -51,7 +51,7 @@ export class ChartService {
 
 			return this.http.get<ChartModel[]>(this.apiUrl).pipe(
 				tap((fetchedCharts) => {
-					this.cacheService.setAllCharts(fetchedCharts);
+					this.cacheService.addCharts(fetchedCharts);
 				}),
 			);
 		}
@@ -60,7 +60,7 @@ export class ChartService {
 	async getChartById(id: string): Promise<ChartModel> {
 		const cachedChart = this.cacheService.getChart(id);
 
-		if (cachedChart) {
+		if (cachedChart && cachedChart.isFull) {
 			console.log(`Returning chart ${id} from cache...`);
 
 			try {

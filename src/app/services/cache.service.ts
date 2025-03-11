@@ -9,8 +9,9 @@ import { ContributorModel } from "@/models/contributor.model";
 
 const MAX_CACHED_CHARTS = 5;
 
-interface CachedFullChart extends ChartModel {
+interface CachedChart extends ChartModel {
 	lastAccessed: string;
+	isFull: boolean;
 }
 
 @Injectable({
@@ -42,38 +43,28 @@ export class CacheService {
 	/**
 	 * Retrieves all charts stored in the browser's cookies.
 	 *
-	 * @param {boolean} full - If true, returns the full chart objects; otherwise, returns the simplified versions.
-	 *
 	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" cookie is found; otherwise, undefined.
 	 */
-	getAllCharts(full?: boolean): ChartModel[] | undefined {
-		if (full) {
-			const allCookies = this.cookieService.getAll();
-			const fullCharts = Object.keys(allCookies)
-				.filter((key) => key.startsWith("chart_"))
-				.map((key) => JSON.parse(allCookies[key]));
+	getAllCharts(): ChartModel[] | undefined {
+		const cookies = this.cookieService.getAll();
 
-			return fullCharts;
-		} else {
-			const charts = this.cookieService.get("charts");
-			return charts ? JSON.parse(charts) : undefined;
-		}
+		const charts = Object.keys(cookies)
+			.filter((key) => key.startsWith("chart_"))
+			.map((key) => JSON.parse(cookies[key]));
+
+		return charts;
 	}
 
-	setAllCharts(charts: ChartModel[]): void {
-		this.cookieService.set("charts", JSON.stringify(charts));
-	}
-
-	getChart(id: string): ChartModel | undefined {
+	getChart(id: string): CachedChart | undefined {
 		const chart = this.cookieService.get(`chart_${id}`);
 
 		return chart ? JSON.parse(chart) : undefined;
 	}
 
-	addChart(chart: ChartModel): void {
+	addChart(chart: ChartModel, isFull: boolean = true): void {
 		// If we have reached the maximum number of cached charts, we need to remove the oldest one
 		if (this.getChartCount() >= MAX_CACHED_CHARTS) {
-			const allCharts = this.getAllCharts(true) as CachedFullChart[];
+			const allCharts = this.getAllCharts() as CachedChart[];
 
 			if (!allCharts || allCharts.length === 0) {
 				return;
@@ -96,9 +87,25 @@ export class CacheService {
 			JSON.stringify({
 				...chart,
 				lastAccessed: new Date().toISOString(),
+				isFull,
 			}),
 		);
+
 		this.increaseChartCount();
+	}
+
+	addCharts(charts: ChartModel[]): void {
+		const currentCharts = this.getAllCharts();
+		charts.forEach((chart) => {
+			if (
+				!currentCharts ||
+				!currentCharts.some((c) => c.id === chart.id)
+			) {
+				this.addChart(chart, false);
+			} else {
+				this.updateChart(chart);
+			}
+		});
 	}
 
 	removeChart(id: string): void {
@@ -106,12 +113,6 @@ export class CacheService {
 		if (this.getChart(id)) {
 			this.cookieService.delete(`chart_${id}`);
 			this.decreaseChartCount();
-
-			// We also remove the chart from the list of all charts
-			const allCharts = this.getAllCharts();
-			const updatedCharts = allCharts?.filter((chart) => chart.id !== id);
-
-			this.setAllCharts(updatedCharts || []);
 		}
 	}
 

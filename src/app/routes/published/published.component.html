@@ -47,7 +47,7 @@
 			<app-large-panel
 				class="w-full"
 				title="Don’t know where to start?"
-				description="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
+				message="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
 				[button]="{ label: 'Discord', link: '/' }"
 			></app-large-panel>
 		</div>
@@ -84,14 +84,8 @@
 								[track]="chart.track"
 								[artist]="chart.artist"
 								[coverUrl]="chart.coverUrl"
-								[duration]="
-									chart.versions[chart.versions.length - 1]
-										.duration
-								"
-								[notesAmount]="
-									chart.versions[chart.versions.length - 1]
-										.notesAmount
-								"
+								[duration]="chart.latestVersion.duration"
+								[notesAmount]="chart.latestVersion.notesAmount"
 								[difficulty]="chart.difficulty"
 								[isDeluxe]="chart.isDeluxe"
 							></app-chart>

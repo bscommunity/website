@@ -28,9 +28,11 @@ import { Router } from "@angular/router";
 				if the problem persists.
 			</p>
 			@if (data.error) {
-				<details class="w-full overflow-x-auto">
+				<details>
 					<summary><strong>Error details</strong></summary>
-					<pre>{{ data.error }}</pre>
+					<pre class="whitespace-pre-wrap break-words max-w-[75%]">{{
+						data.error
+					}}</pre>
 				</details>
 			}
 		</mat-dialog-content>
