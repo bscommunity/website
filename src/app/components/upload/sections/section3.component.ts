@@ -43,12 +43,38 @@ import { ChartFileData } from "@/services/decode.service";
 					the submission guidelines.
 				</p>
 				<mat-form-field appearance="outline">
-					<mat-label>URL</mat-label>
+					<mat-label>Bundle</mat-label>
 					<input
 						type="text"
 						matInput
 						formControlName="chartUrl"
 						placeholder="https://example.com/chart.zip"
+					/>
+					@if (
+						chartUrlControl?.hasError("required") &&
+						chartUrlControl?.touched
+					) {
+						<mat-error>URL is <strong>required</strong></mat-error>
+					} @else if (
+						chartUrlControl?.hasError("invalidUrl") ||
+						chartUrlControl?.hasError("notHttps")
+					) {
+						<mat-error>Please enter a valid URL</mat-error>
+					} @else if (chartUrlControl?.hasError("invalidZipUrl")) {
+						<mat-error>URL must point to a .zip file</mat-error>
+					}
+
+					<mat-hint align="start"
+						>Must be a direct link to the .zip file</mat-hint
+					>
+				</mat-form-field>
+				<mat-form-field appearance="outline">
+					<mat-label>Gameplay</mat-label>
+					<input
+						type="text"
+						matInput
+						formControlName="chartPreviewUrl"
+						placeholder="https://youtu.be/BY_XwvKogC8"
 					/>
 					@if (
 						chartUrlControl?.hasError("required") &&
@@ -128,6 +154,10 @@ export class UploadDialogSection3Component implements OnInit {
 				initialFormData.chartUrl,
 				[Validators.required, zipUrlValidator()],
 			],
+			chartPreviewUrl: [
+				initialFormData.chartPreviewUrl,
+				[Validators.required, Validators.pattern(youtubePattern)],
+			],
 			chartFileData: [null, Validators.required],
 		});
 	}
@@ -139,6 +169,10 @@ export class UploadDialogSection3Component implements OnInit {
 
 	get chartUrlControl() {
 		return this.form.get("chartUrl");
+	}
+
+	get chartPreviewUrlControl() {
+		return this.form.get("chartPreviewUrl");
 	}
 
 	onFileDecoded(chartFileData: ChartFileData | null): void {
@@ -157,6 +191,8 @@ export class UploadDialogSection3Component implements OnInit {
 		}
 	}
 }
+
+const youtubePattern = /^https:\/\/youtu\.be\/[a-zA-Z0-9-_]+$/i;
 
 export function zipUrlValidator(): ValidatorFn {
 	const urlPattern = /^https:\/\/.*\/[a-zA-Z0-9-_]+\.zip$/i;

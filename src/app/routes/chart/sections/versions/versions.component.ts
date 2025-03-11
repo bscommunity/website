@@ -66,7 +66,7 @@ export class VersionsComponent {
 		{
 			columnDef: "id",
 			header: "Version",
-			cell: (_, index: number) => `${index}`,
+			cell: (item: VersionModel) => `${item.index}`,
 		},
 		{
 			columnDef: "publishedAt",

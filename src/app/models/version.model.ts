@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { KnownIssue } from "./known-issue.model";
 
 export const Version = z.object({

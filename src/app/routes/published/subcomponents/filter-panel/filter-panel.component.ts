@@ -36,19 +36,13 @@ export class FilterPanelComponent {
 	);
 
 	genres: ExpansionPanelData[] = [
-		{ name: "Pop" },
-		{ name: "Rock" },
-		{ name: "Metal" },
-		{ name: "Jazz" },
-		{ name: "Blues" },
-		{ name: "Classical" },
-		{ name: "Folk" },
-		{ name: "Rap" },
 		{ name: "Hip-Hop" },
+		{ name: "Pop" },
 		{ name: "R&B" },
+		{ name: "Rock" },
 		{ name: "Dance" },
+		{ name: "Alternative" },
 		{ name: "Soundtrack" },
-		{ name: "Latin" },
 	];
 
 	versions: ExpansionPanelData[] = [{ name: "Default" }, { name: "Deluxe" }];

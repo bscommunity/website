@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Difficulty } from "./enums/difficulty.enum";
 import { Contributor } from "./contributor.model";
 import { Version } from "./version.model";
+import { StreamingLink } from "./streaming-link.model";
 
 export const Chart = z.object({
 	id: z.string(),
@@ -9,16 +10,16 @@ export const Chart = z.object({
 	track: z.string(),
 	album: z.string(),
 	coverUrl: z.string(),
-	trackUrl: z.string(),
-	trackPreviewUrl: z.string(),
+	trackUrls: z.array(StreamingLink).optional(),
+	trackPreviewUrl: z.string().optional(),
 	difficulty: z.nativeEnum(Difficulty),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
 	isFeatured: z.boolean().default(false),
 
 	// Relations
-	latestVersion: Version.optional(),
-	versions: Version.array(),
+	latestVersion: Version,
+	versions: Version.array().optional(),
 	contributors: z.array(Contributor).optional(),
 });
 
@@ -29,15 +30,16 @@ export const CreateChartModel = Chart.omit({
 	isFeatured: true,
 	versions: true,
 	contributors: true,
+	latestVersion: true,
 }).merge(
 	// First version properties
-	z.object({
-		chartUrl: z.string(),
-		chartPreviewUrl: z.string().optional(),
-		duration: z.number(),
-		notesAmount: z.number(),
-		effectsAmount: z.number(),
-		bpm: z.number(),
+	Version.pick({
+		chartUrl: true,
+		chartPreviewUrl: true,
+		duration: true,
+		notesAmount: true,
+		effectsAmount: true,
+		bpm: true,
 	}),
 );
 export type CreateChartModel = z.infer<typeof CreateChartModel>;

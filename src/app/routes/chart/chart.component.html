@@ -1,13 +1,13 @@
-@if (chart && latestVersion) {
+@if (chart && chart.latestVersion && chart.versions && chart.contributors) {
 	<main
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
 		<!-- Desktop aside -->
 		<app-aside
-			[chartUrl]="latestVersion.chartUrl"
+			[chartUrl]="chart.latestVersion.chartUrl"
 			[coverUrl]="chart.coverUrl"
-			[duration]="latestVersion.duration"
-			[notesAmount]="latestVersion.notesAmount"
+			[duration]="chart.latestVersion.duration"
+			[notesAmount]="chart.latestVersion.notesAmount"
 			[trackName]="chart.track"
 			class="hidden md:flex md:sticky md:top-8"
 		>
@@ -21,10 +21,10 @@
 			</div>
 			<!-- Mobile "aside" -->
 			<app-aside
-				[chartUrl]="latestVersion.chartUrl"
+				[chartUrl]="chart.latestVersion.chartUrl"
 				[coverUrl]="chart.coverUrl"
-				[duration]="latestVersion.duration"
-				[notesAmount]="latestVersion.notesAmount"
+				[duration]="chart.latestVersion.duration"
+				[notesAmount]="chart.latestVersion.notesAmount"
 				[trackName]="chart.track"
 				class="flex w-full md:hidden"
 			>
@@ -32,7 +32,7 @@
 			<app-chart-known-issues-section
 				#knownIssuesSection
 				class="w-full"
-				[initialKnownIssues]="latestVersion.knownIssues"
+				[initialKnownIssues]="chart.latestVersion.knownIssues"
 			></app-chart-known-issues-section>
 			<app-chart-contributors-section
 				#contributorsSection

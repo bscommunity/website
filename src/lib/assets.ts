@@ -1,13 +1,33 @@
-const ITUNES_API_URL = "https://itunes.apple.com/search";
+import { environment } from "environments/environment";
 
-interface MediaInfo {
-	coverUrl: string;
-	album?: string;
-	track?: string;
-	artist?: string;
-	trackUrl?: string;
-	trackPreviewUrl?: string;
-}
+const LASTFM_API_KEY = environment.LASTFM_API_KEY;
+
+// Types
+import type { ITunesResponse } from "types/ITunesResponse";
+import type { LastFMResponse } from "types/LastFMResponse";
+import type { OdesliResponse } from "types/OdesliResponse";
+
+const ITUNES_API_URL = "https://itunes.apple.com/search";
+const ODESLI_API_URL = "https://api.song.link/v1-alpha.1";
+const LASTFM_API_URL = "http://ws.audioscrobbler.com/2.0/";
+const MUSICBRAINZ_API_URL = "https://musicbrainz.org/ws/2/recording";
+
+// Models
+import { z } from "zod";
+import { Chart } from "@/models/chart.model";
+import { Version } from "@/models/version.model";
+import { StreamingLinkModel } from "@/models/streaming-link.model";
+
+const MediaInfo = Chart.pick({
+	coverUrl: true,
+	album: true,
+	track: true,
+	artist: true,
+	trackUrls: true,
+	trackPreviewUrl: true,
+});
+
+export type MediaInfoModel = z.infer<typeof MediaInfo>;
 
 /**
  * Find media information (album cover, etc.) using track and artist names
@@ -15,99 +35,184 @@ interface MediaInfo {
 export async function getMediaInfo(
 	track: string,
 	artist: string,
-): Promise<MediaInfo> {
+): Promise<MediaInfoModel> {
 	// Construct the search query
-	const query = new URLSearchParams({
+	let query = new URLSearchParams({
 		term: `${track} ${artist}`,
 		entity: "song",
 		limit: "1",
 	}).toString();
 
-	// Fetch data from iTunes Search API
-	const response = await fetch(`${ITUNES_API_URL}?${query}`);
+	// First, search for the track on iTunes
+	let iTunesData = await fetchItunesApi(query);
 
-	console.log("response", response);
+	// Check if results are available
+	if (iTunesData) {
+		// Return higher resolution version of the artwork
+		return {
+			coverUrl: iTunesData.artworkUrl100.replace("100x100", "600x600"),
+			album: iTunesData.collectionName,
+			track: iTunesData.trackName,
+			artist: iTunesData.artistName,
+			trackUrls: [
+				{
+					platform: "Apple Music",
+					url: iTunesData.trackViewUrl,
+				},
+			],
+			trackPreviewUrl: iTunesData.previewUrl,
+		};
+	}
+
+	// If no results were found on iTunes, try Last.fm
+	query = new URLSearchParams({
+		method: "track.getInfo",
+		artist: artist,
+		track: track,
+		api_key: LASTFM_API_KEY,
+		format: "json",
+	}).toString();
+
+	const lastFmData = await fetchLastfmApi(query);
+
+	// Check if results are available
+	if (lastFmData) {
+		// Return higher resolution version of the artwork
+		return {
+			coverUrl: lastFmData.track.album.image[3]["#text"],
+			album: lastFmData.track.album.title,
+			track: lastFmData.track.name,
+			artist: lastFmData.track.artist.name,
+			trackUrls: [
+				{
+					platform: "Last.fm",
+					url: lastFmData.track.url,
+				},
+			],
+		};
+	}
+
+	// If no results were found on iTunes or Last.fm, throw error
+	throw new Error(
+		`No results found for track "${track}" by artist "${artist}"`,
+	);
+}
+
+export async function getTrackStreamingLinks(
+	url: string,
+	track: string,
+	artist: string,
+): Promise<StreamingLinkModel[]> {
+	const query = new URLSearchParams({
+		url: url,
+	}).toString();
+
+	// First, try to search for the links with Odesli
+	const odesliData = await fetchOdesliApi(query);
+
+	if (odesliData) {
+		let links: StreamingLinkModel[] = [];
+
+		for (const [key, value] of Object.entries(odesliData.linksByPlatform)) {
+			links.push({
+				platform: key,
+				url: value.url,
+			});
+		}
+
+		return links;
+	}
+
+	let musicBrainzData = await fetchMusicBrainzApi(
+		"",
+		`recording:"${track}" AND artist:"${artist}"`,
+	);
+
+	if (musicBrainzData) {
+		const trackId = musicBrainzData.recordings[0].id;
+		musicBrainzData = await fetchMusicBrainzApi(
+			`/${trackId}`,
+			`inc=url-rels`,
+		);
+
+		if (musicBrainzData) {
+			const relations = musicBrainzData.relations;
+
+			for (const relation of relations) {
+				if (relation.type === "free streaming") {
+					const url = relation.url.resource;
+					return [
+						{
+							platform: getPlatformFromLink(url),
+							url: url,
+						},
+					];
+				}
+			}
+		}
+	}
+
+	throw new Error("No streaming links found for track");
+}
+
+function getPlatformFromLink(link: string): string {
+	switch (true) {
+		case link.includes("spotify"):
+			return "Spotify";
+		case link.includes("youtube"):
+			return "YouTube";
+		case link.includes("soundcloud"):
+			return "SoundCloud";
+		case link.includes("deezer"):
+			return "Deezer";
+		case link.includes("apple"):
+			return "Apple Music";
+		case link.includes("amazon"):
+			return "Amazon Music";
+		default:
+			return "Unknown";
+	}
+}
+
+async function fetchItunesApi(query: string): Promise<ITunesResponse> {
+	const response = await fetch(`${ITUNES_API_URL}?${query}`);
 
 	if (!response.ok) {
 		throw new Error(`iTunes API error: ${response.statusText}`);
 	}
 
 	const data = await response.json();
-
-	// Check if results are available
-	if (!data.results || data.results.length === 0) {
-		throw new Error(
-			`No results found for track "${track}" by artist "${artist}"`,
-		);
-	}
-
-	// Extract the artwork URL
-	const artworkUrl100 = data.results[0].artworkUrl100;
-
-	console.log("response", data);
-
-	// Return higher resolution version of the artwork
-	return {
-		coverUrl: artworkUrl100.replace("100x100", "600x600"),
-		album: data.results[0].collectionName,
-		track: data.results[0].trackName,
-		artist: data.results[0].artistName,
-		trackUrl: data.results[0].trackViewUrl,
-		trackPreviewUrl: data.results[0].previewUrl,
-	};
+	return data.results[0];
 }
 
-/**
- * Get album cover art URL using artist and album name
- * If album is not provided, attempts to find it using track name via Last.fm
- */
-/* async function getCoverArtUrl(
-	artist: string,
-	track?: string,
-	album?: string | null,
-): Promise<MediaInfo> {
-	try {
-		// If album is not provided but track is, try to find the album
-		if (!album?.trim() && track?.trim()) {
-			console.warn(
-				"Album not provided, attempting to search for it using track name.",
-			);
-			return await getMediaInfo(track, artist);
-		}
+async function fetchOdesliApi(query: string): Promise<OdesliResponse> {
+	const response = await fetch(`${ODESLI_API_URL}/links?${query}`);
 
-		// If we still don't have an album name, we can't proceed
-		if (!album?.trim()) {
-			throw new Error(
-				"Album name is required and could not be determined from track",
-			);
-		}
-
-		// Search for the album cover
-		const query = `term=${encodeURIComponent(artist + " " + album)}&entity=album&limit=1`;
-		const response = await fetch(`${ITUNES_API_URL}?${query}`);
-
-		if (!response.ok) {
-			throw new Error(`iTunes API error: ${response.statusText}`);
-		}
-
-		const data = await response.json();
-
-		if (!data.results || data.results.length === 0) {
-			throw new Error(`No cover art found for "${album}" by "${artist}"`);
-		}
-
-		// Get higher resolution version of the artwork
-		return {
-			coverUrl: data.results[0].artworkUrl100.replace(
-				"100x100",
-				"600x600",
-			),
-		};
-	} catch (error) {
-		// Wrap all errors in a consistent format
-		throw new Error(
-			`Failed to get cover art: ${error instanceof Error ? error.message : "Unknown error"}`,
-		);
+	if (!response.ok) {
+		throw new Error(`Odesli API error: ${response.statusText}`);
 	}
+
+	return response.json();
 }
- */
+
+async function fetchLastfmApi(query: string): Promise<LastFMResponse> {
+	const response = await fetch(`${LASTFM_API_URL}?${query}`);
+
+	if (!response.ok) {
+		throw new Error(`Last.fm API error: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+async function fetchMusicBrainzApi(url: string, query: string): Promise<any> {
+	const response = await fetch(
+		`${MUSICBRAINZ_API_URL}${url}?${query}&fmt=json`,
+	);
+
+	if (!response.ok) {
+		throw new Error(`MusicBrainz API error: ${response.statusText}`);
+	}
+
+	return response.json();
+}
