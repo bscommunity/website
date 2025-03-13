@@ -50,7 +50,7 @@ export class VersionService {
 				),
 			);
 
-			this.cacheService.deleteChartContributor(chartId, versionId);
+			this.cacheService.removeVersion(chartId, versionId);
 
 			return true;
 		} catch (error) {

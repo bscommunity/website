@@ -1,4 +1,10 @@
-import { Component, inject, Input, ViewChild } from "@angular/core";
+import {
+	ChangeDetectorRef,
+	Component,
+	inject,
+	Input,
+	ViewChild,
+} from "@angular/core";
 
 // Material
 import { MatDialog } from "@angular/material/dialog";
@@ -25,7 +31,11 @@ import {
 import { VersionService } from "@/services/api/version.service";
 
 // Model
-import type { CreateVersionModel, VersionModel } from "@/models/version.model";
+import {
+	Version,
+	type CreateVersionModel,
+	type VersionModel,
+} from "@/models/version.model";
 
 @Component({
 	selector: "app-chart-versions-section",
@@ -43,6 +53,7 @@ export class VersionsComponent {
 	@Input() chartId!: string;
 	@Input() versions: VersionModel[] = [];
 
+	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
@@ -126,9 +137,6 @@ export class VersionsComponent {
 		},
 	];
 
-	// initialSortDirection: SortDirection = "asc";
-	// sortOrder: SortDirection = this.initialSortDirection;
-
 	versionsActions: Action<VersionModel>[] = [
 		{
 			description: "Download",
@@ -142,19 +150,44 @@ export class VersionsComponent {
 			icon: "swap_horiz",
 			callback: () => {
 				this.openSnackBar(
-					"Version switching is currently not implemented",
+					"Version switching wasn't implemented yet.",
 					"Close",
 				);
 			},
-			disabled: (_, item) =>
-				item.id === this.versions[this.versions.length - 1].id,
+			disabled: (index, item) => {
+				// If it's a update, we already have versionTable available
+				// Since we only update the table data, and not "versions" array
+				// we need to check the table data directly
+				if (this.versionTable) {
+					return (
+						item.id ===
+						this.versionTable.dataSource.data[
+							this.versionTable.dataSource.data.length - 1
+						].id
+					);
+				} else {
+					// If it's the initial load, we need to check the versions array,
+					// since it stores the initial data, and we don't have the table data yet
+					return index === this.versions.length - 1;
+				}
+			},
 		},
 		{
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (index, _) => {
-				return index === 0 || index === this.versions.length - 1;
+			disabled: (index, item) => {
+				if (this.versionTable) {
+					return (
+						item.id ===
+							this.versionTable.dataSource.data[
+								this.versionTable.dataSource.data.length - 1
+							].id ||
+						item.id === this.versionTable.dataSource.data[0].id
+					);
+				} else {
+					return index === this.versions.length - 1 || index === 0;
+				}
 			},
 		},
 	];
@@ -179,7 +212,7 @@ export class VersionsComponent {
 
 			console.log("Version added with success:", response);
 
-			this.addVersionToTable(response);
+			this.addVersionToTable(Version.parse(response));
 
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
@@ -198,11 +231,24 @@ export class VersionsComponent {
 
 	addVersionToTable(version: VersionModel) {
 		this.versionTable.addData(version);
+		this.cdr.detectChanges();
 		this.openSnackBar("Version added with success!", "Close");
 	}
 
 	removeVersionFromTable(version: VersionModel) {
 		this.versionTable.removeData(version);
+
+		// Decrement index for versions with higher index than the removed one
+		this.versionTable.updateTableData((items) =>
+			items.map(
+				(item) =>
+					item.index > version.index
+						? { ...item, index: item.index - 1 }
+						: item, // Keep other items unchanged
+			),
+		);
+
+		this.cdr.detectChanges();
 		this.openSnackBar("Version removed with success!", "Close");
 	}
 }

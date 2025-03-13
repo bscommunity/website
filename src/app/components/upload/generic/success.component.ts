@@ -58,14 +58,14 @@ import { SuccessDialogData } from "../../../services/upload.service";
 			>
 				Access chart
 			</button>
-			<button
+			<!-- <button
 				class="!w-full !mb-2"
 				mat-button
 				type="button"
 				(click)="dialogRef.close()"
 			>
 				Close
-			</button>
+			</button> -->
 		</mat-dialog-actions>
 	`,
 	imports: [MatDialogModule, MatButtonModule, ChartComponent],

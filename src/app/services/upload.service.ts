@@ -258,6 +258,7 @@ export class UploadDialogService {
 			// Open success dialog
 			this.dialog.closeAll();
 			this.dialog.open(UploadDialogSuccessComponent, {
+				hasBackdrop: true,
 				disableClose: true,
 				data: {
 					id: response.id,
