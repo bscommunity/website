@@ -40,9 +40,16 @@ export class ChartResolver implements Resolve<any> {
 		} catch (error: any) {
 			console.error("Error fetching chart", error);
 
-			// In the future, redirect to 404 only if not found
+			if (error.status === 404) {
+				console.error("Chart not found");
+				this.router.navigate(["404"], {
+					state: { error: "Chart not found" },
+				});
+				return null;
+			}
+
 			this.router.navigate(["error"], {
-				state: { error: `${error.statusText}: ${error.error.error}` },
+				state: { error: `${error.statusText}: ${error.error}` },
 			});
 
 			return null;

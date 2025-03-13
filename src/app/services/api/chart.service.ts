@@ -1,3 +1,4 @@
+import { Router } from "@angular/router";
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
@@ -20,6 +21,7 @@ import { apiUrl } from ".";
 })
 export class ChartService {
 	constructor(
+		private router: Router,
 		private cacheService: CacheService,
 		private http: HttpClient,
 	) {}
@@ -61,9 +63,44 @@ export class ChartService {
 		const cachedChart = this.cacheService.getChart(id);
 
 		if (cachedChart && cachedChart.isFull) {
-			console.log(`Returning chart ${id} from cache...`);
+			// Trigger a background fetch to check for updates
+			this.fetchChartFromRemote(id).subscribe({
+				next: (fetchedChart) => {
+					// Compare versions to see if we need to update the cache
+					if (
+						JSON.stringify(fetchedChart.versions) !==
+						JSON.stringify(cachedChart.versions)
+					) {
+						console.log(`Updating chart ${id} in cache...`);
+						this.cacheService.updateChart(fetchedChart);
 
+						// If the user is viewing the chart, navigate to the new version
+						if (this.router.url.startsWith(`/chart/${id}`)) {
+							this.router.navigate(["/chart", id]);
+
+							/* // We need to reload the page to trigger the resolver
+								// and get the updated data
+								window.location.reload(); */
+						}
+					}
+				},
+				error: (error) => {
+					// If the chart was deleted, remove it from cache
+					if (error.status === 404) {
+						console.log(`Removing chart ${id} from cache...`);
+						this.cacheService.removeChart(id);
+						if (this.router.url.startsWith(`/chart/${id}`)) {
+							this.router.navigate(["/"]);
+						}
+					} else {
+						console.error("Failed to fetch chart:", error);
+					}
+				},
+			});
+
+			// Return cache data immediately
 			try {
+				console.log(`Returning chart ${id} from cache...`);
 				return Chart.parse(cachedChart);
 			} catch (error) {
 				console.error("Error parsing cached chart:", error);
@@ -72,9 +109,7 @@ export class ChartService {
 		}
 
 		console.log("Fetching chart with ID:", id);
-		const response = await firstValueFrom(
-			this.http.get<unknown>(`${this.apiUrl}/${id}`),
-		);
+		const response = await firstValueFrom(this.fetchChartFromRemote(id));
 
 		try {
 			const parsedChart = Chart.parse(response);
@@ -87,6 +122,10 @@ export class ChartService {
 			console.error("Invalid data structure received:", error);
 			throw new Error("Failed to fetch valid chart data");
 		}
+	}
+
+	fetchChartFromRemote(id: string): Observable<ChartModel> {
+		return this.http.get<ChartModel>(`${this.apiUrl}/${id}`);
 	}
 
 	// Update
