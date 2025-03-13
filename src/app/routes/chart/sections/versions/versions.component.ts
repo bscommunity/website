@@ -60,9 +60,9 @@ export class VersionsComponent {
 		dialogRef.afterClosed().subscribe((result: UploadFormData | "back") => {
 			if (result == "back") return;
 
-			console.log("Adding version", result);
-			const { chartFileData, ...rest } = result;
 			this.dialog.open(UploadDialogLoadingComponent);
+
+			const { chartFileData, ...rest } = result;
 			this.addVersion({
 				chartId: this.chartId,
 				...rest,

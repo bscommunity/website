@@ -7,6 +7,7 @@ import { StorageService } from "./storage.service";
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
+import { KnownIssueModel } from "@/models/known-issue.model";
 
 const MAX_CACHED_CHARTS = 5;
 
@@ -67,12 +68,13 @@ export class CacheService {
 		const storedItems = JSON.parse(keys) as string[];
 		const charts = storedItems
 			.filter((key) => key.startsWith("chart_"))
-			.map((key) => {
-				if (key) {
-					const chart = this.storageService.getItem(key);
-					return chart ? JSON.parse(chart) : undefined;
-				}
-			});
+			.filter((key) => this.storageService.getItem(key))
+			.map(
+				(key) =>
+					JSON.parse(
+						this.storageService.getItem(key)!,
+					) as CachedChart,
+			);
 
 		return charts;
 	}
@@ -103,6 +105,11 @@ export class CacheService {
 
 		// We add the new chart to the cache
 		const cacheKey = `chart_${chart.id}`;
+
+		if (cacheKey in localStorage) {
+			return this.updateChart(chart, true);
+		}
+
 		this.storageService.setItem(
 			cacheKey,
 			JSON.stringify({
@@ -138,7 +145,7 @@ export class CacheService {
 		}
 	}
 
-	updateChart(updatedChart: ChartModel): void {
+	updateChart(updatedChart: ChartModel, isFull = false): void {
 		const chart = this.getChart(updatedChart.id);
 
 		if (!chart) {
@@ -147,7 +154,11 @@ export class CacheService {
 
 		this.storageService.setItem(
 			`chart_${updatedChart.id}`,
-			JSON.stringify(updatedChart),
+			JSON.stringify({
+				...updatedChart,
+				lastAccessed: new Date().toISOString(),
+				isFull,
+			}),
 		);
 	}
 
@@ -250,6 +261,53 @@ export class CacheService {
 			JSON.stringify({
 				...chart,
 				versions: updatedVersions,
+			}),
+		);
+	}
+
+	// Known Issues
+
+	addIssue(id: string, knownIssue: KnownIssueModel): void {
+		const chart = this.getChart(id);
+
+		if (!chart) {
+			return;
+		}
+
+		const knownIssues = chart.latestVersion?.knownIssues || [];
+		knownIssues.push(knownIssue);
+
+		this.storageService.setItem(
+			`chart_${id}`,
+			JSON.stringify({
+				...chart,
+				latestVersion: {
+					...chart.latestVersion,
+					knownIssues,
+				},
+			}),
+		);
+	}
+
+	removeIssue(id: string, knownIssueId: string): void {
+		const chart = this.getChart(id);
+
+		if (!chart || !chart.latestVersion?.knownIssues) {
+			return;
+		}
+
+		const updatedKnownIssues = chart.latestVersion.knownIssues.filter(
+			(knownIssue) => knownIssue.id !== knownIssueId,
+		);
+
+		this.storageService.setItem(
+			`chart_${id}`,
+			JSON.stringify({
+				...chart,
+				latestVersion: {
+					...chart.latestVersion,
+					knownIssues: updatedKnownIssues,
+				},
 			}),
 		);
 	}
