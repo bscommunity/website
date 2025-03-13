@@ -8,6 +8,7 @@ import { MatButtonModule } from "@angular/material/button";
 
 // Components
 import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
+import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
 import {
 	TableComponent,
 	TableColumn,
@@ -15,15 +16,16 @@ import {
 } from "../../subcomponents/table/table.component";
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+
+// Service
 import {
 	UploadFormData,
 	uploadStepComponents,
 } from "@/services/upload.service";
+import { VersionService } from "@/services/api/version.service";
 
 // Model
-import { CreateVersionModel, VersionModel } from "@/models/version.model";
-import { VersionService } from "@/services/api/version.service";
-import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
+import type { CreateVersionModel, VersionModel } from "@/models/version.model";
 
 @Component({
 	selector: "app-chart-versions-section",
@@ -57,18 +59,20 @@ export class VersionsComponent {
 			data: {},
 		});
 
-		dialogRef.afterClosed().subscribe((result: UploadFormData | "back") => {
-			if (result == "back") return;
+		dialogRef
+			.afterClosed()
+			.subscribe((result: UploadFormData | "back" | undefined) => {
+				if (result == "back" || result == undefined) return;
 
-			this.dialog.open(UploadDialogLoadingComponent);
+				this.dialog.open(UploadDialogLoadingComponent);
 
-			const { chartFileData, ...rest } = result;
-			this.addVersion({
-				chartId: this.chartId,
-				...rest,
-				...chartFileData,
+				const { chartFileData, ...rest } = result;
+				this.addVersion({
+					chartId: this.chartId,
+					...rest,
+					...chartFileData,
+				});
 			});
-		});
 	}
 
 	openRemoveVersionConfirmationDialog(
@@ -106,7 +110,7 @@ export class VersionsComponent {
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
-			columnDef: "id",
+			columnDef: "index",
 			header: "Version",
 			cell: (item: VersionModel) => `${item.index}`,
 		},
@@ -121,6 +125,9 @@ export class VersionsComponent {
 			cell: (item: VersionModel) => `${item.downloadsAmount ?? 0}`,
 		},
 	];
+
+	// initialSortDirection: SortDirection = "asc";
+	// sortOrder: SortDirection = this.initialSortDirection;
 
 	versionsActions: Action<VersionModel>[] = [
 		{
@@ -139,14 +146,14 @@ export class VersionsComponent {
 					"Close",
 				);
 			},
-			disabled: (index, _) =>
-				index === 1 || index === this.versions.length - 1,
+			disabled: (_, item) =>
+				item.id === this.versions[this.versions.length - 1].id,
 		},
 		{
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (index, item: VersionModel) => {
+			disabled: (index, _) => {
 				return index === 0 || index === this.versions.length - 1;
 			},
 		},
@@ -158,7 +165,6 @@ export class VersionsComponent {
 				this.chartId,
 				version,
 			);
-			console.log("Version added successfully:", response);
 
 			if (!response) {
 				this.dialog.closeAll();
@@ -170,6 +176,10 @@ export class VersionsComponent {
 				});
 				return;
 			}
+
+			console.log("Version added with success:", response);
+
+			this.addVersionToTable(response);
 
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
@@ -184,6 +194,11 @@ export class VersionsComponent {
 				},
 			});
 		}
+	}
+
+	addVersionToTable(version: VersionModel) {
+		this.versionTable.addData(version);
+		this.openSnackBar("Version added with success!", "Close");
 	}
 
 	removeVersionFromTable(version: VersionModel) {
