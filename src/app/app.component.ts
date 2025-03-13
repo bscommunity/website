@@ -77,12 +77,7 @@ export class AppComponent implements OnInit {
 						event.urlAfterRedirects.startsWith(route),
 					) && authService.isLoggedIn();
 
-				const disableFooter = [
-					"/login",
-					"/callback",
-					"/error",
-					"/not-found",
-				];
+				const disableFooter = ["/login", "/callback", "/error", "/404"];
 
 				this.showFooter = !disableFooter.some((route) =>
 					event.urlAfterRedirects.includes(route),
