@@ -78,6 +78,9 @@ export class ChartService {
 
 		try {
 			const parsedChart = Chart.parse(response);
+
+			// We need to add, since we don't know if it's already cached
+			// The user may just pasted the URL in the browser
 			this.cacheService.addChart(parsedChart);
 			return parsedChart;
 		} catch (error) {

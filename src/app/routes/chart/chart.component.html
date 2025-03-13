@@ -32,7 +32,8 @@
 			<app-chart-known-issues-section
 				#knownIssuesSection
 				class="w-full"
-				[initialKnownIssues]="chart.latestVersion.knownIssues"
+				[chartId]="chart.id"
+				[issues]="chart.latestVersion.knownIssues"
 			></app-chart-known-issues-section>
 			<app-chart-contributors-section
 				#contributorsSection
