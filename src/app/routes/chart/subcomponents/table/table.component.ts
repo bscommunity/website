@@ -112,6 +112,26 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 		// console.log("New data", this.dataSource.data);
 	}
 
+	updateItemData(updatedItem: T) {
+		const index = this.data.findIndex((item) => item === updatedItem);
+		if (index === -1) {
+			console.error("Item not found", updatedItem);
+			return;
+		}
+
+		this.data = [
+			...this.data.slice(0, index),
+			updatedItem,
+			...this.data.slice(index + 1),
+		];
+		this.dataSource.data = this.data;
+	}
+
+	updateTableData = (callback: (items: T[]) => T[]) => {
+		this.data = callback(this.data);
+		this.dataSource.data = this.data;
+	};
+
 	sortData(sort: Sort) {
 		this.sortChanged.emit(sort);
 	}
