@@ -3,9 +3,10 @@
 		mat-table
 		[dataSource]="dataSource"
 		matSort
+		(matSortChange)="sortData($event)"
 		[matSortDisabled]="!hasSorting.length"
 		[matSortActive]="initialSortColumn"
-		[matSortDirection]="initialSortDirection"
+		[matSortDirection]="sortDirection"
 		class="mat-elevation-z8"
 	>
 		@for (column of columns; track $index) {

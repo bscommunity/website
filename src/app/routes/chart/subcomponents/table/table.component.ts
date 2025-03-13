@@ -1,8 +1,10 @@
 import {
 	AfterViewInit,
 	Component,
+	EventEmitter,
 	Input,
 	OnInit,
+	Output,
 	Pipe,
 	PipeTransform,
 	ViewChild,
@@ -13,7 +15,12 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
-import { MatSort, MatSortModule, SortDirection } from "@angular/material/sort";
+import {
+	MatSort,
+	MatSortModule,
+	Sort,
+	SortDirection,
+} from "@angular/material/sort";
 
 export interface TableColumn<T> {
 	columnDef: string;
@@ -65,7 +72,9 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	@ViewChild(MatSort) sort!: MatSort;
 	@Input() hasSorting = "";
 	@Input() initialSortColumn = "";
-	@Input() initialSortDirection: SortDirection = "asc";
+	@Input() sortDirection: SortDirection = "asc";
+
+	@Output() sortChanged = new EventEmitter<Sort>();
 
 	displayedColumns: string[] = [];
 	dataSource!: MatTableDataSource<T>;
@@ -81,6 +90,14 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 
 	ngAfterViewInit(): void {
 		this.dataSource.sort = this.sort;
+		this.dataSource.sortingDataAccessor = (item: any, property) => {
+			// console.log("Sorting data accessor", item, property);
+			if (typeof item[property] === "number") {
+				// Convert the value to a number for proper numeric comparison
+				return Number(item.index);
+			}
+			return item[property];
+		};
 	}
 
 	addData(newItem: T) {
@@ -91,7 +108,11 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	removeData(itemToRemove: T) {
 		this.data = this.data.filter((item) => item !== itemToRemove);
 		this.dataSource.data = this.data;
-		console.log("Removed item", itemToRemove);
-		console.log("New data", this.dataSource.data);
+		// console.log("Removed item", itemToRemove);
+		// console.log("New data", this.dataSource.data);
+	}
+
+	sortData(sort: Sort) {
+		this.sortChanged.emit(sort);
 	}
 }
