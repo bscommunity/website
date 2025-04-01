@@ -17,6 +17,15 @@
 					Please try again later or check Discord if the problem
 					persists
 				</p>
+				<button
+					mat-stroked-button
+					(click)="fetchCharts(true)"
+					(keypress)="fetchCharts(true)"
+					aria-label="Refresh charts"
+				>
+					<p>Refresh charts</p>
+					<mat-icon class="!mr-0 !ml-2">refresh</mat-icon>
+				</button>
 			</div>
 		</div>
 	} @else if (charts === undefined) {
@@ -74,6 +83,17 @@
 						[selectedOption]="sortBy"
 					></app-custom-select>
 				</span>
+				<button
+					mat-icon-button
+					(click)="fetchCharts(true)"
+					(keypress)="fetchCharts(true)"
+					aria-label="Refresh charts"
+					class="!flex !items-center !justify-center"
+				>
+					<span class="flex flex-1 items-center justify-center">
+						<mat-icon inline>refresh</mat-icon>
+					</span>
+				</button>
 			</div>
 			@if (charts.length > 0) {
 				<ul class="flex flex-col items-start justify-start w-full">

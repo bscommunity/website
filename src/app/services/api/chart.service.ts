@@ -15,6 +15,7 @@ import {
 } from "@/models/chart.model";
 
 import { apiUrl } from ".";
+import { ZodError } from "zod";
 
 @Injectable({
 	providedIn: "root",
@@ -36,10 +37,12 @@ export class ChartService {
 	}
 
 	// Read
-	getAllCharts(): Observable<ChartModel[]> {
+	getAllCharts(
+		forceRefresh: boolean | undefined = false,
+	): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
 
-		if (charts && charts.length > 0) {
+		if (charts && charts.length > 0 && !forceRefresh) {
 			console.log(`Returning charts from cache...`);
 
 			return new Observable((subscriber) => {
@@ -119,8 +122,8 @@ export class ChartService {
 			this.cacheService.addChart(parsedChart);
 			return parsedChart;
 		} catch (error) {
-			console.error("Invalid data structure received:", error);
-			throw new Error("Failed to fetch valid chart data");
+			console.error("Error parsing fetched chart:", error);
+			throw error;
 		}
 	}
 

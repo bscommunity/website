@@ -3,8 +3,7 @@ import { Component, Input } from "@angular/core";
 
 import { MatIconModule } from "@angular/material/icon";
 
-import { Difficulty } from "@/models/enums/difficulty.enum";
-import { difficultiesIcons } from "assets/difficulties";
+import { Difficulty, getDifficultyIcon } from "@/models/enums/difficulty.enum";
 
 import { transformDuration } from "@/lib/time";
 
@@ -123,7 +122,7 @@ export class ChartComponent implements ChartProps {
 	})
 	duration = 0;
 	@Input() notesAmount = 0;
-	@Input() difficulty = Difficulty.Normal;
+	@Input() difficulty = Difficulty.NORMAL;
 	@Input() isDeluxe: ChartProps["isDeluxe"] = false;
 	@Input() isExplicit: ChartProps["isExplicit"] = false;
 	@Input() isFeatured: ChartProps["isFeatured"] = false;
@@ -134,5 +133,5 @@ export class ChartComponent implements ChartProps {
 	tendencyUp = Tendency.Up;
 	tendencyDown = Tendency.Down;
 
-	difficultyIcon = difficultiesIcons[this.difficulty] || null;
+	difficultyIcon = getDifficultyIcon(this.difficulty) || null;
 }

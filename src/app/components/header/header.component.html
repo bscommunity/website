@@ -2,7 +2,8 @@
 	class="flex flex-col md:flex-row items-start md:items-center justify-center w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9"
 >
 	<div class="flex flex-row items-center justify-between w-full px-wrapper">
-		<div
+		<a
+			[routerLink]="['/published']"
 			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
 		>
 			<mat-icon
@@ -17,7 +18,7 @@
 				aria-hidden="false"
 				aria-label="Site label"
 			></mat-icon>
-		</div>
+		</a>
 
 		<ul class="hidden flex-row items-center justify-center gap-4 md:flex">
 			<li>

@@ -16,7 +16,7 @@ export class ContributorTagsComponent {
 	@Input() roles!: WritableSignal<Map<string, Array<ContributorRole>>>;
 
 	readonly baseRoles = Object.values(ContributorRole).filter(
-		(r) => r !== "Author",
+		(r) => r !== "AUTHOR",
 	);
 
 	toggleRole(event: MatChipSelectionChange, role: ContributorRole): void {

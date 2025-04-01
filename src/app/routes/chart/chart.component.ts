@@ -15,12 +15,10 @@ import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.componen
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import { VersionModel } from "@/models/version.model";
 import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
-import { PageErrorComponent } from "../error/error.component";
 
 @Component({
 	selector: "app-chart",
