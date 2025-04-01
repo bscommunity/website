@@ -1,9 +1,0 @@
-export const environment = {
-	production: false,
-	DISCORD_CLIENT_ID: "",
-	REDIRECT_URI: "",
-	LASTFM_API_KEY: "",
-	SPOTIFY_CLIENT_ID: "",
-	SPOTIFY_API_KEY: "",
-	ENCODING_KEY: "",
-};

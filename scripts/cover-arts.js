@@ -14,10 +14,10 @@ const fetchArtworkUrls = async (songs) => {
                 const artworkUrl = data.results[0].artworkUrl100.replace("100x100", "600x600");
                 urls.push(artworkUrl);
             } else {
-                console.log(`Nenhum resultado encontrado para: ${track} por ${artist}`);
+                console.log(`No results found for: ${track} by ${artist}`);
             }
         } catch (error) {
-            console.error(`Erro ao buscar ${track} por ${artist}:`, error);
+            console.error(`Error while trying to search ${track} by ${artist}:`, error);
         }
     }
 
@@ -54,5 +54,5 @@ fetchArtworkUrls(songs).then(urls => {
 
     const data = { urls };
     writeToJsonFile(filePath, data);
-    console.log(`URLs de arte foram salvas em ${filePath}`);
+    console.log(`Cover arts URLs were saved on ${filePath}`);
 });

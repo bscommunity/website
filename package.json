@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"scripts": {
 		"ng": "ng",
-		"start": "ng serve",
+		"start": "node -r dotenv/config scripts/env.js && ng serve",
 		"build": "ng build",
 		"watch": "ng build --watch --configuration development",
 		"test": "ng test",
@@ -24,6 +24,7 @@
 		"@angular/platform-server": "^19.2.1",
 		"@angular/router": "^19.2.1",
 		"@angular/ssr": "^19.2.1",
+		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
 		"ng-qrcode": "^19.0.1",
 		"rxjs": "~7.8.2",
