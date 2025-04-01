@@ -13,7 +13,7 @@ const envFile = `export const environment = {
 	ENCODING_KEY: '${process.env.ENCODING_KEY}',
 };
 `;
-const targetPath = path.join(__dirname, '../src/environments/environment.ts');
+const targetPath = path.join(process.cwd(), 'src/environments/environment.ts');
 fs.writeFile(targetPath, envFile, (err) => {
     if (err) {
         console.error(err);
