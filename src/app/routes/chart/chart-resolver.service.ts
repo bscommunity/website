@@ -8,6 +8,7 @@ import {
 import { ChartService } from "@/services/api/chart.service";
 import { ChartModel } from "@/models/chart.model";
 import { AuthService } from "@/auth/auth.service";
+import { ZodError } from "zod";
 
 @Injectable({
 	providedIn: "root",
@@ -39,6 +40,15 @@ export class ChartResolver implements Resolve<any> {
 			return chart;
 		} catch (error: any) {
 			console.error("Error fetching chart", error);
+
+			// Handle Zod validation errors
+			if (error instanceof ZodError) {
+				console.error("Zod validation failed", error.errors);
+				this.router.navigate(["error"], {
+					state: { error: "Invalid chart data structure" },
+				});
+				return null;
+			}
 
 			if (error.status === 404) {
 				console.error("Chart not found");

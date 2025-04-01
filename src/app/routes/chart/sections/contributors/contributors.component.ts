@@ -23,7 +23,10 @@ import { ContributorService } from "@/services/api/contributor.service";
 
 // Models
 import { ContributorModel } from "@/models/contributor.model";
-import { ContributorRole } from "@/models/enums/role.enum";
+import {
+	ContributorRole,
+	getContributorRoleLabel,
+} from "@/models/enums/role.enum";
 
 @Component({
 	selector: "app-chart-contributors-section",
@@ -131,7 +134,8 @@ export class ContributorsComponent {
 		{
 			columnDef: "roles",
 			header: "Roles",
-			cell: (item: ContributorModel) => `${item.roles.join(", ")}`,
+			cell: (item: ContributorModel) =>
+				`${item.roles.map((role) => getContributorRoleLabel(role)).join(", ")}`,
 		},
 	];
 

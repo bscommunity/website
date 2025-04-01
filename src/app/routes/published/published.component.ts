@@ -73,7 +73,19 @@ export class PublishedComponent implements OnInit {
 
 	ngOnInit(): void {
 		// Access resolved data
-		this.chartService.getAllCharts().subscribe({
+		this.fetchCharts(false);
+	}
+
+	clearFilters() {
+		// Clear filters
+	}
+
+	fetchCharts(forceRefresh: boolean | undefined = false) {
+		// console.log("Refreshing charts...");
+
+		this.charts = undefined;
+		this.error = "";
+		this.chartService.getAllCharts(forceRefresh).subscribe({
 			next: (response) => {
 				// console.log("Resolved charts data:", this.charts);
 
@@ -92,9 +104,5 @@ export class PublishedComponent implements OnInit {
 				// console.log(this.charts);
 			},
 		});
-	}
-
-	clearFilters() {
-		// Clear filters
 	}
 }

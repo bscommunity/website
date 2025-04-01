@@ -27,7 +27,7 @@ import {
 	initialFormData,
 	UploadFormData,
 } from "../../../services/upload.service";
-import { Difficulty } from "@/models/enums/difficulty.enum";
+import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-upload-dialog-section2",
@@ -89,8 +89,8 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 								difficulty of difficulties;
 								track difficulty
 							) {
-								<mat-option [value]="difficulty">
-									{{ getDifficultyLabel(difficulty) }}
+								<mat-option [value]="difficulty.key">
+									{{ difficulty.value }}
 								</mat-option>
 							}
 						</mat-select>
@@ -138,7 +138,10 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 })
 export class UploadDialogSection2Component implements OnInit {
 	form: FormGroup;
-	difficulties = Object.values(Difficulty);
+	difficulties = Object.values(Difficulty).map((difficulty) => ({
+		key: difficulty,
+		value: getDifficultyLabel(difficulty),
+	}));
 
 	constructor(
 		private fb: FormBuilder,
@@ -163,9 +166,5 @@ export class UploadDialogSection2Component implements OnInit {
 		if (this.form.valid) {
 			this.dialogRef.close(this.form.value);
 		}
-	}
-
-	getDifficultyLabel(difficulty: Difficulty): string {
-		return Difficulty[difficulty];
 	}
 }

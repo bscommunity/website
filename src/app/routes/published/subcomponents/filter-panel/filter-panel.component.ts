@@ -8,7 +8,7 @@ import {
 	ExpansionPanelData,
 } from "../expansion-panel.component";
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { Difficulty } from "@/models/enums/difficulty.enum";
+import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-filter-panel",
@@ -31,7 +31,7 @@ export class FilterPanelComponent {
 
 	difficulties: ExpansionPanelData[] = Object.values(Difficulty).map(
 		(name) => ({
-			name,
+			name: getDifficultyLabel(name as Difficulty),
 		}),
 	);
 
