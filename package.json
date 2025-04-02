@@ -24,6 +24,7 @@
 		"@angular/platform-server": "^19.2.4",
 		"@angular/router": "^19.2.4",
 		"@angular/ssr": "^19.2.5",
+		"@netlify/angular-runtime": "^2.3.1",
 		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
 		"ng-qrcode": "^19.0.1",
