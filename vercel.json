@@ -1,11 +1,12 @@
 {
 	"buildCommand": "node -r dotenv/config scripts/env.js; ng build",
-	"rewrites": [
-		{
-			"source": "/(.*)",
-			"destination": "/index.html"
+	"name": "website",
+	"rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+	"functions": {
+		"api/index.js": {
+			"includeFiles": "dist/website/**"
 		}
-	],
+	},
 	"headers": [
 		{
 			"source": "/(.*)",
