@@ -4,7 +4,7 @@
 	"scripts": {
 		"ng": "ng",
 		"start": "node -r dotenv/config scripts/env.js && ng serve",
-		"build": "ng build",
+		"build": "ng build --configuration production",
 		"watch": "ng build --watch --configuration development",
 		"test": "ng test",
 		"serve:ssr:website": "node dist/website/server/server.mjs",
