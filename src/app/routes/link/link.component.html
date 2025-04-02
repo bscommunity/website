@@ -20,17 +20,16 @@
 			</div>
 
 			<qr-code
-				[value]="`bscm://${contentType}/details/${contentId}"
+				[value]="`bscm://${contentType}/${contentId}`"
 				size="200"
 				errorCorrectionLevel="M"
 				centerImageSrc="undefined"
 				centerImageSize="undefined"
 				[margin]="2"
 				styleClass="rounded"
-			>
-			</qr-code>
+			></qr-code>
 
-			<a href="bscm://{{ contentType }}/details/{{ contentId }}">
+			<a href="bscm://{{ contentType }}/{{ contentId }}">
 				<button mat-stroked-button>
 					<p>Open app</p>
 				</button>
