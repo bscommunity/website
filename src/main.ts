@@ -4,7 +4,7 @@ import { appConfig } from "./app/app.config";
 import { AppComponent } from "./app/app.component";
 import { environment } from "environments/environment";
 
-if (environment.PRODUCTION !== "false") {
+if (environment.PRODUCTION == true) {
 	// If the environment is production, enable production mode
 	enableProdMode();
 }
