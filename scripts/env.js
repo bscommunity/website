@@ -5,6 +5,7 @@ const checkSign = '\u{2705}';
 require('dotenv').config({ path: '.env' });;
 
 const envFile = `export const environment = {
+    PRODUCTION: ${process.env.PRODUCTION},
 	DISCORD_CLIENT_ID: '${process.env.DISCORD_CLIENT_ID}',
 	REDIRECT_URI: '${process.env.REDIRECT_URI}',
 	LASTFM_API_KEY: '${process.env.LASTFM_API_KEY}',
