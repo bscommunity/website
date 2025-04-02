@@ -1,0 +1,12 @@
+[
+	{
+		"relation": ["delegate_permission/common.handle_all_urls"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.meninocoiso.bscm",
+			"sha256_cert_fingerprints": [
+				"8C:AE:32:7E:61:62:C0:90:56:59:8E:E9:3B:1F:C0:A5:8B:1F:D9:04:33:3B:63:A8:9F:4D:3E:04:15:38:0A:04"
+			]
+		}
+	}
+]
