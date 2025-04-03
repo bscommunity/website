@@ -5,7 +5,27 @@
 			"namespace": "android_app",
 			"package_name": "com.meninocoiso.bscm",
 			"sha256_cert_fingerprints": [
-				" 76:87:5D:A6:C3:AA:FB:3C:96:EF:6C:BB:6C:6C:A9:F3:BF:24:93:E4:37:38:8D:F5:71:D4:2E:22:21:07:01:9F"
+				"76:87:5D:A6:C3:AA:FB:3C:96:EF:6C:BB:6C:6C:A9:F3:BF:24:93:E4:37:38:8D:F5:71:D4:2E:22:21:07:01:9F"
+			]
+		}
+	},
+	{
+		"relation": ["delegate_permission/common.handle_all_urls"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.meninocoiso.bscm",
+			"sha256_cert_fingerprints": [
+				"0A:ED:27:F6:81:CA:43:92:E3:79:E4:6C:1B:58:3D:72:24:FD:06:F2:7C:81:68:64:67:B4:35:BA:01:76:85:90"
+			]
+		}
+	},
+	{
+		"relation": ["delegate_permission/common.handle_all_urls"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.meninocoiso.bscm",
+			"sha256_cert_fingerprints": [
+				"8C:AE:32:7E:61:62:C0:90:56:59:8E:E9:3B:1F:C0:A5:8B:1F:D9:04:33:3B:63:A8:9F:4D:3E:04:15:38:0A:04"
 			]
 		}
 	}
