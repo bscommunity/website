@@ -1,5 +1,5 @@
 <main
-	class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
+	class="flex flex-col-reverse md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
 	@if (charts) {
 		<app-filter-panel
@@ -7,7 +7,7 @@
 		></app-filter-panel>
 		<div class="flex flex-col items-start justify-start gap-9 w-full">
 			<div
-				class="flex flex-col md:flex-row items-center justify-start w-full gap-4"
+				class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
 			>
 				<app-searchbar
 					placeholder="Search for charts, tourpasses and themes..."
@@ -22,30 +22,32 @@
 						></mat-progress-spinner>
 					}
 				</app-searchbar>
-				<span
-					class="flex flex-row items-center justify-end gap-4 h-full"
-				>
-					<label class="min-w-fit" for="sort-by">Sort by</label>
-					<app-custom-select
-						class="h-full"
-						id="sort-by"
-						[options]="sortOptions"
-						[selectedOption]="sortBy"
-						[disabled]="isRefreshing"
-					></app-custom-select>
-				</span>
-				<button
-					mat-icon-button
-					(click)="fetchCharts(true)"
-					(keypress)="fetchCharts(true)"
-					aria-label="Refresh charts"
-					class="!flex !items-center !justify-center"
-					[disabled]="isRefreshing"
-				>
-					<span class="flex flex-1 items-center justify-center">
-						<mat-icon inline>refresh</mat-icon>
+				<div class="flex flex-row items-center gap-4">
+					<span
+						class="flex flex-row items-center justify-end gap-4 h-full"
+					>
+						<label class="min-w-fit" for="sort-by">Sort by</label>
+						<app-custom-select
+							class="h-full"
+							id="sort-by"
+							[options]="sortOptions"
+							[selectedOption]="sortBy"
+							[disabled]="isRefreshing"
+						></app-custom-select>
 					</span>
-				</button>
+					<button
+						mat-icon-button
+						(click)="fetchCharts(true)"
+						(keypress)="fetchCharts(true)"
+						aria-label="Refresh charts"
+						class="!flex !items-center !justify-center"
+						[disabled]="isRefreshing"
+					>
+						<span class="flex flex-1 items-center justify-center">
+							<mat-icon inline>refresh</mat-icon>
+						</span>
+					</button>
+				</div>
 			</div>
 			@if (charts.length === 0 && !filters) {
 				<!-- No filters applied, user has no charts -->

@@ -39,6 +39,7 @@ export class ChartService {
 	// Read
 	getAllCharts(forceRefresh: boolean = false): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
+		const url = `${this.apiUrl}?fetchContributors=true&fetchVersions=true`;
 
 		if (charts && charts.length > 0 && !forceRefresh) {
 			// Check if we are on refresh cooldown
@@ -52,7 +53,7 @@ export class ChartService {
 				this.http
 					.get<
 						ChartModel[]
-					>(`${this.apiUrl}?fetchContributors=true&fetchVersions=true`)
+					>(`${url}?fetchContributors=true&fetchVersions=true`)
 					.subscribe({
 						next: (fetchedCharts) => {
 							// Set up a cooldown to prevent too many requests
@@ -98,7 +99,7 @@ export class ChartService {
 				"It was not possible to get cached charts. Fetching from API...",
 			);
 
-			return this.http.get<ChartModel[]>(this.apiUrl).pipe(
+			return this.http.get<ChartModel[]>(url).pipe(
 				tap((fetchedCharts) => {
 					this.cacheService.addCharts(fetchedCharts);
 				}),
