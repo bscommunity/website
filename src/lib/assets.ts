@@ -116,7 +116,8 @@ export async function getMediaInfo(
 
 		if (spotifyData && spotifyData.tracks.items.length > 0) {
 			const spotifyTrack = spotifyData.tracks.items[0];
-			// Tenta obter o gênero do álbum se disponível
+
+			// Try to get the genre from the album
 			const albumGenre = spotifyData.albums?.items[0]?.genres?.[0];
 			foundGenre = normalizeGenre(albumGenre) || foundGenre;
 
@@ -151,7 +152,7 @@ export async function getMediaInfo(
 		const lastFmData = await fetchLastfmApi(query);
 
 		if (lastFmData && lastFmData.track.album) {
-			// Tenta obter o gênero das tags
+			// Try to get the genre from the tags
 			const tags = lastFmData.track.toptags?.tag || [];
 			for (const tag of tags) {
 				const genreFromTag = normalizeGenre(tag.name);
@@ -179,7 +180,7 @@ export async function getMediaInfo(
 		errors.push(err as Error);
 	}
 
-	// Se chegarmos aqui, tentamos uma última vez com uma busca mais flexível no iTunes
+	// If we reach here, we try one last time with a more flexible search on iTunes
 	try {
 		const veryCleanTrack = cleanedTrack.split("-")[0].trim();
 		const query = new URLSearchParams({
@@ -215,7 +216,7 @@ export async function getMediaInfo(
 		errors.push(err as Error);
 	}
 
-	// Se todas as tentativas falharam, lança erro com todas as mensagens de erro coletadas
+	// If all attempts failed, throw an error with all the collected error messages
 	throw new Error(
 		`Não foi possível encontrar informações para "${track}" por "${artist}". ` +
 			`Tentamos várias APIs mas todas falharam. Detalhes: ${errors.map((e) => e.message).join("; ")}`,
@@ -233,6 +234,7 @@ export async function getTrackStreamingLinks(
 
 	// First, try to search for the links with Odesli
 	const odesliData = await fetchOdesliApi(query);
+	console.log("Odesli data", odesliData);
 
 	if (odesliData) {
 		let links: StreamingLinkModel[] = [];
@@ -261,6 +263,7 @@ export async function getTrackStreamingLinks(
 
 		if (musicBrainzData) {
 			const relations = musicBrainzData.relations;
+			console.log("MusicBrainz data", musicBrainzData);
 
 			for (const relation of relations) {
 				if (relation.type === "free streaming") {
