@@ -43,6 +43,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 	) {}
 
 	@Input() class = "";
+	@Input() disabled = false;
 
 	@Input() options: Option[] = [];
 	@Input() selectedOption: Option | null = null;
