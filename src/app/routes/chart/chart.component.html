@@ -3,14 +3,7 @@
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
 		<!-- Desktop aside -->
-		<app-aside
-			[chartUrl]="chart.latestVersion.chartUrl"
-			[coverUrl]="chart.coverUrl"
-			[duration]="chart.latestVersion.duration"
-			[notesAmount]="chart.latestVersion.notesAmount"
-			[trackName]="chart.track"
-			class="hidden md:flex md:sticky md:top-8"
-		>
+		<app-aside [chart]="chart" class="hidden md:flex md:sticky md:top-8">
 		</app-aside>
 		<div
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
@@ -20,14 +13,7 @@
 				<h2 class="text-3xl">{{ chart.artist }}</h2>
 			</div>
 			<!-- Mobile "aside" -->
-			<app-aside
-				[chartUrl]="chart.latestVersion.chartUrl"
-				[coverUrl]="chart.coverUrl"
-				[duration]="chart.latestVersion.duration"
-				[notesAmount]="chart.latestVersion.notesAmount"
-				[trackName]="chart.track"
-				class="flex w-full md:hidden"
-			>
+			<app-aside [chart]="chart" class="flex w-full md:hidden">
 			</app-aside>
 			<app-chart-known-issues-section
 				#knownIssuesSection

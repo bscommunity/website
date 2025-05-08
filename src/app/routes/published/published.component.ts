@@ -73,14 +73,14 @@ export class PublishedComponent implements OnInit {
 
 	ngOnInit(): void {
 		// Access resolved data
-		this.fetchCharts(false);
+		this.fetchCharts();
 	}
 
 	clearFilters() {
 		// Clear filters
 	}
 
-	fetchCharts(forceRefresh: boolean | undefined = false) {
+	fetchCharts(forceRefresh: boolean = false) {
 		// console.log("Refreshing charts...");
 
 		this.charts = undefined;

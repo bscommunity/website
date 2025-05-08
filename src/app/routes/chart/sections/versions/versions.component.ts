@@ -65,7 +65,7 @@ export class VersionsComponent {
 
 	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
 
-	openAddVersionConfirmationDialog(): void {
+	openAddVersionDialog(): void {
 		const dialogRef = this.dialog.open(uploadStepComponents[2], {
 			data: {},
 		});

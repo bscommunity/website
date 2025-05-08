@@ -50,5 +50,5 @@ const chartSchema = Chart.omit({
 	isFeatured: true,
 	versions: true,
 	contributors: true,
-});
+}).partial();
 export type MutateChartModel = z.infer<typeof chartSchema>;
