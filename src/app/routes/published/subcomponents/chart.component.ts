@@ -35,6 +35,7 @@ export interface ChartProps {
 		<a
 			class="flex flex-row items-start justify-start gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant rounded-2xl p-6 cursor-pointer"
 			[routerLink]="routerLink"
+			title="{{ track }} - {{ artist }}"
 		>
 			<div
 				class="relative rounded-md overflow-hidden h-[82px] w-[82px] min-w-[82px]"
@@ -67,11 +68,13 @@ export interface ChartProps {
 							{{ track }}
 						</p>
 						@if (isDeluxe) {
-							<img
-								src="assets/icons/deluxe.png"
-								alt="Deluxe icon"
-								class="w-4 invert dark:invert-0"
-							/>
+							<mat-icon
+								svgIcon="deluxe"
+								inline="true"
+								class="text-on-surface !w-6 !h-6 -mt-0.5"
+								aria-hidden="false"
+								aria-label="Deluxe icon"
+							></mat-icon>
 						}
 						@if (isExplicit) {
 							<mat-icon inline>explicit</mat-icon>

@@ -61,6 +61,11 @@ export class AppComponent implements OnInit {
 			),
 		);
 
+		iconRegistry.addSvgIcon(
+			"deluxe",
+			sanitizer.bypassSecurityTrustResourceUrl("assets/icons/deluxe.svg"),
+		);
+
 		// Hiding header/footer on specific routes (e.g., login, signup)
 		this.router.events
 			.pipe(filter((event) => event instanceof NavigationEnd))
