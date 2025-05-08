@@ -177,7 +177,7 @@ export class UploadDialogService {
 		if (!this.authService.isLoggedIn()) {
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
-					message: "You must be logged in to submit content.",
+					message: "Você precisa estar logado para enviar conteúdo.",
 					error: null,
 				},
 			});
@@ -186,77 +186,80 @@ export class UploadDialogService {
 		}
 
 		// Open loading dialog
-		this.dialog.open(UploadDialogLoadingComponent, { disableClose: true });
+		const loadingDialog = this.dialog.open(UploadDialogLoadingComponent, {
+			disableClose: true,
+		});
 
-		// Handle track data retrieval (cover art, track and artist names confirmation)
 		try {
-			const response = await getMediaInfo(
-				this.formData.track,
-				this.formData.artist,
-				this.cookieService,
-			);
+			// Handle track data retrieval (cover art, track and artist names confirmation)
+			try {
+				const response = await getMediaInfo(
+					this.formData.track,
+					this.formData.artist,
+					this.cookieService,
+				);
+				console.log("Media info retrieved:", response);
 
-			this.formData = { ...this.formData, ...response };
-		} catch (error: any) {
-			this.triggerError("Failed to retrieve cover art.", error.message);
-			return;
-		}
-
-		// Handle track streaming services URL retrieval
-		try {
-			if (
-				!this.formData.trackUrls ||
-				this.formData.trackUrls.length === 0
-			) {
-				throw new Error("No track streaming URLs provided.");
+				// Update form data with retrieved info
+				this.formData = {
+					...this.formData,
+					...response,
+				};
+			} catch (error: any) {
+				console.warn("Failed to retrieve media info:", error);
+				// Continue with user provided data if media info retrieval fails
+				if (!this.formData.coverUrl) {
+					throw new Error(
+						"Não foi possível encontrar a capa do álbum. Por favor, tente novamente ou forneça um URL da capa manualmente.",
+					);
+				}
 			}
 
-			this.formData.trackUrls = await getTrackStreamingLinks(
-				this.formData.trackUrls[0].url,
-				this.formData.track,
-				this.formData.artist,
-			);
-		} catch (error: any) {
-			console.error("Failed to retrieve track streaming links:", error);
-			this.triggerError(
-				"Failed to retrieve track streaming links.",
-				error.message,
-			);
-			return;
-		}
+			// Handle track streaming services URL retrieval
+			try {
+				if (
+					this.formData.trackUrls &&
+					this.formData.trackUrls.length > 0
+				) {
+					this.formData.trackUrls = await getTrackStreamingLinks(
+						this.formData.trackUrls[0].url,
+						this.formData.track,
+						this.formData.artist,
+					);
+				}
+			} catch (error: any) {
+				console.warn(
+					"Failed to retrieve track streaming links:",
+					error,
+				);
+				// Continue with user provided streaming links if retrieval fails
+			}
 
-		// Handle chart data submission (basic and first version creation)
-		const { contentType, chartFileData, ...rest } = this.formData;
+			// Handle chart data submission (basic and first version creation)
+			const { contentType, chartFileData, ...rest } = this.formData;
 
-		const data: CreateChartModel = {
-			...rest,
-			...chartFileData,
-		};
+			const data: CreateChartModel = {
+				...rest,
+				...chartFileData,
+			};
 
-		console.log("Form submitted with the following data:", data);
+			console.log("Form submitted with the following data:", data);
 
-		// Submit chart data
-		try {
+			// Submit chart data
 			const response = await this.chartService.createChart(data);
 			console.log("Chart submitted successfully:", response);
 
 			if (!response) {
-				this.dialog.open(UploadDialogErrorComponent, {
-					data: {
-						message: "Failed to submit chart.",
-						error: "No response from server.",
-					},
-				});
-
-				/* this.reset(); */
-				return;
+				throw new Error(
+					"Sem resposta do servidor ao tentar criar o chart.",
+				);
 			}
 
 			// Cache chart data
 			this.cacheService.addChart(response);
 
-			// Open success dialog
-			this.dialog.closeAll();
+			// Close loading dialog and open success dialog
+			loadingDialog.close();
 			this.dialog.open(UploadDialogSuccessComponent, {
 				hasBackdrop: true,
 				disableClose: true,
@@ -275,15 +278,18 @@ export class UploadDialogService {
 		} catch (error: any) {
 			console.error("Failed to submit chart:", error);
 
-			this.dialog.closeAll();
+			loadingDialog.close();
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
-					title: "Failed to submit chart.",
-					error: error.message,
+					title: "Failed to submit chart",
+					message:
+						error.statusText ||
+						"There was an error while submitting the chart.",
+					error: error.message || error,
 				},
 			});
 		}
 
-		/* this.reset(); */
+		this.reset();
 	}
 }

@@ -16,7 +16,11 @@ const MUSICBRAINZ_API_URL = "https://musicbrainz.org/ws/2/recording";
 // Models
 import { z } from "zod";
 import { Chart } from "@/models/chart.model";
+import { Genre } from "@/models/enums/genre.enum";
 import { StreamingLinkModel } from "@/models/streaming-link.model";
+
+// Lib
+import { normalizeGenre } from "./genres";
 
 // Services & Injections
 import { CookieService } from "@/services/cookie.service";
@@ -26,12 +30,33 @@ const MediaInfo = Chart.pick({
 	coverUrl: true,
 	album: true,
 	track: true,
+	genre: true,
 	artist: true,
 	trackUrls: true,
 	trackPreviewUrl: true,
 });
 
 export type MediaInfoModel = z.infer<typeof MediaInfo>;
+
+function cleanTrackName(track: string): string {
+	return track
+		.replace(/\(.*?\)/g, "") // Remove content in parentheses
+		.replace(/\[.*?\]/g, "") // Remove content in brackets
+		.replace(/feat\.|ft\.|featuring/i, "") // Remove featuring
+		.replace(/remix|edit|version|remaster(ed)?/i, "") // Remove version indicators
+		.replace(/part\.?\s*\d+/i, "") // Remove "part X"
+		.replace(/\s+/g, " ") // Remove extra spaces
+		.trim();
+}
+
+function cleanArtistName(artist: string): string {
+	return artist
+		.replace(/feat\.|ft\.|featuring/i, "") // Remove featuring
+		.replace(/&amp;/g, "&") // Fix ampersands
+		.replace(/\s*,\s*/g, " & ") // Replace commas with &
+		.replace(/\s+/g, " ") // Remove extra spaces
+		.trim();
+}
 
 /**
  * Find media information (album cover, etc.) using track and artist names
@@ -41,90 +66,159 @@ export async function getMediaInfo(
 	artist: string,
 	cookieService: CookieService,
 ): Promise<MediaInfoModel> {
-	// Construct the search query
-	let query = new URLSearchParams({
-		term: `${track} ${artist}`,
-		entity: "song",
-		limit: "1",
-	}).toString();
+	// Clean track and artist names for better search results
+	const cleanedTrack = cleanTrackName(track);
+	const cleanedArtist = cleanArtistName(artist);
+	let mediaInfo: MediaInfoModel | null = null;
+	let errors: Error[] = [];
+	let foundGenre: Genre | null = null;
 
-	// First, search for the track on iTunes
-	let iTunesData = await fetchItunesApi(query);
+	// Try iTunes first
+	try {
+		let query = new URLSearchParams({
+			term: `${cleanedTrack} ${cleanedArtist}`,
+			entity: "song",
+			limit: "1",
+		}).toString();
 
-	// Check if results are available
-	if (iTunesData) {
-		console.log(iTunesData);
+		const iTunesData = await fetchItunesApi(query);
 
-		return {
-			coverUrl: iTunesData.artworkUrl100.replace("100x100", "600x600"),
-			album: iTunesData.collectionName,
-			track: iTunesData.trackName,
-			artist: iTunesData.artistName,
-			trackUrls: [
-				{
-					platform: "Apple Music",
-					url: iTunesData.trackViewUrl,
-				},
-			],
-			trackPreviewUrl: iTunesData.previewUrl,
-		};
+		if (iTunesData) {
+			foundGenre = normalizeGenre(iTunesData.primaryGenreName);
+			return {
+				coverUrl: iTunesData.artworkUrl100.replace(
+					"100x100",
+					"600x600",
+				),
+				album: iTunesData.collectionName,
+				track: iTunesData.trackName,
+				artist: iTunesData.artistName,
+				genre: foundGenre,
+				trackUrls: [
+					{
+						platform: "Apple Music",
+						url: iTunesData.trackViewUrl,
+					},
+				],
+				trackPreviewUrl: iTunesData.previewUrl,
+			};
+		}
+	} catch (err) {
+		errors.push(err as Error);
 	}
 
-	// If no results were found on iTunes, try Last.fm
-	query = new URLSearchParams({
-		method: "track.getInfo",
-		artist: artist,
-		track: track,
-		api_key: LASTFM_API_KEY,
-		format: "json",
-	}).toString();
+	// Try Spotify next
+	try {
+		const spotifyData = await fetchSpotifyApi(
+			`q=${cleanedTrack} artist:${cleanedArtist}&type=track,album&limit=1`,
+			cookieService,
+		);
 
-	const spotifyData = await fetchSpotifyApi(
-		`q=${track} artist:${artist}&type=track&limit=1`,
-		cookieService,
-	);
+		if (spotifyData && spotifyData.tracks.items.length > 0) {
+			const spotifyTrack = spotifyData.tracks.items[0];
+			// Tenta obter o gênero do álbum se disponível
+			const albumGenre = spotifyData.albums?.items[0]?.genres?.[0];
+			foundGenre = normalizeGenre(albumGenre) || foundGenre;
 
-	if (spotifyData && spotifyData.tracks.items.length > 0) {
-		console.log(spotifyData);
-		const spotifyTrack = spotifyData.tracks.items[0];
-
-		return {
-			coverUrl: spotifyTrack.album.images[0].url,
-			album: spotifyTrack.album.name,
-			track: spotifyTrack.name,
-			artist: spotifyTrack.artists[0].name,
-			trackUrls: [
-				{
-					platform: "Spotify",
-					url: spotifyTrack.external_urls.spotify,
-				},
-			],
-		};
+			return {
+				coverUrl: spotifyTrack.album.images[0].url,
+				album: spotifyTrack.album.name,
+				track: spotifyTrack.name,
+				artist: spotifyTrack.artists[0].name,
+				genre: foundGenre,
+				trackUrls: [
+					{
+						platform: "Spotify",
+						url: spotifyTrack.external_urls.spotify,
+					},
+				],
+			};
+		}
+	} catch (err) {
+		errors.push(err as Error);
 	}
 
-	const lastFmData = await fetchLastfmApi(query);
+	// Try Last.fm as last resort
+	try {
+		const query = new URLSearchParams({
+			method: "track.getInfo",
+			artist: cleanedArtist,
+			track: cleanedTrack,
+			api_key: LASTFM_API_KEY,
+			format: "json",
+		}).toString();
 
-	// Check if results are available
-	if (lastFmData) {
-		console.log(lastFmData);
-		// Return higher resolution version of the artwork
-		return {
-			coverUrl: lastFmData.track.album.image[3]["#text"],
-			album: lastFmData.track.album.title,
-			track: lastFmData.track.name,
-			artist: lastFmData.track.artist.name,
-			trackUrls: [
-				{
-					platform: "Last.fm",
-					url: lastFmData.track.url,
-				},
-			],
-		};
+		const lastFmData = await fetchLastfmApi(query);
+
+		if (lastFmData && lastFmData.track.album) {
+			// Tenta obter o gênero das tags
+			const tags = lastFmData.track.toptags?.tag || [];
+			for (const tag of tags) {
+				const genreFromTag = normalizeGenre(tag.name);
+				if (genreFromTag) {
+					foundGenre = genreFromTag;
+					break;
+				}
+			}
+
+			return {
+				coverUrl: lastFmData.track.album.image[3]["#text"],
+				album: lastFmData.track.album.title,
+				track: lastFmData.track.name,
+				artist: lastFmData.track.artist.name,
+				genre: foundGenre,
+				trackUrls: [
+					{
+						platform: "Last.fm",
+						url: lastFmData.track.url,
+					},
+				],
+			};
+		}
+	} catch (err) {
+		errors.push(err as Error);
 	}
 
-	// If no results were found on iTunes or Last.fm, throw error
+	// Se chegarmos aqui, tentamos uma última vez com uma busca mais flexível no iTunes
+	try {
+		const veryCleanTrack = cleanedTrack.split("-")[0].trim();
+		const query = new URLSearchParams({
+			term: `${veryCleanTrack} ${cleanedArtist.split("&")[0].trim()}`,
+			entity: "song",
+			limit: "1",
+		}).toString();
+
+		const iTunesData = await fetchItunesApi(query);
+
+		if (iTunesData) {
+			foundGenre =
+				normalizeGenre(iTunesData.primaryGenreName) || foundGenre;
+			return {
+				coverUrl: iTunesData.artworkUrl100.replace(
+					"100x100",
+					"600x600",
+				),
+				album: iTunesData.collectionName,
+				track: iTunesData.trackName,
+				artist: iTunesData.artistName,
+				genre: foundGenre,
+				trackUrls: [
+					{
+						platform: "Apple Music",
+						url: iTunesData.trackViewUrl,
+					},
+				],
+				trackPreviewUrl: iTunesData.previewUrl,
+			};
+		}
+	} catch (err) {
+		errors.push(err as Error);
+	}
+
+	// Se todas as tentativas falharam, lança erro com todas as mensagens de erro coletadas
 	throw new Error(
-		`No results found for track "${track}" by artist "${artist}"`,
+		`Não foi possível encontrar informações para "${track}" por "${artist}". ` +
+			`Tentamos várias APIs mas todas falharam. Detalhes: ${errors.map((e) => e.message).join("; ")}`,
 	);
 }
 
