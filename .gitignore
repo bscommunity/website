@@ -45,4 +45,4 @@ Thumbs.db
 /.env
 /.env.local
 /.env.development.local
-.vercel
+/src/environments/*.ts
