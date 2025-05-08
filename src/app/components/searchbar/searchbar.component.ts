@@ -33,6 +33,7 @@ export class SearchbarComponent {
 	@Input() onSearch: (value: string) => void = () => {};
 	@Input() debounceDuration: number = 300;
 	@Input() placeholder: string = "Search";
+	@Input() disabled: boolean = false;
 
 	private searchSubject = new Subject<string>();
 	private searchSubscription: Subscription;

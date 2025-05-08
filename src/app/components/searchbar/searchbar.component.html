@@ -13,6 +13,8 @@
 		[placeholder]="placeholder"
 		(input)="onInput($event)"
 		[matAutocomplete]="autoComplete"
+		[disabled]="disabled"
+		[style.pointerEvents]="disabled ? 'none' : 'auto'"
 	/>
 	<ng-content></ng-content>
 </div>

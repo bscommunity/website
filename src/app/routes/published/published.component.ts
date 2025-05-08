@@ -69,6 +69,7 @@ export class PublishedComponent implements OnInit {
 	filters = [];
 
 	charts: ChartModel[] | undefined | null = undefined;
+	isRefreshing: boolean = true;
 	error: string = "";
 
 	ngOnInit(): void {
@@ -83,25 +84,23 @@ export class PublishedComponent implements OnInit {
 	fetchCharts(forceRefresh: boolean = false) {
 		// console.log("Refreshing charts...");
 
-		this.charts = undefined;
+		this.isRefreshing = forceRefresh;
 		this.error = "";
 		this.chartService.getAllCharts(forceRefresh).subscribe({
 			next: (response) => {
-				// console.log("Resolved charts data:", this.charts);
+				console.log("Resolved charts data:", response);
 
+				this.isRefreshing = false;
 				this.charts = response;
-				this.cdr.detectChanges();
-
-				// console.log(this.charts);
+				this.cdr.markForCheck();
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
 				this.error = error.message;
 
+				this.isRefreshing = false;
 				this.charts = null;
-				this.cdr.detectChanges();
-
-				// console.log(this.charts);
+				this.cdr.markForCheck();
 			},
 		});
 	}

@@ -1,66 +1,7 @@
 <main
 	class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
-	@if (charts === null) {
-		<div
-			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-		>
-			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"
-					><mat-icon inline>deployed_code_alert</mat-icon></span
-				>
-				<h1 class="text-2xl">
-					Oops, something went wrong while fetching your charts
-				</h1>
-				"{{ this.error }}" <br />
-				<p class="max-w-[65%] text-center">
-					Please try again later or check Discord if the problem
-					persists
-				</p>
-				<button
-					mat-stroked-button
-					(click)="fetchCharts(true)"
-					(keypress)="fetchCharts(true)"
-					aria-label="Refresh charts"
-				>
-					<p>Refresh charts</p>
-					<mat-icon class="!mr-0 !ml-2">refresh</mat-icon>
-				</button>
-			</div>
-		</div>
-	} @else if (charts === undefined) {
-		<div class="flex w-screen h-screen items-start justify-center">
-			<mat-progress-spinner
-				diameter="48"
-				mode="indeterminate"
-			></mat-progress-spinner>
-		</div>
-	} @else if (!filters.length && !charts.length) {
-		<div class="flex flex-col items-center justify-start gap-6 w-full">
-			<div
-				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-			>
-				<div class="flex flex-col items-center justify-center gap-4">
-					<span class="text-6xl"
-						><mat-icon inline>file_copy_off</mat-icon></span
-					>
-					<h1 class="text-2xl">
-						It looks like you haven't published anything yet
-					</h1>
-					<p class="max-w-[65%] text-center">
-						Create a chart, tourpass or theme and showcase them to
-						the community when you’re ready!
-					</p>
-				</div>
-			</div>
-			<app-large-panel
-				class="w-full"
-				title="Don’t know where to start?"
-				message="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
-				[button]="{ label: 'Discord', link: '/' }"
-			></app-large-panel>
-		</div>
-	} @else {
+	@if (charts) {
 		<app-filter-panel
 			class="w-full md:w-1/3 md:max-w-md"
 		></app-filter-panel>
@@ -71,7 +12,16 @@
 				<app-searchbar
 					placeholder="Search for charts, tourpasses and themes..."
 					class="flex flex-1 max-md:w-full relative"
-				></app-searchbar>
+					[disabled]="isRefreshing"
+				>
+					@if (isRefreshing) {
+						<mat-progress-spinner
+							class="absolute top-1/2 -translate-y-1/2 right-12"
+							diameter="16"
+							mode="indeterminate"
+						></mat-progress-spinner>
+					}
+				</app-searchbar>
 				<span
 					class="flex flex-row items-center justify-end gap-4 h-full"
 				>
@@ -81,6 +31,7 @@
 						id="sort-by"
 						[options]="sortOptions"
 						[selectedOption]="sortBy"
+						[disabled]="isRefreshing"
 					></app-custom-select>
 				</span>
 				<button
@@ -89,32 +40,45 @@
 					(keypress)="fetchCharts(true)"
 					aria-label="Refresh charts"
 					class="!flex !items-center !justify-center"
+					[disabled]="isRefreshing"
 				>
 					<span class="flex flex-1 items-center justify-center">
 						<mat-icon inline>refresh</mat-icon>
 					</span>
 				</button>
 			</div>
-			@if (charts.length > 0) {
-				<ul class="flex flex-col items-start justify-start w-full">
-					<app-list-section class="w-full" title="June 2024">
-						@for (chart of charts; track $index) {
-							<app-chart
-								[routerLink]="['/chart', chart.id]"
-								[track]="chart.track"
-								[artist]="chart.artist"
-								[coverUrl]="chart.coverUrl"
-								[duration]="chart.latestVersion.duration"
-								[notesAmount]="chart.latestVersion.notesAmount"
-								[difficulty]="chart.difficulty"
-								[isDeluxe]="chart.isDeluxe"
-							></app-chart>
-							<!-- [ranking]="chart.ranking"
-								[tendency]="chart.tendency" -->
-						}
-					</app-list-section>
-				</ul>
-			} @else {
+			@if (charts.length === 0 && !filters) {
+				<!-- No filters applied, user has no charts -->
+				<div
+					class="flex flex-col items-center justify-start gap-6 w-full"
+				>
+					<div
+						class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+					>
+						<div
+							class="flex flex-col items-center justify-center gap-4"
+						>
+							<span class="text-6xl"
+								><mat-icon inline>file_copy_off</mat-icon></span
+							>
+							<h1 class="text-2xl">
+								It looks like you haven't published anything yet
+							</h1>
+							<p class="max-w-[65%] text-center">
+								Create a chart, tourpass or theme and showcase
+								them to the community when you’re ready!
+							</p>
+						</div>
+					</div>
+					<app-large-panel
+						class="w-full"
+						title="Don’t know where to start?"
+						message="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
+						[button]="{ label: 'Discord', link: '/' }"
+					></app-large-panel>
+				</div>
+			} @else if (!charts) {
+				<!-- No charts found after filtering -->
 				<div
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 				>
@@ -144,7 +108,66 @@
 						<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
 					</button>
 				</div>
+			} @else {
+				<ul
+					class="flex flex-col items-start justify-start w-full"
+					[style.opacity]="isRefreshing ? '0.5' : '1'"
+					[style.pointerEvents]="isRefreshing ? 'none' : 'auto'"
+				>
+					<app-list-section class="w-full" title="June 2024">
+						@for (chart of charts; track $index) {
+							<app-chart
+								[routerLink]="['/chart', chart.id]"
+								[track]="chart.track"
+								[artist]="chart.artist"
+								[coverUrl]="chart.coverUrl"
+								[duration]="chart.latestVersion.duration"
+								[notesAmount]="chart.latestVersion.notesAmount"
+								[difficulty]="chart.difficulty"
+								[isDeluxe]="chart.isDeluxe"
+							></app-chart>
+							<!-- [ranking]="chart.ranking"
+								[tendency]="chart.tendency" -->
+						}
+					</app-list-section>
+				</ul>
 			}
+		</div>
+	} @else if (charts === null) {
+		<!-- Error state -->
+		<div
+			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+		>
+			<div class="flex flex-col items-center justify-center gap-4">
+				<span class="text-6xl"
+					><mat-icon inline>deployed_code_alert</mat-icon></span
+				>
+				<h1 class="text-2xl">
+					Oops, something went wrong while fetching your charts
+				</h1>
+				"{{ this.error }}" <br />
+				<p class="max-w-[65%] text-center">
+					Please try again later or check Discord if the problem
+					persists
+				</p>
+				<button
+					mat-stroked-button
+					(click)="fetchCharts(true)"
+					(keypress)="fetchCharts(true)"
+					aria-label="Refresh charts"
+				>
+					<p>Refresh charts</p>
+					<mat-icon class="!mr-0 !ml-2">refresh</mat-icon>
+				</button>
+			</div>
+		</div>
+	} @else {
+		<!-- First loading state -->
+		<div class="flex w-screen h-screen items-start justify-center">
+			<mat-progress-spinner
+				diameter="48"
+				mode="indeterminate"
+			></mat-progress-spinner>
 		</div>
 	}
 </main>
