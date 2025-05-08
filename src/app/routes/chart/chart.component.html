@@ -9,7 +9,17 @@
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
 		>
 			<div class="flex flex-col items-start justify-start gap-2 relative">
-				<h1 class="font-medium text-5xl">{{ chart.track }}</h1>
+				<h1 class="font-medium text-5xl items-center inline gap-4">
+					{{ chart.track }}
+					<mat-icon
+						svgIcon="deluxe"
+						inline="true"
+						class="text-on-surface !w-12 !h-12 relative"
+						style="top: 8px"
+						aria-hidden="false"
+						aria-label="Deluxe icon"
+					></mat-icon>
+				</h1>
 				<h2 class="text-3xl">{{ chart.artist }}</h2>
 			</div>
 			<!-- Mobile "aside" -->
