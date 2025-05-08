@@ -40,6 +40,13 @@ import { AuthService } from "app/auth/auth.service";
 import { ChartModel, CreateChartModel } from "@/models/chart.model";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 
+export type DialogData = {
+	title?: string | null;
+	description?: string | null;
+	formData: UploadFormData;
+	inactive: string[];
+};
+
 export type UploadFormData = CreateChartModel & {
 	// Omitted when submitting
 	contentType: string;
@@ -126,7 +133,9 @@ export class UploadDialogService {
 			{
 				// width: "500px",
 				disableClose: this.currentStepSubject.value !== 0,
-				data: this.formData,
+				data: {
+					formData: this.formData,
+				},
 			},
 		);
 

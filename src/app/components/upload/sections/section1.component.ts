@@ -11,10 +11,7 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import {
-	initialFormData,
-	UploadFormData,
-} from "../../../services/upload.service";
+import { initialFormData, type DialogData } from "@/services/upload.service";
 
 @Component({
 	selector: "app-upload-dialog-section1",
@@ -72,7 +69,7 @@ export class UploadDialogSection1Component {
 	constructor(
 		private fb: FormBuilder,
 		public dialogRef: MatDialogRef<UploadDialogSection1Component>,
-		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
+		@Inject(MAT_DIALOG_DATA) public data: DialogData,
 	) {
 		this.form = this.fb.group({
 			contentType: [initialFormData.contentType],
@@ -82,14 +79,14 @@ export class UploadDialogSection1Component {
 	ngOnInit() {
 		// Initialize form with existing data
 		this.form.patchValue({
-			contentType: this.formData.contentType,
+			contentType: this.data.formData.contentType,
 		});
 	}
 
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
-				...this.formData,
+				...this.data.formData,
 				...this.form.value,
 			});
 		}

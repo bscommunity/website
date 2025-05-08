@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	Inject,
+	Input,
 	OnInit,
 } from "@angular/core";
 
@@ -23,21 +24,17 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import {
-	initialFormData,
-	UploadFormData,
-} from "../../../services/upload.service";
+import { type DialogData, initialFormData } from "@/services/upload.service";
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-upload-dialog-section2",
 	template: `
-		<h2 mat-dialog-title>Chart details</h2>
+		<h2 mat-dialog-title>{{ title }}</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
 			<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 				<p class="mb-2">
-					Fill in the details for your chart submission. Make sure all
-					the required fields are filled before proceeding
+					{{ description }}
 				</p>
 
 				<mat-form-field appearance="outline">
@@ -137,6 +134,10 @@ import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSection2Component implements OnInit {
+	title = "Chart details";
+	description =
+		"Fill in the details for your chart submission. Make sure all the required fields are filled before proceeding";
+
 	form: FormGroup;
 	difficulties = Object.values(Difficulty).map((difficulty) => ({
 		key: difficulty,
@@ -146,20 +147,51 @@ export class UploadDialogSection2Component implements OnInit {
 	constructor(
 		private fb: FormBuilder,
 		public dialogRef: MatDialogRef<UploadDialogSection2Component>,
-		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
+		@Inject(MAT_DIALOG_DATA)
+		public data: DialogData,
 	) {
+		this.title = data.title || this.title;
+		this.description = data.description || this.description;
+
 		this.form = this.fb.group({
-			track: [initialFormData.track, Validators.required],
-			artist: [initialFormData.artist, Validators.required],
-			difficulty: [initialFormData.difficulty],
-			isDeluxe: [initialFormData.isDeluxe],
-			isExplicit: [initialFormData.isExplicit],
+			track: [
+				{
+					value: initialFormData.track,
+					disabled: data.inactive?.includes("track"),
+				},
+				Validators.required,
+			],
+			artist: [
+				{
+					value: initialFormData.artist,
+					disabled: data.inactive?.includes("artist"),
+				},
+				Validators.required,
+			],
+			difficulty: [
+				{
+					value: initialFormData.difficulty,
+					disabled: data.inactive?.includes("difficulty"),
+				},
+			],
+			isDeluxe: [
+				{
+					value: initialFormData.isDeluxe,
+					disabled: data.inactive?.includes("isDeluxe"),
+				},
+			],
+			isExplicit: [
+				{
+					value: initialFormData.isExplicit,
+					disabled: data.inactive?.includes("isExplicit"),
+				},
+			],
 		});
 	}
 
 	ngOnInit() {
 		// Initialize form with existing data
-		this.form.patchValue(this.formData);
+		this.form.patchValue(this.data.formData);
 	}
 
 	onSubmit() {

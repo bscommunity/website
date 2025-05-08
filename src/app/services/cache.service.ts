@@ -8,19 +8,43 @@ import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
+import { CookieService } from "./cookie.service";
 
 const MAX_CACHED_CHARTS = 5;
 
 interface CachedChart extends ChartModel {
 	lastAccessed: string;
-	isFull: boolean;
 }
 
 @Injectable({
 	providedIn: "root",
 })
 export class CacheService {
-	constructor(private storageService: StorageService) {}
+	constructor(
+		private storageService: StorageService,
+		private cookieService: CookieService,
+	) {}
+
+	public get isOnRefreshCooldown(): boolean {
+		const lastRefresh = this.cookieService.get("lastRefresh");
+		if (!lastRefresh) {
+			return false;
+		}
+
+		const lastRefreshDate = new Date(lastRefresh);
+		const currentDate = new Date();
+
+		const timeDiff = currentDate.getTime() - lastRefreshDate.getTime();
+		const diffInMinutes = Math.floor(timeDiff / (1000 * 60)); // Convert to minutes
+
+		return diffInMinutes < 5; // 5 minutes cooldown
+	}
+
+	public setRefreshCooldown(): void {
+		this.cookieService.set("lastRefresh", new Date().toISOString(), {
+			expires: 5 / (24 * 60), // 5 minutes in days
+		});
+	}
 
 	private getChartCount(): number {
 		return parseInt(this.storageService.getItem("chartCount") || "0");
@@ -84,7 +108,7 @@ export class CacheService {
 		return chart ? JSON.parse(chart) : undefined;
 	}
 
-	addChart(chart: ChartModel, isFull: boolean = true): void {
+	addChart(chart: ChartModel): void {
 		// If we have reached the maximum number of cached charts, we need to remove the oldest one
 		if (this.getChartCount() >= MAX_CACHED_CHARTS) {
 			const allCharts = this.getAllCharts() as CachedChart[];
@@ -115,7 +139,6 @@ export class CacheService {
 			JSON.stringify({
 				...chart,
 				lastAccessed: new Date().toISOString(),
-				isFull,
 			}),
 		);
 
@@ -130,7 +153,7 @@ export class CacheService {
 				!currentCharts ||
 				!currentCharts.some((c) => c.id === chart.id)
 			) {
-				this.addChart(chart, false);
+				this.addChart(chart);
 			} else {
 				this.updateChart(chart);
 			}

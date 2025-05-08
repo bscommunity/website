@@ -8,7 +8,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
-import { AsideComponent } from "./subcomponents/aside.component";
+import { AsideComponent } from "./subcomponents/aside/aside.component";
 import { KnownIssuesComponent } from "./sections/known-issues/known-issues.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
@@ -49,6 +49,7 @@ export class ChartComponent implements OnInit {
 	ngOnInit(): void {
 		// Access resolved data
 		this.chart = this.route.snapshot.data["chart"];
+		// console.warn("Chart data", this.chart);
 
 		if (!this.chart?.versions || !this.chart.contributors) {
 			console.error("Chart data is incomplete", this.chart);

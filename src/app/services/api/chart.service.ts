@@ -37,13 +37,55 @@ export class ChartService {
 	}
 
 	// Read
-	getAllCharts(
-		forceRefresh: boolean | undefined = false,
-	): Observable<ChartModel[]> {
+	getAllCharts(forceRefresh: boolean = false): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
 
 		if (charts && charts.length > 0 && !forceRefresh) {
-			console.log(`Returning charts from cache...`);
+			// Check if we are on refresh cooldown
+			if (!this.cacheService.isOnRefreshCooldown) {
+				console.log(
+					"Refresh cooldown is over. Fetching charts from API...",
+				);
+
+				// If we are not on refresh cooldown, we can fetch from API
+				// Trigger a background fetch to check for updates
+				this.http
+					.get<
+						ChartModel[]
+					>(`${this.apiUrl}?fetchContributors=true&fetchVersions=true`)
+					.subscribe({
+						next: (fetchedCharts) => {
+							// Set up a cooldown to prevent too many requests
+							this.cacheService.setRefreshCooldown();
+
+							// Compare versions to see if we need to update the cache
+							if (
+								JSON.stringify(fetchedCharts) !==
+								JSON.stringify(charts)
+							) {
+								console.log("Updating charts in cache...");
+								this.cacheService.addCharts(fetchedCharts);
+
+								// If the user is viewing the charts, navigate to the new version
+								if (this.router.url.startsWith("/charts")) {
+									this.router
+										.navigateByUrl("/", {
+											skipLocationChange: true,
+										})
+										.then(() => {
+											this.router.navigate(["/charts"]);
+										});
+								}
+							}
+						},
+						error: (error) => {
+							// Handle error if needed
+							console.error("Failed to fetch charts:", error);
+						},
+					});
+			}
+
+			console.log("Returning cached charts:", charts);
 
 			return new Observable((subscriber) => {
 				subscriber.next(charts);
@@ -65,9 +107,12 @@ export class ChartService {
 	async getChartById(id: string): Promise<ChartModel> {
 		const cachedChart = this.cacheService.getChart(id);
 
-		if (cachedChart && cachedChart.isFull) {
+		console.log("Cached chart:", cachedChart);
+
+		if (cachedChart) {
 			// Trigger a background fetch to check for updates
-			this.fetchChartFromRemote(id).subscribe({
+			// CHANGED: the background fetch is now done in getAllCharts()
+			/* this.fetchChartFromRemote(id).subscribe({
 				next: (fetchedChart) => {
 					// Compare versions to see if we need to update the cache
 					if (
@@ -81,9 +126,9 @@ export class ChartService {
 						if (this.router.url.startsWith(`/chart/${id}`)) {
 							this.router.navigate(["/chart", id]);
 
-							/* // We need to reload the page to trigger the resolver
-								// and get the updated data
-								window.location.reload(); */
+							// We need to reload the page to trigger the resolver
+							// and get the updated data
+							// window.location.reload();
 						}
 					}
 				},
@@ -99,7 +144,7 @@ export class ChartService {
 						console.error("Failed to fetch chart:", error);
 					}
 				},
-			});
+			}); */
 
 			// Return cache data immediately
 			try {

@@ -27,10 +27,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import {
-	initialFormData,
-	UploadFormData,
-} from "../../../services/upload.service";
+import { initialFormData, type DialogData } from "@/services/upload.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
 
@@ -173,7 +170,7 @@ export class UploadDialogSection3Component implements OnInit {
 	constructor(
 		private fb: FormBuilder,
 		public dialogRef: MatDialogRef<UploadDialogSection3Component>,
-		@Inject(MAT_DIALOG_DATA) public formData: UploadFormData,
+		@Inject(MAT_DIALOG_DATA) public data: DialogData,
 	) {
 		this.form = this.fb.group({
 			chartUrl: [
@@ -195,10 +192,10 @@ export class UploadDialogSection3Component implements OnInit {
 
 	ngOnInit() {
 		// Initialize form with existing data
-		this.form.patchValue(this.formData);
+		this.form.patchValue(this.data.formData);
 
-		if (this.formData.chartPreviewUrls) {
-			this.formData.chartPreviewUrls.forEach((url) =>
+		if (this.data.formData.chartPreviewUrls) {
+			this.data.formData.chartPreviewUrls.forEach((url) =>
 				this.chartPreviewUrls.push(
 					new FormControl(url, [
 						urlValidator(),
