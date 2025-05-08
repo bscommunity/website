@@ -6,6 +6,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { Difficulty, getDifficultyIcon } from "@/models/enums/difficulty.enum";
 
 import { transformDuration } from "@/lib/time";
+import { RouterLink, UrlTree } from "@angular/router";
 
 export enum Tendency {
 	Up = "up",
@@ -29,10 +30,11 @@ export interface ChartProps {
 
 @Component({
 	selector: "app-chart",
-	imports: [MatIconModule, NgClass],
+	imports: [MatIconModule, NgClass, RouterLink],
 	template: `
 		<a
 			class="flex flex-row items-start justify-start gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant rounded-2xl p-6 cursor-pointer"
+			[routerLink]="routerLink"
 		>
 			<div
 				class="relative rounded-md overflow-hidden h-[82px] w-[82px] min-w-[82px]"
@@ -128,6 +130,8 @@ export class ChartComponent implements ChartProps {
 	@Input() isFeatured: ChartProps["isFeatured"] = false;
 	@Input() ranking: ChartProps["ranking"] = 0;
 	@Input() tendency: ChartProps["tendency"] = Tendency.Neutral;
+
+	@Input() routerLink: string | any[] | UrlTree | null | undefined = null;
 
 	tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;

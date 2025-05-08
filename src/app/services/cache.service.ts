@@ -78,11 +78,12 @@ export class CacheService {
 	}
 
 	/**
-	 * Retrieves all charts stored in the browser's localStorage.
+	 * Retrieves all charts stored in the browser's localStorage and removes those not found remotely.
 	 *
+	 * @param remoteChartIds - List of chart IDs found remotely.
 	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" object is found; otherwise, undefined.
 	 */
-	getAllCharts(): ChartModel[] | undefined {
+	getAllCharts(remoteChartIds?: string[]): ChartModel[] | undefined {
 		const keys = this.storageService.getItem("chartKeys");
 
 		if (!keys) {
@@ -99,6 +100,15 @@ export class CacheService {
 						this.storageService.getItem(key)!,
 					) as CachedChart,
 			);
+
+		// Remove cached charts not found remotely if remoteChartIds is provided
+		if (remoteChartIds) {
+			charts.forEach((chart) => {
+				if (!remoteChartIds.includes(chart.id)) {
+					this.removeChart(chart.id);
+				}
+			});
+		}
 
 		return charts;
 	}
@@ -148,6 +158,17 @@ export class CacheService {
 
 	addCharts(charts: ChartModel[]): void {
 		const currentCharts = this.getAllCharts();
+		const currentChartIds = currentCharts?.map((chart) => chart.id);
+
+		// Remove charts that are not in the new list
+		if (currentChartIds) {
+			currentChartIds.forEach((id) => {
+				if (!charts.some((chart) => chart.id === id)) {
+					this.removeChart(id);
+				}
+			});
+		}
+
 		charts.forEach((chart) => {
 			if (
 				!currentCharts ||

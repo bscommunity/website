@@ -132,9 +132,14 @@
 			>
 		</li>
 		<li class="mr-wrapper">
-			<a mat-flat-button class="!p-0">
+			<button
+				(click)="openUploadDialog()"
+				type="button"
+				mat-flat-button
+				class="!p-0"
+			>
 				<mat-icon class="!p-0 !m-0">cloud_upload</mat-icon>
-			</a>
+			</button>
 		</li>
 	</ul>
 </nav>

@@ -219,7 +219,7 @@ export class UploadDialogService {
 				// Continue with user provided data if media info retrieval fails
 				if (!this.formData.coverUrl) {
 					throw new Error(
-						"Não foi possível encontrar a capa do álbum. Por favor, tente novamente ou forneça um URL da capa manualmente.",
+						"We couldn't find the album cover. Please check your track and artist names and try again.",
 					);
 				}
 			}

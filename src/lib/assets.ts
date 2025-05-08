@@ -218,8 +218,8 @@ export async function getMediaInfo(
 
 	// If all attempts failed, throw an error with all the collected error messages
 	throw new Error(
-		`Não foi possível encontrar informações para "${track}" por "${artist}". ` +
-			`Tentamos várias APIs mas todas falharam. Detalhes: ${errors.map((e) => e.message).join("; ")}`,
+		`Unable to find information for \"${track}\" by \"${artist}\". ` +
+			`We tried several APIs but all failed. Details: ${errors.map((e) => e.message).join('; ')}`,
 	);
 }
 

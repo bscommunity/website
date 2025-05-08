@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
-import { RouterLink } from "@angular/router";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -32,7 +31,6 @@ import { LargePanelComponent } from "../../components/panel/large-panel.componen
 		FilterPanelComponent,
 		ListSectionComponent,
 		ChartComponent,
-		RouterLink,
 		MatProgressSpinnerModule,
 		SearchbarComponent,
 		LargePanelComponent,
