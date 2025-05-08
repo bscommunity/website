@@ -1,2 +1,3 @@
-export const apiUrl =
-	"https://api-cyb1.onrender.com"; /* "http://127.0.0.1:8080"; */
+import { environment } from "environments/environment";
+
+export const apiUrl = environment.API_URL;

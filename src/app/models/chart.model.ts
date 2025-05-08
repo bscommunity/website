@@ -9,6 +9,7 @@ export const Chart = z.object({
 	artist: z.string(),
 	track: z.string(),
 	album: z.string().optional().nullable(),
+	genre: z.string().optional().nullable(),
 	coverUrl: z.string(),
 	trackUrls: z.array(StreamingLink).optional(),
 	trackPreviewUrl: z.string().optional(),

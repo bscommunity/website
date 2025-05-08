@@ -1,0 +1,9 @@
+export enum Genre {
+	HIP_HOP = "HIP_HOP",
+	POP = "POP",
+	RNB = "RNB",
+	ROCK = "ROCK",
+	DANCE = "DANCE",
+	ALTERNATIVE = "ALTERNATIVE",
+	CLASSICAL = "CLASSICAL",
+}
