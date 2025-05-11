@@ -25,6 +25,7 @@ import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirma
 
 // Service
 import {
+	DialogData,
 	UploadFormData,
 	uploadStepComponents,
 } from "@/services/upload.service";
@@ -67,7 +68,12 @@ export class VersionsComponent {
 
 	openAddVersionDialog(): void {
 		const dialogRef = this.dialog.open(uploadStepComponents[2], {
-			data: {},
+			data: {
+				title: "Upload Chart",
+				description:
+					"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
+				formData: {},
+			} as DialogData,
 		});
 
 		dialogRef
