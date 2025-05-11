@@ -23,14 +23,7 @@ import { SuccessDialogData } from "../../../services/upload.service";
 			<div class="relative w-full">
 				<app-chart
 					class="pointer-events-none"
-					[artist]="data.artist"
-					[track]="data.track"
-					[coverUrl]="data.coverUrl"
-					[difficulty]="data.difficulty"
-					[isDeluxe]="data.isDeluxe"
-					[isExplicit]="data.isExplicit"
-					[duration]="data.duration"
-					[notesAmount]="data.notesAmount"
+					[chart]="data"
 				></app-chart>
 				<div
 					class="absolute right-8 top-[45%] -translate-y-1/2 rotate-[-4.55deg]"

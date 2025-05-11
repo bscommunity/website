@@ -1,12 +1,15 @@
-import { NgClass } from "@angular/common";
-import { Component, Input } from "@angular/core";
+import { RouterLink, UrlTree } from "@angular/router";
+import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
 
 import { MatIconModule } from "@angular/material/icon";
 
-import { Difficulty, getDifficultyIcon } from "@/models/enums/difficulty.enum";
+// Models
+import { ChartModel } from "@/models/chart.model";
 
+// Libs
 import { transformDuration } from "@/lib/time";
-import { RouterLink, UrlTree } from "@angular/router";
+import { Difficulty, getDifficultyIcon } from "@/models/enums/difficulty.enum";
+import { CoverArtComponent } from "../../../components/cover-art/cover-art.component";
 
 export enum Tendency {
 	Up = "up",
@@ -14,45 +17,20 @@ export enum Tendency {
 	Neutral = "neutral",
 }
 
-export interface ChartProps {
-	track: string;
-	artist: string;
-	coverUrl: string;
-	duration: number;
-	notesAmount: number;
-	difficulty: Difficulty;
-	isDeluxe?: boolean;
-	isExplicit?: boolean;
-	isFeatured?: boolean;
-	ranking?: number;
-	tendency?: Tendency;
-}
-
 @Component({
 	selector: "app-chart",
-	imports: [MatIconModule, NgClass, RouterLink],
+	imports: [MatIconModule, RouterLink, CoverArtComponent],
 	template: `
 		<a
 			class="flex flex-row items-start justify-start gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant rounded-2xl p-6 cursor-pointer"
 			[routerLink]="routerLink"
-			title="{{ track }} - {{ artist }}"
+			title="{{ this.chart.track }} - {{ this.chart.artist }}"
 		>
-			<div
-				class="relative rounded-md overflow-hidden h-[82px] w-[82px] min-w-[82px]"
-			>
-				<img
-					[src]="coverUrl"
-					alt="Cover"
-					class="w-full h-full aspect-square object-cover"
-				/>
-				@if (difficultyIcon) {
-					<img
-						class="absolute bottom-0 right-0 w-5 h-5 z-20"
-						[src]="difficultyIcon"
-						alt="Difficulty badge icon"
-					/>
-				}
-			</div>
+			<app-cover-art
+				[src]="this.chart.coverUrl"
+				[alt]="this.chart.track"
+				[difficulty]="chart.difficulty"
+			></app-cover-art>
 			<div
 				class="flex flex-col flex-1 items-start justify-start gap-4 relative overflow-hidden"
 			>
@@ -65,9 +43,9 @@ export interface ChartProps {
 						<p
 							class="text-base font-medium overflow-hidden text-ellipsis line-clamp-1"
 						>
-							{{ track }}
+							{{ this.chart.track }}
 						</p>
-						@if (isDeluxe) {
+						@if (this.chart.isDeluxe) {
 							<mat-icon
 								svgIcon="deluxe"
 								inline="true"
@@ -76,10 +54,10 @@ export interface ChartProps {
 								aria-label="Deluxe icon"
 							></mat-icon>
 						}
-						@if (isExplicit) {
+						@if (this.chart.isExplicit) {
 							<mat-icon inline>explicit</mat-icon>
 						}
-						@if (ranking && track.length < 20) {
+						<!-- @if (this.chart.ranking && this.chart.track.length < 20) {
 							<div
 								class="ml-auto flex flex-row items-center justify-start gap-2 text-secondary"
 							>
@@ -96,21 +74,28 @@ export interface ChartProps {
 								}
 								{{ ranking }}º
 							</div>
-						}
+						} -->
 					</div>
-					<p class="text-sm font-medium line-clamp-1">{{ artist }}</p>
+					<p class="text-sm font-medium line-clamp-1">
+						{{ this.chart.artist }}
+					</p>
 				</div>
 				<div
 					class="flex flex-row items-center justify-start w-full gap-4"
 				>
 					<div class="flex flex-row items-center justify-start gap-2">
 						<mat-icon inline>timer</mat-icon>
-						<span class="line-clamp-1">{{ duration }}</span>
+						<span class="line-clamp-1">{{
+							transformDuration(this.chart.latestVersion.duration)
+						}}</span>
 					</div>
 					<div class="flex flex-row items-center justify-start gap-2">
 						<mat-icon inline>music_note</mat-icon>
 						<span class="line-clamp-1"
-							>{{ notesAmount }} notes</span
+							>{{
+								this.chart.latestVersion.notesAmount
+							}}
+							notes</span
 						>
 					</div>
 				</div>
@@ -118,27 +103,14 @@ export interface ChartProps {
 		</a>
 	`,
 })
-export class ChartComponent implements ChartProps {
-	@Input() track = "";
-	@Input() artist = "";
-	@Input() coverUrl = "";
-	@Input({
-		transform: transformDuration,
-	})
-	duration = 0;
-	@Input() notesAmount = 0;
-	@Input() difficulty = Difficulty.NORMAL;
-	@Input() isDeluxe: ChartProps["isDeluxe"] = false;
-	@Input() isExplicit: ChartProps["isExplicit"] = false;
-	@Input() isFeatured: ChartProps["isFeatured"] = false;
-	@Input() ranking: ChartProps["ranking"] = 0;
-	@Input() tendency: ChartProps["tendency"] = Tendency.Neutral;
+export class ChartComponent {
+	@Input() chart!: ChartModel;
+
+	transformDuration = transformDuration;
 
 	@Input() routerLink: string | any[] | UrlTree | null | undefined = null;
 
 	tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;
 	tendencyDown = Tendency.Down;
-
-	difficultyIcon = getDifficultyIcon(this.difficulty) || null;
 }
