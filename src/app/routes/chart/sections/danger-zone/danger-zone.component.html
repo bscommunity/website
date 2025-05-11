@@ -1,24 +1,23 @@
 <app-chart-section class="w-full" title="Danger Zone">
 	<ul
-		class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container overflow-hidden"
+		class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container/50 overflow-hidden"
 	>
-		<li
-			class="flex flex-col md:flex-row items-center justify-between w-full gap-2 font-normal px-4 py-3 text-sm"
-		>
-			<div class="flex flex-col items-start justify-start gap-1">
-				<h6 class="font-medium">Delete this chart</h6>
-				<p>
-					Once you delete a chart, there is no going back. Please be
-					certain.
-				</p>
-			</div>
-			<button
-				mat-raised-button
-				class="w-full md:w-fit !bg-red-100/5"
-				(click)="openDeleteDialog()"
-			>
-				Delete this chart
-			</button>
-		</li>
+		<app-danger-zone-list-item
+			class="w-full"
+			title="Change visibility of this chart"
+			description="The chart is currently {{
+				visibility
+			}}. Changing the visibility will affect all users."
+			buttonLabel="Change visibility"
+			[buttonAction]="openVisibilityDialog.bind(this)"
+		></app-danger-zone-list-item>
+		<div class="w-full h-[1px] bg-error-container/50"></div>
+		<app-danger-zone-list-item
+			class="w-full"
+			title="Delete this chart"
+			description="Once you delete a chart, there is no going back. Please be certain."
+			buttonLabel="Delete this chart"
+			[buttonAction]="openDeleteDialog.bind(this)"
+		></app-danger-zone-list-item>
 	</ul>
 </app-chart-section>

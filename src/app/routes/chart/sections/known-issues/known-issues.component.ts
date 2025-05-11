@@ -15,6 +15,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
@@ -25,7 +26,6 @@ import { KnownIssueService } from "@/services/api/known-issue.service";
 
 // Types
 import { KnownIssueModel } from "@/models/known-issue.model";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
 	selector: "app-chart-known-issues-section",

@@ -147,20 +147,30 @@
 				<h1 class="text-2xl">
 					Oops, something went wrong while fetching your charts
 				</h1>
-				"{{ this.error }}" <br />
-				<p class="max-w-[65%] text-center">
-					Please try again later or check Discord if the problem
-					persists
-				</p>
-				<button
-					mat-stroked-button
-					(click)="fetchCharts(true)"
-					(keypress)="fetchCharts(true)"
-					aria-label="Refresh charts"
+				<div
+					class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
 				>
-					<p>Refresh charts</p>
-					<mat-icon class="!mr-0 !ml-2">refresh</mat-icon>
-				</button>
+					{{ this.error }} <br />
+					<p>
+						Please try again later or check Discord if the problem
+						persists
+					</p>
+					<button
+						mat-stroked-button
+						(click)="fetchCharts(true)"
+						(keypress)="fetchCharts(true)"
+						[disabled]="isRefreshing"
+						aria-label="Refresh charts"
+					>
+						<mat-icon class="!mx-2">refresh</mat-icon>
+
+						@if (isRefreshing) {
+							<p>Refreshing...</p>
+						} @else {
+							<p>Refresh charts</p>
+						}
+					</button>
+				</div>
 			</div>
 		</div>
 	} @else {

@@ -13,7 +13,7 @@ import {
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
-export interface DialogData {
+export interface ConfirmationDialogData {
 	title: string;
 	description: string;
 	operation: () => Promise<void>;
@@ -33,7 +33,7 @@ export interface DialogData {
 })
 export class ConfirmationDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<ConfirmationDialogComponent>);
-	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+	readonly data = inject<ConfirmationDialogData>(MAT_DIALOG_DATA);
 	readonly _matSnackBar = inject(MatSnackBar);
 
 	readonly isLoading = signal(false);
