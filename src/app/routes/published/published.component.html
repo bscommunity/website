@@ -120,13 +120,7 @@
 						@for (chart of charts; track $index) {
 							<app-chart
 								[routerLink]="['/chart', chart.id]"
-								[track]="chart.track"
-								[artist]="chart.artist"
-								[coverUrl]="chart.coverUrl"
-								[duration]="chart.latestVersion.duration"
-								[notesAmount]="chart.latestVersion.notesAmount"
-								[difficulty]="chart.difficulty"
-								[isDeluxe]="chart.isDeluxe"
+								[chart]="chart"
 							></app-chart>
 							<!-- [ranking]="chart.ranking"
 								[tendency]="chart.tendency" -->
