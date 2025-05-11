@@ -50,42 +50,36 @@ export class ChartService {
 
 				// If we are not on refresh cooldown, we can fetch from API
 				// Trigger a background fetch to check for updates
-				this.http
-					.get<
-						ChartModel[]
-					>(`${url}?fetchContributors=true&fetchVersions=true`)
-					.subscribe({
-						next: (fetchedCharts) => {
-							// Set up a cooldown to prevent too many requests
-							this.cacheService.setRefreshCooldown();
+				this.http.get<ChartModel[]>(url).subscribe({
+					next: (fetchedCharts) => {
+						// Set up a cooldown to prevent too many requests
+						this.cacheService.setRefreshCooldown();
 
-							// Compare versions to see if we need to update the cache
-							if (
-								JSON.stringify(fetchedCharts) !==
-								JSON.stringify(charts)
-							) {
-								console.log("Updating charts in cache...");
-								this.cacheService.addCharts(fetchedCharts);
+						// Compare versions to see if we need to update the cache
+						if (
+							JSON.stringify(fetchedCharts) !==
+							JSON.stringify(charts)
+						) {
+							console.log("Updating charts in cache...");
+							this.cacheService.addCharts(fetchedCharts);
 
-								// If the user is viewing the charts, navigate to the new version
-								if (this.router.url.endsWith("/published")) {
-									this.router
-										.navigateByUrl("/", {
-											skipLocationChange: true,
-										})
-										.then(() => {
-											this.router.navigate([
-												"/published",
-											]);
-										});
-								}
+							// If the user is viewing the charts, navigate to the new version
+							if (this.router.url.endsWith("/published")) {
+								this.router
+									.navigateByUrl("/", {
+										skipLocationChange: true,
+									})
+									.then(() => {
+										this.router.navigate(["/published"]);
+									});
 							}
-						},
-						error: (error) => {
-							// Handle error if needed
-							console.error("Failed to fetch charts:", error);
-						},
-					});
+						}
+					},
+					error: (error) => {
+						// Handle error if needed
+						console.error("Failed to fetch charts:", error);
+					},
+				});
 			}
 
 			console.log("Returning cached charts:", charts);
