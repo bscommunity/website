@@ -83,7 +83,6 @@ export class PublishedComponent implements OnInit {
 		// console.log("Refreshing charts...");
 
 		this.isRefreshing = forceRefresh;
-		this.error = "";
 		this.chartService.getAllCharts(forceRefresh).subscribe({
 			next: (response) => {
 				console.log("Resolved charts data:", response);

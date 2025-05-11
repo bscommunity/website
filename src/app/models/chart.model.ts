@@ -17,6 +17,7 @@ export const Chart = z.object({
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
 	isFeatured: z.boolean().default(false),
+	isPublic: z.boolean().default(true),
 
 	// Relations
 	latestVersion: Version,
@@ -29,6 +30,7 @@ export type ChartModel = z.infer<typeof Chart>;
 export const CreateChart = Chart.omit({
 	id: true,
 	isFeatured: true,
+	isPublic: true,
 	versions: true,
 	contributors: true,
 	latestVersion: true,
