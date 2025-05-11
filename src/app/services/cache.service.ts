@@ -141,7 +141,7 @@ export class CacheService {
 		const cacheKey = `chart_${chart.id}`;
 
 		if (cacheKey in localStorage) {
-			return this.updateChart(chart, true);
+			return this.updateChart(chart);
 		}
 
 		this.storageService.setItem(
@@ -189,7 +189,7 @@ export class CacheService {
 		}
 	}
 
-	updateChart(updatedChart: ChartModel, isFull = false): void {
+	updateChart(updatedChart: ChartModel): void {
 		const chart = this.getChart(updatedChart.id);
 
 		if (!chart) {
@@ -201,7 +201,6 @@ export class CacheService {
 			JSON.stringify({
 				...updatedChart,
 				lastAccessed: new Date().toISOString(),
-				isFull,
 			}),
 		);
 	}
