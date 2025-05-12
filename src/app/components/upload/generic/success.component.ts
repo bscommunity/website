@@ -8,7 +8,7 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 
-import { ChartComponent } from "app/routes/published/subcomponents/chart.component";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 import { SuccessDialogData } from "../../../services/upload.service";
 
 @Component({
@@ -21,10 +21,10 @@ import { SuccessDialogData } from "../../../services/upload.service";
 				use
 			</p>
 			<div class="relative w-full">
-				<app-chart
+				<app-chart-preview
 					class="pointer-events-none"
 					[chart]="data"
-				></app-chart>
+				></app-chart-preview>
 				<div
 					class="absolute right-8 top-[45%] -translate-y-1/2 rotate-[-4.55deg]"
 				>
@@ -61,7 +61,12 @@ import { SuccessDialogData } from "../../../services/upload.service";
 			</button> -->
 		</mat-dialog-actions>
 	`,
-	imports: [MatDialogModule, MatButtonModule, ChartComponent],
+	imports: [
+		MatDialogModule,
+		MatButtonModule,
+		ChartPreviewComponent,
+		ChartPreviewComponent,
+	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSuccessComponent {

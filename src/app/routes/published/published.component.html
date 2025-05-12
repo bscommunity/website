@@ -118,10 +118,10 @@
 				>
 					<app-list-section class="w-full" title="June 2024">
 						@for (chart of charts; track $index) {
-							<app-chart
+							<app-chart-preview
 								[routerLink]="['/chart', chart.id]"
 								[chart]="chart"
-							></app-chart>
+							></app-chart-preview>
 							<!-- [ranking]="chart.ranking"
 								[tendency]="chart.tendency" -->
 						}

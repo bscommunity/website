@@ -17,9 +17,9 @@ export class DifficultyMarkComponent implements OnChanges {
 	ngOnChanges(changes: SimpleChanges): void {
 		if (changes["difficulty"] && this.difficulty) {
 			this.difficultyIcon = getDifficultyIcon(this.difficulty);
-			console.log(
+			/* console.log(
 				`Difficulty icon: ${this.difficultyIcon} for difficulty: ${this.difficulty}`,
-			);
+			); */
 		}
 	}
 }
