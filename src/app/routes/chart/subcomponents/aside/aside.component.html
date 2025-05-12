@@ -1,10 +1,17 @@
 <aside class="flex flex-col items-start justify-start gap-6 w-full">
 	<div class="absolute top-0 left-0 md:relative w-full max-md:-z-10">
-		<img
-			class="w-full opacity-50 md:opacity-100 md:w-72 aspect-square md:rounded-lg"
-			[src]="chart.coverUrl"
-			[alt]="chart.track"
-		/>
+		<div class="relative overflow-hidden md:rounded-lg">
+			<img
+				class="w-full opacity-50 md:opacity-100 md:w-72 lg:w-96 xl:w-[425px] aspect-square"
+				[src]="chart.coverUrl"
+				[alt]="chart.track"
+			/>
+			<app-difficulty-mark
+				class="hidden md:flex"
+				[difficulty]="chart.difficulty"
+				[size]="96"
+			></app-difficulty-mark>
+		</div>
 		<div
 			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-gradient-to-b from-transparent to-background"
 		></div>

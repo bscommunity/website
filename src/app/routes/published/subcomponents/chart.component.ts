@@ -1,15 +1,17 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, Input } from "@angular/core";
 
+// Material
 import { MatIconModule } from "@angular/material/icon";
+
+// Components
+import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
-import { Difficulty, getDifficultyIcon } from "@/models/enums/difficulty.enum";
-import { CoverArtComponent } from "../../../components/cover-art/cover-art.component";
 
 export enum Tendency {
 	Up = "up",
@@ -19,18 +21,23 @@ export enum Tendency {
 
 @Component({
 	selector: "app-chart",
-	imports: [MatIconModule, RouterLink, CoverArtComponent],
+	imports: [MatIconModule, RouterLink, DifficultyMarkComponent],
 	template: `
 		<a
 			class="flex flex-row items-start justify-start gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant rounded-2xl p-6 cursor-pointer"
 			[routerLink]="routerLink"
 			title="{{ this.chart.track }} - {{ this.chart.artist }}"
 		>
-			<app-cover-art
-				[src]="this.chart.coverUrl"
-				[alt]="this.chart.track"
-				[difficulty]="chart.difficulty"
-			></app-cover-art>
+			<div
+				class="relative rounded-md overflow-hidden h-[82px] w-[82px] min-w-[82px]"
+			>
+				<img
+					[src]="this.chart.coverUrl"
+					alt="Cover"
+					class="w-full h-full aspect-square object-cover"
+				/>
+				<app-difficulty-mark [difficulty]="chart.difficulty" />
+			</div>
 			<div
 				class="flex flex-col flex-1 items-start justify-start gap-4 relative overflow-hidden"
 			>

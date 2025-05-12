@@ -19,6 +19,7 @@ import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
+import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 
 @Component({
 	selector: "app-chart",
@@ -45,6 +46,7 @@ export class ChartComponent implements OnInit {
 	) {}
 
 	chart: ChartModel | null = null;
+	difficultyIcon: string | null = null;
 
 	ngOnInit(): void {
 		// Access resolved data
@@ -56,6 +58,10 @@ export class ChartComponent implements OnInit {
 			this.router.navigate(["error"], {
 				state: { error: "Chart data is incomplete" },
 			});
+		}
+
+		if (this.chart) {
+			this.difficultyIcon = getDifficultyIcon(this.chart.difficulty);
 		}
 	}
 }
