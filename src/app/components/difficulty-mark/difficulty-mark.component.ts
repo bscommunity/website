@@ -3,17 +3,14 @@ import { CommonModule } from "@angular/common";
 import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
 
 @Component({
-	selector: "app-cover-art",
+	selector: "app-difficulty-mark",
 	imports: [CommonModule],
-	templateUrl: "./cover-art.component.html",
+	templateUrl: "./difficulty-mark.component.html",
 })
-export class CoverArtComponent implements OnChanges {
-	@Input() class?: string = "";
-	@Input() src!: string;
+export class DifficultyMarkComponent implements OnChanges {
+	@Input() class?: string;
 	@Input() difficulty!: Difficulty;
-
-	@Input() alt?: string = "Cover art";
-	@Input() size: number = 82;
+	@Input() size: number = 40;
 
 	difficultyIcon: string | null = null;
 

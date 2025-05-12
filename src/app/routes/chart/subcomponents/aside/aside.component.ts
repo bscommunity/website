@@ -21,11 +21,16 @@ import { ChartService } from "@/services/api/chart.service";
 // Models
 import { ChartModel } from "@/models/chart.model";
 import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
+import { DifficultyMarkComponent } from "../../../../components/difficulty-mark/difficulty-mark.component";
 
 @Component({
 	selector: "app-aside",
 	templateUrl: "./aside.component.html",
-	imports: [AsideSectionComponent, AsideContainerComponent],
+	imports: [
+		AsideSectionComponent,
+		AsideContainerComponent,
+		DifficultyMarkComponent,
+	],
 })
 export class AsideComponent {
 	readonly dialog = inject(MatDialog);
