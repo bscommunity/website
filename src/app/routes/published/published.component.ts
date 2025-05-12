@@ -10,17 +10,17 @@ import {
 	CustomSelectComponent,
 	type Option,
 } from "@/components/custom-select/custom-select.component";
-import { ChartComponent } from "./subcomponents/chart.component";
+import { ChartPreviewComponent } from "../../components/chart-preview/chart-preview.component";
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
+import { LargePanelComponent } from "@/components/panel/large-panel.component";
 
 // Types
 import { ChartModel } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
-import { LargePanelComponent } from "../../components/panel/large-panel.component";
 
 @Component({
 	selector: "app-published",
@@ -30,10 +30,11 @@ import { LargePanelComponent } from "../../components/panel/large-panel.componen
 		CustomSelectComponent,
 		FilterPanelComponent,
 		ListSectionComponent,
-		ChartComponent,
+		ChartPreviewComponent,
 		MatProgressSpinnerModule,
 		SearchbarComponent,
 		LargePanelComponent,
+		ChartPreviewComponent,
 	],
 	templateUrl: "./published.component.html",
 })
