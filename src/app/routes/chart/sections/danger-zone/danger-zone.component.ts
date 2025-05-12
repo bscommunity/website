@@ -3,17 +3,16 @@ import { Component, inject, Input } from "@angular/core";
 // Modules
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
 import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
-import {
-	ConfirmationDialogComponent,
-	ConfirmationDialogData,
-} from "../../dialogs/confirmation/confirmation-dialog.component";
+import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+
+// Services
 import { ChartService } from "@/services/api/chart.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
 	selector: "app-chart-danger-zone-section",
@@ -28,7 +27,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 export class DangerZoneComponent {
 	@Input() chartId: string = "";
 	@Input() chartName: string = "";
-	@Input() isPublic: boolean = true;
+	@Input() isPublic: boolean | null = null;
 
 	visibility = this.isPublic ? "public" : "private";
 
