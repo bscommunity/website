@@ -169,6 +169,16 @@ export class ChartService {
 		}
 	}
 
+	searchCharts(query: string): Observable<ChartModel[]> {
+		const url = `${this.apiUrl}?query=${query}&fetchContributors=true&fetchVersions=true`;
+
+		return this.http.get<ChartModel[]>(url).pipe(
+			tap((fetchedCharts) => {
+				this.cacheService.addCharts(fetchedCharts);
+			}),
+		);
+	}
+
 	fetchChartFromRemote(id: string): Observable<ChartModel> {
 		return this.http.get<ChartModel>(`${this.apiUrl}/${id}`);
 	}
