@@ -27,7 +27,7 @@ interface AutoCompleteExceptions {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchbarComponent {
-	@Input() autoComplete: MatAutocomplete = new MatAutocomplete();
+	@Input() autoComplete?: MatAutocomplete | null = null;
 
 	@ViewChild("input") input!: ElementRef<HTMLInputElement>;
 	@Input() onSearch: (value: string) => void = () => {};

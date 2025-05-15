@@ -102,4 +102,11 @@ export class PublishedComponent implements OnInit {
 			},
 		});
 	}
+
+	onSearch(query: string) {
+		console.log("Search query:", query);
+		console.log("Charts before search:", this.charts);
+
+		// Handle search query
+	}
 }

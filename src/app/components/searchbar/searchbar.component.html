@@ -6,15 +6,41 @@
 			>search</mat-icon
 		>
 	</span>
-	<input
-		#input
-		class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
-		type="text"
-		[placeholder]="placeholder"
-		(input)="onInput($event)"
-		[matAutocomplete]="autoComplete"
-		[disabled]="disabled"
-		[style.pointerEvents]="disabled ? 'none' : 'auto'"
-	/>
-	<ng-content></ng-content>
+	@if (autoComplete) {
+		<input
+			#input
+			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
+			type="text"
+			[placeholder]="placeholder"
+			(input)="onInput($event)"
+			[matAutocomplete]="autoComplete"
+			[disabled]="disabled"
+			[style.pointerEvents]="disabled ? 'none' : 'auto'"
+		/>
+	} @else {
+		<input
+			#input
+			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
+			type="text"
+			[placeholder]="placeholder"
+			(input)="onInput($event)"
+			[disabled]="disabled"
+			[style.pointerEvents]="disabled ? 'none' : 'auto'"
+		/>
+	}
+	<span class="absolute top-1/2 -translate-y-1/2 right-1.5">
+		@if (this.input && this.input.nativeElement.value.length > 0) {
+			<button
+				mat-icon-button
+				(click)="clearSearch()"
+				aria-label="Clear search input"
+				class="!flex !items-center !justify-center"
+			>
+				<span class="flex flex-1 items-center justify-center">
+					<mat-icon inline>close</mat-icon>
+				</span>
+			</button>
+		}
+		<ng-content></ng-content>
+	</span>
 </div>

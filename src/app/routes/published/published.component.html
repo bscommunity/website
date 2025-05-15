@@ -13,6 +13,7 @@
 					placeholder="Search for charts, tourpasses and themes..."
 					class="flex flex-1 max-md:w-full relative"
 					[disabled]="isRefreshing"
+					[onSearch]="onSearch.bind(this)"
 				>
 					@if (isRefreshing) {
 						<mat-progress-spinner

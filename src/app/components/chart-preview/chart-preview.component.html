@@ -34,6 +34,9 @@
 					{{ this.chart.track }}
 				</p>
 				<span class="inline-flex gap-1 items-center justify-start">
+					@if (this.chart.isExplicit) {
+						<mat-icon class="filled-icon" inline>explicit</mat-icon>
+					}
 					@if (this.chart.isDeluxe) {
 						<mat-icon
 							svgIcon="deluxe"
@@ -42,9 +45,6 @@
 							aria-hidden="false"
 							aria-label="Deluxe icon"
 						></mat-icon>
-					}
-					@if (this.chart.isExplicit) {
-						<mat-icon class="filled-icon" inline>explicit</mat-icon>
 					}
 				</span>
 				<!-- @if (this.chart.ranking && this.chart.track.length < 20) {
