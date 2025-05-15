@@ -20,11 +20,13 @@ import { VersionsComponent } from "./sections/versions/versions.component";
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
 import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
+import { CommonModule } from "@angular/common";
 
 @Component({
 	selector: "app-chart",
 	imports: [
 		// Modules
+		CommonModule,
 		FormsModule,
 		MatButtonModule,
 		MatIconModule,

@@ -33,18 +33,20 @@
 				>
 					{{ this.chart.track }}
 				</p>
-				@if (this.chart.isDeluxe) {
-					<mat-icon
-						svgIcon="deluxe"
-						inline="true"
-						class="text-on-surface !w-6 !h-6 -mt-0.5"
-						aria-hidden="false"
-						aria-label="Deluxe icon"
-					></mat-icon>
-				}
-				@if (this.chart.isExplicit) {
-					<mat-icon inline>explicit</mat-icon>
-				}
+				<span class="inline-flex gap-1 items-center justify-start">
+					@if (this.chart.isDeluxe) {
+						<mat-icon
+							svgIcon="deluxe"
+							inline
+							class="!w-6 !h-6"
+							aria-hidden="false"
+							aria-label="Deluxe icon"
+						></mat-icon>
+					}
+					@if (this.chart.isExplicit) {
+						<mat-icon class="filled-icon" inline>explicit</mat-icon>
+					}
+				</span>
 				<!-- @if (this.chart.ranking && this.chart.track.length < 20) {
 							<div
 								class="ml-auto flex flex-row items-center justify-start gap-2 text-secondary"
