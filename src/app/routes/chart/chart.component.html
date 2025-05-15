@@ -9,13 +9,9 @@
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
 		>
 			<div class="flex flex-col items-start justify-start gap-2 relative">
-				<h1
-					class="font-medium text-5xl items-center inline-block gap-4 w-full"
-				>
-					{{ chart.track }}
-					<span
-						class="relative inline-flex items-center justify-start gap-2 ml-2 md:ml-0 top-0.5 md:top-2"
-					>
+				<h1 class="font-medium text-5xl leading-tight">
+					<span class="mr-4">{{ chart.track }}</span>
+					<span class="relative inline-flex gap-4 text-2xl h-full">
 						@if (difficultyIcon) {
 							<img
 								class="w-8 h-8 flex md:hidden"
@@ -23,12 +19,15 @@
 								alt="Difficulty badge icon"
 							/>
 						}
+						@if (chart.isExplicit) {
+							<mat-icon class="filled-icon" inline
+								>explicit</mat-icon
+							>
+						}
 						@if (chart.isDeluxe) {
 							<mat-icon
 								svgIcon="deluxe"
-								inline="true"
-								class="text-on-surface !w-12 !h-12 relative"
-								aria-hidden="false"
+								class="!w-8 !h-8 relative"
 								aria-label="Deluxe icon"
 							></mat-icon>
 						}
