@@ -48,7 +48,7 @@ export class DeleteChartComponent {
 	readonly fb = inject(FormBuilder);
 
 	form = this.fb.group({
-		chartName: ["", Validators.pattern(this.data.chartName)],
+		chartName: ["", Validators.pattern(escapeRegExp(this.data.chartName))],
 	});
 
 	readonly isLoading = signal(false);
@@ -81,4 +81,9 @@ export class DeleteChartComponent {
 
 		this.isLoading.update(() => false);
 	}
+}
+
+// Scapes special characters in a string for use in a regular expression
+function escapeRegExp(text: string): string {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

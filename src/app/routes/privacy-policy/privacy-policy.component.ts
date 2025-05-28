@@ -25,7 +25,7 @@ export class PrivacyPolicyComponent {
 			id: "what-do-we-collect",
 			content: `
 				<li><strong>Technical Data:</strong> We automatically collect technical information (such as access logs and usage statistics) solely to maintain and improve our service.</li>
-				<li><strong>Content Links:</strong> You provide us with links for content like Charts, Tour Passes, and Themes – and we do not store any files on our servers.</li>
+				<li><strong>Content Links:</strong> You provide us with links to content such as charts, tour passes, and themes, which are not stored in any files on our servers.</li>
 			`,
 		},
 		{
@@ -48,7 +48,7 @@ export class PrivacyPolicyComponent {
 			title: "Content Responsibility",
 			id: "content-responsibility",
 			content: `
-				<p>All content submitted – whether it’s a Chart (music/level), a Tour Pass (collection of charts), or a Theme (skin) – is entirely your responsibility.</p>
+				<p>All content submitted – whether it’s a Chart, a Tour Pass, or a Theme – is entirely your responsibility.</p>
 				<p>You confirm that you hold the necessary rights to share the content, thereby relieving the app of any liability regarding copyright or intellectual property issues.</p>
 			`,
 		},
