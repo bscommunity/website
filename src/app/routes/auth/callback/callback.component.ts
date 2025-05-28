@@ -57,7 +57,9 @@ export class OAuthCallbackComponent implements OnInit {
 			this.dialog.open(UploadDialogErrorComponent, {
 				data: {
 					message: error.statusText,
-					error: error.error.error, // this is stupid but too lazy to fix
+					error: error.error // this is stupid but too lazy to fix
+						? error.error.message
+						: "An error occurred during login",
 					redirectTo: "/login",
 				},
 				disableClose: true,
