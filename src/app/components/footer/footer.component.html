@@ -4,14 +4,28 @@
 	<div
 		class="flex flex-col md:flex-row items-start justify-between w-full gap-9"
 	>
-		<div class="flex flex-col items-start justify-start gap-4">
+		<!-- First Section -->
+		<div
+			class="flex flex-col items-start justify-start gap-4 flex-shrink-0 flex-grow-0"
+		>
 			<div class="flex flex-row items-center justify-start gap-6">
-				<mat-icon
-					svgIcon="logo"
-					class="text-on-secondary-container"
-					aria-hidden="false"
-					aria-label="Site logo"
-				></mat-icon>
+				<a
+					href="#"
+					class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-surface"
+				>
+					<mat-icon
+						svgIcon="logo"
+						aria-hidden="false"
+						aria-label="Site logo"
+					></mat-icon>
+					<mat-icon
+						svgIcon="label"
+						inline
+						class="select-none pointer-events-none !w-[110px] !h-[13px]"
+						aria-hidden="false"
+						aria-label="Site label"
+					></mat-icon>
+				</a>
 				<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
 				<div class="flex flex-row items-center justify-start gap-4">
 					<a href="https://discord.com" target="_blank" class="h-8">
@@ -34,35 +48,67 @@
 					</a>
 				</div>
 			</div>
-			<p>&#64;2025. Made with ❤️ from community, for community.</p>
+			<p class="max-w-3/4">
+				&#64;2025. Made with ❤️ from community, for community.
+			</p>
 		</div>
 
 		<!-- Sections -->
 		<ul
-			class="grid-cols-2 w-full md:flex flex-row items-center justify-start md:justify-end gap-8 md:gap-16 order-1 md:order-2"
+			class="grid-cols-2 grid w-full md:flex flex-row items-start justify-start md:justify-end gap-8 md:gap-16 order-1 md:order-2"
 		>
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Resources</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">About</a></li>
-					<li><a routerLink="/release-notes">Release Notes</a></li>
+					<li>
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							href="#"
+							>About</a
+						>
+					</li>
+					<li>
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							routerLink="/release-notes"
+							>Release Notes</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Help</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
-					<li><a href="#">Support</a></li>
-					<li><a href="#">Documentation</a></li>
+					<li>
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							href="#"
+							>Support</a
+						>
+					</li>
+					<li>
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							href="#"
+							>Documentation</a
+						>
+					</li>
 				</ul>
 			</li>
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Legal</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
 					<li>
-						<a [routerLink]="['/privacy-policy']">Privacy Policy</a>
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							routerLink="/privacy-policy"
+							>Privacy Policy</a
+						>
 					</li>
 					<li>
-						<a [routerLink]="['/terms-of-service']"
+						<a
+							class="hover:text-on-surface-variant transition-colors"
+							routerLink="/terms-of-service"
 							>Terms of Service</a
 						>
 					</li>

@@ -25,15 +25,15 @@ export class PrivacyPolicyComponent {
 			id: "what-do-we-collect",
 			content: `
 				<li><strong>Technical Data:</strong> We automatically collect technical information (such as access logs and usage statistics) solely to maintain and improve our service.</li>
-				<li><strong>Content Links:</strong> You provide us with links to content such as charts, tour passes, and themes, which are not stored in any files on our servers.</li>
+				<li><strong>Content Links:</strong> You provide us with links to content such as charts, tour passes, and themes. The original files are not stored in any of our servers.</li>
 			`,
 		},
 		{
 			title: "How Do We Use This Data?",
 			id: "how-do-we-use-this-data",
 			content: `
-				<li>The technical data is used solely to enhance your experience, security, and app performance.</li>
-				<li>Your links are used only to direct fellow community members to the content you shared.</li>
+				<li>The technical data is used solely to enhance the user experience, security, and app performance.</li>
+				<li>Your links are used only to direct fellow community members to the content you shared. You have the right to remove or edit your content at any time.</li>
 			`,
 		},
 		{

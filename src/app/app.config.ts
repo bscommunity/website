@@ -38,7 +38,7 @@ export const appConfig: ApplicationConfig = {
 			routes,
 			withComponentInputBinding(),
 			withInMemoryScrolling({
-				scrollPositionRestoration: "top", // Scrolls to the top on navigation
+				scrollPositionRestoration: "enabled", // Scrolls to the top on navigation
 				anchorScrolling: "enabled", // Enables anchor (fragment) scrolling
 			}),
 			withRouterConfig({
