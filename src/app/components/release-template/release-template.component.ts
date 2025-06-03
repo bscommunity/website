@@ -6,12 +6,21 @@ import { ReleaseTemplateItemComponent } from "./release-item.component";
 export interface ReleaseNote {
 	version: string;
 	date: string;
-	extra: string;
-	features: string[];
-	fixes: {
+	extra?: string;
+	features?: string[];
+	refactors?: string[];
+	fixes?: string[];
+	/* fixes: {
 		description: string;
 		issue: number;
-	}[];
+	}[]; */
+}
+
+export interface ReleaseNoteResponse {
+	url: string;
+	tag_name: string;
+	published_at: string;
+	body: string;
 }
 
 @Component({
@@ -27,6 +36,7 @@ export class ReleaseTemplateComponent implements OnInit {
 	releaseDate: string = "";
 
 	ngOnInit(): void {
+		// console.log("Release data:", this.release);
 		this.releaseDate = new Date(this.release.date).toLocaleDateString(
 			"en-US",
 			{

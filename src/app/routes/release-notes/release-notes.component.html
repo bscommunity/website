@@ -1,6 +1,6 @@
 <app-public-header></app-public-header>
 <main
-	class="flex flex-col items-start justify-center gap-wrapper md:gap-12 w-full min-h-screen px-wrapper py-wrapper md:pt-12 pb-20 text-base font-normal leading-5"
+	class="flex flex-col items-center justify-star gap-wrapper md:gap-12 w-full min-h-screen px-wrapper py-wrapper md:pt-12 pb-20 text-base font-normal leading-5"
 >
 	<header class="flex flex-col items-start justify-start gap-9 w-full">
 		<h1 class="font-medium text-5xl md:text-6xl">Release Notes</h1>
@@ -14,11 +14,22 @@
 
 	<div class="flex w-full h-[1px] bg-surface-container-high"></div>
 
-	@for (release of releaseNotes; track $index) {
-		<app-release-template
-			[release]="release"
-			[isLast]="releaseNotes.length - 1 === $index"
-			[icon]="$index % 2 === 0 ? '🎉' : '🚀'"
-		></app-release-template>
+	@if (releaseNotes()) {
+		@for (release of releaseNotes(); track $index) {
+			<app-release-template
+				class="w-full"
+				[release]="release"
+				[isLast]="releaseNotes().length - 1 === $index"
+				[icon]="$index % 2 === 0 ? '🎉' : '🚀'"
+			></app-release-template>
+		}
+	} @else if (releaseNotes === undefined) {
+		<p class="text-on-background text-base font-normal">
+			Loading release notes...
+		</p>
+	} @else {
+		<p class="text-on-background text-base font-normal">
+			No release notes available.
+		</p>
 	}
 </main>
