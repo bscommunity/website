@@ -21,6 +21,12 @@ import { ChartModel } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { convertStringToMonth } from "@/lib/time";
+
+type ChartsByMonth = {
+	name: string; // e.g., "2023-10"
+	charts: ChartModel[];
+};
 
 @Component({
 	selector: "app-published",
@@ -43,6 +49,8 @@ export class PublishedComponent implements OnInit {
 		private chartService: ChartService,
 		private cdr: ChangeDetectorRef,
 	) {}
+
+	convertStringToMonth = convertStringToMonth;
 
 	sortOptions: Option[] = [
 		{
@@ -67,9 +75,49 @@ export class PublishedComponent implements OnInit {
 
 	filters = [];
 
-	charts: ChartModel[] | undefined | null = undefined;
+	set charts(value: ChartModel[] | undefined) {
+		const charts =
+			value?.map((chart) => {
+				return {
+					...chart,
+					latestVersion: chart.versions?.[0] || undefined,
+				};
+			}) || [];
+
+		console.log("Processed charts:", charts);
+
+		const chartsByMonth: ChartsByMonth[] = [];
+		charts.forEach((chart) => {
+			const month = chart.latestVersion?.publishedAt
+				? new Date(chart.latestVersion.publishedAt)
+						.toISOString()
+						.slice(0, 7)
+				: "unknown";
+
+			let monthEntry = chartsByMonth.find(
+				(entry) => entry.name === month,
+			);
+			if (!monthEntry) {
+				monthEntry = { name: month, charts: [] };
+				chartsByMonth.push(monthEntry);
+			}
+			monthEntry.charts.push(chart);
+		});
+
+		console.log("Charts grouped by month:", chartsByMonth);
+		this._charts = chartsByMonth.sort((a, b) => {
+			return new Date(b.name).getTime() - new Date(a.name).getTime();
+		});
+	}
+
+	get charts(): ChartsByMonth[] | undefined {
+		return this._charts;
+	}
+
+	private _charts!: ChartsByMonth[] | undefined;
+
 	isRefreshing: boolean = true;
-	error: string = "";
+	error: string | undefined = undefined;
 
 	ngOnInit(): void {
 		// Access resolved data
@@ -82,8 +130,8 @@ export class PublishedComponent implements OnInit {
 
 	fetchCharts(forceRefresh: boolean = false) {
 		// console.log("Refreshing charts...");
-
 		this.isRefreshing = forceRefresh;
+		this.error = undefined;
 		this.chartService.getAllCharts(forceRefresh).subscribe({
 			next: (response) => {
 				console.log("Resolved charts data:", response);
@@ -97,7 +145,6 @@ export class PublishedComponent implements OnInit {
 				this.error = error.message;
 
 				this.isRefreshing = false;
-				this.charts = null;
 				this.cdr.markForCheck();
 			},
 		});

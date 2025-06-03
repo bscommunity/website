@@ -8,8 +8,9 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 // Components
 import { AsideSectionComponent } from "./aside-section.component";
 import { AsideContainerComponent } from "./aside-container.component";
-import { transformDuration } from "@/lib/time";
 import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
+import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
+import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 
 // Services
 import {
@@ -20,8 +21,10 @@ import { ChartService } from "@/services/api/chart.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
-import { DifficultyMarkComponent } from "../../../../components/difficulty-mark/difficulty-mark.component";
+import { VersionModel } from "@/models/version.model";
+
+// Libs
+import { transformDuration } from "@/lib/time";
 
 @Component({
 	selector: "app-aside",

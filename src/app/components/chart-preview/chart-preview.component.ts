@@ -1,5 +1,6 @@
 import { RouterLink, UrlTree } from "@angular/router";
 import { Component, Input } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -12,7 +13,7 @@ import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
-import { CommonModule } from "@angular/common";
+import { VersionModel } from "@/models/version.model";
 
 export enum Tendency {
 	Up = "up",
@@ -26,13 +27,23 @@ export enum Tendency {
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
-	@Input() chart!: ChartModel;
+	@Input()
+	set chart(value: ChartModel) {
+		this._chart = value;
+		this.latestVersion = value?.versions?.[0];
+	}
+	get chart(): ChartModel {
+		return this._chart;
+	}
+	private _chart!: ChartModel;
+
+	latestVersion: VersionModel | undefined;
 
 	transformDuration = transformDuration;
 
 	@Input() routerLink: string | any[] | UrlTree | null | undefined = null;
 
-	tendencyNeutral = Tendency.Neutral;
+	/* tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;
-	tendencyDown = Tendency.Down;
+	tendencyDown = Tendency.Down; */
 }

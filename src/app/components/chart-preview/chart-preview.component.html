@@ -74,13 +74,13 @@
 			<div class="flex flex-row items-center justify-start gap-2">
 				<mat-icon inline>timer</mat-icon>
 				<span class="line-clamp-1">{{
-					transformDuration(this.chart.latestVersion.duration)
+					transformDuration(this.latestVersion?.duration || 0)
 				}}</span>
 			</div>
 			<div class="flex flex-row items-center justify-start gap-2">
 				<mat-icon inline>music_note</mat-icon>
 				<span class="line-clamp-1"
-					>{{ this.chart.latestVersion.notesAmount }} notes</span
+					>{{ this.latestVersion?.notesAmount }} notes</span
 				>
 			</div>
 		</div>

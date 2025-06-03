@@ -15,7 +15,6 @@ import {
 } from "@/models/chart.model";
 
 import { apiUrl } from ".";
-import { ZodError } from "zod";
 
 @Injectable({
 	providedIn: "root",
@@ -39,7 +38,7 @@ export class ChartService {
 	// Read
 	getAllCharts(forceRefresh: boolean = false): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
-		const url = `${this.apiUrl}?fetchContributors=true&fetchVersions=true`;
+		const url = `${this.apiUrl}`;
 
 		if (charts && charts.length > 0 && !forceRefresh) {
 			// Check if we are on refresh cooldown
@@ -170,7 +169,7 @@ export class ChartService {
 	}
 
 	searchCharts(query: string): Observable<ChartModel[]> {
-		const url = `${this.apiUrl}?query=${query}&fetchContributors=true&fetchVersions=true`;
+		const url = `${this.apiUrl}?query=${query}`;
 
 		return this.http.get<ChartModel[]>(url).pipe(
 			tap((fetchedCharts) => {
