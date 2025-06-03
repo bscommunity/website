@@ -3,13 +3,14 @@ import { Difficulty } from "./enums/difficulty.enum";
 import { Contributor } from "./contributor.model";
 import { Version } from "./version.model";
 import { StreamingLink } from "./streaming-link.model";
+import { Genre } from "./enums/genre.enum";
 
 export const Chart = z.object({
 	id: z.string(),
 	artist: z.string(),
 	track: z.string(),
 	album: z.string().optional().nullable(),
-	genre: z.string().optional().nullable(),
+	genre: z.nativeEnum(Genre).optional(),
 	coverUrl: z.string(),
 	trackPreviewUrl: z.string().optional().nullable(),
 	difficulty: z.nativeEnum(Difficulty),
