@@ -7,6 +7,7 @@ import { MatChipsModule } from "@angular/material/chips";
 
 export interface ExpansionPanelData {
 	name: string;
+	value?: string;
 	isSelected?: boolean;
 }
 

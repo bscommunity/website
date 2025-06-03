@@ -18,10 +18,14 @@ import { LargePanelComponent } from "@/components/panel/large-panel.component";
 
 // Types
 import { ChartModel } from "@/models/chart.model";
+import { Difficulty } from "@/models/enums/difficulty.enum";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+
+// Utils
 import { convertStringToMonth } from "@/lib/time";
+import { Genre } from "@/models/enums/genre.enum";
 
 type ChartsByMonth = {
 	name: string; // e.g., "2023-10"
@@ -84,7 +88,32 @@ export class PublishedComponent implements OnInit {
 				};
 			}) || [];
 
-		console.log("Processed charts:", charts);
+		this.availableDifficulties = Array.from(
+			new Set(charts.map((chart) => Difficulty[chart.difficulty])),
+		);
+
+		this.availableGenres = Array.from(
+			new Set(
+				charts.map((chart) =>
+					!!chart.genre ? Genre[chart.genre] : undefined,
+				),
+			),
+		);
+
+		this.availableVersions = Array.from(
+			new Set(
+				charts
+					.map((chart) => (chart.isDeluxe ? "Deluxe" : "Default"))
+					.flat(),
+			),
+		);
+
+		/* console.log(
+			"Processed: ",
+			this.availableDifficulties,
+			this.availableGenres,
+			this.availableVersions,
+		); */
 
 		const chartsByMonth: ChartsByMonth[] = [];
 		charts.forEach((chart) => {
@@ -115,6 +144,12 @@ export class PublishedComponent implements OnInit {
 	}
 
 	private _charts!: ChartsByMonth[] | undefined;
+
+	availableDifficulties: Difficulty[] = [];
+	availableGenres: (Genre | undefined)[] = [];
+	availableVersions: string[] = [];
+	startDate: string | null = null;
+	endDate: string | null = null;
 
 	isRefreshing: boolean = true;
 	error: string | undefined = undefined;
