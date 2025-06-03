@@ -29,3 +29,12 @@ export function convertDateTimeToHumanReadable(value: string): string {
 	}
 	return seconds === 1 ? "1 second ago" : `${seconds} seconds ago`;
 }
+
+export function convertStringToMonth(value: string): string {
+	const date = new Date(value);
+	const options: Intl.DateTimeFormatOptions = {
+		month: "long",
+		year: "numeric",
+	};
+	return date.toLocaleDateString("en-US", options);
+}

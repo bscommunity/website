@@ -50,7 +50,7 @@ export class OAuthCallbackComponent implements OnInit {
 
 		try {
 			await this.authService.login(code);
-			this.router.navigate(["/"]);
+			this.router.navigate(["/published"]);
 		} catch (error: any) {
 			console.error("Error: ", error);
 

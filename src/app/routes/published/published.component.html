@@ -2,59 +2,61 @@
 	class="flex flex-col-reverse md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
 	@if (charts) {
-		<app-filter-panel
-			class="w-full md:w-1/3 md:max-w-md"
-		></app-filter-panel>
-		<div class="flex flex-col items-start justify-start gap-9 w-full">
-			<div
-				class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
-			>
-				<app-searchbar
-					placeholder="Search for charts, tourpasses and themes..."
-					class="flex flex-1 max-md:w-full relative"
-					[disabled]="isRefreshing"
-					[onSearch]="onSearch.bind(this)"
-				>
-					@if (isRefreshing) {
-						<mat-progress-spinner
-							class="mr-3"
-							diameter="16"
-							mode="indeterminate"
-						></mat-progress-spinner>
-					}
-				</app-searchbar>
-				<div class="flex flex-row items-center gap-4">
-					<span
-						class="flex flex-row items-center justify-end gap-4 h-full"
-					>
-						<label class="min-w-fit" for="sort-by">Sort by</label>
-						<app-custom-select
-							class="h-full"
-							id="sort-by"
-							[options]="sortOptions"
-							[selectedOption]="sortBy"
-							[disabled]="isRefreshing"
-						></app-custom-select>
-					</span>
-					<button
-						mat-icon-button
-						(click)="fetchCharts(true)"
-						(keypress)="fetchCharts(true)"
-						aria-label="Refresh charts"
-						class="!flex !items-center !justify-center"
-						[disabled]="isRefreshing"
-					>
-						<span class="flex flex-1 items-center justify-center">
-							<mat-icon inline>refresh</mat-icon>
-						</span>
-					</button>
-				</div>
-			</div>
-			@if (charts.length === 0 && !filters) {
-				<!-- No filters applied, user has no charts -->
+		@if (charts.length > 0 || filters.length > 0) {
+			<app-filter-panel
+				class="w-full md:w-1/3 md:max-w-md"
+			></app-filter-panel>
+			<div class="flex flex-col items-start justify-start gap-9 w-full">
 				<div
-					class="flex flex-col items-center justify-start gap-6 w-full"
+					class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
 				>
+					<app-searchbar
+						placeholder="Search for charts, tourpasses and themes..."
+						class="flex flex-1 max-md:w-full relative"
+						[disabled]="isRefreshing"
+						[onSearch]="onSearch.bind(this)"
+					>
+						@if (isRefreshing) {
+							<mat-progress-spinner
+								class="mr-3"
+								diameter="16"
+								mode="indeterminate"
+							></mat-progress-spinner>
+						}
+					</app-searchbar>
+					<div class="flex flex-row items-center gap-4">
+						<span
+							class="flex flex-row items-center justify-end gap-4 h-full"
+						>
+							<label class="min-w-fit" for="sort-by"
+								>Sort by</label
+							>
+							<app-custom-select
+								class="h-full"
+								id="sort-by"
+								[options]="sortOptions"
+								[selectedOption]="sortBy"
+								[disabled]="isRefreshing"
+							></app-custom-select>
+						</span>
+						<button
+							mat-icon-button
+							(click)="fetchCharts(true)"
+							(keypress)="fetchCharts(true)"
+							aria-label="Refresh charts"
+							class="!flex !items-center !justify-center"
+							[disabled]="isRefreshing"
+						>
+							<span
+								class="flex flex-1 items-center justify-center"
+							>
+								<mat-icon inline>refresh</mat-icon>
+							</span>
+						</button>
+					</div>
+				</div>
+				@if (filters.length > 0) {
+					<!-- No charts found after filtering -->
 					<div
 						class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 					>
@@ -62,26 +64,59 @@
 							class="flex flex-col items-center justify-center gap-4"
 						>
 							<span class="text-6xl"
-								><mat-icon inline>file_copy_off</mat-icon></span
+								><mat-icon inline
+									>sentiment_dissatisfied</mat-icon
+								></span
 							>
 							<h1 class="text-2xl">
-								It looks like you haven't published anything yet
+								We couldn't find anything based on your search
 							</h1>
-							<p class="max-w-[65%] text-center">
-								Create a chart, tourpass or theme and showcase
-								them to the community when you’re ready!
+							<p class="max-w-[50%] text-center">
+								Try removing some filters or searching for
+								something else
 							</p>
 						</div>
+						<button
+							class="!flex-row-reverse"
+							mat-stroked-button
+							(click)="clearFilters()"
+							(keypress)="clearFilters()"
+						>
+							<p>Clear filters</p>
+							<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
+						</button>
 					</div>
-					<app-large-panel
-						class="w-full"
-						title="Don’t know where to start?"
-						message="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
-						[button]="{ label: 'Discord', link: '/' }"
-					></app-large-panel>
-				</div>
-			} @else if (!charts) {
-				<!-- No charts found after filtering -->
+				}
+				<ul
+					class="flex flex-col items-start justify-start w-full"
+					[style.opacity]="isRefreshing ? '0.5' : '1'"
+					[style.pointerEvents]="isRefreshing ? 'none' : 'auto'"
+				>
+					<!-- <app-list-section class="w-full" title="June 2024">
+						@for (chart of charts; track $index) {
+							<app-chart-preview
+								[routerLink]="['/chart', chart.id]"
+								[chart]="chart"
+							></app-chart-preview>
+						}
+					</app-list-section> -->
+					@for (month of charts; track $index) {
+						<app-list-section
+							class="w-full"
+							[title]="convertStringToMonth(month.name)"
+						>
+							@for (chart of month.charts; track chart.id) {
+								<app-chart-preview
+									[routerLink]="['/chart', chart.id]"
+									[chart]="chart"
+								></app-chart-preview>
+							}
+						</app-list-section>
+					}
+				</ul>
+			</div>
+		} @else {
+			<div class="flex flex-col items-center justify-start gap-6 w-full">
 				<div
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 				>
@@ -89,47 +124,25 @@
 						class="flex flex-col items-center justify-center gap-4"
 					>
 						<span class="text-6xl"
-							><mat-icon inline
-								>sentiment_dissatisfied</mat-icon
-							></span
+							><mat-icon inline>file_copy_off</mat-icon></span
 						>
 						<h1 class="text-2xl">
-							We couldn't find anything based on your search
+							It looks like you haven't published anything yet
 						</h1>
-						<p class="max-w-[50%] text-center">
-							Try removing some filters or searching for something
-							else
+						<p class="max-w-[65%] text-center">
+							Create a chart, tourpass or theme and showcase them
+							to the community when you’re ready!
 						</p>
 					</div>
-					<button
-						class="!flex-row-reverse"
-						mat-stroked-button
-						(click)="clearFilters()"
-						(keypress)="clearFilters()"
-					>
-						<p>Clear filters</p>
-						<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
-					</button>
 				</div>
-			} @else {
-				<ul
-					class="flex flex-col items-start justify-start w-full"
-					[style.opacity]="isRefreshing ? '0.5' : '1'"
-					[style.pointerEvents]="isRefreshing ? 'none' : 'auto'"
-				>
-					<app-list-section class="w-full" title="June 2024">
-						@for (chart of charts; track $index) {
-							<app-chart-preview
-								[routerLink]="['/chart', chart.id]"
-								[chart]="chart"
-							></app-chart-preview>
-							<!-- [ranking]="chart.ranking"
-								[tendency]="chart.tendency" -->
-						}
-					</app-list-section>
-				</ul>
-			}
-		</div>
+				<app-large-panel
+					class="w-full"
+					title="Don’t know where to start?"
+					message="Meet the community on Discord and stay up to date with everything you need to know to have fun creating your own content!"
+					[button]="{ label: 'Discord', link: '/' }"
+				></app-large-panel>
+			</div>
+		}
 	} @else if (charts === null) {
 		<!-- Error state -->
 		<div
@@ -168,13 +181,5 @@
 				</div>
 			</div>
 		</div>
-	} @else {
-		<!-- First loading state -->
-		<div class="flex w-screen h-screen items-start justify-center">
-			<mat-progress-spinner
-				diameter="48"
-				mode="indeterminate"
-			></mat-progress-spinner>
-		</div>
-	}
+	} @else {}
 </main>

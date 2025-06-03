@@ -15,7 +15,7 @@ const MUSICBRAINZ_API_URL = "https://musicbrainz.org/ws/2/recording";
 
 // Models
 import { z } from "zod";
-import { Chart } from "@/models/chart.model";
+import { Chart, CreateChart } from "@/models/chart.model";
 import { Genre } from "@/models/enums/genre.enum";
 import { StreamingLinkModel } from "@/models/streaming-link.model";
 
@@ -25,8 +25,9 @@ import { normalizeGenre } from "./genres";
 // Services & Injections
 import { CookieService } from "@/services/cookie.service";
 import { importKey, encrypt, decrypt } from "@/lib/security";
+import { StreamingPlatform } from "@/models/enums/streaming-platform.model";
 
-const MediaInfo = Chart.pick({
+const MediaInfo = CreateChart.pick({
 	coverUrl: true,
 	album: true,
 	track: true,
@@ -96,7 +97,7 @@ export async function getMediaInfo(
 				genre: foundGenre,
 				trackUrls: [
 					{
-						platform: "Apple Music",
+						platform: StreamingPlatform.APPLE_MUSIC,
 						url: iTunesData.trackViewUrl,
 					},
 				],
@@ -129,7 +130,7 @@ export async function getMediaInfo(
 				genre: foundGenre,
 				trackUrls: [
 					{
-						platform: "Spotify",
+						platform: StreamingPlatform.SPOTIFY,
 						url: spotifyTrack.external_urls.spotify,
 					},
 				],
@@ -170,7 +171,7 @@ export async function getMediaInfo(
 				genre: foundGenre,
 				trackUrls: [
 					{
-						platform: "Last.fm",
+						platform: StreamingPlatform.LAST_FM,
 						url: lastFmData.track.url,
 					},
 				],
@@ -205,7 +206,7 @@ export async function getMediaInfo(
 				genre: foundGenre,
 				trackUrls: [
 					{
-						platform: "Apple Music",
+						platform: StreamingPlatform.APPLE_MUSIC,
 						url: iTunesData.trackViewUrl,
 					},
 				],
@@ -219,7 +220,7 @@ export async function getMediaInfo(
 	// If all attempts failed, throw an error with all the collected error messages
 	throw new Error(
 		`Unable to find information for \"${track}\" by \"${artist}\". ` +
-			`We tried several APIs but all failed. Details: ${errors.map((e) => e.message).join('; ')}`,
+			`We tried several APIs but all failed. Details: ${errors.map((e) => e.message).join("; ")}`,
 	);
 }
 
@@ -232,16 +233,28 @@ export async function getTrackStreamingLinks(
 		url: url,
 	}).toString();
 
+	let links: StreamingLinkModel[] = [];
+
 	// First, try to search for the links with Odesli
 	const odesliData = await fetchOdesliApi(query);
 	console.log("Odesli data", odesliData);
 
 	if (odesliData) {
-		let links: StreamingLinkModel[] = [];
-
 		for (const [key, value] of Object.entries(odesliData.linksByPlatform)) {
+			const platform = getPlatformFromLink(
+				key.normalize("NFC").toLowerCase(),
+			);
+
+			if (
+				!platform ||
+				!value.url ||
+				links.some((link) => link.platform === platform)
+			) {
+				continue; // Skip if platform is unknown or URL is missing
+			}
+
 			links.push({
-				platform: key,
+				platform: platform,
 				url: value.url,
 			});
 		}
@@ -268,36 +281,47 @@ export async function getTrackStreamingLinks(
 			for (const relation of relations) {
 				if (relation.type === "free streaming") {
 					const url = relation.url.resource;
-					return [
-						{
-							platform: getPlatformFromLink(url),
-							url: url,
-						},
-					];
+					const platform = getPlatformFromLink(url);
+
+					if (
+						!platform ||
+						links.some((link) => link.platform === platform)
+					) {
+						continue; // Skip if platform is unknown
+					}
+
+					links.push({
+						platform: platform,
+						url: url,
+					});
 				}
 			}
+
+			return links;
 		}
 	}
 
 	throw new Error("No streaming links found for track");
 }
 
-function getPlatformFromLink(link: string): string {
+function getPlatformFromLink(link: string): StreamingPlatform | null {
 	switch (true) {
 		case link.includes("spotify"):
-			return "Spotify";
-		case link.includes("youtube"):
-			return "YouTube";
+			return StreamingPlatform.SPOTIFY;
+		case link.includes("youtu"):
+			return StreamingPlatform.YOUTUBE_MUSIC;
 		case link.includes("soundcloud"):
-			return "SoundCloud";
+			return StreamingPlatform.SOUNDCLOUD;
 		case link.includes("deezer"):
-			return "Deezer";
+			return StreamingPlatform.DEEZER;
 		case link.includes("apple"):
-			return "Apple Music";
+			return StreamingPlatform.APPLE_MUSIC;
 		case link.includes("amazon"):
-			return "Amazon Music";
+			return StreamingPlatform.AMAZON_MUSIC;
+		case link.includes("last"):
+			return StreamingPlatform.LAST_FM;
 		default:
-			return "Unknown";
+			return null;
 	}
 }
 

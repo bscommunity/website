@@ -241,7 +241,6 @@ export class UploadDialogService {
 					"Failed to retrieve track streaming links:",
 					error,
 				);
-				// Continue with user provided streaming links if retrieval fails
 			}
 
 			// Handle chart data submission (basic and first version creation)
@@ -260,7 +259,7 @@ export class UploadDialogService {
 
 			if (!response) {
 				throw new Error(
-					"Sem resposta do servidor ao tentar criar o chart.",
+					"No response received from the server. Please try again later.",
 				);
 			}
 

@@ -21,6 +21,8 @@ import { VersionsComponent } from "./sections/versions/versions.component";
 import { ChartTitleStrategy } from "./chart-title.strategy";
 import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 import { CommonModule } from "@angular/common";
+import { PageErrorComponent } from "../error/error.component";
+import { VersionModel } from "@/models/version.model";
 
 @Component({
 	selector: "app-chart",
@@ -37,6 +39,8 @@ import { CommonModule } from "@angular/common";
 		ContributorsComponent,
 		DangerZoneComponent,
 		VersionsComponent,
+		PageErrorComponent,
+		PageErrorComponent,
 	],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
 	templateUrl: "./chart.component.html",
@@ -47,7 +51,17 @@ export class ChartComponent implements OnInit {
 		private router: Router,
 	) {}
 
-	chart: ChartModel | null = null;
+	set chart(value: ChartModel) {
+		this._chart = {
+			...value,
+			latestVersion: value.versions?.[0] || undefined,
+		};
+	}
+	get chart(): ChartModel {
+		return this._chart;
+	}
+	private _chart!: ChartModel;
+
 	difficultyIcon: string | null = null;
 
 	ngOnInit(): void {

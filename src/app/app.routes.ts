@@ -1,5 +1,7 @@
 import type { Routes } from "@angular/router";
 
+import { LandingComponent } from "./routes/landing.component";
+
 // Routes
 import { PublishedComponent } from "./routes/published/published.component";
 import { OverviewComponent } from "./routes/overview/overview.component";
@@ -82,6 +84,11 @@ export const routes: Routes = [
 		component: PageErrorComponent,
 		title: "Error",
 	},
-	{ path: "", redirectTo: "/published", pathMatch: "full" }, // Redirect to published
+	{
+		path: "",
+		component: LandingComponent,
+		title: "bscm",
+	},
+	// { path: "", redirectTo: "/published", pathMatch: "full" }, // Redirect to published
 	{ path: "**", title: "Oops. 404", component: PageNotFoundComponent }, // Should be the last
 ];

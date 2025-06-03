@@ -34,12 +34,12 @@
 		<app-aside-container
 			class="w-full"
 			icon="timer"
-			[info]="transformDuration(chart.latestVersion.duration || 0)"
+			[info]="transformDuration(chart.latestVersion?.duration || 0)"
 		></app-aside-container>
 		<app-aside-container
 			class="w-full"
 			icon="music_note"
-			[info]="chart.latestVersion.notesAmount + ' notes'"
+			[info]="chart.latestVersion?.notesAmount + ' notes'"
 		></app-aside-container>
 	</app-aside-section>
 	<app-aside-section title="Files" class="w-full">

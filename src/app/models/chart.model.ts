@@ -11,8 +11,7 @@ export const Chart = z.object({
 	album: z.string().optional().nullable(),
 	genre: z.string().optional().nullable(),
 	coverUrl: z.string(),
-	trackUrls: z.array(StreamingLink).optional(),
-	trackPreviewUrl: z.string().optional(),
+	trackPreviewUrl: z.string().optional().nullable(),
 	difficulty: z.nativeEnum(Difficulty),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
@@ -20,7 +19,7 @@ export const Chart = z.object({
 	isPublic: z.boolean().default(true),
 
 	// Relations
-	latestVersion: Version,
+	latestVersion: Version.optional(),
 	versions: Version.array().optional(),
 	contributors: z.array(Contributor).optional(),
 });
@@ -33,18 +32,22 @@ export const CreateChart = Chart.omit({
 	isPublic: true,
 	versions: true,
 	contributors: true,
-	latestVersion: true,
-}).merge(
-	// First version properties
-	Version.pick({
-		chartUrl: true,
-		chartPreviewUrls: true,
-		duration: true,
-		notesAmount: true,
-		effectsAmount: true,
-		bpm: true,
-	}),
-);
+})
+	.merge(
+		// First version properties
+		Version.pick({
+			chartUrl: true,
+			chartPreviewUrls: true,
+			duration: true,
+			notesAmount: true,
+			effectsAmount: true,
+			bpm: true,
+		}),
+	)
+	.extend({
+		trackUrls: z.array(StreamingLink).optional(),
+	});
+
 export type CreateChartModel = z.infer<typeof CreateChart>;
 
 const chartSchema = Chart.omit({
