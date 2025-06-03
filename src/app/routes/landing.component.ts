@@ -1,19 +1,33 @@
 import { Component } from "@angular/core";
+import { RouterLink } from "@angular/router";
+
+// Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 @Component({
 	selector: "app-terms-of-service",
-	imports: [MatButtonModule, MatTooltipModule],
+	imports: [MatButtonModule, MatTooltipModule, RouterLink],
 	template: `
 		<div
 			class="w-full min-h-screen flex flex-col items-center justify-center gap-4"
 		>
 			<h1 class="text-6xl font-bold tracking-wide">bscm</h1>
 			<h2 class="text-2xl">We don't have a landing page yet 😃</h2>
-			<div matTooltip="Coming soon!">
-				<button mat-flat-button class="mt-4" disabled="">
-					Access dashboard
+			<div
+				class="flex flex-row items-center justify-center gap-4 flex-wrap"
+			>
+				<div matTooltip="Coming soon!">
+					<button mat-flat-button class="mt-4" disabled>
+						Access dashboard
+					</button>
+				</div>
+				<button
+					mat-flat-button
+					class="mt-4"
+					routerLink="/release-notes"
+				>
+					Check release notes
 				</button>
 			</div>
 		</div>

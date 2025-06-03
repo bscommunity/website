@@ -70,9 +70,9 @@ export async function getMediaInfo(
 	// Clean track and artist names for better search results
 	const cleanedTrack = cleanTrackName(track);
 	const cleanedArtist = cleanArtistName(artist);
-	let mediaInfo: MediaInfoModel | null = null;
+
 	let errors: Error[] = [];
-	let foundGenre: Genre | null = null;
+	let foundGenre: Genre | undefined = undefined;
 
 	// Try iTunes first
 	try {

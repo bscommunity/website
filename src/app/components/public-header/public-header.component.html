@@ -1,8 +1,9 @@
 <nav
-	class="flex flex-col md:flex-row items-start md:items-center justify-center w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9 px-wrapper"
+	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9 px-wrapper"
 >
-	<div class="flex flex-row items-center justify-between w-full">
-		<div
+	<div class="flex flex-row items-center justify-start">
+		<a
+			[routerLink]="['/']"
 			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
 		>
 			<mat-icon
@@ -17,10 +18,10 @@
 				aria-hidden="false"
 				aria-label="Site label"
 			></mat-icon>
-		</div>
+		</a>
 	</div>
 
-	<a mat-stroked-button class="!min-w-fit">
+	<a mat-stroked-button class="!min-w-fit max-xs:!w-full">
 		<div class="flex flex-row items-center justify-center gap-2">
 			<span
 				class="flex self-center text-inherit leading-none select-none"

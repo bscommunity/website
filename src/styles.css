@@ -18,6 +18,9 @@
 	/* Spacing */
 	--spacing-wrapper: var(--wrapper);
 
+	/* Breakpoint */
+	--breakpoint-xs: 30rem;
+
 	/* Color */
 	--color-primary: var(--mat-sys-primary);
 	--color-on-primary: var(--mat-sys-on-primary);
@@ -70,8 +73,11 @@ body {
 }
 
 .hide-scrollbar {
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+
+	/* Firefox */
 	&::-webkit-scrollbar {
 		display: none;
 	}
@@ -94,6 +100,7 @@ body {
 }
 
 @layer base {
+
 	button:not(:disabled),
 	[role="button"]:not(:disabled) {
 		cursor: pointer;

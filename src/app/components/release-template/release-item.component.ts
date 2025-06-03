@@ -1,6 +1,7 @@
-import { Component, Input } from "@angular/core";
+import { Component, input, Input } from "@angular/core";
+
+// Components
 import { MatIcon } from "@angular/material/icon";
-import { ReleaseNote } from "./release-template.component";
 
 @Component({
 	selector: "app-release-template-item",
@@ -16,40 +17,31 @@ import { ReleaseNote } from "./release-template.component";
 					class="flex self-center text-inherit leading-none select-none text-lg"
 				>
 					<mat-icon inline>
-						{{
-							features !== null
-								? "local_fire_department"
-								: "bug_report"
-						}}
+						{{ icon() }}
 					</mat-icon>
 				</span>
 				<div
 					class="relative justify-center text-base font-medium leading-snug"
 				>
-					{{ features !== null ? "Features" : "Fixes" }}
+					{{ title() }}
 				</div>
 			</div>
 			<ul
 				class="flex flex-col justify-start items-start gap-3 md:gap-1 overflow-hidden list-disc list-inside text-on-background text-base font-normal leading-snug"
 			>
-				@if (features !== null) {
-					@for (item of features; track $index) {
-						<li class="flex-1 relative justify-center">
-							{{ item }}
-						</li>
-					}
-				} @else {
-					@for (item of fixes; track $index) {
-						<li class="flex-1 relative justify-center">
-							{{ item.description }}
-						</li>
-					}
+				@for (item of content(); track $index) {
+					<li
+						class="flex-1 relative justify-center first-letter:capitalize"
+					>
+						{{ item }}
+					</li>
 				}
 			</ul>
 		</div>
 	`,
 })
 export class ReleaseTemplateItemComponent {
-	@Input() features: ReleaseNote["features"] | null = null;
-	@Input() fixes: ReleaseNote["fixes"] | null = null;
+	title = input<string>();
+	icon = input<string>();
+	content = input<string[]>();
 }

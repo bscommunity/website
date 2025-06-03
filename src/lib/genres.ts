@@ -1,7 +1,7 @@
 import { Genre } from "@/models/enums/genre.enum";
 
-export function normalizeGenre(genre: string | null): Genre | null {
-	if (!genre) return null;
+export function normalizeGenre(genre: string | undefined): Genre | undefined {
+	if (!genre) return undefined;
 
 	const normalizedInput = genre.toLowerCase();
 
