@@ -4,8 +4,8 @@ import {
   ElementRef,
   inject,
   signal,
-  ViewChild,
-  output
+  output,
+  viewChild
 } from "@angular/core";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -26,7 +26,7 @@ export class FileUploadComponent {
 
 
 	// Get section HTML component reference
-	@ViewChild("container") container!: ElementRef;
+	readonly container = viewChild.required<ElementRef>("container");
 	readonly onFileDecoded = output<ChartFileData | null>();
 
 	private _snackBar = inject(MatSnackBar);
@@ -50,13 +50,13 @@ export class FileUploadComponent {
 	onDragOver(event: DragEvent): void {
 		event.preventDefault();
 		// Optionally add visual feedback
-		this.container.nativeElement.classList.add("drag-over");
+		this.container().nativeElement.classList.add("drag-over");
 	}
 
 	onDragLeave(event: DragEvent): void {
 		event.preventDefault();
 		// Remove visual feedback
-		this.container.nativeElement.classList.remove("drag-over");
+		this.container().nativeElement.classList.remove("drag-over");
 	}
 
 	onDrop(event: DragEvent): void {
@@ -66,7 +66,7 @@ export class FileUploadComponent {
 		}
 
 		// Remove visual feedback
-		this.container.nativeElement.classList.remove("drag-over");
+		this.container().nativeElement.classList.remove("drag-over");
 	}
 
 	processFiles(files: FileList): void {

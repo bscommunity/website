@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, AfterViewInit, PLATFORM_ID, OnDestroy, input, model, inject, output } from "@angular/core";
+import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, AfterViewInit, PLATFORM_ID, OnDestroy, input, model, inject, output, viewChild } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
@@ -24,7 +24,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 	private elementRef = inject(ElementRef);
 	private cdr = inject(ChangeDetectorRef);
 
-	@ViewChild("dropdown") dropdown!: ElementRef;
+	readonly dropdown = viewChild.required<ElementRef>("dropdown");
 
 	readonly class = input("");
 	readonly disabled = input(false);
@@ -44,7 +44,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 
 		const triggerRect =
 			this.elementRef.nativeElement.getBoundingClientRect();
-		const dropdown = this.dropdown.nativeElement;
+		const dropdown = this.dropdown().nativeElement;
 		const dropdownHeight = dropdown.offsetHeight;
 		const viewportHeight = window.innerHeight;
 

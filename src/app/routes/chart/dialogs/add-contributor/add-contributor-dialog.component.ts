@@ -1,12 +1,12 @@
 import {
-	ChangeDetectionStrategy,
-	ChangeDetectorRef,
-	Component,
-	computed,
-	inject,
-	signal,
-	ViewChild,
-	WritableSignal,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  signal,
+  WritableSignal,
+  viewChild
 } from "@angular/core";
 
 // Material
@@ -102,7 +102,7 @@ export class AddContributorDialogComponent {
 	}
 
 	// Contributors Search
-	@ViewChild("searchbar") searchbar!: SearchbarComponent;
+	readonly searchbar = viewChild.required<SearchbarComponent>("searchbar");
 	queryContributors: SimplifiedUserModel[] | undefined | null | "start" =
 		"start";
 
@@ -167,7 +167,7 @@ export class AddContributorDialogComponent {
 		}
 
 		// Reset
-		this.searchbar.clearSearch();
+		this.searchbar().clearSearch();
 		event.option.deselect();
 	}
 

@@ -1,9 +1,9 @@
 import {
-	ChangeDetectionStrategy,
-	Component,
-	ElementRef,
-	ViewChild,
-	input,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  input,
+  viewChild
 } from "@angular/core";
 
 import { Subject, Subscription } from "rxjs";
@@ -29,7 +29,7 @@ interface AutoCompleteExceptions {
 export class SearchbarComponent {
 	readonly autoComplete = input<MatAutocomplete | null>(null);
 
-	@ViewChild("input") input!: ElementRef<HTMLInputElement>;
+	readonly input = viewChild.required<ElementRef<HTMLInputElement>>("input");
 	readonly onSearch = input<(value: string) => void>(() => {});
 	readonly debounceDuration = input<number>(300);
 	readonly placeholder = input<string>("Search");
@@ -51,7 +51,7 @@ export class SearchbarComponent {
 	}
 
 	clearSearch() {
-		this.input.nativeElement.value = "";
+		this.input().nativeElement.value = "";
 	}
 
 	ngOnDestroy() {

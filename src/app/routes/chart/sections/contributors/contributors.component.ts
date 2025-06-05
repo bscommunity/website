@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, input } from "@angular/core";
+import { Component, inject, input, viewChild } from "@angular/core";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
@@ -52,8 +52,7 @@ export class ContributorsComponent {
 		this._snackBar.open(message, action);
 	}
 
-	@ViewChild("contributorTable")
-	contributorTable!: TableComponent<ContributorModel>;
+	readonly contributorTable = viewChild.required<TableComponent<ContributorModel>>("contributorTable");
 
 	openAddContributorConfirmationDialog(): void {
 		const contributors = this.contributors();
@@ -157,7 +156,7 @@ export class ContributorsComponent {
 	];
 
 	removeContributorFromTable(contributor: ContributorModel) {
-		this.contributorTable.removeData(contributor);
+		this.contributorTable().removeData(contributor);
 		this.openSnackBar("Contributor removed with success!", "Close");
 	}
 }
