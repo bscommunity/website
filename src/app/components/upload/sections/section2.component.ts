@@ -1,10 +1,4 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	Inject,
-	Input,
-	OnInit,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from "@angular/core";
 
 import {
 	FormBuilder,
@@ -134,6 +128,10 @@ import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSection2Component implements OnInit {
+	private fb = inject(FormBuilder);
+	dialogRef = inject<MatDialogRef<UploadDialogSection2Component>>(MatDialogRef);
+	data = inject<DialogData>(MAT_DIALOG_DATA);
+
 	title = "Chart details";
 	description =
 		"Fill in the details for your chart submission. Make sure all the required fields are filled before proceeding";
@@ -144,12 +142,9 @@ export class UploadDialogSection2Component implements OnInit {
 		value: getDifficultyLabel(difficulty),
 	}));
 
-	constructor(
-		private fb: FormBuilder,
-		public dialogRef: MatDialogRef<UploadDialogSection2Component>,
-		@Inject(MAT_DIALOG_DATA)
-		public data: DialogData,
-	) {
+	constructor() {
+		const data = this.data;
+
 		this.title = data.title || this.title;
 		this.description = data.description || this.description;
 

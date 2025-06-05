@@ -39,10 +39,10 @@ import { UploadDialogService } from "@/services/upload.service";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit {
+	private authService = inject(AuthService);
+
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(UploadDialogService);
-
-	constructor(private authService: AuthService) {}
 
 	user: UserModel | null = null;
 

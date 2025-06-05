@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import {
 	MAT_DIALOG_DATA,
@@ -51,11 +51,10 @@ import { Router } from "@angular/router";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogErrorComponent {
-	constructor(
-		private router: Router,
-		public dialogRef: MatDialogRef<UploadDialogErrorComponent>,
-		@Inject(MAT_DIALOG_DATA) public data: UploadErrorData,
-	) {}
+	private router = inject(Router);
+	dialogRef = inject<MatDialogRef<UploadDialogErrorComponent>>(MatDialogRef);
+	data = inject<UploadErrorData>(MAT_DIALOG_DATA);
+
 
 	onClose() {
 		if (this.data.redirectTo) {

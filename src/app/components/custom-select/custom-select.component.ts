@@ -1,19 +1,4 @@
-import {
-	Component,
-	HostListener,
-	ElementRef,
-	ChangeDetectorRef,
-	Renderer2,
-	ViewChild,
-	AfterViewInit,
-	Output,
-	EventEmitter,
-	Inject,
-	PLATFORM_ID,
-	OnDestroy,
-	input,
-	model,
-} from "@angular/core";
+import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, AfterViewInit, Output, EventEmitter, PLATFORM_ID, OnDestroy, input, model, inject } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
@@ -34,14 +19,12 @@ export interface Option {
 	templateUrl: "./custom-select.component.html",
 })
 export class CustomSelectComponent implements AfterViewInit, OnDestroy {
-	@ViewChild("dropdown") dropdown!: ElementRef;
+	private platformId = inject(PLATFORM_ID);
+	private renderer = inject(Renderer2);
+	private elementRef = inject(ElementRef);
+	private cdr = inject(ChangeDetectorRef);
 
-	constructor(
-		@Inject(PLATFORM_ID) private platformId: object,
-		private renderer: Renderer2,
-		private elementRef: ElementRef,
-		private cdr: ChangeDetectorRef,
-	) {}
+	@ViewChild("dropdown") dropdown!: ElementRef;
 
 	readonly class = input("");
 	readonly disabled = input(false);

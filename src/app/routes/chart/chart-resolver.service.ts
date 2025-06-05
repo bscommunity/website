@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import {
 	Resolve,
 	Router,
@@ -14,11 +14,10 @@ import { ZodError } from "zod";
 	providedIn: "root",
 })
 export class ChartResolver implements Resolve<any> {
-	constructor(
-		private chartService: ChartService,
-		private router: Router,
-		private authService: AuthService,
-	) {}
+	private chartService = inject(ChartService);
+	private router = inject(Router);
+	private authService = inject(AuthService);
+
 
 	async resolve(
 		route: ActivatedRouteSnapshot,

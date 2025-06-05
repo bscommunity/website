@@ -23,7 +23,8 @@ import { UploadDialogErrorComponent } from "../upload/generic/error.component";
 	styleUrl: "./file-upload.component.scss",
 })
 export class FileUploadComponent {
-	constructor(private decodeService: DecodeService) {}
+	private decodeService = inject(DecodeService);
+
 
 	// Get section HTML component reference
 	@ViewChild("container") container!: ElementRef;

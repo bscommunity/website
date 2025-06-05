@@ -57,6 +57,10 @@ export interface DialogData {
 	],
 })
 export class EditContributorDialogComponent {
+	private contributorService = inject(ContributorService);
+	private router = inject(Router);
+	private cdr = inject(ChangeDetectorRef);
+
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
@@ -73,12 +77,6 @@ export class EditContributorDialogComponent {
 			elementToKey,
 		),
 	);
-
-	constructor(
-		private contributorService: ContributorService,
-		private router: Router,
-		private cdr: ChangeDetectorRef,
-	) {}
 
 	async onSubmit(): Promise<void> {
 		this.dialogRef.disableClose = true;

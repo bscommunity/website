@@ -41,6 +41,9 @@ interface DeleteChartDialogData {
 	templateUrl: "./delete-chart.component.html",
 })
 export class DeleteChartComponent {
+	private chartService = inject(ChartService);
+	private router = inject(Router);
+
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<DeleteChartComponent>);
 
@@ -52,11 +55,6 @@ export class DeleteChartComponent {
 	});
 
 	readonly isLoading = signal(false);
-
-	constructor(
-		private chartService: ChartService,
-		private router: Router,
-	) {}
 
 	async onSubmit() {
 		console.log("Delete chart form submitted");

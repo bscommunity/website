@@ -1,9 +1,4 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	Inject,
-	OnInit,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, OnInit, inject } from "@angular/core";
 
 import {
 	AbstractControl,
@@ -165,13 +160,13 @@ import { ChartFileData } from "@/services/decode.service";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSection3Component implements OnInit {
+	private fb = inject(FormBuilder);
+	dialogRef = inject<MatDialogRef<UploadDialogSection3Component>>(MatDialogRef);
+	data = inject<DialogData>(MAT_DIALOG_DATA);
+
 	form: FormGroup;
 
-	constructor(
-		private fb: FormBuilder,
-		public dialogRef: MatDialogRef<UploadDialogSection3Component>,
-		@Inject(MAT_DIALOG_DATA) public data: DialogData,
-	) {
+	constructor() {
 		this.form = this.fb.group({
 			chartUrl: [
 				initialFormData.chartUrl,

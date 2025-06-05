@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import {
 	FormBuilder,
@@ -62,15 +62,15 @@ import { initialFormData, type DialogData } from "@/services/upload.service";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSection1Component {
+	private fb = inject(FormBuilder);
+	dialogRef = inject<MatDialogRef<UploadDialogSection1Component>>(MatDialogRef);
+	data = inject<DialogData>(MAT_DIALOG_DATA);
+
 	form: FormGroup;
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
 	contentEnabledTypes: string[] = ["Chart"];
 
-	constructor(
-		private fb: FormBuilder,
-		public dialogRef: MatDialogRef<UploadDialogSection1Component>,
-		@Inject(MAT_DIALOG_DATA) public data: DialogData,
-	) {
+	constructor() {
 		this.form = this.fb.group({
 			contentType: [initialFormData.contentType],
 		});

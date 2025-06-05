@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import { MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
@@ -39,8 +39,6 @@ import { MatButtonModule } from "@angular/material/button";
 	imports: [MatDialogModule, MatButtonModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogDisclaimerComponent {
-	constructor(
-		public dialogRef: MatDialogRef<UploadDialogDisclaimerComponent>,
-	) {}
+export class UploadDialogDisclaimerComponent {	dialogRef = inject<MatDialogRef<UploadDialogDisclaimerComponent>>(MatDialogRef);
+
 }

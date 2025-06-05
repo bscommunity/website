@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
@@ -10,10 +10,9 @@ import { CookieService } from "../cookie.service";
 	providedIn: "root",
 })
 export class UserService {
-	constructor(
-		private cookieService: CookieService,
-		private http: HttpClient,
-	) {}
+	private cookieService = inject(CookieService);
+	private http = inject(HttpClient);
+
 
 	private readonly apiUrl = `${apiUrl}/users`;
 

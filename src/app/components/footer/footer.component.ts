@@ -25,12 +25,10 @@ import { RouterLink } from "@angular/router";
 	styleUrl: "./footer.component.scss",
 })
 export class FooterComponent implements OnInit {
-	private document = inject(DOCUMENT);
+	private storageService = inject(StorageService);
+	private themeService = inject(ThemeService);
 
-	constructor(
-		private storageService: StorageService,
-		private themeService: ThemeService,
-	) {}
+	private document = inject(DOCUMENT);
 
 	themeOptions: Option[] = [
 		{ label: "Auto", value: "auto", icon: "tonality" },

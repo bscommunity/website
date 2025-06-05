@@ -18,13 +18,11 @@ import { AuthService } from "app/auth/auth.service";
 	templateUrl: "./callback.component.html",
 })
 export class OAuthCallbackComponent implements OnInit {
-	private platformId = inject(PLATFORM_ID);
+	private router = inject(Router);
+	private route = inject(ActivatedRoute);
+	private authService = inject(AuthService);
 
-	constructor(
-		private router: Router,
-		private route: ActivatedRoute,
-		private authService: AuthService,
-	) {}
+	private platformId = inject(PLATFORM_ID);
 
 	readonly dialog = inject(MatDialog);
 
