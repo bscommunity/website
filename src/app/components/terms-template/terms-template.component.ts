@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation } from "@angular/core";
+import { Component, ViewEncapsulation, input } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 // Material
@@ -18,6 +18,6 @@ export interface TermsSection {
 	encapsulation: ViewEncapsulation.None,
 })
 export class TermsTemplateComponent {
-	@Input() baseUrl!: string;
-	@Input() sections!: TermsSection[];
+	readonly baseUrl = input.required<string>();
+	readonly sections = input.required<TermsSection[]>();
 }

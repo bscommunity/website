@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, OnInit, input } from "@angular/core";
 
 // Components
 import { ReleaseTemplateItemComponent } from "./release-item.component";
@@ -29,15 +29,15 @@ export interface ReleaseNoteResponse {
 	templateUrl: "./release-template.component.html",
 })
 export class ReleaseTemplateComponent implements OnInit {
-	@Input() release!: ReleaseNote;
-	@Input() isLast!: boolean;
-	@Input() icon!: string;
+	readonly release = input.required<ReleaseNote>();
+	readonly isLast = input.required<boolean>();
+	readonly icon = input.required<string>();
 
 	releaseDate: string = "";
 
 	ngOnInit(): void {
 		// console.log("Release data:", this.release);
-		this.releaseDate = new Date(this.release.date).toLocaleDateString(
+		this.releaseDate = new Date(this.release().date).toLocaleDateString(
 			"en-US",
 			{
 				year: "numeric",

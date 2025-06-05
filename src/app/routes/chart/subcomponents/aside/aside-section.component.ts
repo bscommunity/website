@@ -1,11 +1,11 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 
 @Component({
 	selector: "app-aside-section",
 	template: `
 		<div class="flex flex-col items-start justify-start gap-4 w-full">
-			@if (title) {
-				<h3 class="text-sm font-medium">{{ title }}</h3>
+			@if (title()) {
+				<h3 class="text-sm font-medium">{{ title() }}</h3>
 			}
 			<ul
 				class="flex flex-col items-start justify-start gap-2 font-medium text-base w-full"
@@ -16,5 +16,5 @@ import { Component, Input } from "@angular/core";
 	`,
 })
 export class AsideSectionComponent {
-	@Input() title: string | null | undefined = null;
+	readonly title = input<string | null | undefined>(null);
 }

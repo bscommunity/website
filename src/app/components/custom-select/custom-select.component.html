@@ -1,11 +1,11 @@
 <button
-	class="relative inline-block w-full {{ class }}"
+	class="relative inline-block w-full {{ class() }}"
 	(click)="toggleDropdown()"
 	(keypress)="toggleDropdown()"
 	role="combobox"
 	aria-controls="options-list"
 	[attr.aria-expanded]="dropdownOpen"
-	[disabled]="disabled"
+	[disabled]="disabled()"
 >
 	<!-- Trigger -->
 	<div
@@ -15,10 +15,12 @@
 		class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 cursor-pointer h-full"
 	>
 		<!-- Trigger Content -->
-		<ng-container *ngIf="selectedOption; else placeholder">
+		<ng-container *ngIf="selectedOption(); else placeholder">
 			<div class="flex items-center space-x-2">
-				<mat-icon inline>{{ selectedOption.icon }}</mat-icon>
-				<span>{{ selectedOption.label }}</span>
+				@if (selectedOption()?.icon) {
+					<mat-icon inline>{{ selectedOption()?.icon }}</mat-icon>
+				}
+				<span>{{ selectedOption()?.label }}</span>
 			</div>
 		</ng-container>
 		<ng-template #placeholder>
@@ -45,7 +47,7 @@
 		}
 		<li
 			matRipple
-			*ngFor="let option of options; let i = index"
+			*ngFor="let option of options(); let i = index"
 			(click)="selectOption(option)"
 			(keypress)="selectOption(option)"
 			role="option"

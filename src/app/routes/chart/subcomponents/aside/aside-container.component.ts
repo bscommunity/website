@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 
 import { MatIconModule } from "@angular/material/icon";
 
@@ -8,22 +8,22 @@ import { MatIconModule } from "@angular/material/icon";
 	template: `
 		<li
 			class="flex flex-row items-center justify-center gap-3 bg-surface-container border border-surface-container-high rounded px-5 py-2 w-full {{
-				asideContainerClass
+				asideContainerClass()
 			}}"
 		>
-			@if (icon) {
+			@if (icon()) {
 				<span
 					><mat-icon class="leading-none align-middle" inline>{{
-						icon
+						icon()
 					}}</mat-icon></span
 				>
 			}
-			<span>{{ info }}</span>
+			<span>{{ info() }}</span>
 		</li>
 	`,
 })
 export class AsideContainerComponent {
-	@Input() icon: string | undefined;
-	@Input() info = "[placeholder]";
-	@Input() asideContainerClass = "";
+	readonly icon = input<string>();
+	readonly info = input("[placeholder]");
+	readonly asideContainerClass = input("");
 }

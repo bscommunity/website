@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from "@angular/core";
+import { Component, Input, OnInit, signal, input } from "@angular/core";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSliderModule } from "@angular/material/slider";
@@ -43,8 +43,8 @@ const versions: ExpansionPanelData[] = [
 	templateUrl: "./filter-panel.component.html",
 })
 export class FilterPanelComponent {
-	@Input() startDate: string | null = null;
-	@Input() endDate: string | null = null;
+	readonly startDate = input<string | null>(null);
+	readonly endDate = input<string | null>(null);
 
 	private _difficulties: Difficulty[] = [];
 	private _genres: (Genre | undefined)[] = [];

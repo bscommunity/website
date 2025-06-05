@@ -1,5 +1,5 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, Input } from "@angular/core";
+import { Component, Input, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 // Material
@@ -41,7 +41,7 @@ export class ChartPreviewComponent {
 
 	transformDuration = transformDuration;
 
-	@Input() routerLink: string | any[] | UrlTree | null | undefined = null;
+	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(null);
 
 	/* tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;

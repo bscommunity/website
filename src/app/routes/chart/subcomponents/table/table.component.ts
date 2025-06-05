@@ -2,12 +2,13 @@ import {
 	AfterViewInit,
 	Component,
 	EventEmitter,
-	Input,
 	OnInit,
 	Output,
 	Pipe,
 	PipeTransform,
 	ViewChild,
+	input,
+	model,
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
@@ -65,14 +66,14 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 		return this.sanitizer.bypassSecurityTrustHtml(content);
 	}
 
-	@Input() data: T[] = [];
-	@Input() columns: TableColumn<T>[] = [];
-	@Input() actions: Action<T>[] | undefined;
+	readonly data = model<T[]>([]);
+	readonly columns = input<TableColumn<T>[]>([]);
+	readonly actions = input<Action<T>[]>();
 
 	@ViewChild(MatSort) sort!: MatSort;
-	@Input() hasSorting = "";
-	@Input() initialSortColumn = "";
-	@Input() sortDirection: SortDirection = "asc";
+	readonly hasSorting = input("");
+	readonly initialSortColumn = input("");
+	readonly sortDirection = input<SortDirection>("asc");
 
 	@Output() sortChanged = new EventEmitter<Sort>();
 
@@ -80,12 +81,13 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	dataSource!: MatTableDataSource<T>;
 
 	ngOnInit() {
-		this.displayedColumns = this.columns.map((c) => c.columnDef);
-		if (this.actions && this.actions.length > 0) {
+		this.displayedColumns = this.columns().map((c) => c.columnDef);
+		const actions = this.actions();
+		if (actions && actions.length > 0) {
 			this.displayedColumns.push("actions");
 		}
 
-		this.dataSource = new MatTableDataSource(this.data);
+		this.dataSource = new MatTableDataSource(this.data());
 	}
 
 	ngAfterViewInit(): void {
@@ -101,35 +103,37 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	}
 
 	addData(newItem: T) {
-		this.data = [...this.data, newItem];
-		this.dataSource.data = this.data;
+		// this.data = [...this.data(), newItem];
+		this.dataSource.data = this.data();
 	}
 
 	removeData(itemToRemove: T) {
-		this.data = this.data.filter((item) => item !== itemToRemove);
-		this.dataSource.data = this.data;
+		this.data.update((items) =>
+			items.filter((item) => item !== itemToRemove),
+		);
+		this.dataSource.data = this.data();
 		// console.log("Removed item", itemToRemove);
 		// console.log("New data", this.dataSource.data);
 	}
 
 	updateItemData(updatedItem: T) {
-		const index = this.data.findIndex((item) => item === updatedItem);
+		const index = this.data().findIndex((item) => item === updatedItem);
 		if (index === -1) {
 			console.error("Item not found", updatedItem);
 			return;
 		}
 
-		this.data = [
-			...this.data.slice(0, index),
-			updatedItem,
-			...this.data.slice(index + 1),
-		];
-		this.dataSource.data = this.data;
+		this.data.update((items) => {
+			const newItems = [...items];
+			newItems[index] = updatedItem;
+			return newItems;
+		});
+		this.dataSource.data = this.data();
 	}
 
 	updateTableData = (callback: (items: T[]) => T[]) => {
-		this.data = callback(this.data);
-		this.dataSource.data = this.data;
+		this.data.update(callback);
+		this.dataSource.data = this.data();
 	};
 
 	sortData(sort: Sort) {

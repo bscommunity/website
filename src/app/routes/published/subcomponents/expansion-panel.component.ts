@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from "@angular/core";
+import { Component, EventEmitter, Output, signal, input } from "@angular/core";
 
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
@@ -27,10 +27,10 @@ export interface ExpansionPanelData {
 			(closed)="panelOpenState.set(false)"
 		>
 			<mat-expansion-panel-header class="!w-full">
-				<mat-panel-title> {{ title }} </mat-panel-title>
+				<mat-panel-title> {{ title() }} </mat-panel-title>
 			</mat-expansion-panel-header>
-			<mat-chip-set [ariaLabel]="title">
-				@for (item of data; track $index) {
+			<mat-chip-set [ariaLabel]="title()">
+				@for (item of data(); track $index) {
 					<mat-chip-option
 						[selected]="item.isSelected"
 						(selectionChange)="selectionChange(item)"
@@ -44,12 +44,12 @@ export interface ExpansionPanelData {
 })
 export class ExpansionPanelComponent {
 	readonly panelOpenState = signal(false);
-	@Input() title = "";
-	@Input() data: ExpansionPanelData[] | null = null;
+	readonly title = input("");
+	readonly data = input<ExpansionPanelData[] | null>(null);
 	@Output() dataChange = new EventEmitter<ExpansionPanelData[] | null>();
 
 	selectionChange(item: ExpansionPanelData): void {
 		item.isSelected = !item.isSelected;
-		this.dataChange.emit(this.data);
+		this.dataChange.emit(this.data());
 	}
 }
