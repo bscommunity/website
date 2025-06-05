@@ -24,15 +24,17 @@ import { filter } from "rxjs";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+	authService = inject(AuthService);
+	private themeService = inject(ThemeService);
+	private router = inject(Router);
+	private renderer = inject(Renderer2);
+
 	showHeader = false;
 	showFooter = false;
 
-	constructor(
-		public authService: AuthService,
-		private themeService: ThemeService,
-		private router: Router,
-		private renderer: Renderer2,
-	) {
+	constructor() {
+		const authService = this.authService;
+
 		// Registering custom icons
 		const iconRegistry = inject(MatIconRegistry);
 		const sanitizer = inject(DomSanitizer);

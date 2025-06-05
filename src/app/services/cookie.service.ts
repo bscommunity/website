@@ -1,27 +1,19 @@
 import { Request } from "express";
-import {
-	Inject,
-	Injectable,
-	REQUEST,
-	Optional,
-	PLATFORM_ID,
-	RESPONSE_INIT,
-} from "@angular/core";
+import { Injectable, REQUEST, PLATFORM_ID, RESPONSE_INIT, inject } from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 
 @Injectable({
 	providedIn: "root",
 })
 export class CookieService {
+	private document = inject<Document>(DOCUMENT);
+	private platformId = inject(PLATFORM_ID);
+	private request = inject<Request>(REQUEST, { optional: true });
+	private response = inject<Response>(RESPONSE_INIT, { optional: true });
+
 	private readonly documentIsAccessible: boolean;
 
-	constructor(
-		@Inject(DOCUMENT) private document: Document,
-		// Get the `PLATFORM_ID` so we can check if we're in a browser.
-		@Inject(PLATFORM_ID) private platformId: any,
-		@Optional() @Inject(REQUEST) private request: Request,
-		@Optional() @Inject(RESPONSE_INIT) private response?: Response,
-	) {
+	constructor() {
 		this.documentIsAccessible = isPlatformBrowser(this.platformId);
 	}
 

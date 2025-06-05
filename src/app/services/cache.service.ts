@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 
 // Services
 import { StorageService } from "./storage.service";
@@ -20,10 +20,9 @@ interface CachedChart extends ChartModel {
 	providedIn: "root",
 })
 export class CacheService {
-	constructor(
-		private storageService: StorageService,
-		private cookieService: CookieService,
-	) {}
+	private storageService = inject(StorageService);
+	private cookieService = inject(CookieService);
+
 
 	public get isOnRefreshCooldown(): boolean {
 		const lastRefresh = this.cookieService.get("lastRefresh");

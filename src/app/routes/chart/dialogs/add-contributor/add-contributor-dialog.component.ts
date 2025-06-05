@@ -67,6 +67,11 @@ export interface DialogData {
 	],
 })
 export class AddContributorDialogComponent {
+	private authService = inject(AuthService);
+	private userService = inject(UserService);
+	private contributorService = inject(ContributorService);
+	private cdr = inject(ChangeDetectorRef);
+
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<AddContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
@@ -85,12 +90,7 @@ export class AddContributorDialogComponent {
 
 	readonly poolUsers: SimplifiedUserModel[] = [];
 
-	constructor(
-		private authService: AuthService,
-		private userService: UserService,
-		private contributorService: ContributorService,
-		private cdr: ChangeDetectorRef,
-	) {
+	constructor() {
 		// We need to manually bind the context of the function to the class,
 		// if not, UserService will not be available in the function
 		this.onSearch = this.onSearch.bind(this);

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -13,10 +13,9 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 	templateUrl: "./login.component.html",
 })
 export class LoginComponent implements OnInit {
-	constructor(
-		private authService: AuthService,
-		private router: Router,
-	) {}
+	private authService = inject(AuthService);
+	private router = inject(Router);
+
 
 	oAuthUrl: string | null = null;
 

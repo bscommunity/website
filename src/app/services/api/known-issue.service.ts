@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
@@ -17,10 +17,9 @@ import { apiUrl } from ".";
 	providedIn: "root",
 })
 export class KnownIssueService {
-	constructor(
-		private cacheService: CacheService,
-		private http: HttpClient,
-	) {}
+	private cacheService = inject(CacheService);
+	private http = inject(HttpClient);
+
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Add

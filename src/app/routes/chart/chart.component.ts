@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 import { CommonModule } from "@angular/common";
 
@@ -47,10 +47,9 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 	templateUrl: "./chart.component.html",
 })
 export class ChartComponent implements OnInit {
-	constructor(
-		private route: ActivatedRoute,
-		private router: Router,
-	) {}
+	private route = inject(ActivatedRoute);
+	private router = inject(Router);
+
 
 	set chart(value: ChartWithLatestVersionModel) {
 		this._chart = {

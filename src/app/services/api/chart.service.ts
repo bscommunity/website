@@ -1,5 +1,5 @@
 import { Router } from "@angular/router";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
@@ -20,11 +20,10 @@ import { apiUrl } from ".";
 	providedIn: "root",
 })
 export class ChartService {
-	constructor(
-		private router: Router,
-		private cacheService: CacheService,
-		private http: HttpClient,
-	) {}
+	private router = inject(Router);
+	private cacheService = inject(CacheService);
+	private http = inject(HttpClient);
+
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Create

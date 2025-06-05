@@ -1,15 +1,4 @@
-import {
-	AfterViewInit,
-	Component,
-	EventEmitter,
-	OnInit,
-	Output,
-	Pipe,
-	PipeTransform,
-	ViewChild,
-	input,
-	model,
-} from "@angular/core";
+import { AfterViewInit, Component, EventEmitter, OnInit, Output, Pipe, PipeTransform, ViewChild, input, model, inject } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
@@ -40,7 +29,8 @@ export interface Action<T> {
 	name: "safeHtml",
 })
 export class SafeHtmlPipe implements PipeTransform {
-	constructor(private sanitizer: DomSanitizer) {}
+	private sanitizer = inject(DomSanitizer);
+
 
 	transform(value: string): SafeHtml {
 		return this.sanitizer.bypassSecurityTrustHtml(value);
@@ -60,7 +50,8 @@ export class SafeHtmlPipe implements PipeTransform {
 	],
 })
 export class TableComponent<T> implements OnInit, AfterViewInit {
-	constructor(private sanitizer: DomSanitizer) {}
+	private sanitizer = inject(DomSanitizer);
+
 
 	sanitizeContent(content: string): SafeHtml {
 		return this.sanitizer.bypassSecurityTrustHtml(content);

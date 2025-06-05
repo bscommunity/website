@@ -1,6 +1,6 @@
 import { Location } from "@angular/common";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -12,12 +12,14 @@ import { MatIconModule } from "@angular/material/icon";
 	templateUrl: "./error.component.html",
 })
 export class PageErrorComponent implements OnInit {
+	private location = inject(Location);
+	private router = inject(Router);
+
 	error = "undefined";
 
-	constructor(
-		private location: Location,
-		private router: Router,
-	) {
+	constructor() {
+		const location = this.location;
+
 		this.error = (
 			location.getState() as {
 				error: string;

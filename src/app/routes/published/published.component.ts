@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, inject } from "@angular/core";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -56,10 +56,9 @@ type ChartsByMonth = {
 	templateUrl: "./published.component.html",
 })
 export class PublishedComponent implements OnInit {
-	constructor(
-		private chartService: ChartService,
-		private cdr: ChangeDetectorRef,
-	) {}
+	private chartService = inject(ChartService);
+	private cdr = inject(ChangeDetectorRef);
+
 
 	convertStringToMonth = convertStringToMonth;
 

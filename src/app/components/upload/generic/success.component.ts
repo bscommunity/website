@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
 
 import {
@@ -70,11 +70,10 @@ import { SuccessDialogData } from "../../../services/upload.service";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UploadDialogSuccessComponent {
-	constructor(
-		public dialogRef: MatDialogRef<UploadDialogSuccessComponent>,
-		@Inject(MAT_DIALOG_DATA) public data: SuccessDialogData,
-		private router: Router,
-	) {}
+	dialogRef = inject<MatDialogRef<UploadDialogSuccessComponent>>(MatDialogRef);
+	data = inject<SuccessDialogData>(MAT_DIALOG_DATA);
+	private router = inject(Router);
+
 
 	onAccessButtonClicked() {
 		this.dialogRef.close();

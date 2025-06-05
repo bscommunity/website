@@ -25,6 +25,10 @@ interface LoginResponse {
 	providedIn: "root",
 })
 export class AuthService {
+	private cookieService = inject(CookieService);
+	private cacheService = inject(CacheService);
+	private http = inject(HttpClient);
+
 	private readonly TOKEN_NAME = "bscm_auth";
 	private readonly USER_OBJECT_NAME = "bscm_user";
 	private readonly TOKEN_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -49,11 +53,7 @@ export class AuthService {
 		return JSON.parse(user);
 	}
 
-	constructor(
-		private cookieService: CookieService,
-		private cacheService: CacheService,
-		private http: HttpClient,
-	) {
+	constructor() {
 		this.initializeAuthState();
 	}
 
