@@ -88,30 +88,30 @@ export class FilterPanelComponent {
 	versions: ExpansionPanelData[] = [];
 
 	private updateDifficulties(value: Difficulty[]) {
-		console.log("Updating difficulties with:", value);
+		// console.log("Updating difficulties with:", value);
 		this.difficulties = value.map((difficulty) => ({
 			name: getDifficultyLabel(difficulty),
 			value: difficulty,
 		}));
-		console.log("Updated difficulties:", this.difficulties);
+		// console.log("Updated difficulties:", this.difficulties);
 	}
 
 	private updateGenres(value: (Genre | undefined)[]) {
-		console.log("Updating genres with:", value);
+		// console.log("Updating genres with:", value);
 		this.genres = value.map((genre) => ({
 			name: getGenreLabel(genre as Genre),
 			value: genre,
 		}));
-		console.log("Updated genres:", this.genres);
+		// console.log("Updated genres:", this.genres);
 	}
 
 	private updateVersions(value: string[]) {
-		console.log("Updating versions with:", value);
+		// console.log("Updating versions with:", value);
 		this.versions = value.map((version) => ({
 			name: version,
 			value: version,
 		}));
-		console.log("Updated versions:", this.versions);
+		// console.log("Updated versions:", this.versions);
 	}
 
 	readonly datePanelOpenState = signal(false);

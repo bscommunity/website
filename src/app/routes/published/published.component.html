@@ -146,7 +146,7 @@
 				></app-large-panel>
 			</div>
 		}
-	} @else if (charts === null) {
+	} @else if (error) {
 		<!-- Error state -->
 		<div
 			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -184,5 +184,18 @@
 				</div>
 			</div>
 		</div>
-	} @else {}
+	} @else {
+		<!-- Loading state -->
+		<div class="flex flex-col items-center justify-center gap-6 w-full">
+			<mat-progress-spinner
+				diameter="36"
+				mode="indeterminate"
+			></mat-progress-spinner>
+			<!-- <mat-progress-spinner
+				diameter="64"
+				mode="indeterminate"
+			></mat-progress-spinner>
+			<p class="text-lg">Loading your charts...</p> -->
+		</div>
+	}
 </main>

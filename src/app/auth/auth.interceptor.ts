@@ -22,6 +22,9 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 			catchError((error) => {
 				if (error.status === 401) {
 					// Log out the user and redirect to the login page
+					console.error(
+						"AuthInterceptor: Unauthorized request, logging out.",
+					);
 					authService.logout();
 				}
 				return throwError(() => error);

@@ -157,6 +157,8 @@ export class CacheService {
 	}
 
 	addCharts(charts: ChartModel[]): void {
+		console.log("Adding charts to cache:", charts);
+
 		const currentCharts = this.getAllCharts();
 		const currentChartIds = currentCharts?.map((chart) => chart.id);
 
@@ -202,6 +204,11 @@ export class CacheService {
 				...updatedChart,
 				lastAccessed: new Date().toISOString(),
 			}),
+		);
+
+		console.log(
+			`Chart ${updatedChart.id} updated in cache:`,
+			this.getChart(updatedChart.id),
 		);
 	}
 
@@ -317,17 +324,14 @@ export class CacheService {
 			return;
 		}
 
-		const knownIssues = chart.latestVersion?.knownIssues || [];
-		knownIssues.push(knownIssue);
+		let versions = chart.versions || [];
+		versions[0]?.knownIssues.push(knownIssue);
 
 		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
-				latestVersion: {
-					...chart.latestVersion,
-					knownIssues,
-				},
+				versions,
 			}),
 		);
 	}
@@ -335,23 +339,44 @@ export class CacheService {
 	removeIssue(id: string, knownIssueId: string): void {
 		const chart = this.getChart(id);
 
-		if (!chart || !chart.latestVersion?.knownIssues) {
+		if (!chart || !chart.versions) {
 			return;
 		}
 
-		const updatedKnownIssues = chart.latestVersion.knownIssues.filter(
-			(knownIssue) => knownIssue.id !== knownIssueId,
-		);
+		const updatedVersions = chart.versions.map((version) => {
+			return {
+				...version,
+				knownIssues: version.knownIssues.filter(
+					(issue) => issue.id !== knownIssueId,
+				),
+			};
+		});
 
 		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
-				latestVersion: {
-					...chart.latestVersion,
-					knownIssues: updatedKnownIssues,
-				},
+				versions: updatedVersions,
 			}),
 		);
+	}
+
+	clearCache(): void {
+		/* const keys = this.storageService.getItem("chartKeys");
+
+		if (keys) {
+			const storedKeys = JSON.parse(keys) as string[];
+			storedKeys.forEach((key) => {
+				if (key.startsWith("chart_")) {
+					this.storageService.removeItem(key);
+				}
+			});
+		}
+
+		this.storageService.removeItem("chartCount");
+		this.storageService.removeItem("chartKeys"); */
+
+		this.storageService.clear();
+		this.cookieService.delete("lastRefresh");
 	}
 }

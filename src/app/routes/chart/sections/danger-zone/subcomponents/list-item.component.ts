@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -13,4 +14,14 @@ export class DangerZoneListItemComponent {
 	@Input() description: string = "";
 	@Input() buttonLabel: string = "";
 	@Input() buttonAction: () => void = () => {};
+
+	safeDescription: SafeHtml = "";
+
+	constructor(private sanitizer: DomSanitizer) {}
+
+	ngOnChanges() {
+		this.safeDescription = this.sanitizer.bypassSecurityTrustHtml(
+			this.description,
+		);
+	}
 }

@@ -5,9 +5,9 @@
 		<app-danger-zone-list-item
 			class="w-full"
 			title="Change visibility of this chart"
-			description="The chart is currently {{
-				visibility
-			}}. Changing the visibility will affect all users."
+			description="The chart is currently <strong>{{
+				isPublic() ? 'public' : 'private'
+			}}</strong>. Changing the visibility will affect all users."
 			buttonLabel="Change visibility"
 			[buttonAction]="openVisibilityDialog.bind(this)"
 		></app-danger-zone-list-item>

@@ -71,7 +71,7 @@ export class DeleteChartComponent {
 		const response = await this.chartService.deleteChart(this.data.chartId);
 
 		if (response) {
-			this.router.navigate(["/"]);
+			this.router.navigate(["/published"]);
 			this.dialogRef.close(true);
 		} else {
 			this._matSnackBar.open("Failed to delete chart", "Dismiss", {

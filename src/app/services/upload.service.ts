@@ -266,22 +266,15 @@ export class UploadDialogService {
 			// Cache chart data
 			this.cacheService.addChart(response);
 
+			console.log("durations:", response.versions?.[0].duration);
+			console.log("notesAmount:", response.versions?.[0].notesAmount);
+
 			// Close loading dialog and open success dialog
 			loadingDialog.close();
 			this.dialog.open(UploadDialogSuccessComponent, {
 				hasBackdrop: true,
 				disableClose: true,
-				data: {
-					id: response.id,
-					track: response.track,
-					artist: response.artist,
-					difficulty: response.difficulty,
-					coverUrl: response.coverUrl,
-					duration: response.latestVersion?.duration,
-					notesAmount: response.latestVersion?.notesAmount,
-					isDeluxe: response.isDeluxe,
-					isExplicit: response.isExplicit,
-				},
+				data: response,
 			});
 		} catch (error: any) {
 			console.error("Failed to submit chart:", error);
@@ -296,8 +289,8 @@ export class UploadDialogService {
 					error: error.message || error,
 				},
 			});
+		} finally {
+			// this.reset();
 		}
-
-		this.reset();
 	}
 }

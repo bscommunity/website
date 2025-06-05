@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
+import { CommonModule } from "@angular/common";
 
 // Modules
 import { FormsModule } from "@angular/forms";
@@ -12,17 +13,17 @@ import { AsideComponent } from "./subcomponents/aside/aside.component";
 import { KnownIssuesComponent } from "./sections/known-issues/known-issues.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
+import { PageErrorComponent } from "../error/error.component";
 
 // Models
-import { ChartModel } from "@/models/chart.model";
+import { ChartWithLatestVersionModel } from "@/models/chart.model";
 import { VersionsComponent } from "./sections/versions/versions.component";
+
+// Enums
+import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
-import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
-import { CommonModule } from "@angular/common";
-import { PageErrorComponent } from "../error/error.component";
-import { VersionModel } from "@/models/version.model";
 
 @Component({
 	selector: "app-chart",
@@ -51,23 +52,23 @@ export class ChartComponent implements OnInit {
 		private router: Router,
 	) {}
 
-	set chart(value: ChartModel) {
+	set chart(value: ChartWithLatestVersionModel) {
 		this._chart = {
 			...value,
 			latestVersion: value.versions?.[0] || undefined,
 		};
 	}
-	get chart(): ChartModel {
+	get chart(): ChartWithLatestVersionModel {
 		return this._chart;
 	}
-	private _chart!: ChartModel;
+	private _chart!: ChartWithLatestVersionModel;
 
 	difficultyIcon: string | null = null;
 
 	ngOnInit(): void {
 		// Access resolved data
 		this.chart = this.route.snapshot.data["chart"];
-		// console.warn("Chart data", this.chart);
+		console.warn("Chart data", this.chart);
 
 		if (!this.chart?.versions || !this.chart.contributors) {
 			console.error("Chart data is incomplete", this.chart);

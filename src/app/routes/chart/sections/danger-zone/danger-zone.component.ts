@@ -1,4 +1,11 @@
-import { Component, inject, Input } from "@angular/core";
+import {
+	Component,
+	inject,
+	input,
+	Input,
+	output,
+	EventEmitter,
+} from "@angular/core";
 
 // Modules
 import { MatButtonModule } from "@angular/material/button";
@@ -13,6 +20,7 @@ import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirma
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { Router, RouterModule } from "@angular/router";
 
 @Component({
 	selector: "app-chart-danger-zone-section",
@@ -21,21 +29,19 @@ import { ChartService } from "@/services/api/chart.service";
 		ChartSectionComponent,
 		MatButtonModule,
 		DangerZoneListItemComponent,
+		RouterModule,
 	],
 	templateUrl: "./danger-zone.component.html",
 })
 export class DangerZoneComponent {
-	@Input() chartId: string = "";
-	@Input() chartName: string = "";
-	@Input() isPublic: boolean | null = null;
+	chartId = input.required<string>();
+	chartName = input.required<string>();
+	isPublic = input.required<boolean>();
+	visibilityChanged = output<boolean>();
 
-	visibility = this.isPublic ? "public" : "private";
-
-	constructor(
-		private dialog: MatDialog,
-		private _snackBar: MatSnackBar,
-		private chartService: ChartService,
-	) {}
+	private readonly chartService = inject(ChartService);
+	private readonly dialog = inject(MatDialog);
+	private readonly _snackBar = inject(MatSnackBar);
 
 	// Open a snackbar with a message
 	openSnackBar(message: string, action: string) {
@@ -55,42 +61,36 @@ export class DangerZoneComponent {
 	}
 
 	openVisibilityDialog() {
-		// If the chart is public, we want to make it private
-		// If the chart is private, we want to make it public
-		const newVisibility = this.visibility === "public" ? false : true;
-		const newVisibilityText =
-			newVisibility === false ? "private" : "public";
+		const newVisibility = !this.isPublic();
 
 		console.log(
-			`Updating chart visibility from ${this.visibility} to ${newVisibilityText}`,
+			`Updating chart visibility from ${this.isPublic()} to ${newVisibility}`,
 		);
 
 		const operation = async () => {
-			const result = await this.chartService.updateChart(this.chartId, {
+			await this.chartService.updateChart(this.chartId(), {
 				isPublic: newVisibility,
 			});
-
-			if (!result) {
-				throw new Error(
-					"An error occurred while updating the chart visibility",
-				);
-			}
 		};
 
 		const afterOperation = () => {
+			console.log(`Chart visibility updated to ${newVisibility}`);
+			this.visibilityChanged.emit(newVisibility);
 			this.dialog.closeAll();
 			this.openSnackBar("Chart visibility updated", "Close");
-			this.visibility = newVisibility ? "public" : "private";
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
 			data: {
 				title: "Change chart visibility",
-				description: `Are you sure you want to make update the chart visibility to <strong>${newVisibilityText.toUpperCase()}</strong>? ${
+				description: `Are you sure you want to make update the chart visibility to <b>${
+					newVisibility ? "PUBLIC" : "PRIVATE"
+				}</b>? ${
 					newVisibility
 						? "This will make the chart visible to everyone."
 						: "This will make the chart only visible to you."
 				}`,
+				error: "An error occurred while updating the chart visibility",
 				operation,
 				afterOperation,
 			},
