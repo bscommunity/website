@@ -1,18 +1,20 @@
 import { z } from "zod";
+
+// Enums
 import { Difficulty } from "./enums/difficulty.enum";
+import { Genre } from "./enums/genre.enum";
+
+// Models
 import { Contributor } from "./contributor.model";
 import { Version } from "./version.model";
 import { StreamingLink } from "./streaming-link.model";
-import { Genre } from "./enums/genre.enum";
 
 export const Chart = z.object({
 	id: z.string(),
 	artist: z.string(),
 	track: z.string(),
-	album: z.string().optional().nullable(),
 	genre: z.nativeEnum(Genre).optional(),
 	coverUrl: z.string(),
-	trackPreviewUrl: z.string().optional().nullable(),
 	difficulty: z.nativeEnum(Difficulty),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
@@ -20,12 +22,18 @@ export const Chart = z.object({
 	isPublic: z.boolean().default(true),
 
 	// Relations
-	latestVersion: Version.optional(),
 	versions: Version.array().optional(),
 	contributors: z.array(Contributor).optional(),
 });
 
+const ChartWithLatestVersion = Chart.extend({
+	latestVersion: Version.optional(),
+});
+
 export type ChartModel = z.infer<typeof Chart>;
+export type ChartWithLatestVersionModel = z.infer<
+	typeof ChartWithLatestVersion
+>;
 
 export const CreateChart = Chart.omit({
 	id: true,
@@ -46,6 +54,9 @@ export const CreateChart = Chart.omit({
 		}),
 	)
 	.extend({
+		// Additional properties for creation
+		album: z.string().optional().nullable(),
+		trackPreviewUrl: z.string().optional().nullable(),
 		trackUrls: z.array(StreamingLink).optional(),
 	});
 

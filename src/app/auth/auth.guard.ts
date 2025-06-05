@@ -37,8 +37,8 @@ export const redirectIfAuthenticatedGuard: CanActivateFn = (
 	return authService.isLoggedIn$.pipe(
 		map((isLoggedIn) => {
 			if (isLoggedIn) {
-				// Redirect authenticated users accessing /login to /
-				return router.createUrlTree(["/"]);
+				// Redirect authenticated users accessing /login to /published
+				return router.createUrlTree(["/published"]);
 			}
 			return true;
 		}),

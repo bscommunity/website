@@ -1,15 +1,20 @@
 import { Injectable, inject, PLATFORM_ID } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { isPlatformBrowser } from "@angular/common";
+import { Router } from "@angular/router";
+
 import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { toSignal } from "@angular/core/rxjs-interop";
 
 import { environment } from "environments/environment";
 import { apiUrl } from "@/services/api";
 
+// Models
 import { UserModel } from "@/models/user.model";
+
+// Services
 import { CookieService } from "@/services/cookie.service";
-import { Router } from "@angular/router";
+import { CacheService } from "@/services/cache.service";
 
 interface LoginResponse {
 	user: UserModel;
@@ -46,6 +51,7 @@ export class AuthService {
 
 	constructor(
 		private cookieService: CookieService,
+		private cacheService: CacheService,
 		private http: HttpClient,
 	) {
 		this.initializeAuthState();
@@ -99,8 +105,10 @@ export class AuthService {
 
 	logout() {
 		if (isPlatformBrowser(this.platformId)) {
+			console.log("Logging out...");
 			this.cookieService.delete(this.TOKEN_NAME);
 			this.cookieService.delete(this.USER_OBJECT_NAME);
+			this.cacheService.clearCache();
 			this._isLoggedIn$.next(false);
 			this.router.navigate(["/login"], { onSameUrlNavigation: "reload" });
 		}

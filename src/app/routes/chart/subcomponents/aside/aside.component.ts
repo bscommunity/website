@@ -20,8 +20,7 @@ import {
 import { ChartService } from "@/services/api/chart.service";
 
 // Models
-import { ChartModel } from "@/models/chart.model";
-import { VersionModel } from "@/models/version.model";
+import { ChartModel, ChartWithLatestVersionModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
@@ -42,7 +41,7 @@ export class AsideComponent {
 	readonly router = inject(Router);
 	readonly chartService = inject(ChartService);
 
-	@Input() chart!: ChartModel;
+	@Input() chart!: ChartWithLatestVersionModel;
 
 	transformDuration = transformDuration;
 

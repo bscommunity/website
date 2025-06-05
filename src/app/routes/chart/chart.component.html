@@ -62,6 +62,7 @@
 				[chartId]="chart.id"
 				[chartName]="chart.track"
 				[isPublic]="chart.isPublic"
+				(visibilityChanged)="chart.isPublic = $event"
 			></app-chart-danger-zone-section>
 		</div>
 	</main>

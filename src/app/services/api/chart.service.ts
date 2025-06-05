@@ -51,6 +51,8 @@ export class ChartService {
 				// Trigger a background fetch to check for updates
 				this.http.get<ChartModel[]>(url).subscribe({
 					next: (fetchedCharts) => {
+						console.log("Fetched charts from API:", fetchedCharts);
+
 						// Set up a cooldown to prevent too many requests
 						this.cacheService.setRefreshCooldown();
 
@@ -81,7 +83,7 @@ export class ChartService {
 				});
 			}
 
-			console.log("Returning cached charts:", charts);
+			console.log("Returning cached charts");
 
 			return new Observable((subscriber) => {
 				subscriber.next(charts);
@@ -94,6 +96,7 @@ export class ChartService {
 
 			return this.http.get<ChartModel[]>(url).pipe(
 				tap((fetchedCharts) => {
+					console.log("Fetched charts from API:", fetchedCharts);
 					this.cacheService.addCharts(fetchedCharts);
 				}),
 			);
@@ -192,7 +195,9 @@ export class ChartService {
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
 
+		// console.log("Updated chart:", updatedChart);
 		this.cacheService.updateChart(updatedChart);
+
 		return updatedChart;
 	}
 

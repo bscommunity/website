@@ -16,20 +16,27 @@ import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { LargePanelComponent } from "@/components/panel/large-panel.component";
 
-// Types
-import { ChartModel } from "@/models/chart.model";
+// Enums
+import { Genre } from "@/models/enums/genre.enum";
 import { Difficulty } from "@/models/enums/difficulty.enum";
+
+// Models
+import { ChartModel } from "@/models/chart.model";
+import { VersionModel } from "@/models/version.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
 
 // Utils
 import { convertStringToMonth } from "@/lib/time";
-import { Genre } from "@/models/enums/genre.enum";
+
+type ChartWithLatestVersion = ChartModel & {
+	latestVersion?: VersionModel;
+};
 
 type ChartsByMonth = {
 	name: string; // e.g., "2023-10"
-	charts: ChartModel[];
+	charts: ChartWithLatestVersion[];
 };
 
 @Component({
@@ -133,7 +140,8 @@ export class PublishedComponent implements OnInit {
 			monthEntry.charts.push(chart);
 		});
 
-		console.log("Charts grouped by month:", chartsByMonth);
+		// console.log("Charts grouped by month:", chartsByMonth);
+
 		this._charts = chartsByMonth.sort((a, b) => {
 			return new Date(b.name).getTime() - new Date(a.name).getTime();
 		});
@@ -164,7 +172,6 @@ export class PublishedComponent implements OnInit {
 	}
 
 	fetchCharts(forceRefresh: boolean = false) {
-		// console.log("Refreshing charts...");
 		this.isRefreshing = forceRefresh;
 		this.error = undefined;
 		this.chartService.getAllCharts(forceRefresh).subscribe({

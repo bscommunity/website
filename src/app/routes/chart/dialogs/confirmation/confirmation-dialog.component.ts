@@ -16,6 +16,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 export interface ConfirmationDialogData {
 	title: string;
 	description: string;
+	error?: string;
 	operation: () => Promise<void>;
 	afterOperation?: () => void;
 }
@@ -46,7 +47,10 @@ export class ConfirmationDialogComponent {
 			this.data.afterOperation && this.data.afterOperation();
 		} catch (error) {
 			console.error(error);
-			this._matSnackBar.open("An error occurred", "Close");
+			this._matSnackBar.open(
+				this.data.error ?? "An error occurred",
+				"Close",
+			);
 		}
 
 		this.isLoading.set(false);
