@@ -1,4 +1,4 @@
-import { Component, inject, Input, ViewChild } from "@angular/core";
+import { Component, inject, ViewChild, input } from "@angular/core";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
@@ -41,8 +41,8 @@ import {
 	templateUrl: "./contributors.component.html",
 })
 export class ContributorsComponent {
-	@Input() chartId: string = "";
-	@Input() contributors: ContributorModel[] | undefined = [];
+	readonly chartId = input<string>("");
+	readonly contributors = input<ContributorModel[] | undefined>([]);
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
@@ -56,11 +56,12 @@ export class ContributorsComponent {
 	contributorTable!: TableComponent<ContributorModel>;
 
 	openAddContributorConfirmationDialog(): void {
-		this.dialog.open(AddContributorDialogComponent, {
+		const contributors = this.contributors();
+  this.dialog.open(AddContributorDialogComponent, {
 			data: {
-				chartId: this.chartId,
-				usersIds: this.contributors
-					? this.contributors.map(
+				chartId: this.chartId(),
+				usersIds: contributors
+					? contributors.map(
 							(contributor) => contributor.user.id,
 						)
 					: [],
@@ -76,7 +77,7 @@ export class ContributorsComponent {
 		this.dialog.open(EditContributorDialogComponent, {
 			data: {
 				contributor,
-				chartId: this.chartId,
+				chartId: this.chartId(),
 			},
 			width: "450px",
 		});
@@ -90,7 +91,7 @@ export class ContributorsComponent {
 
 		const operation = async () => {
 			const result = await this.contributorService.deleteContributor(
-				this.chartId,
+				this.chartId(),
 				contributor.user.id,
 			);
 

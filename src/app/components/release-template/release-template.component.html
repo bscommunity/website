@@ -3,7 +3,7 @@
 >
 	<header class="flex flex-col justify-start items-start gap-2">
 		<h3 class="relative justify-center text-3xl font-semibold leading-9">
-			Release notes for {{ release.version }} {{ icon }}
+			Release notes for {{ release().version }} {{ icon() }}
 		</h3>
 		<h4 class="relative justify-center text-base font-normal leading-snug">
 			{{ releaseDate }}
@@ -20,40 +20,40 @@
 				>the issues page</a
 			>.
 		</p>
-		@if (release.extra) {
+		@if (release().extra) {
 			<h5
 				class="relative justify-center text-base font-medium leading-snug"
 			>
-				{{ release.extra }}
+				{{ release().extra }}
 			</h5>
 		}
 	</div>
 
-	@if (release.fixes && release.fixes.length > 0) {
+	@if (release().fixes && release().fixes!.length > 0) {
 		<app-release-template-item
 			title="Fixes"
 			icon="bug_report"
-			[content]="release.fixes"
+			[content]="release().fixes"
 		></app-release-template-item>
 	}
 
-	@if (release.features && release.features.length > 0) {
+	@if (release().features && release().features!.length > 0) {
 		<app-release-template-item
 			title="Features"
 			icon="local_fire_department"
-			[content]="release.features"
+			[content]="release().features"
 		></app-release-template-item>
 	}
 
-	@if (release.refactors && release.refactors.length > 0) {
+	@if (release().refactors && release().refactors!.length > 0) {
 		<app-release-template-item
 			title="Refactors"
 			icon="code"
-			[content]="release.refactors"
+			[content]="release().refactors"
 		></app-release-template-item>
 	}
 
-	@if (!isLast) {
+	@if (!isLast()) {
 		<div class="flex w-full h-[1px] bg-surface-container-high mt-6"></div>
 	}
 </section>

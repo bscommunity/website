@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, Input } from "@angular/core";
+import { Component, input } from "@angular/core";
 
 @Component({
 	selector: "app-avatar",
@@ -7,7 +7,7 @@ import { Component, Input } from "@angular/core";
 	templateUrl: "./avatar.component.html",
 })
 export class AvatarComponent {
-	@Input() src: string | null | undefined = null;
-	@Input() alt: string | null | undefined = "User profile picture";
-	@Input() size: number | null | undefined = 40;
+	readonly src = input<string | null | undefined>(null);
+	readonly alt = input<string | null | undefined>("User profile picture");
+	readonly size = input<number | null | undefined>(40);
 }

@@ -2,9 +2,10 @@ import {
 	ChangeDetectorRef,
 	Component,
 	inject,
-	Input,
 	signal,
 	WritableSignal,
+	input,
+	model,
 } from "@angular/core";
 
 // Material
@@ -43,8 +44,8 @@ import { KnownIssueModel } from "@/models/known-issue.model";
 	templateUrl: "./known-issues.component.html",
 })
 export class KnownIssuesComponent {
-	@Input() chartId!: string;
-	@Input() issues!: KnownIssueModel[];
+	readonly chartId = input.required<string>();
+	readonly issues = model.required<KnownIssueModel[]>();
 
 	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
@@ -61,7 +62,7 @@ export class KnownIssuesComponent {
 
 		const operation = async () => {
 			const result = await this.knownIssueService.deleteKnownIssue(
-				this.chartId,
+				this.chartId(),
 				issue.id,
 			);
 
@@ -106,23 +107,25 @@ export class KnownIssuesComponent {
 
 		try {
 			// Send issue to the server
-			const result = await this.knownIssueService.addIssue(this.chartId, {
-				description: this.newIssue,
-			});
+			const result = await this.knownIssueService.addIssue(
+				this.chartId(),
+				{
+					description: this.newIssue,
+				},
+			);
 
 			if (!result) {
 				throw new Error("An error occurred");
 			}
 
-			// Add issue to the list
-			this.issues = [
-				...this.issues,
+			this.issues.update((issues) => [
+				...issues,
 				{
 					id: result.id,
 					description: this.newIssue,
 					createdAt: new Date(),
 				},
-			];
+			]);
 
 			this.cdr.detectChanges();
 
@@ -140,7 +143,7 @@ export class KnownIssuesComponent {
 	}
 
 	removeIssueFromTable(issue: KnownIssueModel) {
-		this.issues = this.issues.filter((i) => i.id !== issue.id);
+		this.issues.update((issues) => issues.filter((i) => i.id !== issue.id));
 		this.cdr.detectChanges();
 	}
 }

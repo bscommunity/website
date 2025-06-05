@@ -1,6 +1,5 @@
 import {
 	Component,
-	Input,
 	HostListener,
 	ElementRef,
 	ChangeDetectorRef,
@@ -12,6 +11,8 @@ import {
 	Inject,
 	PLATFORM_ID,
 	OnDestroy,
+	input,
+	model,
 } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
@@ -42,11 +43,11 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 		private cdr: ChangeDetectorRef,
 	) {}
 
-	@Input() class = "";
-	@Input() disabled = false;
+	readonly class = input("");
+	readonly disabled = input(false);
 
-	@Input() options: Option[] = [];
-	@Input() selectedOption: Option | null = null;
+	readonly options = input<Option[]>([]);
+	readonly selectedOption = model<Option>();
 	@Output() selectionChange = new EventEmitter<Option>();
 
 	dropdownOpen = false;
@@ -127,7 +128,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 	}
 
 	selectOption(option: Option): void {
-		this.selectedOption = option;
+		this.selectedOption.set(option);
 		this.selectionChange.emit(option);
 		this.highlightedIndex = -1;
 
@@ -171,17 +172,17 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 			switch (event.key) {
 				case "ArrowDown":
 					this.highlightedIndex =
-						(this.highlightedIndex + 1) % this.options.length;
+						(this.highlightedIndex + 1) % this.options().length;
 					event.preventDefault();
 					break;
 				case "ArrowUp":
 					this.highlightedIndex =
-						(this.highlightedIndex - 1 + this.options.length) %
-						this.options.length;
+						(this.highlightedIndex - 1 + this.options().length) %
+						this.options().length;
 					event.preventDefault();
 					break;
 				case "Enter":
-					this.selectOption(this.options[this.highlightedIndex]);
+					this.selectOption(this.options()[this.highlightedIndex]);
 					event.preventDefault();
 					break;
 				case "Escape":

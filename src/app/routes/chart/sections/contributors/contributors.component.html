@@ -3,7 +3,7 @@
 		#contributorTable
 		class="w-full"
 		[columns]="contributorsColumns"
-		[data]="contributors ?? []"
+		[data]="contributors() ?? []"
 		[actions]="contributorsActions"
 	></app-table>
 	<span class="flex items-center justify-end w-full">

@@ -1,4 +1,4 @@
-import { Component, inject, Input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { Router } from "@angular/router";
 
 // Material
@@ -41,24 +41,25 @@ export class AsideComponent {
 	readonly router = inject(Router);
 	readonly chartService = inject(ChartService);
 
-	@Input() chart!: ChartWithLatestVersionModel;
+	readonly chart = input.required<ChartWithLatestVersionModel>();
 
 	transformDuration = transformDuration;
 
 	openEditChartDialog(): void {
 		console.log("openEditChartDialog");
 
-		const dialogRef = this.dialog.open(uploadStepComponents[1], {
+		const chartValue = this.chart();
+  const dialogRef = this.dialog.open(uploadStepComponents[1], {
 			data: {
 				title: "Edit Chart",
 				description:
 					"Edit the chart information. Fields like title and artist can't be changed since they are used to identify the chart.",
 				formData: {
-					track: this.chart?.track,
-					artist: this.chart?.artist,
-					difficulty: this.chart?.difficulty,
-					isDeluxe: this.chart?.isDeluxe,
-					isExplicit: this.chart?.isExplicit,
+					track: chartValue?.track,
+					artist: chartValue?.artist,
+					difficulty: chartValue?.difficulty,
+					isDeluxe: chartValue?.isDeluxe,
+					isExplicit: chartValue?.isExplicit,
 				},
 				inactive: ["track", "artist"],
 			},
@@ -86,7 +87,7 @@ export class AsideComponent {
 	async updateChart(chart: Partial<ChartModel>) {
 		try {
 			const response = await this.chartService.updateChart(
-				this.chart.id,
+				this.chart().id,
 				chart,
 			);
 
@@ -107,7 +108,7 @@ export class AsideComponent {
 			this.router
 				.navigateByUrl("/", { skipLocationChange: true })
 				.then(() => {
-					this.router.navigate(["/chart", this.chart.id]);
+					this.router.navigate(["/chart", this.chart().id]);
 				});
 
 			this._snackBar.open("Chart updated with success!", "Close");

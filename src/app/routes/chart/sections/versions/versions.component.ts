@@ -1,9 +1,9 @@
 import {
-	ChangeDetectorRef,
-	Component,
-	inject,
-	Input,
-	ViewChild,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  ViewChild,
+  input
 } from "@angular/core";
 
 // Material
@@ -51,8 +51,8 @@ import {
 	templateUrl: "./versions.component.html",
 })
 export class VersionsComponent {
-	@Input() chartId!: string;
-	@Input() versions: VersionModel[] = [];
+	readonly chartId = input.required<string>();
+	readonly versions = input<VersionModel[]>([]);
 
 	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
@@ -85,7 +85,7 @@ export class VersionsComponent {
 
 				const { chartFileData, ...rest } = result;
 				this.addVersion({
-					chartId: this.chartId,
+					chartId: this.chartId(),
 					...rest,
 					...chartFileData,
 				});
@@ -100,7 +100,7 @@ export class VersionsComponent {
 
 		const operation = async () => {
 			const result = await this.versionService.deleteVersion(
-				this.chartId,
+				this.chartId(),
 				version.id,
 			);
 
@@ -174,7 +174,7 @@ export class VersionsComponent {
 				} else {
 					// If it's the initial load, we need to check the versions array,
 					// since it stores the initial data, and we don't have the table data yet
-					return index === this.versions.length - 1;
+					return index === this.versions().length - 1;
 				}
 			},
 		},
@@ -192,7 +192,7 @@ export class VersionsComponent {
 						item.id === this.versionTable.dataSource.data[0].id
 					);
 				} else {
-					return index === this.versions.length - 1 || index === 0;
+					return index === this.versions().length - 1 || index === 0;
 				}
 			},
 		},
@@ -201,7 +201,7 @@ export class VersionsComponent {
 	async addVersion(version: CreateVersionModel) {
 		try {
 			const response = await this.versionService.addVersion(
-				this.chartId,
+				this.chartId(),
 				version,
 			);
 

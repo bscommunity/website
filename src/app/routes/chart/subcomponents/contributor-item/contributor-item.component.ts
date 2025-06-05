@@ -1,9 +1,9 @@
 import {
-	Component,
-	EventEmitter,
-	Input,
-	Output,
-	WritableSignal,
+  Component,
+  EventEmitter,
+  Output,
+  WritableSignal,
+  input
 } from "@angular/core";
 
 // Modules
@@ -29,11 +29,8 @@ import { MatButtonModule } from "@angular/material/button";
 	templateUrl: "./contributor-item.component.html",
 })
 export class ContributorItemComponent {
-	@Input() user!: SimplifiedUserModel;
-	@Input() roles!: WritableSignal<Map<string, Array<ContributorRole>>>;
-	@Input({
-		transform: (value: string) => value !== "false",
-	})
-	canRemove = false;
+	readonly user = input.required<SimplifiedUserModel>();
+	readonly roles = input.required<WritableSignal<Map<string, Array<ContributorRole>>>>();
+	readonly canRemove = input(false, { transform: (value: string /*T:VAE*/) => value !== "false" });
 	@Output() remove = new EventEmitter<string>();
 }

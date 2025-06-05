@@ -2,18 +2,18 @@
 	<div class="flex flex-row items-center justify-between gap-4 mb-2 w-full">
 		<span class="flex flex-row items-center justify-start gap-4">
 			<app-avatar
-				[src]="user.imageUrl"
-				[alt]="user.username"
+				[src]="user().imageUrl"
+				[alt]="user().username"
 			></app-avatar>
-			<span class="text-base font-medium">{{ user.username }}</span>
+			<span class="text-base font-medium">{{ user().username }}</span>
 		</span>
-		@if (canRemove) {
-			<button mat-icon-button (click)="remove.emit(user.id)">
+		@if (canRemove()) {
+			<button mat-icon-button (click)="remove.emit(user().id)">
 				<mat-icon>close</mat-icon>
 			</button>
 		}
 	</div>
 	<div class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"></div>
-	<app-contributor-tags [userId]="user.id" [roles]="roles">
+	<app-contributor-tags [userId]="user().id" [roles]="roles()">
 	</app-contributor-tags>
 </li>

@@ -6,26 +6,26 @@
 			>search</mat-icon
 		>
 	</span>
-	@if (autoComplete) {
+	@if (autoComplete() != null) {
 		<input
 			#input
 			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
 			type="text"
-			[placeholder]="placeholder"
+			[placeholder]="placeholder()"
 			(input)="onInput($event)"
-			[matAutocomplete]="autoComplete"
-			[disabled]="disabled"
-			[style.pointerEvents]="disabled ? 'none' : 'auto'"
+			[matAutocomplete]="autoComplete()!"
+			[disabled]="disabled()"
+			[style.pointerEvents]="disabled() ? 'none' : 'auto'"
 		/>
 	} @else {
 		<input
 			#input
 			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
 			type="text"
-			[placeholder]="placeholder"
+			[placeholder]="placeholder()"
 			(input)="onInput($event)"
-			[disabled]="disabled"
-			[style.pointerEvents]="disabled ? 'none' : 'auto'"
+			[disabled]="disabled()"
+			[style.pointerEvents]="disabled() ? 'none' : 'auto'"
 		/>
 	}
 	<span class="absolute top-1/2 -translate-y-1/2 right-1.5">

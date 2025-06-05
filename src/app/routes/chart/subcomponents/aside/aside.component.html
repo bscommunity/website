@@ -3,12 +3,12 @@
 		<div class="relative overflow-hidden md:rounded-lg">
 			<img
 				class="w-full opacity-50 md:opacity-100 md:w-72 xl:w-96 aspect-square"
-				[src]="chart.coverUrl"
-				[alt]="chart.track"
+				[src]="chart().coverUrl"
+				[alt]="chart().track"
 			/>
 			<app-difficulty-mark
 				class="hidden md:flex"
-				[difficulty]="chart.difficulty"
+				[difficulty]="chart().difficulty"
 				[size]="96"
 			></app-difficulty-mark>
 		</div>
@@ -34,18 +34,18 @@
 		<app-aside-container
 			class="w-full"
 			icon="timer"
-			[info]="transformDuration(chart.latestVersion?.duration || 0)"
+			[info]="transformDuration(chart().latestVersion?.duration || 0)"
 		></app-aside-container>
 		<app-aside-container
 			class="w-full"
 			icon="music_note"
-			[info]="chart.latestVersion?.notesAmount + ' notes'"
+			[info]="chart().latestVersion?.notesAmount + ' notes'"
 		></app-aside-container>
 	</app-aside-section>
 	<app-aside-section title="Files" class="w-full">
 		<a
 			class="w-full cursor-pointer"
-			[href]="chart.coverUrl"
+			[href]="chart().coverUrl"
 			target="_blank"
 			download
 		>

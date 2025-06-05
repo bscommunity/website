@@ -2,13 +2,13 @@
 	<ul
 		class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
 	>
-		@if (issues.length > 0) {
-			@for (issue of issues; track $index) {
+		@if (issues().length > 0) {
+			@for (issue of issues(); track $index) {
 				<li
 					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
 					[ngClass]="{
 						'border-b border-b-inverse-on-surface':
-							$index !== issues.length - 1,
+							$index !== issues().length - 1,
 					}"
 				>
 					<span>• {{ issue.description }}</span>

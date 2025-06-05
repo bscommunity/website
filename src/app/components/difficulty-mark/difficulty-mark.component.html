@@ -1,21 +1,21 @@
 @if (difficultyIcon) {
 	<span
 		class="absolute bottom-0 right-0 w-10 h-10 z-20 border-solid border-b-[40px] border-l-[40px] border-t-transparent border-r-transparent border-b-black border-l-transparent"
-		[ngClass]="class"
+		[ngClass]="class()"
 		[ngStyle]="{
-			width: size + 'px',
-			height: size + 'px',
-			'border-bottom-width': size + 'px',
-			'border-left-width': size + 'px',
+			width: size() + 'px',
+			height: size() + 'px',
+			'border-bottom-width': size() + 'px',
+			'border-left-width': size() + 'px',
 		}"
 	>
 	</span>
 	<img
 		class="z-30 absolute bottom-0 -right-0.5 w-6 h-6"
-		[ngClass]="class"
+		[ngClass]="class()"
 		[ngStyle]="{
-			width: size * 0.6 + 'px',
-			height: size * 0.6 + 'px',
+			width: size() * 0.6 + 'px',
+			height: size() * 0.6 + 'px',
 		}"
 		[src]="difficultyIcon"
 		alt="Difficulty badge icon"

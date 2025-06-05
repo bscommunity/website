@@ -2,8 +2,8 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	ElementRef,
-	Input,
 	ViewChild,
+	input,
 } from "@angular/core";
 
 import { Subject, Subscription } from "rxjs";
@@ -27,22 +27,22 @@ interface AutoCompleteExceptions {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchbarComponent {
-	@Input() autoComplete?: MatAutocomplete | null = null;
+	readonly autoComplete = input<MatAutocomplete | null>(null);
 
 	@ViewChild("input") input!: ElementRef<HTMLInputElement>;
-	@Input() onSearch: (value: string) => void = () => {};
-	@Input() debounceDuration: number = 300;
-	@Input() placeholder: string = "Search";
-	@Input() disabled: boolean = false;
+	readonly onSearch = input<(value: string) => void>(() => {});
+	readonly debounceDuration = input<number>(300);
+	readonly placeholder = input<string>("Search");
+	readonly disabled = input<boolean>(false);
 
 	private searchSubject = new Subject<string>();
 	private searchSubscription: Subscription;
 
 	constructor() {
 		this.searchSubscription = this.searchSubject
-			.pipe(debounceTime(this.debounceDuration))
+			.pipe(debounceTime(this.debounceDuration()))
 			.subscribe((value) => {
-				this.onSearch(value);
+				this.onSearch()(value);
 			});
 	}
 

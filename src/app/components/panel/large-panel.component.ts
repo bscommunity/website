@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -21,9 +21,9 @@ interface Button {
 			>
 				<mat-icon class="min-w-6"> help </mat-icon>
 				<div class="flex flex-col items-start justify-start">
-					<p>{{ title }}</p>
+					<p>{{ title() }}</p>
 					<p>
-						{{ message }}
+						{{ message() }}
 					</p>
 				</div>
 			</div>
@@ -35,7 +35,7 @@ interface Button {
 					aria-hidden="false"
 					aria-label="Discord logo"
 				></mat-icon>
-				{{ button.label }}
+				{{ button().label }}
 			</button>
 		</div>
 	`,
@@ -43,11 +43,11 @@ interface Button {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LargePanelComponent {
-	@Input() title: string = "";
-	@Input() message: string = "";
-	@Input() button: Button = {
-		label: "",
-		link: "",
-		icon: "",
-	};
+	readonly title = input<string>("");
+	readonly message = input<string>("");
+	readonly button = input<Button>({
+    label: "",
+    link: "",
+    icon: "",
+});
 }

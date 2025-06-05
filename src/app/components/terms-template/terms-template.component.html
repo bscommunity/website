@@ -3,19 +3,19 @@
 		id="index"
 		class="hidden md:flex flex-col items-start justify-start sticky w-96 top-10 gap-4"
 	>
-		@for (section of sections; track $index) {
-			<a [routerLink]="[baseUrl]" fragment="{{ section.id }}"
+		@for (section of sections(); track $index) {
+			<a [routerLink]="[baseUrl()]" fragment="{{ section.id }}"
 				><li>{{ section.title }}</li></a
 			>
 		}
 	</ol>
 	<ol id="list">
-		@for (section of sections; track $index) {
+		@for (section of sections(); track $index) {
 			<li>
 				<h3 id="{{ section.id }}" class="group">
 					{{ section.title }}
 					<a
-						[routerLink]="[baseUrl]"
+						[routerLink]="[baseUrl()]"
 						fragment="{{ section.id }}"
 						class="border-none rounded-md font-medium items-center whitespace-nowrap gap-2 text-sm bg-transparentshadow-none hover:bg-surface-container focus:bg-surface-container active:scale-98 relative my-auto inline-flex size-[25px] min-w-[25px] justify-center p-0 transition-all duration-default invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 scroll-m-5"
 						><span
