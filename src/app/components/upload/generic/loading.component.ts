@@ -14,11 +14,10 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 				Please wait while the content is submitted. <br />
 				Do not close this window.
 			</p>
-			<mat-progress-spinner
-				class="!my-6"
+			<mat-progress-spinner class="!my-6"
 				mode="indeterminate"
 				diameter="48"
-			></mat-progress-spinner>
+			 />
 		</mat-dialog-content>
 	`,
 	imports: [MatDialogModule, MatProgressSpinnerModule],
