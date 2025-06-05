@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, OnInit, Output, Pipe, PipeTransform, ViewChild, input, model, inject } from "@angular/core";
+import { AfterViewInit, Component, OnInit, Pipe, PipeTransform, ViewChild, input, model, inject, output } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
@@ -66,7 +66,7 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	readonly initialSortColumn = input("");
 	readonly sortDirection = input<SortDirection>("asc");
 
-	@Output() sortChanged = new EventEmitter<Sort>();
+	readonly sortChanged = output<Sort>();
 
 	displayedColumns: string[] = [];
 	dataSource!: MatTableDataSource<T>;

@@ -1,12 +1,11 @@
 import { ChartFileData, DecodeService } from "@/services/decode.service";
 import {
-	Component,
-	ElementRef,
-	EventEmitter,
-	inject,
-	Output,
-	signal,
-	ViewChild,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+  output
 } from "@angular/core";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -28,7 +27,7 @@ export class FileUploadComponent {
 
 	// Get section HTML component reference
 	@ViewChild("container") container!: ElementRef;
-	@Output() onFileDecoded = new EventEmitter<ChartFileData | null>();
+	readonly onFileDecoded = output<ChartFileData | null>();
 
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
