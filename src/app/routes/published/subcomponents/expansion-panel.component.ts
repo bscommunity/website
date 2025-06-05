@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, signal, input } from "@angular/core";
+import { Component, signal, input, output } from "@angular/core";
 
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
@@ -46,7 +46,7 @@ export class ExpansionPanelComponent {
 	readonly panelOpenState = signal(false);
 	readonly title = input("");
 	readonly data = input<ExpansionPanelData[] | null>(null);
-	@Output() dataChange = new EventEmitter<ExpansionPanelData[] | null>();
+	readonly dataChange = output<ExpansionPanelData[] | null>();
 
 	selectionChange(item: ExpansionPanelData): void {
 		item.isSelected = !item.isSelected;

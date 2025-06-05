@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, AfterViewInit, Output, EventEmitter, PLATFORM_ID, OnDestroy, input, model, inject } from "@angular/core";
+import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, AfterViewInit, PLATFORM_ID, OnDestroy, input, model, inject, output } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
@@ -31,7 +31,7 @@ export class CustomSelectComponent implements AfterViewInit, OnDestroy {
 
 	readonly options = input<Option[]>([]);
 	readonly selectedOption = model<Option>();
-	@Output() selectionChange = new EventEmitter<Option>();
+	readonly selectionChange = output<Option>();
 
 	dropdownOpen = false;
 	dropdownSide: "up" | "down" = "down";

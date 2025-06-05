@@ -1,9 +1,8 @@
 import {
   Component,
-  EventEmitter,
-  Output,
   WritableSignal,
-  input
+  input,
+  output
 } from "@angular/core";
 
 // Modules
@@ -32,5 +31,5 @@ export class ContributorItemComponent {
 	readonly user = input.required<SimplifiedUserModel>();
 	readonly roles = input.required<WritableSignal<Map<string, Array<ContributorRole>>>>();
 	readonly canRemove = input(false, { transform: (value: string /*T:VAE*/) => value !== "false" });
-	@Output() remove = new EventEmitter<string>();
+	readonly remove = output<string>();
 }
