@@ -2,8 +2,8 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
-  ViewChild,
-  input
+  input,
+  viewChild
 } from "@angular/core";
 
 // Material
@@ -64,7 +64,7 @@ export class VersionsComponent {
 		this._snackBar.open(message, action);
 	}
 
-	@ViewChild("versionTable") versionTable!: TableComponent<VersionModel>;
+	readonly versionTable = viewChild.required<TableComponent<VersionModel>>("versionTable");
 
 	openAddVersionDialog(): void {
 		const dialogRef = this.dialog.open(uploadStepComponents[2], {
@@ -164,11 +164,12 @@ export class VersionsComponent {
 				// If it's a update, we already have versionTable available
 				// Since we only update the table data, and not "versions" array
 				// we need to check the table data directly
-				if (this.versionTable) {
+				const versionTable = this.versionTable();
+    if (versionTable) {
 					return (
 						item.id ===
-						this.versionTable.dataSource.data[
-							this.versionTable.dataSource.data.length - 1
+						versionTable.dataSource.data[
+							versionTable.dataSource.data.length - 1
 						].id
 					);
 				} else {
@@ -183,13 +184,14 @@ export class VersionsComponent {
 			icon: "delete_forever",
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
 			disabled: (index, item) => {
-				if (this.versionTable) {
+				const versionTable = this.versionTable();
+    if (versionTable) {
 					return (
 						item.id ===
-							this.versionTable.dataSource.data[
-								this.versionTable.dataSource.data.length - 1
+							versionTable.dataSource.data[
+								versionTable.dataSource.data.length - 1
 							].id ||
-						item.id === this.versionTable.dataSource.data[0].id
+						item.id === versionTable.dataSource.data[0].id
 					);
 				} else {
 					return index === this.versions().length - 1 || index === 0;
@@ -236,16 +238,16 @@ export class VersionsComponent {
 	}
 
 	addVersionToTable(version: VersionModel) {
-		this.versionTable.addData(version);
+		this.versionTable().addData(version);
 		this.cdr.detectChanges();
 		this.openSnackBar("Version added with success!", "Close");
 	}
 
 	removeVersionFromTable(version: VersionModel) {
-		this.versionTable.removeData(version);
+		this.versionTable().removeData(version);
 
 		// Decrement index for versions with higher index than the removed one
-		this.versionTable.updateTableData((items) =>
+		this.versionTable().updateTableData((items) =>
 			items.map(
 				(item) =>
 					item.index > version.index

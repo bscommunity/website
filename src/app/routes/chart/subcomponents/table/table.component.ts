@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, Pipe, PipeTransform, ViewChild, input, model, inject, output } from "@angular/core";
+import { AfterViewInit, Component, OnInit, Pipe, PipeTransform, input, model, inject, output, viewChild } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
@@ -61,7 +61,7 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	readonly columns = input<TableColumn<T>[]>([]);
 	readonly actions = input<Action<T>[]>();
 
-	@ViewChild(MatSort) sort!: MatSort;
+	readonly sort = viewChild.required(MatSort);
 	readonly hasSorting = input("");
 	readonly initialSortColumn = input("");
 	readonly sortDirection = input<SortDirection>("asc");
@@ -82,7 +82,7 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	}
 
 	ngAfterViewInit(): void {
-		this.dataSource.sort = this.sort;
+		this.dataSource.sort = this.sort();
 		this.dataSource.sortingDataAccessor = (item: any, property) => {
 			// console.log("Sorting data accessor", item, property);
 			if (typeof item[property] === "number") {
