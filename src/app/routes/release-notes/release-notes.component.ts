@@ -18,7 +18,7 @@ const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
 	templateUrl: "./release-notes.component.html",
 })
 export class ReleaseNotesComponent implements OnInit {
-	releaseNotes = signal<ReleaseNote[]>([]);
+	releaseNotes = signal<ReleaseNote[] | undefined>(undefined);
 
 	ngOnInit() {
 		this.fetchReleaseNotes();
@@ -40,6 +40,8 @@ export class ReleaseNotesComponent implements OnInit {
 
 			const data = (await response.json()) as ReleaseNoteResponse[];
 
+			console.log(this.releaseNotes());
+
 			this.releaseNotes.set(
 				data.map((release) => {
 					const lines = release.body.split("\n");
@@ -54,6 +56,9 @@ export class ReleaseNotesComponent implements OnInit {
 						.map((line) =>
 							line.replace(/^- refactor:\s*/, "").trim(),
 						);
+					const style = lines
+						.filter((line) => line.trim().startsWith("- style:"))
+						.map((line) => line.replace(/^- style:\s*/, "").trim());
 
 					return {
 						version: release.tag_name,
@@ -61,6 +66,7 @@ export class ReleaseNotesComponent implements OnInit {
 						features,
 						refactors,
 						fixes,
+						style,
 					} as ReleaseNote;
 				}),
 			);

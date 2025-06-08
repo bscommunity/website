@@ -14,22 +14,24 @@
 
 	<div class="flex w-full h-[1px] bg-surface-container-high"></div>
 
-	@if (releaseNotes()) {
-		@for (release of releaseNotes(); track $index) {
-			<app-release-template
-				class="w-full"
-				[release]="release"
-				[isLast]="releaseNotes().length - 1 === $index"
-				[icon]="$index % 2 === 0 ? '🎉' : '🚀'"
-			></app-release-template>
+	@if (releaseNotes() !== undefined) {
+		@if (releaseNotes()!.length === 0) {
+			<p class="text-on-background text-base font-normal">
+				No release notes available.
+			</p>
+		} @else {
+			@for (release of releaseNotes(); track $index) {
+				<app-release-template
+					class="w-full"
+					[release]="release"
+					[isLast]="releaseNotes()!.length - 1 === $index"
+					[icon]="$index % 2 === 0 ? '🎉' : '🚀'"
+				></app-release-template>
+			}
 		}
-	} @else if (releaseNotes === undefined) {
-		<p class="text-on-background text-base font-normal">
-			Loading release notes...
-		</p>
 	} @else {
 		<p class="text-on-background text-base font-normal">
-			No release notes available.
+			Loading release notes...
 		</p>
 	}
 </main>
