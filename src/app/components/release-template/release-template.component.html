@@ -53,6 +53,14 @@
 		></app-release-template-item>
 	}
 
+	@if (release().style && release().style!.length > 0) {
+		<app-release-template-item
+			title="Style"
+			icon="palette"
+			[content]="release().style"
+		></app-release-template-item>
+	}
+
 	@if (!isLast()) {
 		<div class="flex w-full h-[1px] bg-surface-container-high mt-6"></div>
 	}

@@ -10,6 +10,7 @@ export interface ReleaseNote {
 	features?: string[];
 	refactors?: string[];
 	fixes?: string[];
+	style?: string[];
 	/* fixes: {
 		description: string;
 		issue: number;
