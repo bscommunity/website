@@ -15,9 +15,13 @@ const MUSICBRAINZ_API_URL = "https://musicbrainz.org/ws/2/recording";
 
 // Models
 import { z } from "zod";
-import { Chart, CreateChart } from "@/models/chart.model";
+import { CreateChart } from "@/models/chart.model";
 import { Genre } from "@/models/enums/genre.enum";
 import { StreamingLinkModel } from "@/models/streaming-link.model";
+import {
+	StreamingPlatform,
+	StreamingPlatformUtils,
+} from "@/models/enums/streaming-platform.model";
 
 // Lib
 import { normalizeGenre } from "./genres";
@@ -25,11 +29,6 @@ import { normalizeGenre } from "./genres";
 // Services & Injections
 import { CookieService } from "@/services/cookie.service";
 import { importKey, encrypt, decrypt } from "@/lib/security";
-import {
-	getPlatformFromLink,
-	StreamingPlatform,
-	StreamingPlatformUtils,
-} from "@/models/enums/streaming-platform.model";
 
 const MediaInfo = CreateChart.pick({
 	coverUrl: true,
@@ -64,6 +63,91 @@ function cleanArtistName(artist: string): string {
 }
 
 /**
+ * Smart track matching algorithm to find the best match from search results
+ */
+function findBestTrackMatch(
+	tracks: ITunesResponse[],
+	targetTrack: string,
+	targetArtist: string,
+): ITunesResponse | null {
+	if (!tracks || tracks.length === 0) return null;
+
+	const scoredTracks = tracks.map((track) => ({
+		track,
+		score: calculateTrackScore(track, targetTrack, targetArtist),
+	}));
+
+	// Sort by score (highest first)
+	scoredTracks.sort((a, b) => b.score - a.score);
+
+	// Return the highest scored track
+	return scoredTracks[0].track;
+}
+
+/**
+ * Calculate a score for how well a track matches the search criteria
+ */
+function calculateTrackScore(
+	track: ITunesResponse,
+	targetTrack: string,
+	targetArtist: string,
+): number {
+	let score = 0;
+
+	const trackName = track.trackName.toLowerCase();
+	const artistName = track.artistName.toLowerCase();
+	const collectionName = track.collectionName.toLowerCase();
+
+	const normalizedTargetTrack = targetTrack.toLowerCase();
+	const normalizedTargetArtist = targetArtist.toLowerCase();
+
+	// Exact track name match gets highest score
+	if (trackName === normalizedTargetTrack) {
+		score += 100;
+	} else if (trackName.includes(normalizedTargetTrack)) {
+		score += 70;
+	} else if (normalizedTargetTrack.includes(trackName)) {
+		score += 50;
+	}
+
+	// Exact artist match
+	if (artistName === normalizedTargetArtist) {
+		score += 80;
+	} else if (
+		artistName.includes(normalizedTargetArtist) ||
+		normalizedTargetArtist.includes(artistName)
+	) {
+		score += 60;
+	}
+
+	// Penalize remixes, edits, versions, etc.
+	const remixPatterns =
+		/\b(remix|edit|version|remaster|acoustic|live|instrumental|radio|extended|club|dub|vip)\b/i;
+	if (remixPatterns.test(trackName)) {
+		score -= 30;
+	}
+
+	// Bonus for single releases (more likely to be original)
+	if (collectionName.includes("single") || track.trackCount === 1) {
+		score += 20;
+	}
+
+	// Bonus for tracks from main albums vs remix albums
+	if (!collectionName.includes("remix") && !collectionName.includes("edit")) {
+		score += 15;
+	}
+
+	// Prefer newer releases (but not too heavily)
+	const releaseYear = new Date(track.releaseDate).getFullYear();
+	const currentYear = new Date().getFullYear();
+	if (releaseYear >= currentYear - 2) {
+		score += 5;
+	}
+
+	return score;
+}
+
+/**
  * Find media information (album cover, etc.) using track and artist names
  */
 export async function getMediaInfo(
@@ -77,36 +161,44 @@ export async function getMediaInfo(
 
 	let errors: Error[] = [];
 	let foundGenre: Genre | undefined = undefined;
-
-	// Try iTunes first
+	// Try iTunes first with smart result selection
 	try {
 		let query = new URLSearchParams({
 			term: `${cleanedTrack} ${cleanedArtist}`,
 			entity: "song",
-			limit: "1",
+			limit: "5", // Get more results to find the best match
 		}).toString();
 
-		const iTunesData = await fetchItunesApi(query);
+		const iTunesResults = await fetchItunesApi(query);
 
-		if (iTunesData) {
-			foundGenre = normalizeGenre(iTunesData.primaryGenreName);
-			return {
-				coverUrl: iTunesData.artworkUrl100.replace(
-					"100x100",
-					"600x600",
-				),
-				album: iTunesData.collectionName,
-				track: iTunesData.trackName,
-				artist: iTunesData.artistName,
-				genre: foundGenre,
-				trackUrls: [
-					{
-						platform: StreamingPlatform.APPLE_MUSIC,
-						url: iTunesData.trackViewUrl,
-					},
-				],
-				trackPreviewUrl: iTunesData.previewUrl,
-			};
+		if (iTunesResults && iTunesResults.length > 0) {
+			// Find the best match using smart scoring
+			const bestMatch = findBestTrackMatch(
+				iTunesResults,
+				cleanedTrack,
+				cleanedArtist,
+			);
+
+			if (bestMatch) {
+				foundGenre = normalizeGenre(bestMatch.primaryGenreName);
+				return {
+					coverUrl: bestMatch.artworkUrl100.replace(
+						"100x100",
+						"600x600",
+					),
+					album: bestMatch.collectionName,
+					track: bestMatch.trackName,
+					artist: bestMatch.artistName,
+					genre: foundGenre,
+					trackUrls: [
+						{
+							platform: StreamingPlatform.APPLE_MUSIC,
+							url: bestMatch.trackViewUrl,
+						},
+					],
+					trackPreviewUrl: bestMatch.previewUrl,
+				};
+			}
 		}
 	} catch (err) {
 		errors.push(err as Error);
@@ -184,38 +276,45 @@ export async function getMediaInfo(
 	} catch (err) {
 		errors.push(err as Error);
 	}
-
 	// If we reach here, we try one last time with a more flexible search on iTunes
 	try {
 		const veryCleanTrack = cleanedTrack.split("-")[0].trim();
 		const query = new URLSearchParams({
 			term: `${veryCleanTrack} ${cleanedArtist.split("&")[0].trim()}`,
 			entity: "song",
-			limit: "1",
+			limit: "5",
 		}).toString();
 
-		const iTunesData = await fetchItunesApi(query);
+		const iTunesResults = await fetchItunesApi(query);
 
-		if (iTunesData) {
-			foundGenre =
-				normalizeGenre(iTunesData.primaryGenreName) || foundGenre;
-			return {
-				coverUrl: iTunesData.artworkUrl100.replace(
-					"100x100",
-					"600x600",
-				),
-				album: iTunesData.collectionName,
-				track: iTunesData.trackName,
-				artist: iTunesData.artistName,
-				genre: foundGenre,
-				trackUrls: [
-					{
-						platform: StreamingPlatform.APPLE_MUSIC,
-						url: iTunesData.trackViewUrl,
-					},
-				],
-				trackPreviewUrl: iTunesData.previewUrl,
-			};
+		if (iTunesResults && iTunesResults.length > 0) {
+			const bestMatch = findBestTrackMatch(
+				iTunesResults,
+				veryCleanTrack,
+				cleanedArtist.split("&")[0].trim(),
+			);
+
+			if (bestMatch) {
+				foundGenre =
+					normalizeGenre(bestMatch.primaryGenreName) || foundGenre;
+				return {
+					coverUrl: bestMatch.artworkUrl100.replace(
+						"100x100",
+						"600x600",
+					),
+					album: bestMatch.collectionName,
+					track: bestMatch.trackName,
+					artist: bestMatch.artistName,
+					genre: foundGenre,
+					trackUrls: [
+						{
+							platform: StreamingPlatform.APPLE_MUSIC,
+							url: bestMatch.trackViewUrl,
+						},
+					],
+					trackPreviewUrl: bestMatch.previewUrl,
+				};
+			}
 		}
 	} catch (err) {
 		errors.push(err as Error);
@@ -291,7 +390,7 @@ export async function getTrackStreamingLinks(
 	throw new Error("No streaming links found for track");
 }
 
-async function fetchItunesApi(query: string): Promise<ITunesResponse> {
+async function fetchItunesApi(query: string): Promise<ITunesResponse[]> {
 	const response = await fetch(`${ITUNES_API_URL}?${query}`);
 
 	if (!response.ok) {
@@ -299,7 +398,7 @@ async function fetchItunesApi(query: string): Promise<ITunesResponse> {
 	}
 
 	const data = await response.json();
-	return data.results[0];
+	return data.results || [];
 }
 
 async function fetchOdesliApi(query: string): Promise<OdesliResponse> {
