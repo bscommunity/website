@@ -17,6 +17,7 @@ export interface ITunesResponse {
 	artworkUrl100: string;
 	collectionPrice: number;
 	trackPrice: number;
+	releaseDate: string;
 	collectionExplicitness: string;
 	trackExplicitness: string;
 	discCount: number;
