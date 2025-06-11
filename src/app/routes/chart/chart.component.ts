@@ -50,7 +50,6 @@ export class ChartComponent implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 
-
 	set chart(value: ChartWithLatestVersionModel) {
 		this._chart = {
 			...value,

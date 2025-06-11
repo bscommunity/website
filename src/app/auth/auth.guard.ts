@@ -18,6 +18,7 @@ export const isAuthenticatedGuard: CanActivateFn = (
 	return authService.isLoggedIn$.pipe(
 		map((isLoggedIn) => {
 			if (!isLoggedIn) {
+				// Redirect unauthenticated users back to auth
 				return router.createUrlTree(["/login"], {
 					queryParams: { returnUrl: state.url },
 				});
@@ -37,7 +38,7 @@ export const redirectIfAuthenticatedGuard: CanActivateFn = (
 	return authService.isLoggedIn$.pipe(
 		map((isLoggedIn) => {
 			if (isLoggedIn) {
-				// Redirect authenticated users accessing /login to /published
+				// Redirect authenticated users to dashboard
 				return router.createUrlTree(["/published"]);
 			}
 			return true;

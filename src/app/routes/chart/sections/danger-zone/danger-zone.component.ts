@@ -39,9 +39,9 @@ export class DangerZoneComponent {
 	isPublic = input.required<boolean>();
 	visibilityChanged = output<boolean>();
 
-	private readonly chartService = inject(ChartService);
-	private readonly dialog = inject(MatDialog);
-	private readonly _snackBar = inject(MatSnackBar);
+	readonly chartService = inject(ChartService);
+	readonly dialog = inject(MatDialog);
+	readonly _snackBar = inject(MatSnackBar);
 
 	// Open a snackbar with a message
 	openSnackBar(message: string, action: string) {
@@ -54,8 +54,8 @@ export class DangerZoneComponent {
 	openDeleteDialog() {
 		this.dialog.open(DeleteChartComponent, {
 			data: {
-				chartId: this.chartId,
-				chartName: this.chartName,
+				id: this.chartId(),
+				name: this.chartName(),
 			},
 		});
 	}

@@ -1,6 +1,12 @@
 import { Router } from "@angular/router";
 import { Component, inject, signal } from "@angular/core";
-import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import {
+	FormBuilder,
+	FormControl,
+	FormGroup,
+	ReactiveFormsModule,
+	Validators,
+} from "@angular/forms";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -21,8 +27,8 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { ChartService } from "@/services/api/chart.service";
 
 interface DeleteChartDialogData {
-	chartId: string;
-	chartName: string;
+	id: string;
+	name: string;
 }
 
 @Component({
@@ -48,10 +54,12 @@ export class DeleteChartComponent {
 	readonly dialogRef = inject(MatDialogRef<DeleteChartComponent>);
 
 	readonly data = inject<DeleteChartDialogData>(MAT_DIALOG_DATA);
-	readonly fb = inject(FormBuilder);
 
-	form = this.fb.group({
-		chartName: ["", Validators.pattern(escapeRegExp(this.data.chartName))],
+	form = new FormGroup({
+		chartName: new FormControl("", [
+			Validators.required,
+			Validators.pattern(new RegExp(escapeRegExp(this.data.name))),
+		]),
 	});
 
 	readonly isLoading = signal(false);
@@ -64,20 +72,23 @@ export class DeleteChartComponent {
 		}
 
 		this.isLoading.update(() => true);
+		this.form.disable();
 
 		// Delete the chart
-		const response = await this.chartService.deleteChart(this.data.chartId);
+		const response = await this.chartService.deleteChart(this.data.id);
 
 		if (response) {
 			this.router.navigate(["/published"]);
-			this.dialogRef.close(true);
+			this.dialogRef.close(false);
 		} else {
+			console.error("Failed to delete chart", response);
 			this._matSnackBar.open("Failed to delete chart", "Dismiss", {
 				duration: 2000,
 			});
+			this.dialogRef.close(false);
+			this.isLoading.update(() => false);
+			this.form.enable();
 		}
-
-		this.isLoading.update(() => false);
 	}
 }
 

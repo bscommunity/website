@@ -59,7 +59,6 @@ export class PublishedComponent implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
 
-
 	convertStringToMonth = convertStringToMonth;
 
 	sortOptions: Option[] = [
@@ -183,7 +182,10 @@ export class PublishedComponent implements OnInit {
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
-				this.error = error.message;
+				if (forceRefresh) {
+					this.error = error.message;
+				}
+				console.error(this.error);
 
 				this.isRefreshing = false;
 				this.cdr.markForCheck();
