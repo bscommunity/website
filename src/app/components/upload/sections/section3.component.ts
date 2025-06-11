@@ -66,7 +66,7 @@ import { ChartFileData } from "@/services/decode.service";
 					>
 				</mat-form-field>
 				<mat-form-field appearance="outline">
-					<mat-label>Gameplay URL</mat-label>
+					<mat-label>Gameplay</mat-label>
 					<input
 						type="text"
 						matInput
@@ -81,7 +81,7 @@ import { ChartFileData } from "@/services/decode.service";
 					} @else if (
 						form.get("chartPreviewUrl")?.hasError("pattern")
 					) {
-						<mat-error>URL must be a "youtu.be" video</mat-error>
+						<mat-error>Must be a YouTube video URL</mat-error>
 					}
 				</mat-form-field>
 				<app-file-upload
@@ -147,7 +147,19 @@ export class UploadDialogSection3Component implements OnInit {
 			],
 			chartPreviewUrl: [
 				initialFormData.chartPreviewUrl,
-				[urlValidator(), Validators.pattern(youtubePattern)],
+				[
+					urlValidator(),
+					(control: AbstractControl) => {
+						if (!control.value) return null;
+						if (
+							youtubePattern1.test(control.value) ||
+							youtubePattern2.test(control.value)
+						) {
+							return null;
+						}
+						return { pattern: true };
+					},
+				],
 			],
 			chartFileData: [null, Validators.required],
 		});
@@ -186,15 +198,42 @@ export class UploadDialogSection3Component implements OnInit {
 			this.form.get("chartFileData")?.setErrors({ required: true }); // Add required error
 		}
 	}
-
 	onSubmit() {
 		if (this.form.valid) {
-			this.dialogRef.close(this.form.value);
+			const formValue = { ...this.form.value };
+			
+			// Extract YouTube video ID if chartPreviewUrl is provided
+			if (formValue.chartPreviewUrl) {
+				formValue.chartPreviewUrl = this.extractYouTubeVideoId(formValue.chartPreviewUrl);
+			}
+			
+			this.dialogRef.close(formValue);
 		}
+	}
+
+	private extractYouTubeVideoId(url: string): string {
+		if (!url) return '';
+		
+		// Handle youtu.be format: https://youtu.be/VIDEO_ID
+		const youtuBeMatch = url.match(/^https:\/\/youtu\.be\/([a-zA-Z0-9-_]+)/);
+		if (youtuBeMatch) {
+			return youtuBeMatch[1];
+		}
+		
+		// Handle youtube.com format: https://www.youtube.com/watch?v=VIDEO_ID
+		const youtubeMatch = url.match(/^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9-_]+)/);
+		if (youtubeMatch) {
+			return youtubeMatch[1];
+		}
+		
+		// If no match found, return the original URL (fallback)
+		return url;
 	}
 }
 
-const youtubePattern = /^https:\/\/youtu\.be\/[a-zA-Z0-9-_]+(?:\?.*)?$/i;
+const youtubePattern1 = /^https:\/\/youtu\.be\/[a-zA-Z0-9-_]+(?:\?.*)?$/i;
+const youtubePattern2 =
+	/^https:\/\/www\.youtube\.com\/watch\?v=[a-zA-Z0-9-_]+(?:&.*)?$/i;
 
 export function urlValidator(): ValidatorFn {
 	return (control: AbstractControl): { [key: string]: any } | null => {
