@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from "@angular/core";
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnInit,
+	inject,
+} from "@angular/core";
 
 import {
 	AbstractControl,
-	FormArray,
 	FormBuilder,
-	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -62,56 +65,25 @@ import { ChartFileData } from "@/services/decode.service";
 						>Must be a direct link to the .zip file</mat-hint
 					>
 				</mat-form-field>
-				<!-- Multiple Preview URLs -->
-				<div
-					class="w-full flex flex-row items-center justify-center gap-4"
-					formArrayName="chartPreviewUrls"
-				>
-					@for (urlCtrl of chartPreviewUrls.controls; track $index) {
-						<mat-form-field
-							class="w-full relative"
-							appearance="outline"
-						>
-							<mat-label
-								>Gameplay URL
-								{{ $index > 1 ? $index + 1 : "" }}</mat-label
-							>
-							<input
-								type="text"
-								class="w-full"
-								matInput
-								[formControlName]="$index"
-								placeholder="https://youtu.be/BY_XwvKogC8"
-							/>
-							@if (
-								urlCtrl.hasError("invalidUrl") ||
-								urlCtrl.hasError("notHttps")
-							) {
-								<mat-error>Please enter a valid URL</mat-error>
-							} @else if (urlCtrl.hasError("pattern")) {
-								<mat-error
-									>URL must be a "youtu.be" video</mat-error
-								>
-							}
-						</mat-form-field>
+				<mat-form-field appearance="outline">
+					<mat-label>Gameplay URL</mat-label>
+					<input
+						type="text"
+						matInput
+						formControlName="chartPreviewUrl"
+						placeholder="https://youtu.be/BY_XwvKogC8"
+					/>
+					@if (
+						form.get("chartPreviewUrl")?.hasError("invalidUrl") ||
+						form.get("chartPreviewUrl")?.hasError("notHttps")
+					) {
+						<mat-error>Please enter a valid URL</mat-error>
+					} @else if (
+						form.get("chartPreviewUrl")?.hasError("pattern")
+					) {
+						<mat-error>URL must be a "youtu.be" video</mat-error>
 					}
-					<!-- @if (chartPreviewUrls.length < 2) {
-						<button
-							mat-button
-							type="button"
-							(click)="addPreviewUrl()"
-						>
-							+
-						</button>
-					} @else {
-						<button
-							mat-icon-button
-							(click)="removePreviewUrl($index)"
-						>
-							✖
-						</button>
-					} -->
-				</div>
+				</mat-form-field>
 				<app-file-upload
 					(onFileDecoded)="onFileDecoded($event)"
 				></app-file-upload>
@@ -161,7 +133,8 @@ import { ChartFileData } from "@/services/decode.service";
 })
 export class UploadDialogSection3Component implements OnInit {
 	private fb = inject(FormBuilder);
-	dialogRef = inject<MatDialogRef<UploadDialogSection3Component>>(MatDialogRef);
+	dialogRef =
+		inject<MatDialogRef<UploadDialogSection3Component>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup;
@@ -172,15 +145,10 @@ export class UploadDialogSection3Component implements OnInit {
 				initialFormData.chartUrl,
 				[Validators.required, urlValidator(), zipValidator()],
 			],
-			chartPreviewUrls: this.fb.array(
-				[
-					new FormControl("", [
-						urlValidator(),
-						Validators.pattern(youtubePattern),
-					]),
-				],
-				Validators.maxLength(2),
-			),
+			chartPreviewUrl: [
+				initialFormData.chartPreviewUrl,
+				[urlValidator(), Validators.pattern(youtubePattern)],
+			],
 			chartFileData: [null, Validators.required],
 		});
 	}
@@ -189,15 +157,12 @@ export class UploadDialogSection3Component implements OnInit {
 		// Initialize form with existing data
 		this.form.patchValue(this.data.formData);
 
-		if (this.data.formData.chartPreviewUrls) {
-			this.data.formData.chartPreviewUrls.forEach((url) =>
-				this.chartPreviewUrls.push(
-					new FormControl(url, [
-						urlValidator(),
-						Validators.pattern(youtubePattern),
-					]),
-				),
-			);
+		// If formData has chartPreviewUrl (singular), set it.
+		// This handles the case where data might come from an older structure or needs specific handling.
+		if (this.data.formData.chartPreviewUrl) {
+			this.form
+				.get("chartPreviewUrl")
+				?.setValue(this.data.formData.chartPreviewUrl);
 		}
 	}
 
@@ -205,36 +170,12 @@ export class UploadDialogSection3Component implements OnInit {
 		return this.form.get("chartUrl");
 	}
 
-	get chartPreviewUrls() {
-		return this.form.get("chartPreviewUrls") as FormArray;
+	get chartPreviewUrl() {
+		return this.form.get("chartPreviewUrl");
 	}
 
 	// Methods
-
-	setChartPreviewUrls(urls: string[]) {
-		const urlControls = urls.map((url) =>
-			this.fb.control(url, [
-				urlValidator(),
-				Validators.pattern(youtubePattern),
-			]),
-		);
-		this.form.setControl("chartPreviewUrls", this.fb.array(urlControls));
-	}
-
-	addPreviewUrl() {
-		if (this.chartPreviewUrls.length < 2) {
-			this.chartPreviewUrls.push(
-				new FormControl("", [
-					urlValidator(),
-					Validators.pattern(youtubePattern),
-				]),
-			);
-		}
-	}
-
-	removePreviewUrl(index: number) {
-		this.chartPreviewUrls.removeAt(index);
-	}
+	// Removed setChartPreviewUrls, addPreviewUrl, and removePreviewUrl as they are for FormArray
 
 	onFileDecoded(chartFileData: ChartFileData | null): void {
 		if (chartFileData) {

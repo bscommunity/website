@@ -3,12 +3,12 @@
 	<mat-dialog-content class="!flex flex-col items-start gap-4">
 		<p>
 			Are you sure you want to delete the chart
-			<strong>{{ data.chartName }}</strong
+			<strong>{{ this.data.name }}</strong
 			>? <br />
 			This action cannot be undone.
 		</p>
 		<p>
-			Please type <strong>{{ data.chartName }}</strong> to confirm.
+			Please type <strong>{{ this.data.name }}</strong> to confirm.
 		</p>
 		<mat-form-field
 			appearance="outline"

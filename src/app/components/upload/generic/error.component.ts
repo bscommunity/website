@@ -17,7 +17,7 @@ import { Router } from "@angular/router";
 		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
 			<p class="mb-2">
 				@if (data.title) {
-					{{ data.title }}
+					{{ data.title }}:{{ " " }}
 				} @else if (data.title !== null) {
 					An unexpected error occurred while processing your request:
 				}
@@ -54,7 +54,6 @@ export class UploadDialogErrorComponent {
 	private router = inject(Router);
 	dialogRef = inject<MatDialogRef<UploadDialogErrorComponent>>(MatDialogRef);
 	data = inject<UploadErrorData>(MAT_DIALOG_DATA);
-
 
 	onClose() {
 		if (this.data.redirectTo) {

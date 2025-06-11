@@ -46,7 +46,7 @@ export const CreateChart = Chart.omit({
 		// First version properties
 		Version.pick({
 			chartUrl: true,
-			chartPreviewUrls: true,
+			chartPreviewUrl: true,
 			duration: true,
 			notesAmount: true,
 			effectsAmount: true,

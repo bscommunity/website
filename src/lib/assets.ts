@@ -25,7 +25,11 @@ import { normalizeGenre } from "./genres";
 // Services & Injections
 import { CookieService } from "@/services/cookie.service";
 import { importKey, encrypt, decrypt } from "@/lib/security";
-import { StreamingPlatform } from "@/models/enums/streaming-platform.model";
+import {
+	getPlatformFromLink,
+	StreamingPlatform,
+	StreamingPlatformUtils,
+} from "@/models/enums/streaming-platform.model";
 
 const MediaInfo = CreateChart.pick({
 	coverUrl: true,
@@ -233,35 +237,27 @@ export async function getTrackStreamingLinks(
 		url: url,
 	}).toString();
 
-	let links: StreamingLinkModel[] = [];
-
 	// First, try to search for the links with Odesli
+	// Odesli returns keys like "youtubeMusic", "youtube", "appleMusic", "itunes", "amazonMusic", "amazonStore"
 	const odesliData = await fetchOdesliApi(query);
 	console.log("Odesli data", odesliData);
 
 	if (odesliData) {
-		for (const [key, value] of Object.entries(odesliData.linksByPlatform)) {
-			const platform = getPlatformFromLink(
-				key.normalize("NFC").toLowerCase(),
-			);
-
-			if (
-				!platform ||
-				!value.url ||
-				links.some((link) => link.platform === platform)
-			) {
-				continue; // Skip if platform is unknown or URL is missing
-			}
-
-			links.push({
-				platform: platform,
+		const odesliLinks = Object.entries(odesliData.linksByPlatform).map(
+			([key, value]) => ({
+				key,
 				url: value.url,
-			});
-		}
+			}),
+		);
 
-		return links;
+		return StreamingPlatformUtils.processLinksWithPrioritization(
+			odesliLinks,
+			true,
+		);
 	}
 
+	// Fallback to MusicBrainz
+	// MusicBrainz returns direct URLs like "https://music.youtube.com/...", "https://youtube.com/..."
 	let musicBrainzData = await fetchMusicBrainzApi(
 		"",
 		`recording:"${track}" AND artist:"${artist}"`,
@@ -278,51 +274,21 @@ export async function getTrackStreamingLinks(
 			const relations = musicBrainzData.relations;
 			console.log("MusicBrainz data", musicBrainzData);
 
-			for (const relation of relations) {
-				if (relation.type === "free streaming") {
-					const url = relation.url.resource;
-					const platform = getPlatformFromLink(url);
+			const musicBrainzLinks = relations
+				.filter((relation: any) => relation.type === "free streaming")
+				.map((relation: any) => ({
+					key: relation.url.resource,
+					url: relation.url.resource,
+				}));
 
-					if (
-						!platform ||
-						links.some((link) => link.platform === platform)
-					) {
-						continue; // Skip if platform is unknown
-					}
-
-					links.push({
-						platform: platform,
-						url: url,
-					});
-				}
-			}
-
-			return links;
+			return StreamingPlatformUtils.processLinksWithPrioritization(
+				musicBrainzLinks,
+				false,
+			);
 		}
 	}
 
 	throw new Error("No streaming links found for track");
-}
-
-function getPlatformFromLink(link: string): StreamingPlatform | null {
-	switch (true) {
-		case link.includes("spotify"):
-			return StreamingPlatform.SPOTIFY;
-		case link.includes("youtu"):
-			return StreamingPlatform.YOUTUBE_MUSIC;
-		case link.includes("soundcloud"):
-			return StreamingPlatform.SOUNDCLOUD;
-		case link.includes("deezer"):
-			return StreamingPlatform.DEEZER;
-		case link.includes("apple"):
-			return StreamingPlatform.APPLE_MUSIC;
-		case link.includes("amazon"):
-			return StreamingPlatform.AMAZON_MUSIC;
-		case link.includes("last"):
-			return StreamingPlatform.LAST_FM;
-		default:
-			return null;
-	}
 }
 
 async function fetchItunesApi(query: string): Promise<ITunesResponse> {

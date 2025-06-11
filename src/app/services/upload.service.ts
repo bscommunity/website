@@ -32,9 +32,11 @@ import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 // Services
 import { ChartService } from "@/services/api/chart.service";
 import { CacheService } from "@/services/cache.service";
-import { ChartFileData } from "@/services/decode.service";
 import { CookieService } from "./cookie.service";
 import { AuthService } from "app/auth/auth.service";
+
+// Types
+import type { ChartFileData } from "@/services/decode.service";
 
 // Models
 import { ChartModel, CreateChartModel } from "@/models/chart.model";
@@ -80,7 +82,7 @@ export const initialFormData: UploadFormData = {
 	isExplicit: false,
 	//
 	chartUrl: "",
-	chartPreviewUrls: [],
+	chartPreviewUrl: "",
 	duration: 0,
 	notesAmount: 0,
 	bpm: 0,
@@ -286,11 +288,11 @@ export class UploadDialogService {
 					message:
 						error.statusText ||
 						"There was an error while submitting the chart.",
-					error: error.message || error,
+					error: error.error.message || error,
 				},
 			});
 		} finally {
-			// this.reset();
+			this.reset();
 		}
 	}
 }

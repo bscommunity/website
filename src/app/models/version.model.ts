@@ -11,7 +11,7 @@ export const Version = z.object({
 	effectsAmount: z.number(),
 	bpm: z.number(),
 	chartUrl: z.string(),
-	chartPreviewUrls: z.string().array().nullable().optional().default([]),
+	chartPreviewUrl: z.string().nullable().optional(),
 	downloadsAmount: z.number().optional().default(0),
 	knownIssues: KnownIssue.array().optional().default([]),
 	publishedAt: z.coerce.date(),
