@@ -2,7 +2,10 @@
 	class="w-full inline-flex flex-col justify-start items-start gap-6 overflow-hidden"
 >
 	<header class="flex flex-col justify-start items-start gap-2">
-		<h3 class="relative justify-center text-3xl font-semibold leading-9">
+		<h3
+			[id]="release().version"
+			class="relative justify-center text-3xl font-semibold leading-9"
+		>
 			Release notes for {{ release().version }} {{ icon() }}
 		</h3>
 		<h4 class="relative justify-center text-base font-normal leading-snug">
@@ -29,14 +32,6 @@
 		}
 	</div>
 
-	@if (release().fixes && release().fixes!.length > 0) {
-		<app-release-template-item
-			title="Fixes"
-			icon="bug_report"
-			[content]="release().fixes"
-		></app-release-template-item>
-	}
-
 	@if (release().features && release().features!.length > 0) {
 		<app-release-template-item
 			title="Features"
@@ -58,6 +53,14 @@
 			title="Style"
 			icon="palette"
 			[content]="release().style"
+		></app-release-template-item>
+	}
+
+	@if (release().fixes && release().fixes!.length > 0) {
+		<app-release-template-item
+			title="Fixes"
+			icon="bug_report"
+			[content]="release().fixes"
 		></app-release-template-item>
 	}
 

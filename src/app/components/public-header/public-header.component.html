@@ -21,14 +21,30 @@
 		</a>
 	</div>
 
-	<a mat-stroked-button class="!min-w-fit max-xs:!w-full">
-		<div class="flex flex-row items-center justify-center gap-2">
-			<span
-				class="flex self-center text-inherit leading-none select-none"
-			>
-				<mat-icon inline> download </mat-icon>
-			</span>
-			Download app
-		</div>
-	</a>
+	<div class="flex flex-row items-center justify-end gap-4">
+		<!-- <a
+			[routerLink]="['/login']"
+			class="text-on-secondary-container hover:text-on-secondary-container/80 transition-colors"
+		>
+			<mat-icon
+				svgIcon="github"
+				aria-hidden="false"
+				aria-label="Github"
+			></mat-icon>
+		</a> -->
+		<a
+			mat-stroked-button
+			class="!min-w-fit max-xs:!w-full"
+			href="https://github.com/bscommunity/android/releases/latest/download/app-release.apk"
+		>
+			<div class="flex flex-row items-center justify-center gap-2">
+				<span
+					class="flex self-center text-inherit leading-none select-none"
+				>
+					<mat-icon inline> download </mat-icon>
+				</span>
+				Download app
+			</div>
+		</a>
+	</div>
 </nav>

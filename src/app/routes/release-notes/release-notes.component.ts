@@ -20,6 +20,15 @@ const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
 export class ReleaseNotesComponent implements OnInit {
 	releaseNotes = signal<ReleaseNote[] | undefined>(undefined);
 
+	releaseEmojis = ["🎉", "🎉", "✨", "🚀", "🥳", "🥳", "🆕", "😎", "😎"];
+
+	getRandomEmoji(): string {
+		const randomIndex = Math.floor(
+			Math.random() * this.releaseEmojis.length,
+		);
+		return this.releaseEmojis[randomIndex];
+	}
+
 	ngOnInit() {
 		this.fetchReleaseNotes();
 	}
@@ -30,8 +39,7 @@ export class ReleaseNotesComponent implements OnInit {
 				headers: {
 					Accept: "application/vnd.github.v3+json",
 				},
-				cache: "force-cache", // Use cache to avoid rate limiting issues
-				// cache: "no-cache", // Ensure we always fetch the latest data
+				cache: "no-cache",
 			});
 
 			if (!response.ok) {
@@ -45,9 +53,6 @@ export class ReleaseNotesComponent implements OnInit {
 			this.releaseNotes.set(
 				data.map((release) => {
 					const lines = release.body.split("\n");
-					const fixes = lines
-						.filter((line) => line.trim().startsWith("- fix:"))
-						.map((line) => line.replace(/^- fix:\s*/, "").trim());
 					const features = lines
 						.filter((line) => line.trim().startsWith("- feat:"))
 						.map((line) => line.replace(/^- feat:\s*/, "").trim());
@@ -59,14 +64,17 @@ export class ReleaseNotesComponent implements OnInit {
 					const style = lines
 						.filter((line) => line.trim().startsWith("- style:"))
 						.map((line) => line.replace(/^- style:\s*/, "").trim());
+					const fixes = lines
+						.filter((line) => line.trim().startsWith("- fix:"))
+						.map((line) => line.replace(/^- fix:\s*/, "").trim());
 
 					return {
 						version: release.tag_name,
 						date: release.published_at,
 						features,
 						refactors,
-						fixes,
 						style,
+						fixes,
 					} as ReleaseNote;
 				}),
 			);
