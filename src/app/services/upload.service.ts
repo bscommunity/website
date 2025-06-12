@@ -237,6 +237,10 @@ export class UploadDialogService {
 						this.formData.track,
 						this.formData.artist,
 					);
+					/* console.log(
+						"Track streaming links retrieved:",
+						this.formData.trackUrls,
+					); */
 				}
 			} catch (error: any) {
 				console.warn(

@@ -25,7 +25,7 @@
 					class="w-full"
 					[release]="release"
 					[isLast]="releaseNotes()!.length - 1 === $index"
-					[icon]="$index % 2 === 0 ? '🎉' : '🚀'"
+					[icon]="getRandomEmoji()"
 				></app-release-template>
 			}
 		}
