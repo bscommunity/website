@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
 
+// Material
 import {
 	MAT_DIALOG_DATA,
 	MatDialogModule,
@@ -8,11 +9,14 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 
+// Components
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
-import { SuccessDialogData } from "../../../services/upload.service";
+
+// Types
+import { SuccessDialogData } from "@/services/publish.service";
 
 @Component({
-	selector: "app-upload-dialog-success",
+	selector: "app-publish-dialog-success",
 	template: `
 		<h2 mat-dialog-title>Success!</h2>
 		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
@@ -69,11 +73,11 @@ import { SuccessDialogData } from "../../../services/upload.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogSuccessComponent {
-	dialogRef = inject<MatDialogRef<UploadDialogSuccessComponent>>(MatDialogRef);
+export class PublishDialogSuccessComponent {
+	dialogRef =
+		inject<MatDialogRef<PublishDialogSuccessComponent>>(MatDialogRef);
 	data = inject<SuccessDialogData>(MAT_DIALOG_DATA);
 	private router = inject(Router);
-
 
 	onAccessButtonClicked() {
 		this.dialogRef.close();

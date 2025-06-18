@@ -1,9 +1,9 @@
 import {
-  ChangeDetectorRef,
-  Component,
-  inject,
-  input,
-  viewChild
+	ChangeDetectorRef,
+	Component,
+	inject,
+	input,
+	viewChild,
 } from "@angular/core";
 
 // Material
@@ -13,8 +13,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 
 // Components
-import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
-import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
+import { ErrorDialogComponent } from "@/components/dialogs/error.component";
+import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 import {
 	TableComponent,
 	TableColumn,
@@ -26,9 +26,10 @@ import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirma
 // Service
 import {
 	DialogData,
-	UploadFormData,
-	uploadStepComponents,
-} from "@/services/upload.service";
+	PublishFormData,
+	publishStepComponents,
+	type StepComponentInstanceType,
+} from "@/services/publish.service";
 import { VersionService } from "@/services/api/version.service";
 
 // Model
@@ -64,24 +65,28 @@ export class VersionsComponent {
 		this._snackBar.open(message, action);
 	}
 
-	readonly versionTable = viewChild.required<TableComponent<VersionModel>>("versionTable");
+	readonly versionTable =
+		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
 	openAddVersionDialog(): void {
-		const dialogRef = this.dialog.open(uploadStepComponents[2], {
-			data: {
-				title: "Upload Chart",
-				description:
-					"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
-				formData: {},
-			} as DialogData,
-		});
+		const dialogRef = this.dialog.open<StepComponentInstanceType>(
+			publishStepComponents[2],
+			{
+				data: {
+					title: "Upload Chart",
+					description:
+						"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
+					formData: {},
+				} as DialogData,
+			},
+		);
 
 		dialogRef
 			.afterClosed()
-			.subscribe((result: UploadFormData | "back" | undefined) => {
+			.subscribe((result: PublishFormData | "back" | undefined) => {
 				if (result == "back" || result == undefined) return;
 
-				this.dialog.open(UploadDialogLoadingComponent);
+				this.dialog.open(PublishDialogLoadingComponent);
 
 				const { chartFileData, ...rest } = result;
 				this.addVersion({
@@ -165,7 +170,7 @@ export class VersionsComponent {
 				// Since we only update the table data, and not "versions" array
 				// we need to check the table data directly
 				const versionTable = this.versionTable();
-    if (versionTable) {
+				if (versionTable) {
 					return (
 						item.id ===
 						versionTable.dataSource.data[
@@ -185,7 +190,7 @@ export class VersionsComponent {
 			callback: this.openRemoveVersionConfirmationDialog.bind(this),
 			disabled: (index, item) => {
 				const versionTable = this.versionTable();
-    if (versionTable) {
+				if (versionTable) {
 					return (
 						item.id ===
 							versionTable.dataSource.data[
@@ -209,7 +214,7 @@ export class VersionsComponent {
 
 			if (!response) {
 				this.dialog.closeAll();
-				this.dialog.open(UploadDialogErrorComponent, {
+				this.dialog.open(ErrorDialogComponent, {
 					data: {
 						message: "Failed to submit chart.",
 						error: "No response from server.",
@@ -228,7 +233,7 @@ export class VersionsComponent {
 			console.error("Failed to add new version:", error);
 
 			this.dialog.closeAll();
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					title: "Failed to add new version.",
 					error: error.message,

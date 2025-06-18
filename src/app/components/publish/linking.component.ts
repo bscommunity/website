@@ -25,12 +25,12 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { initialFormData, type DialogData } from "@/services/upload.service";
+import { initialFormData, type DialogData } from "@/services/publish.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
 
 @Component({
-	selector: "app-upload-dialog-section3",
+	selector: "app-upload-dialog-linking",
 	template: `
 		<h2 mat-dialog-title>Linking</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -131,10 +131,10 @@ import { ChartFileData } from "@/services/decode.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogSection3Component implements OnInit {
+export class UploadDialogLinkingComponent implements OnInit {
 	private fb = inject(FormBuilder);
 	dialogRef =
-		inject<MatDialogRef<UploadDialogSection3Component>>(MatDialogRef);
+		inject<MatDialogRef<UploadDialogLinkingComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup;
@@ -201,31 +201,37 @@ export class UploadDialogSection3Component implements OnInit {
 	onSubmit() {
 		if (this.form.valid) {
 			const formValue = { ...this.form.value };
-			
+
 			// Extract YouTube video ID if chartPreviewUrl is provided
 			if (formValue.chartPreviewUrl) {
-				formValue.chartPreviewUrl = this.extractYouTubeVideoId(formValue.chartPreviewUrl);
+				formValue.chartPreviewUrl = this.extractYouTubeVideoId(
+					formValue.chartPreviewUrl,
+				);
 			}
-			
+
 			this.dialogRef.close(formValue);
 		}
 	}
 
 	private extractYouTubeVideoId(url: string): string {
-		if (!url) return '';
-		
+		if (!url) return "";
+
 		// Handle youtu.be format: https://youtu.be/VIDEO_ID
-		const youtuBeMatch = url.match(/^https:\/\/youtu\.be\/([a-zA-Z0-9-_]+)/);
+		const youtuBeMatch = url.match(
+			/^https:\/\/youtu\.be\/([a-zA-Z0-9-_]+)/,
+		);
 		if (youtuBeMatch) {
 			return youtuBeMatch[1];
 		}
-		
+
 		// Handle youtube.com format: https://www.youtube.com/watch?v=VIDEO_ID
-		const youtubeMatch = url.match(/^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9-_]+)/);
+		const youtubeMatch = url.match(
+			/^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9-_]+)/,
+		);
 		if (youtubeMatch) {
 			return youtubeMatch[1];
 		}
-		
+
 		// If no match found, return the original URL (fallback)
 		return url;
 	}

@@ -1,11 +1,11 @@
 import { ChartFileData, DecodeService } from "@/services/decode.service";
 import {
-  Component,
-  ElementRef,
-  inject,
-  signal,
-  output,
-  viewChild
+	Component,
+	ElementRef,
+	inject,
+	signal,
+	output,
+	viewChild,
 } from "@angular/core";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -13,7 +13,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 
 // Components
-import { UploadDialogErrorComponent } from "../upload/generic/error.component";
+import { ErrorDialogComponent } from "../dialogs/error.component";
 
 @Component({
 	selector: "app-file-upload",
@@ -23,7 +23,6 @@ import { UploadDialogErrorComponent } from "../upload/generic/error.component";
 })
 export class FileUploadComponent {
 	private decodeService = inject(DecodeService);
-
 
 	// Get section HTML component reference
 	readonly container = viewChild.required<ElementRef>("container");
@@ -89,7 +88,7 @@ export class FileUploadComponent {
 		}).catch((error) => {
 			console.error("Failed to extract chart data:", error);
 			this.onFileDecoded.emit(null);
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					error,
 				},

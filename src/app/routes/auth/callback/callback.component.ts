@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatDialog } from "@angular/material/dialog";
 
 // Components
-import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
+import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Services
 import { AuthService } from "app/auth/auth.service";
@@ -36,7 +36,7 @@ export class OAuthCallbackComponent implements OnInit {
 		if (!code) {
 			console.error("No code found in query params");
 
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					error: "No code found in query params",
 				},
@@ -52,7 +52,7 @@ export class OAuthCallbackComponent implements OnInit {
 		} catch (error: any) {
 			console.error("Error: ", error);
 
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					message: error.statusText,
 					error: error.error // this is stupid but too lazy to fix

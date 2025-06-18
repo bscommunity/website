@@ -22,7 +22,7 @@ import type { UserModel } from "@/models/user.model";
 
 // Services
 import { AuthService } from "@/auth/auth.service";
-import { UploadDialogService } from "@/services/upload.service";
+import { PublishDialogService } from "@/services/publish.service";
 
 @Component({
 	selector: "app-header",
@@ -42,7 +42,7 @@ export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
 
 	private _snackBar = inject(MatSnackBar);
-	private uploadDialog = inject(UploadDialogService);
+	private uploadDialog = inject(PublishDialogService);
 
 	user: UserModel | null = null;
 

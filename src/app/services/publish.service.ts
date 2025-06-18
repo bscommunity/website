@@ -4,23 +4,21 @@ import { BehaviorSubject } from "rxjs";
 
 import { MatDialog } from "@angular/material/dialog";
 
-import { UploadDialogSection1Component } from "@/components/upload/sections/section1.component";
-import { UploadDialogSection2Component } from "@/components/upload/sections/section2.component";
-import { UploadDialogSection3Component } from "@/components/upload/sections/section3.component";
+import { UploadDialogTypeSelectComponent } from "@/components/publish/type-select.component";
+import { UploadDialogCreateChartComponent } from "@/components/publish/create-chart.component";
+import { UploadDialogLinkingComponent } from "@/components/publish/linking.component";
 
-import { UploadDialogDisclaimerComponent } from "@/components/upload/generic/disclaimer.component";
-import { UploadDialogLoadingComponent } from "@/components/upload/generic/loading.component";
-import { UploadDialogSuccessComponent } from "@/components/upload/generic/success.component";
-import { UploadDialogErrorComponent } from "@/components/upload/generic/error.component";
+import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
+import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
-export const uploadStepComponents = [
-	UploadDialogSection1Component,
-	UploadDialogSection2Component,
-	UploadDialogSection3Component,
-	UploadDialogDisclaimerComponent,
+export const publishStepComponents = [
+	UploadDialogTypeSelectComponent,
+	UploadDialogCreateChartComponent,
+	UploadDialogLinkingComponent,
 ];
-type StepComponentInstanceType =
-	(typeof uploadStepComponents)[number] extends new (
+export type StepComponentInstanceType =
+	(typeof publishStepComponents)[number] extends new (
 		...args: any[]
 	) => infer R
 		? R
@@ -45,17 +43,17 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 export type DialogData = {
 	title?: string | null;
 	description?: string | null;
-	formData: UploadFormData;
+	formData: PublishFormData;
 	inactive: string[];
 };
 
-export type UploadFormData = CreateChartModel & {
+export type PublishFormData = CreateChartModel & {
 	// Omitted when submitting
 	contentType: string;
 	chartFileData: ChartFileData | null;
 };
 
-export interface UploadErrorData {
+export interface PublishErrorData {
 	title?: string | null;
 	message: string;
 	error: any;
@@ -67,7 +65,7 @@ export type SuccessDialogData = ChartModel & {
 	duration: number;
 };
 
-export const initialFormData: UploadFormData = {
+export const initialFormData: PublishFormData = {
 	contentType: "",
 	chartFileData: null,
 	//
@@ -93,7 +91,7 @@ export const initialFormData: UploadFormData = {
 @Injectable({
 	providedIn: "root",
 })
-export class UploadDialogService {
+export class PublishDialogService {
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
 
@@ -107,7 +105,7 @@ export class UploadDialogService {
 	currentStep$ = this.currentStepSubject.asObservable();
 
 	// Store form data
-	private formData: UploadFormData = initialFormData;
+	private formData: PublishFormData = initialFormData;
 
 	open() {
 		this.currentStepSubject.next(0);
@@ -163,18 +161,18 @@ export class UploadDialogService {
 	}
 
 	private getStepComponent() {
-		if (this.currentStepSubject.value >= uploadStepComponents.length)
+		if (this.currentStepSubject.value >= publishStepComponents.length)
 			throw new Error("Invalid step");
-		return uploadStepComponents[this.currentStepSubject.value];
+		return publishStepComponents[this.currentStepSubject.value];
 	}
 
 	private getTotalSteps(): number {
-		return uploadStepComponents.length;
+		return publishStepComponents.length;
 	}
 
 	private triggerError(message: string, error: string) {
 		this.dialog.closeAll();
-		this.dialog.open(UploadDialogErrorComponent, {
+		this.dialog.open(ErrorDialogComponent, {
 			data: {
 				message,
 				error,
@@ -186,7 +184,7 @@ export class UploadDialogService {
 	private async submitForm() {
 		// Check if user is logged in
 		if (!this.authService.isLoggedIn()) {
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					message: "Você precisa estar logado para enviar conteúdo.",
 					error: null,
@@ -197,7 +195,7 @@ export class UploadDialogService {
 		}
 
 		// Open loading dialog
-		const loadingDialog = this.dialog.open(UploadDialogLoadingComponent, {
+		const loadingDialog = this.dialog.open(PublishDialogLoadingComponent, {
 			disableClose: true,
 		});
 
@@ -277,7 +275,7 @@ export class UploadDialogService {
 
 			// Close loading dialog and open success dialog
 			loadingDialog.close();
-			this.dialog.open(UploadDialogSuccessComponent, {
+			this.dialog.open(PublishDialogSuccessComponent, {
 				hasBackdrop: true,
 				disableClose: true,
 				data: response,
@@ -286,7 +284,7 @@ export class UploadDialogService {
 			console.error("Failed to submit chart:", error);
 
 			loadingDialog.close();
-			this.dialog.open(UploadDialogErrorComponent, {
+			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					title: "Failed to submit chart",
 					message:

@@ -1,16 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { Router } from "@angular/router";
 
+// Material
 import {
 	MAT_DIALOG_DATA,
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { UploadErrorData } from "../../../services/upload.service";
-import { Router } from "@angular/router";
+
+// Types
+import { PublishErrorData } from "@/services/publish.service";
 
 @Component({
-	selector: "app-upload-dialog-error",
+	selector: "app-dialog-error",
 	template: `
 		<h2 mat-dialog-title>Oh, oh.</h2>
 
@@ -50,10 +53,10 @@ import { Router } from "@angular/router";
 	imports: [MatDialogModule, MatButtonModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogErrorComponent {
+export class ErrorDialogComponent {
 	private router = inject(Router);
-	dialogRef = inject<MatDialogRef<UploadDialogErrorComponent>>(MatDialogRef);
-	data = inject<UploadErrorData>(MAT_DIALOG_DATA);
+	dialogRef = inject<MatDialogRef<ErrorDialogComponent>>(MatDialogRef);
+	data = inject<PublishErrorData>(MAT_DIALOG_DATA);
 
 	onClose() {
 		if (this.data.redirectTo) {

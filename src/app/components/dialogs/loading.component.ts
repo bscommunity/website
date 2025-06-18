@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 
+// Material
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
-	selector: "app-upload-dialog-loading",
+	selector: "app-publish-dialog-loading",
 	template: `
 		<h2 mat-dialog-title>Submitting...</h2>
 		<mat-dialog-content
@@ -14,13 +15,14 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 				Please wait while the content is submitted. <br />
 				Do not close this window.
 			</p>
-			<mat-progress-spinner class="!my-6"
+			<mat-progress-spinner
+				class="!my-6"
 				mode="indeterminate"
 				diameter="48"
-			 />
+			/>
 		</mat-dialog-content>
 	`,
 	imports: [MatDialogModule, MatProgressSpinnerModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogLoadingComponent {}
+export class PublishDialogLoadingComponent {}

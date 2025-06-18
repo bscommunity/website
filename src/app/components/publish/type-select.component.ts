@@ -11,10 +11,10 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { initialFormData, type DialogData } from "@/services/upload.service";
+import { initialFormData, type DialogData } from "@/services/publish.service";
 
 @Component({
-	selector: "app-upload-dialog-section1",
+	selector: "app-upload-dialog-type-select",
 	template: `
 		<h2 mat-dialog-title>Submit</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -61,9 +61,10 @@ import { initialFormData, type DialogData } from "@/services/upload.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogSection1Component {
+export class UploadDialogTypeSelectComponent {
 	private fb = inject(FormBuilder);
-	dialogRef = inject<MatDialogRef<UploadDialogSection1Component>>(MatDialogRef);
+	dialogRef =
+		inject<MatDialogRef<UploadDialogTypeSelectComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup;
