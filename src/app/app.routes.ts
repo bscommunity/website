@@ -1,15 +1,9 @@
 import type { Routes } from "@angular/router";
 
-// Routes
-
-// Linking Routes
-
-// Error Routes
-
-// Auth Routes
-
 // Resolvers
 import { ChartResolver } from "./routes/chart/chart-resolver.service";
+
+// Guards
 import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
@@ -19,9 +13,7 @@ export const routes: Routes = [
 	{
 		path: "login",
 		loadComponent: () =>
-			import("./routes/auth/login/login.component").then(
-				(m) => m.LoginComponent,
-			),
+			import("./routes/auth/login/login").then((m) => m.Login),
 		canActivate: [redirectIfAuthenticatedGuard],
 		title: "Login",
 	},
@@ -29,7 +21,7 @@ export const routes: Routes = [
 		path: "callback",
 		loadComponent: () =>
 			import("./routes/auth/callback/callback.component").then(
-				(m) => m.OAuthCallbackComponent,
+				(m) => m.OAuthCallback,
 			),
 		canActivate: [redirectIfAuthenticatedGuard],
 		title: "Authenticating...",
@@ -37,7 +29,7 @@ export const routes: Routes = [
 	{
 		path: "overview",
 		loadComponent: () =>
-			import("./routes/overview/overview.component").then(
+			import("./routes/overview/overview").then(
 				(m) => m.OverviewComponent,
 			),
 		canActivate: [isAuthenticatedGuard],
@@ -46,9 +38,7 @@ export const routes: Routes = [
 	{
 		path: "published",
 		loadComponent: () =>
-			import("./routes/published/published.component").then(
-				(m) => m.PublishedComponent,
-			),
+			import("./routes/published/published").then((m) => m.Published),
 		canActivate: [isAuthenticatedGuard],
 		title: "Published",
 	},
@@ -62,9 +52,7 @@ export const routes: Routes = [
 	{
 		path: "chart/:id",
 		loadComponent: () =>
-			import("./routes/chart/chart.component").then(
-				(m) => m.ChartComponent,
-			),
+			import("./routes/chart/chart").then((m) => m.Chart),
 		resolve: { chart: ChartResolver },
 		canActivate: [isAuthenticatedGuard],
 		runGuardsAndResolvers: "always",
@@ -73,45 +61,40 @@ export const routes: Routes = [
 		path: "release-notes",
 		loadComponent: () =>
 			import("./routes/release-notes/release-notes.component").then(
-				(m) => m.ReleaseNotesComponent,
+				(m) => m.ReleaseNotes,
 			),
 		title: "Release Notes",
 	},
 	{
 		path: "privacy-policy",
 		loadComponent: () =>
-			import("./routes/privacy-policy/privacy-policy.component").then(
-				(m) => m.PrivacyPolicyComponent,
+			import("./routes/privacy-policy/privacy-policy").then(
+				(m) => m.PrivacyPolicy,
 			),
 		title: "Our Privacy Policy: Transparency for Our Community",
 	},
 	{
 		path: "terms-of-service",
 		loadComponent: () =>
-			import("./routes/terms-of-service/terms-of-service.component").then(
+			import("./routes/terms-of-service/terms-of-service").then(
 				(m) => m.TermsOfServiceComponent,
 			),
 		title: "Our Terms of Service",
 	},
 	{
 		path: "link/:type/:id",
-		loadComponent: () =>
-			import("./routes/link/link.component").then((m) => m.LinkComponent),
+		loadComponent: () => import("./routes/link/link").then((m) => m.Link),
 	},
 	{
 		path: "error",
 		loadComponent: () =>
-			import("./routes/error/error.component").then(
-				(m) => m.PageErrorComponent,
-			),
+			import("./routes/error/error").then((m) => m.PageError),
 		title: "Error",
 	},
 	{
 		path: "",
 		loadComponent: () =>
-			import("./routes/landing.component").then(
-				(m) => m.LandingComponent,
-			),
+			import("./routes/landing").then((m) => m.LandingComponent),
 		title: "bscm",
 	},
 	// { path: "", redirectTo: "/published", pathMatch: "full" }, // Redirect to published
@@ -119,7 +102,7 @@ export const routes: Routes = [
 		path: "**",
 		title: "Oops. 404",
 		loadComponent: () =>
-			import("./routes/not-found/not-found.component").then(
+			import("./routes/not-found/not-found").then(
 				(m) => m.PageNotFoundComponent,
 			),
 	}, // Should be the last

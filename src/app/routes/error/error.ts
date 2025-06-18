@@ -1,5 +1,5 @@
 import { Location } from "@angular/common";
-import { ActivatedRoute, Router } from "@angular/router";
+import { Router } from "@angular/router";
 import { Component, OnInit, inject } from "@angular/core";
 
 // Material
@@ -9,9 +9,9 @@ import { MatIconModule } from "@angular/material/icon";
 @Component({
 	selector: "app-error",
 	imports: [MatIconModule, MatButtonModule],
-	templateUrl: "./error.component.html",
+	templateUrl: "./error.html",
 })
-export class PageErrorComponent implements OnInit {
+export class PageError implements OnInit {
 	private location = inject(Location);
 	private router = inject(Router);
 

@@ -6,7 +6,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 @Component({
-	selector: "app-terms-of-service",
+	selector: "app-landing",
 	imports: [MatButtonModule, MatTooltipModule, RouterLink],
 	template: `
 		<div
@@ -32,5 +32,4 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 export class LandingComponent {
 	// This component is intentionally left empty as it serves as a placeholder
 	// for the landing page of the application.
-	// Any future content or functionality can be added here.
 }

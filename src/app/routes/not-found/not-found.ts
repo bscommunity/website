@@ -1,11 +1,10 @@
 import { Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
-
 import { MatIconModule } from "@angular/material/icon";
 
 @Component({
-	selector: "app-overview",
+	selector: "app-not-found",
 	imports: [MatIconModule, MatButtonModule],
-	templateUrl: "./overview.component.html",
+	templateUrl: "./not-found.html",
 })
-export class OverviewComponent {}
+export class PageNotFoundComponent {}

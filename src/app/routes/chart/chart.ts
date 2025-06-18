@@ -13,7 +13,7 @@ import { AsideComponent } from "./subcomponents/aside/aside.component";
 import { KnownIssuesComponent } from "./sections/known-issues/known-issues.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
-import { PageErrorComponent } from "../error/error.component";
+import { PageError } from "../error/error";
 
 // Models
 import { ChartWithLatestVersionModel } from "@/models/chart.model";
@@ -40,13 +40,12 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 		ContributorsComponent,
 		DangerZoneComponent,
 		VersionsComponent,
-		PageErrorComponent,
-		PageErrorComponent,
+		PageError,
 	],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
-	templateUrl: "./chart.component.html",
+	templateUrl: "./chart.html",
 })
-export class ChartComponent implements OnInit {
+export class Chart implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 

@@ -10,12 +10,11 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 @Component({
 	selector: "app-login",
 	imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule],
-	templateUrl: "./login.component.html",
+	templateUrl: "./login.html",
 })
-export class LoginComponent implements OnInit {
+export class Login implements OnInit {
 	private authService = inject(AuthService);
 	private router = inject(Router);
-
 
 	oAuthUrl: string | null = null;
 

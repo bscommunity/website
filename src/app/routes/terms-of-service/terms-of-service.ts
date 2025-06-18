@@ -14,7 +14,7 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 		TermsTemplateComponent,
 		PublicHeaderComponent,
 	],
-	templateUrl: "./terms-of-service.component.html",
+	templateUrl: "./terms-of-service.html",
 })
 export class TermsOfServiceComponent {
 	sections: TermsSection[] = [

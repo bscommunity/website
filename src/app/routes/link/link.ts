@@ -19,9 +19,9 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 		LargePanelComponent,
 		PublicHeaderComponent,
 	],
-	templateUrl: "./link.component.html",
+	templateUrl: "./link.html",
 })
-export class LinkComponent {
+export class Link {
 	route: ActivatedRoute = inject(ActivatedRoute);
 
 	contentType = null;

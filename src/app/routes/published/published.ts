@@ -53,9 +53,9 @@ type ChartsByMonth = {
 		LargePanelComponent,
 		ChartPreviewComponent,
 	],
-	templateUrl: "./published.component.html",
+	templateUrl: "./published.html",
 })
-export class PublishedComponent implements OnInit {
+export class Published implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
 

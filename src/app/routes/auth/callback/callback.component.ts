@@ -15,9 +15,9 @@ import { AuthService } from "app/auth/auth.service";
 @Component({
 	selector: "app-oauth-callback",
 	imports: [MatProgressSpinnerModule],
-	templateUrl: "./callback.component.html",
+	templateUrl: "./callback.html",
 })
-export class OAuthCallbackComponent implements OnInit {
+export class OAuthCallback implements OnInit {
 	private router = inject(Router);
 	private route = inject(ActivatedRoute);
 	private authService = inject(AuthService);

@@ -16,9 +16,9 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 		TermsTemplateComponent,
 		PublicHeaderComponent,
 	],
-	templateUrl: "./privacy-policy.component.html",
+	templateUrl: "./privacy-policy.html",
 })
-export class PrivacyPolicyComponent {
+export class PrivacyPolicy {
 	sections: TermsSection[] = [
 		{
 			title: "What Do We Collect?",
