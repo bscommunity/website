@@ -88,12 +88,7 @@
 						</span>
 					</span>
 				</button>
-				<button
-					disabled
-					disabledInteractive
-					mat-menu-item
-					(click)="openWarning()"
-				>
+				<button [routerLink]="['/settings']" mat-menu-item>
 					<mat-icon>settings</mat-icon>
 					<span>Settings</span>
 				</button>
