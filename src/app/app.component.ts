@@ -64,6 +64,11 @@ export class AppComponent implements OnInit {
 		);
 
 		iconRegistry.addSvgIcon(
+			"google",
+			sanitizer.bypassSecurityTrustResourceUrl("assets/logos/google.svg"),
+		);
+
+		iconRegistry.addSvgIcon(
 			"deluxe",
 			sanitizer.bypassSecurityTrustResourceUrl("assets/icons/deluxe.svg"),
 		);
