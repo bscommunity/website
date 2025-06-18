@@ -23,7 +23,6 @@ export class CacheService {
 	private storageService = inject(StorageService);
 	private cookieService = inject(CookieService);
 
-
 	public get isOnRefreshCooldown(): boolean {
 		const lastRefresh = this.cookieService.get("lastRefresh");
 		if (!lastRefresh) {
@@ -57,9 +56,14 @@ export class CacheService {
 			keys = JSON.parse(storageKeys);
 		}
 
-		keys.push(key);
+		// Evita duplicidade de chaves
+		if (!keys.includes(key)) {
+			keys.push(key);
+		}
 
-		this.storageService.setItem("chartKeys", JSON.stringify(keys));
+		// Garante que não há duplicatas
+		const uniqueKeys = Array.from(new Set(keys));
+		this.storageService.setItem("chartKeys", JSON.stringify(uniqueKeys));
 	}
 
 	private increaseChartCount(): void {
@@ -136,10 +140,10 @@ export class CacheService {
 			this.removeChart(oldestChart.id);
 		}
 
-		// We add the new chart to the cache
+		// Usar getItem ao invés de 'in' para evitar problemas de verificação
 		const cacheKey = `chart_${chart.id}`;
 
-		if (cacheKey in localStorage) {
+		if (localStorage.getItem(cacheKey) !== null) {
 			return this.updateChart(chart);
 		}
 
