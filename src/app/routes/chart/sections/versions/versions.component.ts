@@ -112,11 +112,8 @@ export class VersionsComponent {
 			if (!result) {
 				throw new Error("An error occurred");
 			}
-		};
 
-		const afterOperation = () => {
 			this.removeVersionFromTable(version);
-			this.openSnackBar("Version removed with success!", "Close");
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
@@ -124,8 +121,8 @@ export class VersionsComponent {
 				title: "Remove Version",
 				description:
 					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+				success: "Version removed with success!",
 				operation,
-				afterOperation,
 			},
 		});
 	}

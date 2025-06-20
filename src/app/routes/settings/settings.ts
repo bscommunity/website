@@ -50,7 +50,7 @@ export class Settings implements OnInit {
 	currentTab = this.tabs[0].value;
 
 	oAuthUrl = this.oAuthService.getGoogleOAuthUrl();
-	hasDriveScope = this.oAuthService.hasDriveScope;
+	hasDriveScope = this.oAuthService.hasDriveScopeSignal;
 
 	ngOnInit(): void {
 		const section = this.route.snapshot.queryParamMap.get("section");
@@ -64,6 +64,14 @@ export class Settings implements OnInit {
 		console.log("Account deletion logic goes here.");
 	}
 
+	async unlinkOperation() {
+		if (!this.oAuthService.hasDriveScopeSignal()) {
+			throw new Error("Google Drive scope is not linked.");
+		}
+
+		await this.oAuthService.unlinkGoogleAccount();
+	}
+
 	openUnlinkConfirmationDialog() {
 		this.dialog.open(ConfirmationDialogComponent, {
 			data: {
@@ -71,14 +79,8 @@ export class Settings implements OnInit {
 				description:
 					"Are you sure you want to unlink your Google account? You'll no longer be able to directly upload files to Google Drive.",
 				error: "Failed to unlink Google account. Please try again.",
-				operation: async () => {
-					if (!this.oAuthService.hasDriveScope) {
-						throw new Error("Google Drive scope is not linked.");
-					}
-
-					await this.oAuthService.unlinkGoogleAccount();
-					this.hasDriveScope = false;
-				},
+				success: "Google account unlinked successfully.",
+				operation: this.unlinkOperation.bind(this),
 			},
 		});
 	}

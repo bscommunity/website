@@ -17,8 +17,8 @@ export interface ConfirmationDialogData {
 	title: string;
 	description: string;
 	error?: string;
+	success?: string;
 	operation: () => Promise<void>;
-	afterOperation?: () => void;
 }
 
 @Component({
@@ -44,11 +44,14 @@ export class ConfirmationDialogComponent {
 
 		try {
 			await this.data.operation();
-			this.data.afterOperation && this.data.afterOperation();
-		} catch (error) {
+			this._matSnackBar.open(
+				this.data.success ?? "Operation completed successfully",
+				"Close",
+			);
+		} catch (error: any) {
 			console.error(error);
 			this._matSnackBar.open(
-				this.data.error ?? "An error occurred",
+				this.data.error ?? error.error ?? "An error occurred",
 				"Close",
 			);
 		}

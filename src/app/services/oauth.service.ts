@@ -1,4 +1,4 @@
-import { Injectable, inject } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
@@ -25,15 +25,27 @@ export class OAuthService {
 	private readonly redirectUri = environment.GOOGLE_REDIRECT_URI;
 	private readonly scope = environment.GOOGLE_SCOPES;
 
-	get hasDriveScope(): boolean {
+	hasDriveScopeSignal = signal(this.getHasDriveScope());
+
+	private getHasDriveScope(): boolean {
 		const scopes = this.storageService.getItem(this.GOOGLE_SCOPES_NAME);
 		if (!scopes) return false;
-
 		return scopes.includes("drive.file");
 	}
 
+	get hasDriveScope(): boolean {
+		return this.hasDriveScopeSignal();
+	}
+
 	getGoogleOAuthUrl(): string {
-		return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&response_type=code&scope=${encodeURIComponent(this.scope)}&access_type=offline`;
+		const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+		url.searchParams.set("client_id", this.clientId);
+		url.searchParams.set("redirect_uri", this.redirectUri);
+		url.searchParams.set("response_type", "code");
+		url.searchParams.set("scope", this.scope);
+		url.searchParams.set("access_type", "offline");
+
+		return url.toString();
 	}
 
 	async linkGoogleAccount(code: string) {
@@ -55,6 +67,7 @@ export class OAuthService {
 				this.GOOGLE_SCOPES_NAME,
 				response.scope,
 			);
+			this.hasDriveScopeSignal.set(this.getHasDriveScope());
 
 			console.log("Google account linked successfully");
 		} catch (error) {
@@ -75,6 +88,7 @@ export class OAuthService {
 				this.http.post(`${apiUrl}/auth/google/unlink`, {}),
 			);
 			this.storageService.removeItem(this.GOOGLE_SCOPES_NAME);
+			this.hasDriveScopeSignal.set(this.getHasDriveScope());
 			console.log("Google account unlinked successfully");
 		} catch (error) {
 			console.error("Error unlinking Google account:", error);

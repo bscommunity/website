@@ -49,7 +49,9 @@ export class GoogleOAuthCallback implements OnInit {
 		try {
 			console.log("Received code: ", code);
 			await this.oAuthService.linkGoogleAccount(code);
-			this.router.navigate(["/published"]);
+			this.router.navigate(["/settings"], {
+				queryParams: { section: "connections" },
+			});
 		} catch (error: any) {
 			console.error("Error: ", error);
 
@@ -59,7 +61,7 @@ export class GoogleOAuthCallback implements OnInit {
 					error: error.error // this is stupid but too lazy to fix
 						? error.error.message
 						: "An error occurred during login",
-					redirectTo: "/login",
+					redirectTo: "/settings?section=connections",
 				},
 				disableClose: true,
 			});

@@ -69,12 +69,8 @@ export class KnownIssuesComponent {
 			if (!result) {
 				throw new Error("An error occurred");
 			}
-		};
 
-		const afterOperation = () => {
 			this.removeIssueFromTable(issue);
-			this.dialog.closeAll();
-			this.openSnackBar("Issue removed with success!", "Close");
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
@@ -82,8 +78,8 @@ export class KnownIssuesComponent {
 				title: "Remove Issue",
 				description:
 					"Are you sure you want to remove this issue? It will not appear as solved for other users.",
+				success: "Issue removed with success!",
 				operation,
-				afterOperation,
 			},
 		});
 	}

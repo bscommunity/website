@@ -71,13 +71,9 @@ export class DangerZoneComponent {
 			await this.chartService.updateChart(this.chartId(), {
 				isPublic: newVisibility,
 			});
-		};
 
-		const afterOperation = () => {
 			console.log(`Chart visibility updated to ${newVisibility}`);
 			this.visibilityChanged.emit(newVisibility);
-			this.dialog.closeAll();
-			this.openSnackBar("Chart visibility updated", "Close");
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
@@ -90,9 +86,9 @@ export class DangerZoneComponent {
 						? "This will make the chart visible to everyone."
 						: "This will make the chart only visible to you."
 				}`,
+				success: "Chart visibility updated",
 				error: "An error occurred while updating the chart visibility",
 				operation,
-				afterOperation,
 			},
 		});
 	}
