@@ -7,7 +7,7 @@ import {
 } from "@angular/router";
 import { ChartService } from "@/services/api/chart.service";
 import { ChartModel } from "@/models/chart.model";
-import { AuthService } from "@/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { ZodError } from "zod";
 
 @Injectable({
@@ -17,7 +17,6 @@ export class ChartResolver implements Resolve<any> {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
 	private authService = inject(AuthService);
-
 
 	async resolve(
 		route: ActivatedRouteSnapshot,

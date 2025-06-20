@@ -162,7 +162,7 @@ export class Published implements OnInit {
 
 	ngOnInit(): void {
 		// Access resolved data
-		this.fetchCharts();
+		this.fetchCharts(true);
 	}
 
 	clearFilters() {
@@ -183,7 +183,9 @@ export class Published implements OnInit {
 			error: (error) => {
 				console.error("Error fetching charts:", error);
 				if (forceRefresh) {
-					this.error = error.message;
+					this.error =
+						error.error ||
+						"Failed to refresh charts. Please try again.";
 				}
 				console.error(this.error);
 

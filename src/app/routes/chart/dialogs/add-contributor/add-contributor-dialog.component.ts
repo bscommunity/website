@@ -1,12 +1,12 @@
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  inject,
-  signal,
-  WritableSignal,
-  viewChild
+	ChangeDetectionStrategy,
+	ChangeDetectorRef,
+	Component,
+	computed,
+	inject,
+	signal,
+	WritableSignal,
+	viewChild,
 } from "@angular/core";
 
 // Material
@@ -40,7 +40,7 @@ import { SimplifiedUserModel } from "@/models/user.model";
 // Services
 import { ContributorService } from "@/services/api/contributor.service";
 import { UserService } from "@/services/api/user.service";
-import { AuthService } from "app/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 
 export interface DialogData {
 	chartId: string;

@@ -7,7 +7,7 @@ import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { toSignal } from "@angular/core/rxjs-interop";
 
 import { environment } from "environments/environment";
-import { apiUrl } from "@/services/api";
+import { apiUrl } from "@/lib/api";
 
 // Models
 import { UserModel } from "@/models/user.model";
@@ -73,7 +73,7 @@ export class AuthService {
 		try {
 			// Send the code to the backend
 			const response = await firstValueFrom(
-				this.http.post<LoginResponse>(`${apiUrl}/login`, { code }),
+				this.http.post<LoginResponse>(`${apiUrl}/auth/login`, { code }),
 			);
 
 			// Set the token and user object in cookies

@@ -21,7 +21,7 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 import type { UserModel } from "@/models/user.model";
 
 // Services
-import { AuthService } from "@/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { PublishDialogService } from "@/services/publish.service";
 
 @Component({

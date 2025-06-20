@@ -7,7 +7,7 @@ import { ChartResolver } from "./routes/chart/chart-resolver.service";
 import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
-} from "./auth/auth.guard";
+} from "./routes/auth/auth.guard";
 
 export const routes: Routes = [
 	{
@@ -18,9 +18,17 @@ export const routes: Routes = [
 		title: "Login",
 	},
 	{
+		path: "callback/google",
+		loadComponent: () =>
+			import("./routes/auth/callback/google").then(
+				(m) => m.GoogleOAuthCallback,
+			),
+		title: "Linking...",
+	},
+	{
 		path: "callback",
 		loadComponent: () =>
-			import("./routes/auth/callback/callback.component").then(
+			import("./routes/auth/callback/callback").then(
 				(m) => m.OAuthCallback,
 			),
 		canActivate: [redirectIfAuthenticatedGuard],

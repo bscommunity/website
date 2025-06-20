@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 
-import { AuthService } from "app/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({

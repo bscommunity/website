@@ -14,7 +14,7 @@ import {
 	MutateChartModel,
 } from "@/models/chart.model";
 
-import { apiUrl } from ".";
+import { apiUrl } from "../../../lib/api";
 
 @Injectable({
 	providedIn: "root",

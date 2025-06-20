@@ -13,6 +13,10 @@ const envFile = `export const environment = {
 	SPOTIFY_CLIENT_ID: '${process.env.SPOTIFY_CLIENT_ID}',
 	SPOTIFY_API_KEY: '${process.env.SPOTIFY_API_KEY}',
 	ENCODING_KEY: '${process.env.ENCODING_KEY}',
+	GOOGLE_CLIENT_ID: '${process.env.GOOGLE_CLIENT_ID}',
+	GOOGLE_CLIENT_SECRET: '${process.env.GOOGLE_CLIENT_SECRET}',
+	GOOGLE_REDIRECT_URI: '${process.env.GOOGLE_REDIRECT_URI}',
+	GOOGLE_SCOPES: '${process.env.GOOGLE_SCOPES}',
 };
 `;
 const targetPath = path.join(process.cwd(), "src/environments/environment.ts");

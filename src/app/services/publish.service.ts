@@ -31,7 +31,7 @@ import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 import { ChartService } from "@/services/api/chart.service";
 import { CacheService } from "@/services/cache.service";
 import { CookieService } from "./cookie.service";
-import { AuthService } from "app/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 
 // Types
 import type { ChartFileData } from "@/services/decode.service";

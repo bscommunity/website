@@ -14,7 +14,7 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { MatIconRegistry, MatIconModule } from "@angular/material/icon";
 
 import { ThemeService } from "./services/theme.service";
-import { AuthService } from "./auth/auth.service";
+import { AuthService } from "./services/auth.service";
 import { filter } from "rxjs";
 
 @Component({

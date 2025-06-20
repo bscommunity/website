@@ -10,7 +10,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Services
-import { AuthService } from "app/auth/auth.service";
+import { AuthService } from "@/services/auth.service";
 
 @Component({
 	selector: "app-oauth-callback",
@@ -47,6 +47,7 @@ export class OAuthCallback implements OnInit {
 		}
 
 		try {
+			console.log("Received code: ", code);
 			await this.authService.login(code);
 			this.router.navigate(["/published"]);
 		} catch (error: any) {

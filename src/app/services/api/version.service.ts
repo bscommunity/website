@@ -8,7 +8,7 @@ import { CacheService } from "../cache.service";
 // Models
 import { CreateVersionModel, VersionModel } from "@/models/version.model";
 
-import { apiUrl } from ".";
+import { apiUrl } from "../../../lib/api";
 
 @Injectable({
 	providedIn: "root",

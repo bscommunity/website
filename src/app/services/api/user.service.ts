@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
 import { User, UserModel } from "@/models/user.model";
-import { apiUrl } from ".";
+import { apiUrl } from "../../../lib/api";
 import { CookieService } from "../cookie.service";
 
 @Injectable({
@@ -12,7 +12,6 @@ import { CookieService } from "../cookie.service";
 export class UserService {
 	private cookieService = inject(CookieService);
 	private http = inject(HttpClient);
-
 
 	private readonly apiUrl = `${apiUrl}/users`;
 
