@@ -18,12 +18,15 @@ import { OAuthService } from "@/services/oauth.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmationDialogComponent } from "../chart/dialogs/confirmation/confirmation-dialog.component";
 import { ActivatedRoute } from "@angular/router";
+import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
+import { settingsAnim } from "./settings.anim";
 
 @Component({
 	selector: "app-settings",
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 	imports: [
+		CommonModule,
 		RouterModule,
 		MatTabsModule,
 		MatButtonModule,
@@ -33,7 +36,7 @@ import { RouterModule } from "@angular/router";
 		SettingsCardComponent,
 	],
 	templateUrl: "./settings.html",
-	styleUrl: "./settings.css",
+	animations: [settingsAnim],
 })
 export class Settings implements OnInit {
 	private readonly route = inject(ActivatedRoute);

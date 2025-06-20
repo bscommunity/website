@@ -42,81 +42,83 @@
 			}
 		</nav>
 
-		@if (currentTab === 'account') {
-		<app-settings-wrapper>
-			<app-settings-card
-				class="w-full"
-				title="Cloud uploading"
-				description="With cloud uploading enabled, charts will automatically be uploaded to your Google Drive cloud."
-			>
-				<card-footer-label>
-					Your Google Drive account must be connected to enable cloud
-					uploading
-				</card-footer-label>
-				<card-footer>
-					<mat-slide-toggle labelPosition="before"
-						>Enabled</mat-slide-toggle
-					>
-				</card-footer>
-			</app-settings-card>
-			<app-settings-card
-				class="w-full"
-				title="Delete Account"
-				description="Once you delete your account, there is no going back. All the content you upload will be removed. Please be certain"
-				variant="destructive"
-			>
-				<card-footer>
-					<button
-						mat-flat-button
-						class="!bg-error-container !text-on-error-container"
-						(click)="deleteAccount()"
-					>
-						Delete account
-					</button>
-				</card-footer>
-			</app-settings-card>
-		</app-settings-wrapper>
-		} @else if (currentTab === 'connections') {
-		<app-settings-wrapper>
-			<app-settings-card
-				class="w-full"
-				title="Google Drive"
-				description="Connect your Google Drive account to directly upload content"
-				[showFooter]="false"
-			>
-				<card-content class="w-full">
-					@if (hasDriveScope) {
-					<button
-						class="!w-full mt-2 !bg-surface-container-high"
-						mat-button
-						disabled
-					>
-						<mat-icon> check</mat-icon>
-						Connected to Google Drive
-					</button>
-					<button
-						class="w-full text-end mt-2 text-on-error-container hover:underline"
-						(click)="openUnlinkConfirmationDialog()"
-					>
-						Unlink account
-					</button>
-					} @else {
-					<a
-						[href]="oAuthUrl"
-						class="!w-full mt-2 !bg-surface-container-high"
-						mat-button
-					>
-						<mat-icon
-							svgIcon="google"
-							aria-hidden="false"
-							aria-label="Google logo"
-						></mat-icon>
-						Continue with Google
-					</a>
-					}
-				</card-content>
-			</app-settings-card>
-		</app-settings-wrapper>
-		}
+		<div [@tabSlide]="currentTab">
+			@if (currentTab === 'account') {
+			<app-settings-wrapper>
+				<app-settings-card
+					class="w-full"
+					title="Cloud uploading"
+					description="With cloud uploading enabled, charts will automatically be uploaded to your Google Drive cloud."
+				>
+					<card-footer-label>
+						Your Google Drive account must be connected to enable
+						cloud uploading
+					</card-footer-label>
+					<card-footer>
+						<mat-slide-toggle labelPosition="before"
+							>Enabled</mat-slide-toggle
+						>
+					</card-footer>
+				</app-settings-card>
+				<app-settings-card
+					class="w-full"
+					title="Delete Account"
+					description="Once you delete your account, there is no going back. All the content you upload will be removed. Please be certain"
+					variant="destructive"
+				>
+					<card-footer>
+						<button
+							mat-flat-button
+							class="!bg-error-container !text-on-error-container"
+							(click)="deleteAccount()"
+						>
+							Delete account
+						</button>
+					</card-footer>
+				</app-settings-card>
+			</app-settings-wrapper>
+			} @else if (currentTab === 'connections') {
+			<app-settings-wrapper>
+				<app-settings-card
+					class="w-full"
+					title="Google Drive"
+					description="Connect your Google Drive account to directly upload content"
+					[showFooter]="false"
+				>
+					<card-content class="w-full">
+						@if (hasDriveScope) {
+						<button
+							class="!w-full mt-2 !bg-surface-container-high"
+							mat-button
+							disabled
+						>
+							<mat-icon> check</mat-icon>
+							Connected to Google Drive
+						</button>
+						<button
+							class="w-full text-end mt-2 text-on-error-container hover:underline"
+							(click)="openUnlinkConfirmationDialog()"
+						>
+							Unlink account
+						</button>
+						} @else {
+						<a
+							[href]="oAuthUrl"
+							class="!w-full mt-2 !bg-surface-container-high"
+							mat-button
+						>
+							<mat-icon
+								svgIcon="google"
+								aria-hidden="false"
+								aria-label="Google logo"
+							></mat-icon>
+							Continue with Google
+						</a>
+						}
+					</card-content>
+				</app-settings-card>
+			</app-settings-wrapper>
+			}
+		</div>
 	</div>
 </main>
