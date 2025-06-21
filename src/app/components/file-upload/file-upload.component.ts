@@ -19,7 +19,7 @@ import { ErrorDialogComponent } from "../dialogs/error.component";
 	selector: "app-file-upload",
 	imports: [MatButtonModule],
 	templateUrl: "./file-upload.component.html",
-	styleUrl: "./file-upload.component.scss",
+	styleUrl: "./file-upload.component.css",
 })
 export class FileUploadComponent {
 	private decodeService = inject(DecodeService);

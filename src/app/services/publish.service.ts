@@ -4,18 +4,22 @@ import { BehaviorSubject } from "rxjs";
 
 import { MatDialog } from "@angular/material/dialog";
 
-import { UploadDialogTypeSelectComponent } from "@/components/publish/type-select.component";
-import { UploadDialogCreateChartComponent } from "@/components/publish/create-chart.component";
-import { UploadDialogLinkingComponent } from "@/components/publish/linking.component";
+import { PublishDialogTypeSelectComponent } from "@/components/publish/type-select.component";
+// import { PublishDialogCreateChartComponent } from "@/components/publish/chart/details.component";
+import { PublishDialogChartFlowComponent } from "@/components/publish/chart/flow-select.component";
+import { PublishDialogLinkingComponent } from "@/components/publish/linking.component";
+import { PublishDialogUploadingComponent } from "@/components/publish/uploading.component";
 
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 export const publishStepComponents = [
-	UploadDialogTypeSelectComponent,
-	UploadDialogCreateChartComponent,
-	UploadDialogLinkingComponent,
+	PublishDialogTypeSelectComponent,
+	PublishDialogChartFlowComponent,
+	// PublishDialogCreateChartComponent,
+	PublishDialogUploadingComponent,
+	PublishDialogLinkingComponent,
 ];
 export type StepComponentInstanceType =
 	(typeof publishStepComponents)[number] extends new (

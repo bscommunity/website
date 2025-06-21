@@ -1,7 +1,6 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	Input,
 	OnInit,
 	inject,
 } from "@angular/core";
@@ -28,7 +27,7 @@ import { type DialogData, initialFormData } from "@/services/publish.service";
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
 @Component({
-	selector: "app-upload-dialog-create-chart",
+	selector: "app-publish-dialog-create-chart",
 	template: `
 		<h2 mat-dialog-title>{{ title }}</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -133,10 +132,10 @@ import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogCreateChartComponent implements OnInit {
+export class PublishDialogCreateChartComponent implements OnInit {
 	private fb = inject(FormBuilder);
 	dialogRef =
-		inject<MatDialogRef<UploadDialogCreateChartComponent>>(MatDialogRef);
+		inject<MatDialogRef<PublishDialogCreateChartComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	title = "Chart details";

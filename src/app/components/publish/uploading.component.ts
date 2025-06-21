@@ -25,49 +25,41 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-// Components
-import { PanelComponent } from "@/components/panel/panel.component";
-
-// Services
 import { initialFormData, type DialogData } from "@/services/publish.service";
+import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
+import { PanelComponent } from "../panel/panel.component";
 
 @Component({
 	selector: "app-publish-dialog-linking",
 	template: `
-		<h2 mat-dialog-title>Linking</h2>
+		<h2 mat-dialog-title>Uploading</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
 			<mat-dialog-content class="mat-typography !flex flex-col gap-4">
 				<p class="mb-2">
-					Provide the URL to your chart bundle. Ensure your file meets
-					the submission guidelines.
+					Upload your chart bundle to the Drive of your synced
+					account. We’ll create a special folder for it. Ensure your
+					files meets the submission guidelines.
 				</p>
-				<mat-form-field appearance="outline">
-					<mat-label>Bundle</mat-label>
-					<input
-						type="text"
-						matInput
-						formControlName="chartUrl"
-						placeholder="https://example.com/chart.zip"
-					/>
-					@if (
-						chartUrlControl?.hasError("required") &&
-						chartUrlControl?.touched
-					) {
-						<mat-error>URL is <strong>required</strong></mat-error>
-					} @else if (
-						chartUrlControl?.hasError("invalidUrl") ||
-						chartUrlControl?.hasError("notHttps")
-					) {
-						<mat-error>Please enter a valid URL</mat-error>
-					} @else if (chartUrlControl?.hasError("invalidZipUrl")) {
-						<mat-error>URL must point to a .zip file</mat-error>
-					}
-
-					<mat-hint align="start"
-						>Must be a direct link to the .zip file</mat-hint
+				<!-- <app-file-upload
+					[formControl]="form.get("chartFileData")"
+					(onFileDecoded)="onFileDecoded($event)"
+					[required]="true"
+					[accept]="['.zip']"
+					[placeholder]="'https://example.com/chart.zip'"
+				></app-file-upload> -->
+				<app-file-upload
+					(onFileDecoded)="onFileDecoded($event)"
+				></app-file-upload>
+				@if (
+					this.form.get("chartFileData")?.hasError("required") &&
+					this.form.get("chartFileData")?.touched
+				) {
+					<mat-error
+						>Chart file metadata is
+						<strong>required</strong></mat-error
 					>
-				</mat-form-field>
+				}
 				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>Gameplay</mat-label>
 					<input
@@ -126,13 +118,14 @@ import { ChartFileData } from "@/services/decode.service";
 		MatSlideToggleModule,
 		ReactiveFormsModule,
 		PanelComponent,
+		FileUploadComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishDialogLinkingComponent implements OnInit {
+export class PublishDialogUploadingComponent implements OnInit {
 	private fb = inject(FormBuilder);
 	dialogRef =
-		inject<MatDialogRef<PublishDialogLinkingComponent>>(MatDialogRef);
+		inject<MatDialogRef<PublishDialogUploadingComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup;

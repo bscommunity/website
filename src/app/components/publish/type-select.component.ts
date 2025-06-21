@@ -14,7 +14,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { initialFormData, type DialogData } from "@/services/publish.service";
 
 @Component({
-	selector: "app-upload-dialog-type-select",
+	selector: "app-publish-dialog-type-select",
 	template: `
 		<h2 mat-dialog-title>Submit</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -27,11 +27,11 @@ import { initialFormData, type DialogData } from "@/services/publish.service";
 					class="flex items-start flex-col my-4"
 					formControlName="contentType"
 				>
-					@for (type of contentTypes; track type) {
+					@for (type of contentTypes; track type; let i = $index) {
 						<mat-radio-button
 							class="m-1"
 							[value]="type"
-							[disabled]="!contentEnabledTypes.includes(type)"
+							[disabled]="i !== 0"
 						>
 							{{ type }}
 						</mat-radio-button>
@@ -61,28 +61,18 @@ import { initialFormData, type DialogData } from "@/services/publish.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UploadDialogTypeSelectComponent {
+export class PublishDialogTypeSelectComponent {
 	private fb = inject(FormBuilder);
 	dialogRef =
-		inject<MatDialogRef<UploadDialogTypeSelectComponent>>(MatDialogRef);
+		inject<MatDialogRef<PublishDialogTypeSelectComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
-	form: FormGroup;
+	form: FormGroup = this.fb.group({
+		contentType: "",
+	});
+
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
-	contentEnabledTypes: string[] = ["Chart"];
-
-	constructor() {
-		this.form = this.fb.group({
-			contentType: [initialFormData.contentType],
-		});
-	}
-
-	ngOnInit() {
-		// Initialize form with existing data
-		this.form.patchValue({
-			contentType: this.data.formData.contentType,
-		});
-	}
+	currentContentType: string = "Chart";
 
 	onSubmit() {
 		if (this.form.valid) {
