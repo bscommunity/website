@@ -23,8 +23,11 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { type DialogData, initialFormData } from "@/services/publish.service";
+// Models
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
+
+import { type DialogData } from "@/services/publish/publish.service";
+import { initialChartFormData as initialFormData } from "@/services/publish/handlers/chart-publish.handler";
 
 @Component({
 	selector: "app-publish-chart-details",
@@ -140,7 +143,7 @@ export class PublishChartDetailsComponent implements OnInit {
 
 	title = "Chart details";
 	description =
-		"Fill in the details for your chart submission. Make sure all the required fields are filled before proceeding";
+		"Fill in the details for your chart submission. Make sure all the required fields are filled before proceeding.";
 
 	form: FormGroup;
 	difficulties = Object.values(Difficulty).map((difficulty) => ({

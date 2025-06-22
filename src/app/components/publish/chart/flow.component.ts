@@ -17,7 +17,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { PanelComponent } from "@/components/panel/panel.component";
 
 // Types
-import { type DialogData } from "@/services/publish.service";
+import { type DialogData } from "@/services/publish/publish.service";
 
 interface Option {
 	icon: string;
@@ -118,11 +118,15 @@ export class PublishChartFlowComponent {
 	];
 	selectedOption: Option | null = null;
 
+	test = 1;
+
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
 				data: this.form.value,
-				next: 2,
+				additionalData: {
+					mode: "uploading",
+				},
 			});
 		}
 	}

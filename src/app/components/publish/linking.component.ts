@@ -29,7 +29,10 @@ import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { PanelComponent } from "@/components/panel/panel.component";
 
 // Services
-import { initialFormData, type DialogData } from "@/services/publish.service";
+import {
+	initialFormData,
+	type DialogData,
+} from "@/services/publish/publish.service";
 import { ChartFileData } from "@/services/decode.service";
 
 @Component({

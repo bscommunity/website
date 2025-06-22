@@ -31,12 +31,12 @@ import { FileUploadComponent } from "@/components/file-upload/file-upload.compon
 import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
-import { initialChartFormData } from "@/services/chart-publish.handler";
+import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
 
 // Types
 import { type BundleZipData } from "@/services/extract.service";
 import { type ChartFileData } from "@/services/decode.service";
-import { type DialogData } from "@/services/publish.service";
+import { type DialogData } from "@/services/publish/publish.service";
 
 @Component({
 	selector: "app-publish-chart-source",

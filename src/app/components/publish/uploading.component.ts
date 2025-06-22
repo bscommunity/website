@@ -25,7 +25,10 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
-import { initialFormData, type DialogData } from "@/services/publish.service";
+import {
+	initialFormData,
+	type DialogData,
+} from "@/services/publish/publish.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
 import { PanelComponent } from "../panel/panel.component";

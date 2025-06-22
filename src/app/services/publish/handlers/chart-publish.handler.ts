@@ -1,5 +1,5 @@
 import { Injectable, Type } from "@angular/core";
-import { PublishHandler } from "./publish-handler.interface";
+import { PublishHandler } from "../publish-handler.interface";
 
 // Components
 import { PublishTypeComponent } from "@/components/publish/type.component";

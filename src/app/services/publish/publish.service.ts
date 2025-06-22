@@ -13,7 +13,7 @@ import { PublishDialogSuccessComponent } from "@/components/publish/success.comp
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Services
-import { AuthService } from "./auth.service";
+import { AuthService } from "../auth.service";
 
 // Tipos utilitários compartilhados
 export type DialogData<TFormData = any> = {
@@ -30,6 +30,14 @@ export interface PublishErrorData {
 	redirectTo?: string;
 }
 
+export type PublishProgressData =
+	| {
+			data: any;
+			additionalData?: any;
+	  }
+	| "back"
+	| "next";
+
 @Injectable({
 	providedIn: "root",
 })
@@ -44,6 +52,7 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 
 	private handler!: PublishHandler<TFormData, TSuccessData>;
 	private formData!: TFormData;
+	private additionalData: any = {};
 
 	setHandler(handler: PublishHandler<TFormData, TSuccessData>) {
 		this.handler = handler;
@@ -61,37 +70,42 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 		this.formData = this.handler.getInitialFormData();
 	}
 
-	private moveToNextStep() {
-		const nextStep = this.currentStepSubject.value + 1;
-		if (nextStep < this.getTotalSteps()) {
-			this.currentStepSubject.next(nextStep);
-			this.openCurrentStep();
-		} else {
-			this.submitForm();
+	private moveToStep(step: number) {
+		if (step < 0 || step >= this.getTotalSteps()) {
+			if (step === this.getTotalSteps()) {
+				this.submitForm();
+				return;
+			}
+			throw new Error("Invalid step number");
 		}
+		this.currentStepSubject.next(step);
+		this.openCurrentStep();
 	}
 
 	private openCurrentStep() {
 		const dialogRef = this.dialog.open<any>(this.getStepComponent(), {
-			// width: "500px",
 			disableClose: this.currentStepSubject.value !== 0,
 			data: {
 				formData: this.formData,
+				...this.additionalData,
 			},
 		});
 
-		dialogRef.afterClosed().subscribe((result: any) => {
+		dialogRef.afterClosed().subscribe((result: PublishProgressData) => {
+			if (!result) {
+				// Dialog was closed without action
+				return;
+			}
+
 			if (result === "back") {
-				const previousStep = this.currentStepSubject.value - 1;
-				this.currentStepSubject.next(previousStep);
-				this.openCurrentStep();
+				this.moveToStep(this.currentStepSubject.value - 1);
 			} else if (result === "next") {
-				this.moveToNextStep();
-			} else if (result) {
-				this.formData = { ...this.formData, ...result };
-				this.moveToNextStep();
+				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
-				/* this.reset(); */
+				this.formData = { ...this.formData, ...result };
+				this.additionalData = result.additionalData;
+
+				this.moveToStep(this.currentStepSubject.value + 1);
 			}
 		});
 	}

@@ -35,11 +35,11 @@ import { CreateChartModel } from "@/models/chart.model";
 import {
 	ChartPublishHandler,
 	initialChartFormData,
-} from "@/services/chart-publish.handler";
+} from "@/services/publish/handlers/chart-publish.handler";
 import { VersionService } from "@/services/api/version.service";
 
 // Types
-import { type DialogData } from "@/services/publish.service";
+import { type DialogData } from "@/services/publish/publish.service";
 
 @Component({
 	selector: "app-chart-versions-section",

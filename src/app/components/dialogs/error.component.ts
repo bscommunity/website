@@ -10,7 +10,7 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 
 // Types
-import { PublishErrorData } from "@/services/publish.service";
+import { PublishErrorData } from "@/services/publish/publish.service";
 
 @Component({
 	selector: "app-dialog-error",

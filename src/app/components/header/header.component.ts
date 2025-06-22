@@ -22,8 +22,8 @@ import type { UserModel } from "@/models/user.model";
 
 // Services
 import { AuthService } from "@/services/auth.service";
-import { PublishDialogService } from "@/services/publish.service";
-import { ChartPublishHandler } from "@/services/chart-publish.handler";
+import { PublishDialogService } from "@/services/publish/publish.service";
+import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
 
 @Component({
 	selector: "app-header",
