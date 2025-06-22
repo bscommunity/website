@@ -27,7 +27,7 @@ import { type DialogData, initialFormData } from "@/services/publish.service";
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
 @Component({
-	selector: "app-publish-dialog-create-chart",
+	selector: "app-publish-chart-details",
 	template: `
 		<h2 mat-dialog-title>{{ title }}</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -132,10 +132,10 @@ import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishDialogCreateChartComponent implements OnInit {
+export class PublishChartDetailsComponent implements OnInit {
 	private fb = inject(FormBuilder);
 	dialogRef =
-		inject<MatDialogRef<PublishDialogCreateChartComponent>>(MatDialogRef);
+		inject<MatDialogRef<PublishChartDetailsComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	title = "Chart details";

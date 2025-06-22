@@ -1,4 +1,3 @@
-import { ChartFileData, DecodeService } from "@/services/decode.service";
 import {
 	Component,
 	ElementRef,
@@ -6,6 +5,7 @@ import {
 	signal,
 	output,
 	viewChild,
+	input,
 } from "@angular/core";
 
 import { MatButtonModule } from "@angular/material/button";
@@ -15,6 +15,10 @@ import { MatDialog } from "@angular/material/dialog";
 // Components
 import { ErrorDialogComponent } from "../dialogs/error.component";
 
+// Services
+import { type ChartFileData, DecodeService } from "@/services/decode.service";
+import { type BundleZipData, ExtractService } from "@/services/extract.service";
+
 @Component({
 	selector: "app-file-upload",
 	imports: [MatButtonModule],
@@ -23,13 +27,17 @@ import { ErrorDialogComponent } from "../dialogs/error.component";
 })
 export class FileUploadComponent {
 	private decodeService = inject(DecodeService);
+	private extractService = inject(ExtractService);
 
 	// Get section HTML component reference
 	readonly container = viewChild.required<ElementRef>("container");
-	readonly onFileDecoded = output<ChartFileData | null>();
+	readonly onFileDecoded = output<any | null>();
 
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
+
+	title = input<string>("Upload File");
+	accept = input<string[]>([".chart", ".zip"]);
 
 	currentFileName = signal<string | null>(null);
 
@@ -71,7 +79,9 @@ export class FileUploadComponent {
 	processFiles(files: FileList): void {
 		Array.from(files).forEach((file) => {
 			if (file.name.endsWith(".chart")) {
-				this.extractInfo(file);
+				this.extractChartInfo(file);
+			} else if (file.name.endsWith(".zip")) {
+				this.extractBundleZipData(file);
 			} else {
 				console.error("Invalid file type:", file.name);
 				this.onInvalidFile();
@@ -79,7 +89,7 @@ export class FileUploadComponent {
 		});
 	}
 
-	extractInfo(file: File): void {
+	extractChartInfo(file: File): void {
 		const data = this.decodeService.decodeChartFile(file);
 		data.then((chartData) => {
 			console.log("Chart data:", chartData);
@@ -94,5 +104,24 @@ export class FileUploadComponent {
 				},
 			});
 		});
+	}
+
+	extractBundleZipData(file: File): void {
+		this.extractService
+			.extractBundleZipData(file)
+			.then((data: BundleZipData) => {
+				console.log("Bundle data:", data);
+				this.currentFileName.set(file.name);
+				this.onFileDecoded.emit(data.info);
+			})
+			.catch((error) => {
+				console.error("Failed to extract bundle data:", error);
+				this.onFileDecoded.emit(null);
+				this.dialog.open(ErrorDialogComponent, {
+					data: {
+						error,
+					},
+				});
+			});
 	}
 }

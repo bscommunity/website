@@ -15,22 +15,13 @@ import { MatButtonModule } from "@angular/material/button";
 // Components
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 import {
 	TableComponent,
 	TableColumn,
 	Action,
 } from "../../subcomponents/table/table.component";
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
-import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
-
-// Service
-import {
-	DialogData,
-	PublishFormData,
-	publishStepComponents,
-	type StepComponentInstanceType,
-} from "@/services/publish.service";
-import { VersionService } from "@/services/api/version.service";
 
 // Model
 import {
@@ -38,6 +29,17 @@ import {
 	type CreateVersionModel,
 	type VersionModel,
 } from "@/models/version.model";
+import { CreateChartModel } from "@/models/chart.model";
+
+// Service
+import {
+	ChartPublishHandler,
+	initialChartFormData,
+} from "@/services/chart-publish.handler";
+import { VersionService } from "@/services/api/version.service";
+
+// Types
+import { type DialogData } from "@/services/publish.service";
 
 @Component({
 	selector: "app-chart-versions-section",
@@ -60,6 +62,7 @@ export class VersionsComponent {
 	readonly dialog = inject(MatDialog);
 
 	readonly versionService = inject(VersionService);
+	readonly chartPublishHandler = inject(ChartPublishHandler);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -69,26 +72,27 @@ export class VersionsComponent {
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
 	openAddVersionDialog(): void {
-		const dialogRef = this.dialog.open<StepComponentInstanceType>(
-			publishStepComponents[2],
+		const dialogRef = this.dialog.open(
+			this.chartPublishHandler.getStepComponents()[2],
 			{
 				data: {
 					title: "Upload Chart",
 					description:
 						"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
-					formData: {},
-				} as DialogData,
+					formData: { ...initialChartFormData },
+					inactive: [],
+				} as DialogData<CreateChartModel>,
 			},
 		);
 
 		dialogRef
 			.afterClosed()
-			.subscribe((result: PublishFormData | "back" | undefined) => {
+			.subscribe((result: CreateChartModel | "back" | undefined) => {
 				if (result == "back" || result == undefined) return;
 
 				this.dialog.open(PublishDialogLoadingComponent);
 
-				const { chartFileData, ...rest } = result;
+				const { chartFileData, ...rest } = result as any;
 				this.addVersion({
 					chartId: this.chartId(),
 					...rest,

@@ -5,7 +5,7 @@
 	(dragleave)="onDragLeave($event)"
 	(drop)="onDrop($event)"
 >
-	<p>Chart file</p>
+	<p>{{ title() }}</p>
 	<div class="flex flex-row items-center justify-end gap-3">
 		@if (currentFileName() != null) {
 			<p class="italic">
@@ -21,7 +21,7 @@
 		<button type="button" class="!p-0" mat-flat-button>
 			<label
 				class="flex w-full h-full px-4 py-2.5 cursor-pointer"
-				for="file-upload"
+				[for]="title() + '-file-upload'"
 			>
 				@if (currentFileName()) {
 					Change
@@ -30,10 +30,10 @@
 				}
 				<input
 					matInput
-					id="file-upload"
+					[id]="title() + '-file-upload'"
 					class="hidden"
 					type="file"
-					accept=".chart"
+					[accept]="accept()"
 					(change)="onFileSelected($event)"
 				/>
 			</label>

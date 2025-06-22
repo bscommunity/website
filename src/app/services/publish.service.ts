@@ -2,59 +2,25 @@ import { Injectable, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 
+import { PublishHandler } from "./publish-handler.interface";
+
+// Material
 import { MatDialog } from "@angular/material/dialog";
 
-import { PublishDialogTypeSelectComponent } from "@/components/publish/type-select.component";
-// import { PublishDialogCreateChartComponent } from "@/components/publish/chart/details.component";
-import { PublishDialogChartFlowComponent } from "@/components/publish/chart/flow-select.component";
-import { PublishDialogLinkingComponent } from "@/components/publish/linking.component";
-import { PublishDialogUploadingComponent } from "@/components/publish/uploading.component";
-
+// Components
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
-export const publishStepComponents = [
-	PublishDialogTypeSelectComponent,
-	PublishDialogChartFlowComponent,
-	// PublishDialogCreateChartComponent,
-	PublishDialogUploadingComponent,
-	PublishDialogLinkingComponent,
-];
-export type StepComponentInstanceType =
-	(typeof publishStepComponents)[number] extends new (
-		...args: any[]
-	) => infer R
-		? R
-		: never;
-
-// Lib
-import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
-
 // Services
-import { ChartService } from "@/services/api/chart.service";
-import { CacheService } from "@/services/cache.service";
-import { CookieService } from "./cookie.service";
-import { AuthService } from "@/services/auth.service";
+import { AuthService } from "./auth.service";
 
-// Types
-import type { ChartFileData } from "@/services/decode.service";
-
-// Models
-import { ChartModel, CreateChartModel } from "@/models/chart.model";
-import { Difficulty } from "@/models/enums/difficulty.enum";
-
-export type DialogData = {
+// Tipos utilitários compartilhados
+export type DialogData<TFormData = any> = {
 	title?: string | null;
 	description?: string | null;
-	formData: PublishFormData;
-	inactive: string[];
-};
-
-export type PublishFormData = CreateChartModel & {
-	// Omitted when submitting
-	contentType: string;
-	chartFileData: ChartFileData | null;
+	formData: TFormData;
+	inactive?: string[];
 };
 
 export interface PublishErrorData {
@@ -64,61 +30,35 @@ export interface PublishErrorData {
 	redirectTo?: string;
 }
 
-export type SuccessDialogData = ChartModel & {
-	notesAmount: number;
-	duration: number;
-};
-
-export const initialFormData: PublishFormData = {
-	contentType: "",
-	chartFileData: null,
-	//
-	track: "",
-	artist: "",
-	album: "",
-	coverUrl: "",
-	trackUrls: [],
-	trackPreviewUrl: "",
-	difficulty: Difficulty.NORMAL,
-	isDeluxe: false,
-	isExplicit: false,
-	//
-	chartUrl: "",
-	chartPreviewUrl: "",
-	duration: 0,
-	notesAmount: 0,
-	bpm: 0,
-	effectsAmount: 0,
-	// ... any other initial values added later
-};
-
 @Injectable({
 	providedIn: "root",
 })
-export class PublishDialogService {
+export class PublishDialogService<TFormData = any, TSuccessData = any> {
+	private authService = inject(AuthService);
+
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
 
-	private chartService = inject(ChartService);
-	private cookieService = inject(CookieService);
-	private cacheService = inject(CacheService);
-	private authService = inject(AuthService);
-
-	// Track the current step
 	private currentStepSubject = new BehaviorSubject<number>(0);
 	currentStep$ = this.currentStepSubject.asObservable();
 
-	// Store form data
-	private formData: PublishFormData = initialFormData;
+	private handler!: PublishHandler<TFormData, TSuccessData>;
+	private formData!: TFormData;
+
+	setHandler(handler: PublishHandler<TFormData, TSuccessData>) {
+		this.handler = handler;
+		this.formData = handler.getInitialFormData();
+	}
 
 	open() {
+		if (!this.handler) throw new Error("No handler set for publish dialog");
 		this.currentStepSubject.next(0);
 		this.openCurrentStep();
 	}
 
 	private reset() {
 		this.currentStepSubject.next(0);
-		this.formData = initialFormData;
+		this.formData = this.handler.getInitialFormData();
 	}
 
 	private moveToNextStep() {
@@ -132,31 +72,23 @@ export class PublishDialogService {
 	}
 
 	private openCurrentStep() {
-		const dialogRef = this.dialog.open<StepComponentInstanceType>(
-			this.getStepComponent(),
-			{
-				// width: "500px",
-				disableClose: this.currentStepSubject.value !== 0,
-				data: {
-					formData: this.formData,
-				},
+		const dialogRef = this.dialog.open<any>(this.getStepComponent(), {
+			// width: "500px",
+			disableClose: this.currentStepSubject.value !== 0,
+			data: {
+				formData: this.formData,
 			},
-		);
+		});
 
-		dialogRef.afterClosed().subscribe((result) => {
+		dialogRef.afterClosed().subscribe((result: any) => {
 			if (result === "back") {
-				// Go back to previous step
 				const previousStep = this.currentStepSubject.value - 1;
 				this.currentStepSubject.next(previousStep);
 				this.openCurrentStep();
 			} else if (result === "next") {
-				// Move to next step
 				this.moveToNextStep();
 			} else if (result) {
-				// Update form data with result
 				this.formData = { ...this.formData, ...result };
-
-				// Move to next step
 				this.moveToNextStep();
 			} else {
 				/* this.reset(); */
@@ -165,13 +97,14 @@ export class PublishDialogService {
 	}
 
 	private getStepComponent() {
-		if (this.currentStepSubject.value >= publishStepComponents.length)
+		const steps = this.handler.getStepComponents();
+		if (this.currentStepSubject.value >= steps.length)
 			throw new Error("Invalid step");
-		return publishStepComponents[this.currentStepSubject.value];
+		return steps[this.currentStepSubject.value];
 	}
 
 	private getTotalSteps(): number {
-		return publishStepComponents.length;
+		return this.handler.getStepComponents().length;
 	}
 
 	private triggerError(message: string, error: string) {
@@ -190,7 +123,7 @@ export class PublishDialogService {
 		if (!this.authService.isLoggedIn()) {
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
-					message: "Você precisa estar logado para enviar conteúdo.",
+					message: "You need to be logged in to submit content",
 					error: null,
 				},
 			});
@@ -204,80 +137,7 @@ export class PublishDialogService {
 		});
 
 		try {
-			// Handle track data retrieval (cover art, track and artist names confirmation)
-			try {
-				const response = await getMediaInfo(
-					this.formData.track,
-					this.formData.artist,
-					this.cookieService,
-				);
-				console.log("Media info retrieved:", response);
-
-				// Update form data with retrieved info
-				this.formData = {
-					...this.formData,
-					...response,
-				};
-			} catch (error: any) {
-				console.warn("Failed to retrieve media info:", error);
-				// Continue with user provided data if media info retrieval fails
-				if (!this.formData.coverUrl) {
-					throw new Error(
-						"We couldn't find the album cover. Please check your track and artist names and try again.",
-					);
-				}
-			}
-
-			// Handle track streaming services URL retrieval
-			try {
-				if (
-					this.formData.trackUrls &&
-					this.formData.trackUrls.length > 0
-				) {
-					this.formData.trackUrls = await getTrackStreamingLinks(
-						this.formData.trackUrls[0].url,
-						this.formData.track,
-						this.formData.artist,
-					);
-					/* console.log(
-						"Track streaming links retrieved:",
-						this.formData.trackUrls,
-					); */
-				}
-			} catch (error: any) {
-				console.warn(
-					"Failed to retrieve track streaming links:",
-					error,
-				);
-			}
-
-			// Handle chart data submission (basic and first version creation)
-			const { contentType, chartFileData, ...rest } = this.formData;
-
-			const data: CreateChartModel = {
-				...rest,
-				...chartFileData,
-			};
-
-			console.log("Form submitted with the following data:", data);
-
-			// Submit chart data
-			const response = await this.chartService.createChart(data);
-			console.log("Chart submitted successfully:", response);
-
-			if (!response) {
-				throw new Error(
-					"No response received from the server. Please try again later.",
-				);
-			}
-
-			// Cache chart data
-			this.cacheService.addChart(response);
-
-			console.log("durations:", response.versions?.[0].duration);
-			console.log("notesAmount:", response.versions?.[0].notesAmount);
-
-			// Close loading dialog and open success dialog
+			const response = await this.handler.submit(this.formData);
 			loadingDialog.close();
 			this.dialog.open(PublishDialogSuccessComponent, {
 				hasBackdrop: true,
@@ -285,16 +145,14 @@ export class PublishDialogService {
 				data: response,
 			});
 		} catch (error: any) {
-			console.error("Failed to submit chart:", error);
-
 			loadingDialog.close();
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
-					title: "Failed to submit chart",
+					title: "Failed to submit content",
 					message:
 						error.statusText ||
-						"There was an error while submitting the chart.",
-					error: error.error.message || error,
+						"There was an error while submitting the content.",
+					error: error.error?.message || error,
 				},
 			});
 		} finally {

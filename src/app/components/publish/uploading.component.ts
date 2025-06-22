@@ -29,6 +29,7 @@ import { initialFormData, type DialogData } from "@/services/publish.service";
 import { FileUploadComponent } from "@/components/file-upload/file-upload.component";
 import { ChartFileData } from "@/services/decode.service";
 import { PanelComponent } from "../panel/panel.component";
+import { BundleZipData } from "@/services/extract.service";
 
 @Component({
 	selector: "app-publish-dialog-linking",
@@ -49,8 +50,15 @@ import { PanelComponent } from "../panel/panel.component";
 					[placeholder]="'https://example.com/chart.zip'"
 				></app-file-upload> -->
 				<app-file-upload
-					(onFileDecoded)="onFileDecoded($event)"
-				></app-file-upload>
+					title="Bundle file"
+					[accept]="['.zip']"
+					(onFileDecoded)="onBundleFileDecoded($event)"
+				/>
+				<app-file-upload
+					title="Chart file"
+					[accept]="['.chart']"
+					(onFileDecoded)="onChartFileDecoded($event)"
+				/>
 				@if (
 					this.form.get("chartFileData")?.hasError("required") &&
 					this.form.get("chartFileData")?.touched
@@ -180,7 +188,7 @@ export class PublishDialogUploadingComponent implements OnInit {
 	// Methods
 	// Removed setChartPreviewUrls, addPreviewUrl, and removePreviewUrl as they are for FormArray
 
-	onFileDecoded(chartFileData: ChartFileData | null): void {
+	onChartFileDecoded(chartFileData: ChartFileData | null): void {
 		if (chartFileData) {
 			this.form.get("chartFileData")?.setValue(chartFileData); // Set the file value in the form
 			this.form.get("chartFileData")?.setErrors(null); // Clear validation errors
@@ -189,6 +197,18 @@ export class PublishDialogUploadingComponent implements OnInit {
 			this.form.get("chartFileData")?.setErrors({ required: true }); // Add required error
 		}
 	}
+
+	onBundleFileDecoded(bundleZipData: BundleZipData | null): void {
+		if (bundleZipData) {
+			// Assuming bundleZipData contains chartFileData
+			this.form.get("chartFileData")?.setValue(bundleZipData.info);
+			this.form.get("chartFileData")?.setErrors(null); // Clear validation errors
+		} else {
+			this.form.get("chartFileData")?.setValue(null); // Clear the file value
+			this.form.get("chartFileData")?.setErrors({ required: true }); // Add required error
+		}
+	}
+
 	onSubmit() {
 		if (this.form.valid) {
 			const formValue = { ...this.form.value };

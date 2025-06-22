@@ -11,10 +11,11 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { initialFormData, type DialogData } from "@/services/publish.service";
+// Types
+// import { type DialogData } from "@/services/publish.service";
 
 @Component({
-	selector: "app-publish-dialog-type-select",
+	selector: "app-publish-type",
 	template: `
 		<h2 mat-dialog-title>Submit</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -61,11 +62,10 @@ import { initialFormData, type DialogData } from "@/services/publish.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishDialogTypeSelectComponent {
+export class PublishTypeComponent {
 	private fb = inject(FormBuilder);
-	dialogRef =
-		inject<MatDialogRef<PublishDialogTypeSelectComponent>>(MatDialogRef);
-	data = inject<DialogData>(MAT_DIALOG_DATA);
+	dialogRef = inject<MatDialogRef<PublishTypeComponent>>(MatDialogRef);
+	data = inject<any>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
 		contentType: "",

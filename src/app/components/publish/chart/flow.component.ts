@@ -16,7 +16,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 // Components
 import { PanelComponent } from "@/components/panel/panel.component";
 
-// Services
+// Types
 import { type DialogData } from "@/services/publish.service";
 
 interface Option {
@@ -26,7 +26,7 @@ interface Option {
 }
 
 @Component({
-	selector: "app-publish-dialog-chart-flow-select",
+	selector: "app-publish-chart-flow",
 	template: `
 		<h2 mat-dialog-title>Start here</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -43,12 +43,12 @@ interface Option {
 					@for (option of options; track option; let i = $index) {
 						<mat-radio-button
 							labelPosition="before"
-							class="m-1 w-full flex items-center justify-between px-4 py-3 rounded-sm border border-outline"
+							class="m-1 w-full flex items-center justify-between rounded-sm border border-outline pr-5"
 							[value]="option.value"
 							[disabled]="i === 0"
 						>
 							<span
-								class="flex items-center justify-start gap-3 w-full"
+								class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
 							>
 								<mat-icon>{{ option.icon }}</mat-icon>
 								{{ option.label }}
@@ -75,7 +75,7 @@ interface Option {
 					mat-button
 					(click)="dialogRef.close('back')"
 				>
-					Cancel
+					Back
 				</button>
 				<button
 					type="submit"
@@ -99,10 +99,9 @@ interface Option {
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishDialogChartFlowComponent {
+export class PublishChartFlowComponent {
 	private fb = inject(FormBuilder);
-	dialogRef =
-		inject<MatDialogRef<PublishDialogChartFlowComponent>>(MatDialogRef);
+	dialogRef = inject<MatDialogRef<PublishChartFlowComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
@@ -122,8 +121,8 @@ export class PublishDialogChartFlowComponent {
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
-				...this.data.formData,
-				...this.form.value,
+				data: this.form.value,
+				next: 2,
 			});
 		}
 	}

@@ -16,7 +16,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
 import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
-import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+import { ConfirmationDialogComponent } from "../../../../components/dialogs/confirmation/confirmation-dialog.component";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";

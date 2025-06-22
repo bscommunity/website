@@ -23,6 +23,7 @@ import type { UserModel } from "@/models/user.model";
 // Services
 import { AuthService } from "@/services/auth.service";
 import { PublishDialogService } from "@/services/publish.service";
+import { ChartPublishHandler } from "@/services/chart-publish.handler";
 
 @Component({
 	selector: "app-header",
@@ -40,6 +41,7 @@ import { PublishDialogService } from "@/services/publish.service";
 })
 export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
+	private chartPublishHandler = inject(ChartPublishHandler);
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
@@ -55,6 +57,8 @@ export class HeaderComponent implements OnInit {
 				this.user = null;
 			}
 		}); */
+
+		this.uploadDialog.setHandler(this.chartPublishHandler);
 	}
 
 	openWarning() {

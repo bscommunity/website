@@ -16,7 +16,7 @@ import { SettingsWrapperComponent } from "./subcomponents/wrapper.component";
 import { SettingsCardComponent } from "./subcomponents/card.component";
 import { OAuthService } from "@/services/oauth.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ConfirmationDialogComponent } from "../chart/dialogs/confirmation/confirmation-dialog.component";
+import { ConfirmationDialogComponent } from "../../components/dialogs/confirmation/confirmation-dialog.component";
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
