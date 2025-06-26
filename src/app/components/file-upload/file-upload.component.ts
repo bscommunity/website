@@ -112,7 +112,7 @@ export class FileUploadComponent {
 			.then((data: BundleZipData) => {
 				console.log("Bundle data:", data);
 				this.currentFileName.set(file.name);
-				this.onFileDecoded.emit(data.info);
+				this.onFileDecoded.emit(data);
 			})
 			.catch((error) => {
 				console.error("Failed to extract bundle data:", error);

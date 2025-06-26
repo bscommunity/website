@@ -3,13 +3,11 @@ import { Injectable } from "@angular/core";
 import * as zip from "@zip.js/zip.js";
 
 export interface BundleZipData {
-	info: {
-		title: string;
-		artist: string;
-		difficulty: number;
-		bpm: number;
-		type: "Promode" | "Regular";
-	}; // JSON data from the info.json file in the bundle zip
+	title: string;
+	artist: string;
+	difficulty: number;
+	bpm: number;
+	type: "Promode" | "Regular";
 }
 
 @Injectable({

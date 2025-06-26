@@ -18,9 +18,6 @@ import { CookieService } from "@/services/cookie.service";
 // Libraries
 import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 
-// Types
-import { type ChartFileData } from "@/services/decode.service";
-
 export const initialChartFormData: CreateChartModel = {
 	track: "",
 	artist: "",
@@ -63,7 +60,7 @@ export class ChartPublishHandler
 	}
 
 	async submit(formData: CreateChartModel): Promise<ChartModel> {
-		// 1. Buscar media info
+		// 1. Search for media info
 		try {
 			const response = await getMediaInfo(
 				formData.track,
@@ -79,7 +76,7 @@ export class ChartPublishHandler
 			}
 		}
 
-		// 2. Buscar links de streaming
+		// 2. Fetch streaming links
 		try {
 			if (formData.trackUrls && formData.trackUrls.length > 0) {
 				formData.trackUrls = await getTrackStreamingLinks(
@@ -90,7 +87,7 @@ export class ChartPublishHandler
 			}
 		} catch {}
 
-		// 3. Submeter chart
+		// 3. Submit the chart
 		const response = await this.chartService.createChart(formData);
 
 		if (!response)

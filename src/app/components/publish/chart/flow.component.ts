@@ -62,7 +62,7 @@ interface Option {
 						<a
 							[routerLink]="['/settings']"
 							[queryParams]="{ section: 'connections' }"
-							class="underline cursor-pointer hover:text-white transition-colors"
+							class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
 							>connect your bscm account to Google Drive</a
 						>
 					</button>
