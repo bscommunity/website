@@ -9,7 +9,7 @@ import { AuthService } from "@/services/auth.service";
 import { StorageService } from "./storage.service";
 
 // Lib
-import { apiUrl } from "../../lib/api";
+import { apiUrl } from "../lib/api";
 
 @Injectable({
 	providedIn: "root",

@@ -13,7 +13,7 @@ import {
 	SimplifiedContributorModel,
 } from "@/models/contributor.model";
 
-import { apiUrl } from "../../../lib/api";
+import { apiUrl } from "../../lib/api";
 
 @Injectable({
 	providedIn: "root",

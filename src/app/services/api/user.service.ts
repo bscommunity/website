@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
 import { User, UserModel } from "@/models/user.model";
-import { apiUrl } from "../../../lib/api";
+import { apiUrl } from "../../lib/api";
 import { CookieService } from "../cookie.service";
 
 @Injectable({
