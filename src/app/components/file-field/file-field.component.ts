@@ -20,12 +20,12 @@ import { type ChartFileData, DecodeService } from "@/services/decode.service";
 import { type BundleZipData, ExtractService } from "@/services/extract.service";
 
 @Component({
-	selector: "app-file-upload",
+	selector: "app-file-field",
 	imports: [MatButtonModule],
-	templateUrl: "./file-upload.component.html",
-	styleUrl: "./file-upload.component.css",
+	templateUrl: "./file-field.component.html",
+	styleUrl: "./file-field.component.css",
 })
-export class FileUploadComponent {
+export class FileFieldComponent {
 	private decodeService = inject(DecodeService);
 	private extractService = inject(ExtractService);
 

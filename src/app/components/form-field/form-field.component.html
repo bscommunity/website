@@ -1,0 +1,34 @@
+@switch (config().type) {
+	@case ("text") {
+		<mat-form-field
+			appearance="outline"
+			[subscriptSizing]="config().hint ? 'dynamic' : 'fixed'"
+		>
+			<mat-label>{{ config().label }}</mat-label>
+			<input
+				matInput
+				[type]="getTextConfig().inputType || 'text'"
+				[formControlName]="getTextConfig().formControlName"
+				[placeholder]="getTextConfig().placeholder || ''"
+			/>
+			@for (error of fieldErrors(); track error.key) {
+				<mat-error [innerHTML]="error.message"></mat-error>
+			}
+			@if (config().hint) {
+				<mat-hint align="start">{{ config().hint }}</mat-hint>
+			}
+		</mat-form-field>
+	}
+	@case ("file") {
+		<div class="flex flex-col gap-1">
+			<app-file-field
+				[title]="config().label"
+				[accept]="getFileConfig().accept"
+				(onFileDecoded)="handleFileUpload($event)"
+			/>
+			@if (hasFileError()) {
+				<mat-error [innerHTML]="fileErrorMessage()"></mat-error>
+			}
+		</div>
+	}
+}

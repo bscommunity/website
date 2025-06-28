@@ -7,9 +7,9 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
 import {
-	CustomSelectComponent,
+	SelectComponent,
 	type Option,
-} from "@/components/custom-select/custom-select.component";
+} from "@/components/select/select.component";
 import { ChartPreviewComponent } from "../../components/chart-preview/chart-preview.component";
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
@@ -44,7 +44,7 @@ type ChartsByMonth = {
 	imports: [
 		MatIconModule,
 		MatButtonModule,
-		CustomSelectComponent,
+		SelectComponent,
 		FilterPanelComponent,
 		ListSectionComponent,
 		ChartPreviewComponent,

@@ -1,4 +1,18 @@
-import { Component, HostListener, ElementRef, ChangeDetectorRef, Renderer2, AfterViewInit, PLATFORM_ID, OnDestroy, input, model, inject, output, viewChild } from "@angular/core";
+import {
+	Component,
+	HostListener,
+	ElementRef,
+	ChangeDetectorRef,
+	Renderer2,
+	AfterViewInit,
+	PLATFORM_ID,
+	OnDestroy,
+	input,
+	model,
+	inject,
+	output,
+	viewChild,
+} from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
@@ -14,11 +28,11 @@ export interface Option {
 }
 
 @Component({
-	selector: "app-custom-select",
+	selector: "app-select",
 	imports: [CommonModule, MatIconModule, MatRippleModule],
-	templateUrl: "./custom-select.component.html",
+	templateUrl: "./select.component.html",
 })
-export class CustomSelectComponent implements AfterViewInit, OnDestroy {
+export class SelectComponent implements AfterViewInit, OnDestroy {
 	private platformId = inject(PLATFORM_ID);
 	private renderer = inject(Renderer2);
 	private elementRef = inject(ElementRef);
