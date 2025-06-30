@@ -7,6 +7,7 @@ import {
 	viewChild,
 	input,
 } from "@angular/core";
+import { ReactiveFormsModule } from "@angular/forms";
 
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -16,12 +17,12 @@ import { MatDialog } from "@angular/material/dialog";
 import { ErrorDialogComponent } from "../dialogs/error.component";
 
 // Services
-import { type ChartFileData, DecodeService } from "@/services/decode.service";
-import { type BundleZipData, ExtractService } from "@/services/extract.service";
+import { DecodeService } from "@/services/decode.service";
+import { ExtractService } from "@/services/extract.service";
 
 @Component({
 	selector: "app-file-field",
-	imports: [MatButtonModule],
+	imports: [MatButtonModule, ReactiveFormsModule],
 	templateUrl: "./file-field.component.html",
 	styleUrl: "./file-field.component.css",
 })
@@ -36,6 +37,7 @@ export class FileFieldComponent {
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
 
+	control = input.required<any | null>();
 	title = input<string>("Upload File");
 	accept = input<string[]>([".chart", ".zip"]);
 
@@ -109,7 +111,7 @@ export class FileFieldComponent {
 	extractBundleZipData(file: File): void {
 		this.extractService
 			.extractBundleZipData(file)
-			.then((data: BundleZipData) => {
+			.then((data) => {
 				console.log("Bundle data:", data);
 				this.currentFileName.set(file.name);
 				this.onFileDecoded.emit(data);

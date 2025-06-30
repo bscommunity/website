@@ -1,182 +1,171 @@
 import { inject, Injectable } from "@angular/core";
-import { ValidationErrorKey, ValidationService } from "./validation.service";
-import { FormGroup, Validators, ValidatorFn } from "@angular/forms";
+import {
+	type FileType,
+	type TextInputType,
+	ValidationErrorKey,
+	ValidationService,
+} from "./validation.service";
+import {
+	Validators,
+	ValidatorFn,
+	FormGroup,
+	FormControl,
+} from "@angular/forms";
 
-export interface BaseFormFieldConfig {
+/**
+ * Base configuration for form fields
+ */
+interface BaseFieldConfig {
 	key: string;
 	label: string;
 	required?: boolean;
 	hint?: string;
-}
-
-export interface TextFieldConfig extends BaseFormFieldConfig {
-	type: "text";
-	formControlName: string;
-	placeholder?: string;
-	inputType?: "text" | "url" | "email" | "number";
 	validators?: ValidatorFn[];
 	validationMessages?: Record<string, string>;
-	// Data processing for text fields (e.g., extract YouTube ID from URL)
-	processValue?: (value: any) => any;
 }
 
-export interface FileFieldConfig extends BaseFormFieldConfig {
-	type: "file";
-	accept: string[];
-	// Callback to process file data and update multiple form fields
-	onFileProcessed: (data: any, formGroup: FormGroup) => void;
+/**
+ * Text field configuration
+ */
+export interface TextFieldConfig extends BaseFieldConfig {
+	readonly type: "text";
+	placeholder?: string;
+	inputType?: TextInputType;
+	onValueProcessed?: (value: string) => string;
+	urlFileExtension?: string;
 }
 
+/**
+ * File field configuration
+ */
+export interface FileFieldConfig extends BaseFieldConfig {
+	readonly type: "file";
+	accept: (FileType | string)[];
+	onFileSelected: (file: File) => void;
+}
+
+/**
+ * Union type for any form field configuration
+ */
 export type FormFieldConfig = TextFieldConfig | FileFieldConfig;
-
-export interface FormMode {
-	title: string;
-	description: string;
-	fields: FormFieldConfig[];
-}
-
-export interface GenericFormData {
-	[key: string]: any;
-}
 
 @Injectable({ providedIn: "root" })
 export class FormService {
 	private validationService = inject(ValidationService);
 
-	// Generic method to create common field types
-	createUrlField(
-		key: string,
-		label: string,
-		formControlName: string,
-		options: {
-			placeholder?: string;
-			hint?: string;
-			required?: boolean;
-			fileExtension?: string; // for file URL validation
-			videoUrl?: boolean; // for YouTube validation
-			processValue?: (value: any) => any;
-			validationMessages?: Record<string, string>;
-		} = {},
-	): TextFieldConfig {
-		const validators: ValidatorFn[] = [];
+	/**
+	 * Creates a configured text field with validations
+	 */
+	createTextField(config: Omit<TextFieldConfig, "type">): TextFieldConfig {
+		const validators: ValidatorFn[] = config.validators
+			? [...config.validators]
+			: [];
 		const messages: Record<string, string> = {
-			invalidUrl: "Please enter a valid URL",
-			notHttps: "Please enter a valid URL",
-			...options.validationMessages,
+			...config.validationMessages,
 		};
 
-		if (options.required) {
+		if (config.required) {
 			validators.push(Validators.required);
-			messages["required"] = `${label} is <strong>required</strong>`;
+			messages[ValidationErrorKey.required] =
+				`${config.label} is <strong>required</strong>`;
 		}
 
-		validators.push(this.validationService.createUrlValidator());
+		// Add URL validation if inputType is url
+		if (config.inputType === "url") {
+			validators.push(this.validationService.createUrlValidator());
+			messages[ValidationErrorKey.invalidUrl] =
+				this.validationService.messages.invalidUrl;
+			messages[ValidationErrorKey.notHttps] =
+				this.validationService.messages.notHttps;
 
-		if (options.fileExtension) {
-			validators.push(
-				this.validationService.createPatternValidator(
-					new RegExp(`^https://.*\\.${options.fileExtension}$`, "i"),
-					"invalidFileUrl",
-				),
-			);
-			messages["invalidFileUrl"] =
-				`URL must point to a .${options.fileExtension} file`;
-		}
-
-		if (options.videoUrl) {
-			validators.push(this.validationService.getYouTubeValidator());
-			messages["invalidVideoUrl"] =
-				options.validationMessages?.["invalidVideoUrl"] ||
-				"Must be a YouTube video URL";
+			// Add file extension validation if specified
+			if (config.urlFileExtension) {
+				validators.push(
+					this.validationService.getFileExtensionValidator(
+						config.urlFileExtension,
+					),
+				);
+				messages[ValidationErrorKey.invalidFileUrl] =
+					this.validationService.messages.invalidFileUrl(
+						config.urlFileExtension,
+					);
+			}
 		}
 
 		return {
+			...config,
 			type: "text",
-			key,
-			label,
-			formControlName,
-			inputType: "url",
-			placeholder: options.placeholder,
-			hint: options.hint,
-			required: options.required,
+			inputType: config.inputType || "text",
 			validators,
 			validationMessages: messages,
-			processValue: options.processValue,
-		};
+		} as const;
 	}
 
-	createFileField(
-		key: string,
-		label: string,
-		accept: string[],
-		onFileProcessed: (data: any, formGroup: FormGroup) => void,
-		options: {
-			required?: boolean;
-			hint?: string;
-		} = {},
-	): FileFieldConfig {
+	/**
+	 * Creates a configured file field with validations
+	 */
+	createFileField(config: Omit<FileFieldConfig, "type">): FileFieldConfig {
+		const validators: ValidatorFn[] = config.validators
+			? [...config.validators]
+			: [];
+		const messages: Record<string, string> = {
+			...config.validationMessages,
+		};
+
+		if (!config.accept?.length) {
+			throw new Error("Accept array must contain at least one file type");
+		}
+
+		if (typeof config.onFileSelected !== "function") {
+			throw new Error("onFileSelected must be a valid function");
+		}
+
+		if (config.required) {
+			validators.push(Validators.required);
+			messages[ValidationErrorKey.required] =
+				this.validationService.messages.required(config.label);
+		}
+
 		return {
+			...config,
 			type: "file",
-			key,
-			label,
-			accept,
-			required: options.required,
-			hint: options.hint,
-			onFileProcessed,
-		};
-	}
-
-	createTextField(
-		key: string,
-		label: string,
-		formControlName: string,
-		options: {
-			placeholder?: string;
-			hint?: string;
-			required?: boolean;
-			inputType?: "text" | "url" | "email" | "number";
-			validators?: ValidatorFn[];
-			validationMessages?: Record<ValidationErrorKey, string>;
-			processValue?: (value: any) => any;
-		} = {},
-	): TextFieldConfig {
-		const validators: ValidatorFn[] = [];
-		const messages: Record<string, string> = {
-			...options.validationMessages,
-		};
-
-		if (options.required) {
-			validators.push(Validators.required);
-			messages["required"] = `${label} is <strong>required</strong>`;
-		}
-
-		return {
-			type: "text",
-			key,
-			label,
-			formControlName,
-			inputType: options.inputType || "text",
-			placeholder: options.placeholder,
-			hint: options.hint,
-			required: options.required,
 			validators,
 			validationMessages: messages,
-			processValue: options.processValue,
-		};
+		} as const;
 	}
 
-	// Helper for YouTube URL processing
-	extractYouTubeVideoId = (url: string): string => {
-		const patterns = [
-			/^https:\/\/youtu\.be\/([\w-]+)(?:\?.*)?$/i,
-			/^https:\/\/www\.youtube\.com\/watch\?v=([\w-]+)(?:&.*)?$/i,
-		];
+	/**
+	 * Creates a FormGroup based on configured fields and initial data
+	 */
+	createFormGroup(
+		fields: FormFieldConfig[],
+		initialData: Record<string, any> = {},
+	): FormGroup {
+		const group: Record<string, FormControl> = {};
 
-		for (const pattern of patterns) {
+		// Create controls from initial data
+		for (const [key, value] of Object.entries(initialData)) {
+			group[key] = new FormControl(value);
+		}
+
+		// Configure validators for each field
+		for (const field of fields) {
+			const control = group[field.key] || new FormControl(null);
+			control.setValidators(field.validators || null);
+			group[field.key] = control;
+		}
+
+		return new FormGroup(group);
+	}
+
+	/**
+	 * Extracts YouTube video ID from URL
+	 */
+	extractYouTubeVideoId = (url: string): string => {
+		for (const pattern of this.validationService.patterns.youtube) {
 			const match = url.match(pattern);
 			if (match?.[1]) return match[1];
 		}
-
 		return url;
 	};
 }

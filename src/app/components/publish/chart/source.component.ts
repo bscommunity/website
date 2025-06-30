@@ -4,10 +4,12 @@ import {
 	OnInit,
 	inject,
 	Input,
+	computed,
 } from "@angular/core";
 
 import {
 	FormBuilder,
+	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -30,13 +32,13 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 // Services
 import {
 	FormService,
-	FormMode,
-	TextFieldConfig,
+	type FormFieldConfig,
+	type TextFieldConfig,
 } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
 
 // Components
-import { DynamicFormFieldComponent } from "@/components/form-field/form-field.component";
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
 import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
@@ -46,6 +48,12 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 import { type BundleZipData } from "@/services/extract.service";
 import { type ChartFileData } from "@/services/decode.service";
 import { type DialogData } from "@/services/publish/publish.service";
+
+interface FormMode {
+	title: string;
+	description: string;
+	fields: FormFieldConfig[];
+}
 
 @Component({
 	selector: "app-publish-chart-source",
@@ -63,17 +71,19 @@ import { type DialogData } from "@/services/publish/publish.service";
 				<!-- Dynamic form fields -->
 				@for (field of formMode.fields; track field.key) {
 					<app-form-field
+						[control]="
+							field.type === 'file'
+								? formControls().file(field.key)
+								: formControls().text(field.key)
+						"
 						[config]="field"
-						[formGroup]="form"
-						[showValidation]="formSubmitted"
 					/>
 				}
 
 				<!-- Disclaimer -->
 				<app-panel>
 					Your chart bundle
-					<span class="font-semibold"
-						>does not leaves the browser</span
+					<span class="font-medium">does not leaves the browser</span
 					>. Only the necessary metadata is extracted and stored on
 					your submission.
 				</app-panel>
@@ -103,7 +113,7 @@ import { type DialogData } from "@/services/publish/publish.service";
 		MatSlideToggleModule,
 		ReactiveFormsModule,
 		PanelComponent,
-		DynamicFormFieldComponent,
+		FormFieldComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -111,14 +121,40 @@ export class PublishChartSourceComponent implements OnInit {
 	dialogRef = inject<MatDialogRef<PublishChartSourceComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
-	private fb = inject(FormBuilder);
 	private formService = inject(FormService);
-	private validationService = inject(ValidationService);
 
 	form!: FormGroup;
-	formSubmitted = false;
+	filesForm!: FormGroup;
 
 	@Input() mode: "linking" | "uploading" = "linking";
+
+	private readonly FIELDS = {
+		chartFileField: this.formService.createFileField({
+			key: "chartFile",
+			label: "Chart file",
+			accept: [".chart"],
+			required: true,
+			hint: "Upload your chart file (.chart)",
+			onFileSelected: (file: File) => this.handleChartFile(file),
+		}),
+		chartBundleField: this.formService.createFileField({
+			key: "bundleFile",
+			label: "Bundle file",
+			accept: [".zip"],
+			required: true,
+			hint: "Upload your chart bundle (.zip)",
+			onFileSelected: (file: File) => this.handleBundleFile(file),
+		}),
+		gameplayUrlField: this.formService.createTextField({
+			key: "chartPreviewUrl",
+			label: "Gameplay",
+			inputType: "url",
+			placeholder: "https://youtu.be/BY_XwvKogC8",
+			hint: "Must be a YouTube video URL",
+			required: false,
+			onValueProcessed: this.formService.extractYouTubeVideoId,
+		}),
+	};
 
 	// Form modes configuration
 	private readonly formModes: Record<string, FormMode> = {
@@ -126,40 +162,17 @@ export class PublishChartSourceComponent implements OnInit {
 			title: "Linking",
 			description: "Provide the URL to your chart bundle.",
 			fields: [
-				this.formService.createUrlField(
-					"bundle-url",
-					"Bundle",
-					"chartUrl",
-					{
-						placeholder: "https://example.com/chart.zip",
-						hint: "Must be a direct link to the .zip file",
-						required: true,
-						fileExtension: "zip",
-						validationMessages: {
-							required: "URL is <strong>required</strong>",
-							invalidUrl: "Please enter a valid URL",
-							notHttps: "Please enter a valid URL",
-							invalidFileUrl: "URL must point to a .zip file",
-						},
-					},
-				),
-				this.formService.createUrlField(
-					"gameplay-url",
-					"Gameplay",
-					"chartPreviewUrl",
-					{
-						placeholder: "https://youtu.be/BY_XwvKogC8",
-						hint: "Must be a YouTube video URL",
-						required: false,
-						videoUrl: true,
-						processValue: this.formService.extractYouTubeVideoId,
-						validationMessages: {
-							invalidUrl: "Please enter a valid URL",
-							notHttps: "Please enter a valid URL",
-							invalidVideoUrl: "Must be a YouTube video URL",
-						},
-					},
-				),
+				this.formService.createTextField({
+					key: "chartUrl",
+					label: "Bundle",
+					inputType: "url",
+					placeholder: "https://example.com/chart.zip",
+					hint: "Must be a direct link to the .zip file",
+					required: true,
+					urlFileExtension: "zip",
+				}),
+				this.FIELDS.chartFileField,
+				this.FIELDS.gameplayUrlField,
 			],
 		},
 		uploading: {
@@ -167,39 +180,9 @@ export class PublishChartSourceComponent implements OnInit {
 			description:
 				"Upload your chart bundle to the Drive of your synced account.",
 			fields: [
-				this.formService.createFileField(
-					"bundle-file",
-					"Bundle file",
-					[".zip"],
-					(data: BundleZipData, formGroup: FormGroup) =>
-						this.processBundleFile(data, formGroup),
-					{ required: true, hint: "Upload your chart bundle (.zip)" },
-				),
-				this.formService.createFileField(
-					"chart-file",
-					"Chart file",
-					[".chart"],
-					(data: ChartFileData, formGroup: FormGroup) =>
-						this.processChartFile(data, formGroup),
-					{ required: true, hint: "Upload your chart file (.chart)" },
-				),
-				this.formService.createUrlField(
-					"gameplay-url",
-					"Gameplay",
-					"chartPreviewUrl",
-					{
-						placeholder: "https://youtu.be/BY_XwvKogC8",
-						hint: "Must be a YouTube video URL",
-						required: false,
-						videoUrl: true,
-						processValue: this.formService.extractYouTubeVideoId,
-						validationMessages: {
-							invalidUrl: "Please enter a valid URL",
-							notHttps: "Please enter a valid URL",
-							invalidVideoUrl: "Must be a YouTube video URL",
-						},
-					},
-				),
+				this.FIELDS.chartBundleField,
+				this.FIELDS.chartFileField,
+				this.FIELDS.gameplayUrlField,
 			],
 		},
 	};
@@ -208,54 +191,48 @@ export class PublishChartSourceComponent implements OnInit {
 		return this.formModes[this.mode];
 	}
 
-	constructor() {
-		this.initializeForm();
-	}
-
-	private initializeForm(): void {
-		this.form = this.fb.group({
-			chartUrl: [
-				initialChartFormData.chartUrl,
-				[
-					Validators.required,
-					this.validationService.createUrlValidator(),
-					this.validationService.getZipValidator(),
-				],
-			],
-			chartPreviewUrl: [
-				initialChartFormData.chartPreviewUrl,
-				[
-					this.validationService.createUrlValidator(),
-					this.validationService.getYouTubeValidator(),
-				],
-			],
-			track: [initialChartFormData.track, Validators.required],
-			artist: [initialChartFormData.artist, Validators.required],
-			difficulty: [initialChartFormData.difficulty, Validators.required],
-			bpm: [initialChartFormData.bpm, Validators.required],
-			isDeluxe: [initialChartFormData.isDeluxe],
-			notesAmount: [
-				initialChartFormData.notesAmount,
-				Validators.required,
-			],
-			effectsAmount: [
-				initialChartFormData.effectsAmount,
-				Validators.required,
-			],
-			duration: [initialChartFormData.duration, Validators.required],
-		});
-	}
+	formControls = computed(() => ({
+		file: (key: string) => this.filesForm.get(key) as FormControl,
+		text: (key: string) => this.form.get(key) as FormControl,
+	}));
 
 	ngOnInit() {
-		this.form.patchValue(this.data.formData);
-		if (this.data.formData?.chartPreviewUrl) {
-			this.form
-				.get("chartPreviewUrl")
-				?.setValue(this.data.formData.chartPreviewUrl);
-		}
+		// Initialize form controls based on the provided data
 		if ((this.data as any).mode) {
 			this.mode = (this.data as any).mode;
 		}
+
+		this.form = this.formService.createFormGroup(
+			this.formMode.fields,
+			initialChartFormData,
+		);
+
+		this.filesForm = this.formService.createFormGroup(
+			[this.FIELDS.chartFileField, this.FIELDS.chartBundleField],
+			{},
+		);
+
+		this.form.patchValue(this.data.formData);
+	}
+
+	/**
+	 * Handle chart file selection and processing
+	 */
+	private handleChartFile(file: File): void {
+		// Here you would typically process the file to extract ChartFileData
+		// For now, we'll just log it
+		console.log("Chart file selected:", file.name);
+		// TODO: Implement file processing logic
+	}
+
+	/**
+	 * Handle bundle file selection and processing
+	 */
+	private handleBundleFile(file: File): void {
+		// Here you would typically process the file to extract BundleZipData
+		// For now, we'll just log it
+		console.log("Bundle file selected:", file.name);
+		// TODO: Implement file processing logic
 	}
 
 	/**
@@ -310,9 +287,10 @@ export class PublishChartSourceComponent implements OnInit {
 	}
 
 	onSubmit() {
-		this.formSubmitted = true;
+		console.log("Trying to submit form");
 
 		if (this.form.valid) {
+			console.log("Form is valid, submitting...");
 			const formValue = { ...this.form.value };
 
 			// Process YouTube URL if provided
@@ -320,18 +298,31 @@ export class PublishChartSourceComponent implements OnInit {
 				const textField = this.formModes[this.mode].fields.find(
 					(field) =>
 						field.type === "text" &&
-						(field as TextFieldConfig).formControlName ===
-							"chartPreviewUrl",
+						field.key === "chartPreviewUrl",
 				) as TextFieldConfig;
 
-				if (textField?.processValue) {
-					formValue.chartPreviewUrl = textField.processValue(
+				if (textField?.onValueProcessed) {
+					formValue.chartPreviewUrl = textField.onValueProcessed(
 						formValue.chartPreviewUrl,
 					);
 				}
 			}
 
 			this.dialogRef.close(formValue);
+		} else {
+			Object.keys(this.form.controls).forEach((key) => {
+				const control = this.form.get(key);
+				if (control?.errors === null) return;
+				console.log(`${key}: errors:`, control?.errors);
+			});
+
+			Object.keys(this.filesForm.controls).forEach((key) => {
+				const control = this.filesForm.get(key);
+				if (control?.errors === null) return;
+				console.log(`${key}: errors:`, control?.errors);
+			});
+
+			console.error("Form is invalid, cannot submit.");
 		}
 	}
 }

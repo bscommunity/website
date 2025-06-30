@@ -5,7 +5,6 @@ import {
 	computed,
 	inject,
 	signal,
-	ViewChild,
 } from "@angular/core";
 
 // Material

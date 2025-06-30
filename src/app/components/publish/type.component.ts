@@ -30,7 +30,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 				>
 					@for (type of contentTypes; track type; let i = $index) {
 						<mat-radio-button
-							class="m-1"
+							class="m-1 w-full"
 							[value]="type"
 							[disabled]="i !== 0"
 						>

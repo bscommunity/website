@@ -13,13 +13,22 @@ export enum ValidationErrorKey {
 
 @Injectable({ providedIn: "root" })
 export class ValidationService {
-	private readonly patterns = {
+	readonly patterns = {
 		youtube: [
 			/^https:\/\/youtu\.be\/[\w-]+(?:\?.*)?$/i,
 			/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+(?:&.*)?$/i,
 		],
 		zip: /^https:\/\/.*\/[\w-]+\.zip$/i,
 		url: /^https?:\/\/.+/i,
+	};
+
+	readonly messages = {
+		invalidUrl: "Please enter a valid URL",
+		notHttps: "URL must start with https://",
+		invalidZipUrl: "URL must point to a .zip file",
+		invalidVideoUrl: "Must be a YouTube video URL",
+		invalidFileUrl: (ext: string) => `URL must point to a .${ext} file`,
+		required: (label: string) => `${label} is <strong>required</strong>`,
 	};
 
 	createUrlValidator(): ValidatorFn {
@@ -34,6 +43,19 @@ export class ValidationService {
 
 			if (!control.value.toLowerCase().startsWith("https://")) {
 				return { notHttps: true };
+			}
+
+			return null;
+		};
+	}
+
+	createFileExtensionValidator(extension: string): ValidatorFn {
+		const pattern = new RegExp(`^https://.*\\.${extension}$`, "i");
+		return (control: AbstractControl): ValidationErrors | null => {
+			if (!control.value) return null;
+
+			if (!pattern.test(control.value)) {
+				return { invalidFileUrl: true };
 			}
 
 			return null;
@@ -64,14 +86,45 @@ export class ValidationService {
 			this.patterns.zip,
 			ValidationErrorKey.invalidZipUrl,
 		);
+	getFileExtensionValidator = (extension: string): ValidatorFn =>
+		this.createFileExtensionValidator(extension);
 	getYouTubeValidator = (): ValidatorFn =>
 		this.createPatternValidator(
 			this.patterns.youtube,
 			ValidationErrorKey.invalidVideoUrl,
 		);
-	getUrlValidator = (): ValidatorFn =>
-		this.createPatternValidator(
-			this.patterns.url,
-			ValidationErrorKey.invalidUrl,
-		);
 }
+
+/**
+ * Supported input types for text fields
+ */
+export type TextInputType =
+	| "text"
+	| "url"
+	| "email"
+	| "number"
+	| "password"
+	| "tel";
+
+/**
+ * Common file types for better developer experience
+ */
+export type FileType =
+	| "image/*"
+	| "image/jpeg"
+	| "image/png"
+	| "image/gif"
+	| "image/webp"
+	| "audio/*"
+	| "audio/mpeg"
+	| "audio/wav"
+	| "audio/ogg"
+	| "video/*"
+	| "video/mp4"
+	| "video/webm"
+	| ".pdf"
+	| ".doc"
+	| ".docx"
+	| ".txt"
+	| ".json"
+	| ".csv";

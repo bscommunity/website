@@ -29,11 +29,11 @@
 					Select the file
 				}
 				<input
-					matInput
 					[id]="title() + '-file-upload'"
 					class="hidden"
 					type="file"
 					[accept]="accept()"
+					[formControl]="control()!"
 					(change)="onFileSelected($event)"
 				/>
 			</label>

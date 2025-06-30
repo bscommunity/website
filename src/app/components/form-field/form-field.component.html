@@ -1,6 +1,7 @@
 @switch (config().type) {
 	@case ("text") {
 		<mat-form-field
+			class="w-full"
 			appearance="outline"
 			[subscriptSizing]="config().hint ? 'dynamic' : 'fixed'"
 		>
@@ -8,7 +9,7 @@
 			<input
 				matInput
 				[type]="getTextConfig().inputType || 'text'"
-				[formControlName]="getTextConfig().formControlName"
+				[formControl]="control()!"
 				[placeholder]="getTextConfig().placeholder || ''"
 			/>
 			@for (error of fieldErrors(); track error.key) {
@@ -24,10 +25,19 @@
 			<app-file-field
 				[title]="config().label"
 				[accept]="getFileConfig().accept"
-				(onFileDecoded)="handleFileUpload($event)"
+				[control]="control()!"
+				(onFileDecoded)="getFileConfig().onFileSelected($event)"
 			/>
-			@if (hasFileError()) {
-				<mat-error [innerHTML]="fileErrorMessage()"></mat-error>
+			@if (config().hint) {
+				<div class="text-sm text-gray-600 mt-1">
+					{{ config().hint }}
+				</div>
+			}
+			@for (error of fieldErrors(); track error.key) {
+				<div
+					class="text-red-600 text-sm mt-1"
+					[innerHTML]="error.message"
+				></div>
 			}
 		</div>
 	}
