@@ -71,11 +71,7 @@ interface FormMode {
 				<!-- Dynamic form fields -->
 				@for (field of formMode.fields; track field.key) {
 					<app-form-field
-						[control]="
-							field.type === 'file'
-								? formControls().file(field.key)
-								: formControls().text(field.key)
-						"
+						[control]="getControl()(field.key)"
 						[config]="field"
 					/>
 				}
@@ -124,9 +120,16 @@ export class PublishChartSourceComponent implements OnInit {
 	private formService = inject(FormService);
 
 	form!: FormGroup;
-	filesForm!: FormGroup;
 
 	@Input() mode: "linking" | "uploading" = "linking";
+
+	getControl = computed(() => (key: string): FormControl => {
+		const control = this.form.get(key) as FormControl | null;
+		if (!(control instanceof FormControl)) {
+			throw new Error(`Control with key "${key}" is not a FormControl`);
+		}
+		return control;
+	});
 
 	private readonly FIELDS = {
 		chartFileField: this.formService.createFileField({
@@ -191,11 +194,6 @@ export class PublishChartSourceComponent implements OnInit {
 		return this.formModes[this.mode];
 	}
 
-	formControls = computed(() => ({
-		file: (key: string) => this.filesForm.get(key) as FormControl,
-		text: (key: string) => this.form.get(key) as FormControl,
-	}));
-
 	ngOnInit() {
 		// Initialize form controls based on the provided data
 		if ((this.data as any).mode) {
@@ -205,11 +203,6 @@ export class PublishChartSourceComponent implements OnInit {
 		this.form = this.formService.createFormGroup(
 			this.formMode.fields,
 			initialChartFormData,
-		);
-
-		this.filesForm = this.formService.createFormGroup(
-			[this.FIELDS.chartFileField, this.FIELDS.chartBundleField],
-			{},
 		);
 
 		this.form.patchValue(this.data.formData);
@@ -312,12 +305,6 @@ export class PublishChartSourceComponent implements OnInit {
 		} else {
 			Object.keys(this.form.controls).forEach((key) => {
 				const control = this.form.get(key);
-				if (control?.errors === null) return;
-				console.log(`${key}: errors:`, control?.errors);
-			});
-
-			Object.keys(this.filesForm.controls).forEach((key) => {
-				const control = this.filesForm.get(key);
 				if (control?.errors === null) return;
 				console.log(`${key}: errors:`, control?.errors);
 			});

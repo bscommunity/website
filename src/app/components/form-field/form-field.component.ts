@@ -3,8 +3,15 @@ import {
 	Component,
 	computed,
 	input,
+	OnInit,
+	signal,
+	effect,
 } from "@angular/core";
-import { ReactiveFormsModule } from "@angular/forms";
+import {
+	AbstractControl,
+	FormControl,
+	ReactiveFormsModule,
+} from "@angular/forms";
 
 // Components
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -22,6 +29,8 @@ import type {
 	FormFieldConfig,
 	TextFieldConfig,
 } from "@/services/form.service";
+import { merge } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
 	selector: "app-form-field",
@@ -40,20 +49,73 @@ import type {
 })
 export class FormFieldComponent {
 	readonly config = input.required<FormFieldConfig>();
-	readonly control = input.required<any | null>();
+	readonly control = input.required<FormControl | null>();
 
-	// Computed properties
-	fieldErrors = computed(() => {
-		if (this.control().valid) return [];
+	errorMessage = signal("");
 
-		const errors = this.control()?.errors;
-		console.log(`Errors from ${this.config().key}: `, errors);
+	constructor() {
+		// Alternative approach using effect() - completely without RxJS
+		effect(() => {
+			const control = this.control();
+			if (control) {
+				// This effect will run whenever control() changes or any of its reactive properties
+				this.updateErrorMessage();
+			}
+		});
+	}
 
-		return Object.entries(errors).map(([key, _]) => ({
-			key,
-			message: this.config().validationMessages?.[key] || `${key} error`,
-		}));
-	});
+	updateErrorMessage() {
+		const control = this.control();
+
+		if (control?.valid || (!control?.touched && !control?.dirty)) {
+			this.errorMessage.set("");
+			return;
+		}
+
+		const errors = control?.errors;
+		if (!errors) {
+			this.errorMessage.set("");
+			return;
+		}
+
+		const errorMessages = Object.entries(errors).map(([key, _]) => {
+			return this.config().validationMessages?.[key] || `${key} error`;
+		});
+
+		/* console.log(`Errors from ${this.config().key}: `, {
+			valid: control?.valid,
+			touched: control?.touched,
+			dirty: control?.dirty,
+			errors: errorMessages,
+		}); */
+
+		this.errorMessage.set(errorMessages[0]);
+	}
+
+	onBlur() {
+		const control = this.control();
+		if (control) {
+			control.markAsTouched();
+			this.updateErrorMessage();
+		}
+	}
+
+	/* ngOnInit() {
+		const control = this.control();
+
+		// Listen to Angular form control events without rxjs
+		// Since we can't avoid RxJS entirely with Angular Forms, we'll use a minimal approach
+		if (control) {
+			// Subscribe to value changes
+			control.valueChanges.subscribe(() => this.updateErrorMessage());
+
+			// Subscribe to status changes (for validation state)
+			control.statusChanges.subscribe(() => this.updateErrorMessage());
+		}
+
+		// Initial error message update
+		this.updateErrorMessage();
+	} */
 
 	getTextConfig(): TextFieldConfig {
 		// console.log((this.config() as TextFieldConfig).formControlName);

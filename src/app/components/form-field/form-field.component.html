@@ -11,9 +11,10 @@
 				[type]="getTextConfig().inputType || 'text'"
 				[formControl]="control()!"
 				[placeholder]="getTextConfig().placeholder || ''"
+				(blur)="onBlur()"
 			/>
-			@for (error of fieldErrors(); track error.key) {
-				<mat-error [innerHTML]="error.message"></mat-error>
+			@if (errorMessage().length > 0) {
+				<mat-error [innerHTML]="errorMessage()"></mat-error>
 			}
 			@if (config().hint) {
 				<mat-hint align="start">{{ config().hint }}</mat-hint>
@@ -28,16 +29,18 @@
 				[control]="control()!"
 				(onFileDecoded)="getFileConfig().onFileSelected($event)"
 			/>
-			@if (config().hint) {
-				<div class="text-sm text-gray-600 mt-1">
-					{{ config().hint }}
-				</div>
-			}
-			@for (error of fieldErrors(); track error.key) {
+
+			@if (errorMessage().length > 0) {
 				<div
-					class="text-red-600 text-sm mt-1"
-					[innerHTML]="error.message"
+					class="text-error text-[0.8rem] -mt-2 ml-4"
+					[innerHTML]="errorMessage()"
 				></div>
+			} @else {
+				@if (config().hint) {
+					<div class="text-on-background text-[0.8rem] -mt-2 ml-4">
+						{{ config().hint }}
+					</div>
+				}
 			}
 		</div>
 	}
