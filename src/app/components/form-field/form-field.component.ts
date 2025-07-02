@@ -1,17 +1,11 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	computed,
 	input,
-	OnInit,
 	signal,
-	effect,
+	OnInit,
 } from "@angular/core";
-import {
-	AbstractControl,
-	FormControl,
-	ReactiveFormsModule,
-} from "@angular/forms";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 
 // Components
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -29,8 +23,6 @@ import type {
 	FormFieldConfig,
 	TextFieldConfig,
 } from "@/services/form.service";
-import { merge } from "rxjs";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
 	selector: "app-form-field",
@@ -47,14 +39,15 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FormFieldComponent {
+export class FormFieldComponent implements OnInit {
 	readonly config = input.required<FormFieldConfig>();
 	readonly control = input.required<FormControl | null>();
 
 	errorMessage = signal("");
 
-	constructor() {
-		// Alternative approach using effect() - completely without RxJS
+	// This is a workaround to avoid using RxJS for Angular Forms
+	// Does not works perfectly, only updates when the control is touched or dirty
+	/* constructor() {
 		effect(() => {
 			const control = this.control();
 			if (control) {
@@ -62,7 +55,7 @@ export class FormFieldComponent {
 				this.updateErrorMessage();
 			}
 		});
-	}
+	} */
 
 	updateErrorMessage() {
 		const control = this.control();
@@ -82,12 +75,12 @@ export class FormFieldComponent {
 			return this.config().validationMessages?.[key] || `${key} error`;
 		});
 
-		/* console.log(`Errors from ${this.config().key}: `, {
+		console.log(`Errors from ${this.config().key}: `, {
 			valid: control?.valid,
 			touched: control?.touched,
 			dirty: control?.dirty,
 			errors: errorMessages,
-		}); */
+		});
 
 		this.errorMessage.set(errorMessages[0]);
 	}
@@ -100,14 +93,14 @@ export class FormFieldComponent {
 		}
 	}
 
-	/* ngOnInit() {
+	ngOnInit() {
 		const control = this.control();
 
 		// Listen to Angular form control events without rxjs
 		// Since we can't avoid RxJS entirely with Angular Forms, we'll use a minimal approach
 		if (control) {
-			// Subscribe to value changes
-			control.valueChanges.subscribe(() => this.updateErrorMessage());
+			// Subscribe to value changes (not )
+			// control.valueChanges.subscribe(() => this.updateErrorMessage());
 
 			// Subscribe to status changes (for validation state)
 			control.statusChanges.subscribe(() => this.updateErrorMessage());
@@ -115,7 +108,7 @@ export class FormFieldComponent {
 
 		// Initial error message update
 		this.updateErrorMessage();
-	} */
+	}
 
 	getTextConfig(): TextFieldConfig {
 		// console.log((this.config() as TextFieldConfig).formControlName);

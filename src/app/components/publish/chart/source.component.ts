@@ -138,7 +138,8 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".chart"],
 			required: true,
 			hint: "Upload your chart file (.chart)",
-			onFileSelected: (file: File) => this.handleChartFile(file),
+			onFileSelected: (chartFileData: ChartFileData) =>
+				this.processChartFile(chartFileData, this.form),
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "bundleFile",
@@ -146,7 +147,8 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".zip"],
 			required: true,
 			hint: "Upload your chart bundle (.zip)",
-			onFileSelected: (file: File) => this.handleBundleFile(file),
+			onFileSelected: (bundleFileData: BundleZipData) =>
+				this.processBundleFile(bundleFileData, this.form),
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "chartPreviewUrl",
@@ -287,7 +289,7 @@ export class PublishChartSourceComponent implements OnInit {
 			const formValue = { ...this.form.value };
 
 			// Process YouTube URL if provided
-			if (formValue.chartPreviewUrl) {
+			/* if (formValue.chartPreviewUrl) {
 				const textField = this.formModes[this.mode].fields.find(
 					(field) =>
 						field.type === "text" &&
@@ -299,7 +301,9 @@ export class PublishChartSourceComponent implements OnInit {
 						formValue.chartPreviewUrl,
 					);
 				}
-			}
+			} */
+
+			console.log("Form value to submit:", formValue);
 
 			this.dialogRef.close(formValue);
 		} else {

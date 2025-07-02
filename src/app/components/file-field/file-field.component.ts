@@ -79,14 +79,24 @@ export class FileFieldComponent {
 	}
 
 	processFiles(files: FileList): void {
+		const acceptedTypes = this.accept();
 		Array.from(files).forEach((file) => {
+			const isAccepted = acceptedTypes.some((type) =>
+				file.name.endsWith(type),
+			);
+			if (!isAccepted) {
+				console.error("Invalid file type:", file.name);
+				this.onInvalidFile();
+				return;
+			}
 			if (file.name.endsWith(".chart")) {
 				this.extractChartInfo(file);
 			} else if (file.name.endsWith(".zip")) {
 				this.extractBundleZipData(file);
 			} else {
-				console.error("Invalid file type:", file.name);
-				this.onInvalidFile();
+				console.log("File accepted:", file.name);
+				this.currentFileName.set(file.name);
+				this.onFileDecoded.emit(file);
 			}
 		});
 	}
