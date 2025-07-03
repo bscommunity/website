@@ -6,8 +6,9 @@ import {
 	output,
 	viewChild,
 	input,
+	InputSignal,
 } from "@angular/core";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -37,9 +38,9 @@ export class FileFieldComponent {
 	private _snackBar = inject(MatSnackBar);
 	private dialog = inject(MatDialog);
 
-	control = input.required<any | null>();
-	title = input<string>("Upload File");
-	accept = input<string[]>([".chart", ".zip"]);
+	readonly control = input<InputSignal<FormControl | null>>();
+	readonly title = input<string>("Upload File");
+	readonly accept = input<string[]>([".chart", ".zip"]);
 
 	currentFileName = signal<string | null>(null);
 

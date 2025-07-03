@@ -13,7 +13,7 @@
 				[placeholder]="getTextConfig().placeholder || ''"
 				(blur)="onBlur()"
 			/>
-			@if (errorMessage().length > 0) {
+			@if (control()?.invalid) {
 				<mat-error [innerHTML]="errorMessage()"></mat-error>
 			}
 			@if (config().hint) {
@@ -23,24 +23,25 @@
 	}
 	@case ("file") {
 		<div class="flex flex-col gap-1">
-			<app-file-field
-				[title]="config().label"
-				[accept]="getFileConfig().accept"
-				[control]="control()!"
-				(onFileDecoded)="getFileConfig().onFileSelected($event)"
-			/>
-
-			@if (errorMessage().length > 0) {
+			<app-file-field [title]="config().label">
+				<input
+					[id]="config().label + '-file-upload'"
+					class="hidden"
+					type="file"
+					[accept]="getFileConfig().accept"
+					[formControl]="control()!"
+					(change)="getFileConfig().onFileSelected($event)"
+				/>
+			</app-file-field>
+			@if (control()?.invalid && control()?.touched) {
 				<div
 					class="text-error text-[0.8rem] -mt-2 ml-4"
 					[innerHTML]="errorMessage()"
 				></div>
-			} @else {
-				@if (config().hint) {
-					<div class="text-on-background text-[0.8rem] -mt-2 ml-4">
-						{{ config().hint }}
-					</div>
-				}
+			} @else if (config().hint) {
+				<div class="text-on-background text-[0.8rem] -mt-2 ml-4">
+					{{ config().hint }}
+				</div>
 			}
 		</div>
 	}

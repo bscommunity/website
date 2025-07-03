@@ -34,28 +34,28 @@ interface Option {
 				<label id="chart-flow-group">
 					Start fresh with a new chart or link to one that already
 					exists
-				</label>
-				<mat-radio-group
-					aria-labelledby="chart-flow-group"
-					class="flex items-start flex-col gap-1 my-4"
-					formControlName="chartFlow"
-				>
-					@for (option of options; track option; let i = $index) {
-						<mat-radio-button
-							labelPosition="before"
-							class="m-1 w-full flex items-center justify-between rounded-sm border border-outline pr-5"
-							[value]="option.value"
-							[disabled]="i === 0"
-						>
-							<span
-								class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
+					<mat-radio-group
+						aria-labelledby="chart-flow-group"
+						class="flex items-start flex-col gap-1 my-4"
+						formControlName="chartFlow"
+					>
+						@for (option of options; track option; let i = $index) {
+							<mat-radio-button
+								labelPosition="before"
+								class="m-1 w-full flex items-center justify-between rounded-sm border border-outline pr-5"
+								[value]="option.value"
+								[disabled]="i === 0"
 							>
-								<mat-icon>{{ option.icon }}</mat-icon>
-								{{ option.label }}
-							</span>
-						</mat-radio-button>
-					}
-				</mat-radio-group>
+								<span
+									class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
+								>
+									<mat-icon>{{ option.icon }}</mat-icon>
+									{{ option.label }}
+								</span>
+							</mat-radio-button>
+						}
+					</mat-radio-group>
+				</label>
 				<app-panel>
 					You can also
 					<button (click)="dialogRef.close()">

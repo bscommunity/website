@@ -28,14 +28,8 @@
 				} @else {
 					Select the file
 				}
-				<input
-					[id]="title() + '-file-upload'"
-					class="hidden"
-					type="file"
-					[accept]="accept()"
-					[formControl]="control()!"
-					(change)="onFileSelected($event)"
-				/>
+				<!-- The input with the [formControl] param filled -->
+				<ng-content></ng-content>
 			</label>
 		</button>
 	</div>

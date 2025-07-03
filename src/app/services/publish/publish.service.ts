@@ -15,7 +15,7 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 // Services
 import { AuthService } from "../auth.service";
 
-// Tipos utilitários compartilhados
+// Types
 export type DialogData<TFormData = any> = {
 	title?: string | null;
 	description?: string | null;

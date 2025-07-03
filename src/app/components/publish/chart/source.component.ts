@@ -5,15 +5,16 @@ import {
 	inject,
 	Input,
 	computed,
+	signal,
+	ViewChild,
 } from "@angular/core";
 
 import {
-	FormBuilder,
 	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
-	Validators,
+	NgForm,
 } from "@angular/forms";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import {
@@ -30,12 +31,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 
 // Services
-import {
-	FormService,
-	type FormFieldConfig,
-	type TextFieldConfig,
-} from "@/services/form.service";
-import { ValidationService } from "@/services/validation.service";
+import { FormService, type FormFieldConfig } from "@/services/form.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
@@ -45,7 +41,7 @@ import { PanelComponent } from "@/components/panel/panel.component";
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
 
 // Types
-import { type BundleZipData } from "@/services/extract.service";
+import { ExtractService, type BundleZipData } from "@/services/extract.service";
 import { type ChartFileData } from "@/services/decode.service";
 import { type DialogData } from "@/services/publish/publish.service";
 
@@ -117,9 +113,11 @@ export class PublishChartSourceComponent implements OnInit {
 	dialogRef = inject<MatDialogRef<PublishChartSourceComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
+	private extractService = inject(ExtractService);
 	private formService = inject(FormService);
 
 	form!: FormGroup;
+	submitted = signal(false); // Keep this for manual tracking
 
 	@Input() mode: "linking" | "uploading" = "linking";
 
@@ -156,7 +154,7 @@ export class PublishChartSourceComponent implements OnInit {
 			inputType: "url",
 			placeholder: "https://youtu.be/BY_XwvKogC8",
 			hint: "Must be a YouTube video URL",
-			required: false,
+			required: true,
 			onValueProcessed: this.formService.extractYouTubeVideoId,
 		}),
 	};
@@ -210,24 +208,29 @@ export class PublishChartSourceComponent implements OnInit {
 		this.form.patchValue(this.data.formData);
 	}
 
-	/**
-	 * Handle chart file selection and processing
-	 */
-	private handleChartFile(file: File): void {
-		// Here you would typically process the file to extract ChartFileData
-		// For now, we'll just log it
-		console.log("Chart file selected:", file.name);
-		// TODO: Implement file processing logic
-	}
+	private async processBundleUrl(
+		bundleUrl: string | null,
+		formGroup: FormGroup,
+	): Promise<void> {
+		if (!bundleUrl) return;
 
-	/**
-	 * Handle bundle file selection and processing
-	 */
-	private handleBundleFile(file: File): void {
-		// Here you would typically process the file to extract BundleZipData
-		// For now, we'll just log it
-		console.log("Bundle file selected:", file.name);
-		// TODO: Implement file processing logic
+		try {
+			const bundleZipData: BundleZipData | null =
+				await this.extractService.fetchBundleZip(bundleUrl);
+			if (bundleZipData) {
+				this.processBundleFile(bundleZipData, formGroup);
+			} else {
+				console.error("Failed to fetch bundle zip data.");
+				throw new Error(
+					`Failed to fetch bundle zip from URL: ${bundleUrl}`,
+				);
+			}
+		} catch (error) {
+			console.error("Error fetching bundle zip:", error);
+			throw new Error(
+				`Failed to fetch bundle zip from URL: ${bundleUrl}`,
+			);
+		}
 	}
 
 	/**
@@ -284,33 +287,54 @@ export class PublishChartSourceComponent implements OnInit {
 	onSubmit() {
 		console.log("Trying to submit form");
 
+		// Mark form as submitted to show validation errors
+		this.submitted.set(true);
+
 		if (this.form.valid) {
 			console.log("Form is valid, submitting...");
-			const formValue = { ...this.form.value };
+			let formValue = { ...this.form.value };
 
 			// Process YouTube URL if provided
-			/* if (formValue.chartPreviewUrl) {
-				const textField = this.formModes[this.mode].fields.find(
-					(field) =>
-						field.type === "text" &&
-						field.key === "chartPreviewUrl",
-				) as TextFieldConfig;
+			this.formService.processTextFieldValues(
+				this.form,
+				this.formMode.fields,
+			);
 
-				if (textField?.onValueProcessed) {
-					formValue.chartPreviewUrl = textField.onValueProcessed(
-						formValue.chartPreviewUrl,
-					);
+			// If current mode is linking, process the bundle URL
+			if (this.mode === "linking") {
+				const chartUrl = this.form.get("chartUrl")?.value;
+				if (chartUrl) {
+					this.processBundleUrl(chartUrl, this.form)
+						.then(() => {
+							console.log("Bundle URL processed successfully.");
+						})
+						.catch((error) => {
+							console.error(
+								"Error processing bundle URL:",
+								error,
+							);
+						});
 				}
-			} */
+			}
+
+			// Update form value after processing
+			// This is necessary to ensure all fields are correctly set
+			formValue = { ...this.form.value };
 
 			console.log("Form value to submit:", formValue);
 
-			this.dialogRef.close(formValue);
+			// this.dialogRef.close(formValue);
 		} else {
 			Object.keys(this.form.controls).forEach((key) => {
 				const control = this.form.get(key);
 				if (control?.errors === null) return;
-				console.log(`${key}: errors:`, control?.errors);
+				console.log(
+					`${key}: errors:`,
+					control?.errors,
+					control?.invalid,
+				);
+				control?.markAsTouched(); // Triggers validation messages
+				control?.markAsDirty(); // Ensures the control is marked as dirty
 			});
 
 			console.error("Form is invalid, cannot submit.");

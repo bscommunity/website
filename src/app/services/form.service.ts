@@ -31,7 +31,7 @@ export interface TextFieldConfig extends BaseFieldConfig {
 	readonly type: "text";
 	placeholder?: string;
 	inputType?: TextInputType;
-	onValueProcessed?: (value: string) => string;
+	onValueProcessed?: (value: string) => void;
 	urlFileExtension?: string;
 }
 
@@ -156,6 +156,20 @@ export class FormService {
 		}
 
 		return new FormGroup(group);
+	}
+
+	processTextFieldValues(form: FormGroup, fields: FormFieldConfig[]): void {
+		for (const field of fields) {
+			if (field.type === "text" && field.onValueProcessed) {
+				const control = form.get(field.key);
+				if (control instanceof FormControl) {
+					const processedValue = field.onValueProcessed(
+						control.value as string,
+					);
+					control.setValue(processedValue);
+				}
+			}
+		}
 	}
 
 	/**
