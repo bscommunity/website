@@ -17,9 +17,11 @@ export class ExtractService {
 	/**
 	 * Fetches a ZIP file from the specified URL, extracts its contents, and parses the `info.json` file inside the ZIP.
 	 * @param url - The URL to fetch the ZIP bundle from.
-	 * @returns A promise that resolves to the parsed `BundleZipData` object if successful, or `null` if an error occurs.
+	 * @returns A promise that resolves to the file data extracted from `info.json`
+	 * @throws If the fetch fails or if `info.json` is not found in the ZIP.
+	 * @throws If parsing `info.json` fails.
 	 */
-	fetchBundleZip(url: string): Promise<BundleZipData | null> {
+	fetchBundleZip(url: string): Promise<File> {
 		return fetch(url)
 			.then((response) => {
 				if (!response.ok) {
@@ -33,14 +35,14 @@ export class ExtractService {
 				const file = new File([blob], "bundle.zip", {
 					type: "application/zip",
 				});
-				return this.extractBundleZipData(file);
+				return file;
 			})
 			.catch((error) => {
 				console.error(
 					"Error fetching or processing bundle zip:",
 					error,
 				);
-				return null;
+				throw new Error(`Failed to fetch bundle zip from URL: ${url}`);
 			});
 	}
 

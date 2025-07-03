@@ -42,7 +42,7 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 
 // Types
 import { ExtractService, type BundleZipData } from "@/services/extract.service";
-import { type ChartFileData } from "@/services/decode.service";
+import { DecodeService, type ChartFileData } from "@/services/decode.service";
 import { type DialogData } from "@/services/publish/publish.service";
 
 interface FormMode {
@@ -114,6 +114,8 @@ export class PublishChartSourceComponent implements OnInit {
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	private extractService = inject(ExtractService);
+	private decodeService = inject(DecodeService);
+
 	private formService = inject(FormService);
 
 	form!: FormGroup;
@@ -134,8 +136,8 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".chart"],
 			required: true,
 			hint: "Upload your chart file (.chart)",
-			onFileSelected: (chartFileData: ChartFileData) =>
-				this.processChartFile(chartFileData, this.form),
+			onFileSelected: (file: File) =>
+				this.processChartFile(file, this.form),
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "bundleFile",
@@ -143,8 +145,8 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".zip"],
 			required: true,
 			hint: "Upload your chart bundle (.zip)",
-			onFileSelected: (bundleFileData: BundleZipData) =>
-				this.processBundleFile(bundleFileData, this.form),
+			onFileSelected: (file: File) =>
+				this.processBundleFile(file, this.form),
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "chartPreviewUrl",
@@ -171,6 +173,11 @@ export class PublishChartSourceComponent implements OnInit {
 					hint: "Must be a direct link to the .zip file",
 					required: true,
 					urlFileExtension: "zip",
+					onValueProcessed:
+						this.mode === "linking"
+							? (url: string) =>
+									this.processBundleUrl(url, this.form)
+							: undefined,
 				}),
 				this.FIELDS.chartFileField,
 				this.FIELDS.gameplayUrlField,
@@ -206,29 +213,24 @@ export class PublishChartSourceComponent implements OnInit {
 		this.form.patchValue(this.data.formData);
 	}
 
+	/**
+	 * Fetches the bundle zip from the provided URL and processes it
+	 */
 	private async processBundleUrl(
-		bundleUrl: string | null,
+		bundleUrl: string,
 		formGroup: FormGroup,
 	): Promise<void> {
-		if (!bundleUrl) return;
-
 		try {
-			const bundleZipData: BundleZipData | null =
-				await this.extractService.fetchBundleZip(bundleUrl);
-			if (bundleZipData) {
-				console.log(
-					"Bundle zip data fetched successfully:",
-					bundleZipData,
-				);
-				this.processBundleFile(bundleZipData, formGroup);
+			const file = await this.extractService.fetchBundleZip(bundleUrl);
+			if (file) {
+				console.log("Bundle zip data fetched successfully:", file);
+				this.processBundleFile(file, formGroup);
 			} else {
-				console.error("Failed to fetch bundle zip data.");
 				throw new Error(
 					`Failed to fetch bundle zip from URL: ${bundleUrl}`,
 				);
 			}
 		} catch (error) {
-			console.error("Error fetching bundle zip:", error);
 			throw new Error(
 				`Failed to fetch bundle zip from URL: ${bundleUrl}`,
 			);
@@ -238,12 +240,26 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Process bundle file data and update form fields
 	 */
-	private processBundleFile(
-		bundleZipData: BundleZipData | null,
+	private async processBundleFile(
+		bundleFile: File,
+		formGroup: FormGroup,
+	): Promise<void> {
+		try {
+			const bundleZipData: BundleZipData =
+				await this.extractService.extractBundleZipData(bundleFile);
+			this.processBundleFileData(bundleZipData, formGroup);
+		} catch (error) {
+			throw new Error("Failed to process bundle file");
+		}
+	}
+
+	/**
+	 * Process bundle file data and update form fields
+	 */
+	private processBundleFileData(
+		bundleZipData: BundleZipData,
 		formGroup: FormGroup,
 	): void {
-		if (!bundleZipData) return;
-
 		let difficulty: Difficulty;
 		switch (bundleZipData.difficulty) {
 			case 4:
@@ -272,18 +288,27 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Process chart file data and update form fields
 	 */
-	private processChartFile(
-		chartFileData: ChartFileData | null,
+	private async processChartFile(
+		chartFile: File,
 		formGroup: FormGroup,
-	): void {
-		if (!chartFileData) return;
+	): Promise<void> {
+		try {
+			const data = await this.decodeService.decodeChartFile(chartFile);
 
-		formGroup.patchValue({
-			notesAmount: chartFileData.notesAmount,
-			effectsAmount: chartFileData.effectsAmount,
-			bpm: chartFileData.bpm,
-			duration: chartFileData.duration,
-		});
+			if (!data) {
+				throw new Error("Invalid chart file data");
+			}
+
+			formGroup.patchValue({
+				notesAmount: data.notesAmount,
+				effectsAmount: data.effectsAmount,
+				bpm: data.bpm,
+				duration: data.duration,
+			});
+		} catch (error) {
+			console.error("Failed to process chart file:", error);
+			throw new Error("Failed to process chart file");
+		}
 	}
 
 	async onSubmit() {
@@ -293,13 +318,6 @@ export class PublishChartSourceComponent implements OnInit {
 			{
 				onValidSubmit: async (formValue) => {
 					console.log("Base form submitted successfully:", formValue);
-					// If current mode is linking, process the bundle URL
-					if (this.mode === "linking") {
-						const chartUrl = this.form.get("chartUrl")?.value;
-						if (chartUrl) {
-							await this.processBundleUrl(chartUrl, this.form);
-						}
-					}
 				},
 				onInvalidSubmit: (invalidControls) => {
 					console.error(

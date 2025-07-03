@@ -26,6 +26,7 @@
 			<app-file-field
 				[title]="config().label"
 				[isInvalid]="control()?.invalid && control()?.touched"
+				[control]="control()"
 			>
 				<input
 					[id]="config().label + '-file-upload'"
@@ -33,7 +34,6 @@
 					type="file"
 					[accept]="getFileConfig().accept"
 					[formControl]="control()!"
-					(change)="getFileConfig().onFileSelected($event)"
 				/>
 			</app-file-field>
 			@if (control()?.invalid && control()?.touched) {

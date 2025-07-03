@@ -18,12 +18,12 @@
 		{{ title() }}
 	</p>
 	<div class="flex flex-row items-center justify-end gap-3">
-		@if (currentFileName() != null) {
+		@if (fileName() != null) {
 			<p class="italic">
 				{{
-					currentFileName()!.length > 20
-						? currentFileName()!.substring(0, 20) + "..."
-						: currentFileName()
+					fileName()!.length > 20
+						? fileName()!.substring(0, 20) + "..."
+						: fileName()
 				}}
 			</p>
 		} @else {
@@ -34,7 +34,7 @@
 				class="flex w-full h-full px-4 py-2.5 cursor-pointer"
 				[for]="title() + '-file-upload'"
 			>
-				@if (currentFileName()) {
+				@if (fileName()) {
 					Change
 				} @else {
 					Select the file

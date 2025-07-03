@@ -31,7 +31,7 @@ export interface TextFieldConfig extends BaseFieldConfig {
 	readonly type: "text";
 	placeholder?: string;
 	inputType?: TextInputType;
-	onValueProcessed?: (value: string) => void;
+	onValueProcessed?: (value: string) => Promise<void> | string;
 	urlFileExtension?: string;
 }
 
@@ -186,15 +186,37 @@ export class FormService {
 		return new FormGroup(group);
 	}
 
-	processTextFieldValues(form: FormGroup, fields: FormFieldConfig[]): void {
+	async processTextFieldValues(
+		form: FormGroup,
+		fields: FormFieldConfig[],
+	): Promise<void> {
 		for (const field of fields) {
 			if (field.type === "text" && field.onValueProcessed) {
 				const control = form.get(field.key);
 				if (control instanceof FormControl) {
-					const processedValue = field.onValueProcessed(
+					const processedValue = await field.onValueProcessed(
 						control.value as string,
 					);
-					control.setValue(processedValue);
+					if (processedValue) {
+						control.setValue(processedValue);
+					}
+				}
+			}
+		}
+	}
+
+	async processFileFieldValues(
+		form: FormGroup,
+		fields: FormFieldConfig[],
+	): Promise<void> {
+		for (const field of fields) {
+			if (field.type === "file" && field.onFileSelected) {
+				const control = form.get(field.key);
+				if (control instanceof FormControl) {
+					const file = control.value;
+					if (file) {
+						field.onFileSelected(file);
+					}
 				}
 			}
 		}
@@ -236,7 +258,10 @@ export class FormService {
 				}
 
 				// Process text field values
-				this.processTextFieldValues(form, fields);
+				await this.processTextFieldValues(form, fields);
+
+				// Process file field values
+				await this.processFileFieldValues(form, fields);
 
 				// Execute custom validation logic if provided
 				if (onValidSubmit) {

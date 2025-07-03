@@ -102,7 +102,7 @@ export class FormFieldComponent implements OnInit {
 		// Listen to Angular form control events without rxjs
 		// Since we can't avoid RxJS entirely with Angular Forms, we'll use a minimal approach
 		if (control) {
-			// Subscribe to value changes (not )
+			// Subscribe to value changes (not performant)
 			// control.valueChanges.subscribe(() => this.updateErrorMessage());
 
 			// Subscribe to status changes (for validation state)
