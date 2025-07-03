@@ -60,21 +60,21 @@ export class FormFieldComponent implements OnInit {
 	updateErrorMessage() {
 		const control = this.control();
 
-		console.log(
+		/* console.log(
 			`Updating error message for control: ${this.config().key}`,
 			{
 				valid: control?.valid,
 				touched: control?.touched,
 				dirty: control?.dirty,
 			},
-		);
+		); */
 
 		const errors = control?.errors;
 
 		if (control?.valid || !errors) {
-			console.log(
+			/* console.log(
 				`Control ${this.config().key} is valid or has no errors.`,
-			);
+			); */
 			this.errorMessage.set("");
 			return;
 		}
@@ -83,7 +83,7 @@ export class FormFieldComponent implements OnInit {
 			return this.config().validationMessages?.[key] || `${key} error`;
 		});
 
-		console.log(`Errors from ${this.config().key}: `, errorMessages);
+		// console.log(`Errors from ${this.config().key}: `, errorMessages);
 
 		this.errorMessage.set(errorMessages[0]);
 	}

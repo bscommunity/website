@@ -9,7 +9,9 @@ import {
 	InputSignal,
 } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
 
+// Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
@@ -23,7 +25,7 @@ import { ExtractService } from "@/services/extract.service";
 
 @Component({
 	selector: "app-file-field",
-	imports: [MatButtonModule, ReactiveFormsModule],
+	imports: [MatButtonModule, ReactiveFormsModule, CommonModule],
 	templateUrl: "./file-field.component.html",
 	styleUrl: "./file-field.component.css",
 })
@@ -41,6 +43,7 @@ export class FileFieldComponent {
 	readonly control = input<InputSignal<FormControl | null>>();
 	readonly title = input<string>("Upload File");
 	readonly accept = input<string[]>([".chart", ".zip"]);
+	readonly isInvalid = input.required<boolean | undefined>();
 
 	currentFileName = signal<string | null>(null);
 

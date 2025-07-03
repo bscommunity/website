@@ -1,11 +1,22 @@
 <div
 	#container
-	class="flex flex-row items-center justify-between w-full rounded border border-outline px-4 py-3 mb-1"
+	[ngClass]="{
+		'flex flex-row items-center justify-between w-full rounded border px-4 py-3 mb-1': true,
+		'border-outline': !isInvalid(),
+		'border-error': isInvalid(),
+	}"
 	(dragover)="onDragOver($event)"
 	(dragleave)="onDragLeave($event)"
 	(drop)="onDrop($event)"
 >
-	<p>{{ title() }}</p>
+	<p
+		[ngClass]="{
+			'text-on-background': !isInvalid(),
+			'text-error': isInvalid(),
+		}"
+	>
+		{{ title() }}
+	</p>
 	<div class="flex flex-row items-center justify-end gap-3">
 		@if (currentFileName() != null) {
 			<p class="italic">

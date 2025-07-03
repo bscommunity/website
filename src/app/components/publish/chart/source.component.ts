@@ -117,8 +117,6 @@ export class PublishChartSourceComponent implements OnInit {
 	private formService = inject(FormService);
 
 	form!: FormGroup;
-	submitted = signal(false); // Keep this for manual tracking
-
 	@Input() mode: "linking" | "uploading" = "linking";
 
 	getControl = computed(() => (key: string): FormControl => {
@@ -154,7 +152,7 @@ export class PublishChartSourceComponent implements OnInit {
 			inputType: "url",
 			placeholder: "https://youtu.be/BY_XwvKogC8",
 			hint: "Must be a YouTube video URL",
-			required: true,
+			required: false,
 			onValueProcessed: this.formService.extractYouTubeVideoId,
 		}),
 	};
@@ -218,6 +216,10 @@ export class PublishChartSourceComponent implements OnInit {
 			const bundleZipData: BundleZipData | null =
 				await this.extractService.fetchBundleZip(bundleUrl);
 			if (bundleZipData) {
+				console.log(
+					"Bundle zip data fetched successfully:",
+					bundleZipData,
+				);
 				this.processBundleFile(bundleZipData, formGroup);
 			} else {
 				console.error("Failed to fetch bundle zip data.");
@@ -284,60 +286,33 @@ export class PublishChartSourceComponent implements OnInit {
 		});
 	}
 
-	onSubmit() {
-		console.log("Trying to submit form");
+	async onSubmit() {
+		const result = await this.formService.handleFormSubmission(
+			this.form,
+			this.formMode.fields,
+			{
+				onValidSubmit: async (formValue) => {
+					console.log("Base form submitted successfully:", formValue);
+					// If current mode is linking, process the bundle URL
+					if (this.mode === "linking") {
+						const chartUrl = this.form.get("chartUrl")?.value;
+						if (chartUrl) {
+							await this.processBundleUrl(chartUrl, this.form);
+						}
+					}
+				},
+				onInvalidSubmit: (invalidControls) => {
+					console.error(
+						"Form validation failed for controls:",
+						invalidControls,
+					);
+				},
+				enableDebugLogging: true,
+			},
+		);
 
-		// Mark form as submitted to show validation errors
-		this.submitted.set(true);
-
-		if (this.form.valid) {
-			console.log("Form is valid, submitting...");
-			let formValue = { ...this.form.value };
-
-			// Process YouTube URL if provided
-			this.formService.processTextFieldValues(
-				this.form,
-				this.formMode.fields,
-			);
-
-			// If current mode is linking, process the bundle URL
-			if (this.mode === "linking") {
-				const chartUrl = this.form.get("chartUrl")?.value;
-				if (chartUrl) {
-					this.processBundleUrl(chartUrl, this.form)
-						.then(() => {
-							console.log("Bundle URL processed successfully.");
-						})
-						.catch((error) => {
-							console.error(
-								"Error processing bundle URL:",
-								error,
-							);
-						});
-				}
-			}
-
-			// Update form value after processing
-			// This is necessary to ensure all fields are correctly set
-			formValue = { ...this.form.value };
-
-			console.log("Form value to submit:", formValue);
-
-			// this.dialogRef.close(formValue);
-		} else {
-			Object.keys(this.form.controls).forEach((key) => {
-				const control = this.form.get(key);
-				if (control?.errors === null) return;
-				console.log(
-					`${key}: errors:`,
-					control?.errors,
-					control?.invalid,
-				);
-				control?.markAsTouched(); // Triggers validation messages
-				control?.markAsDirty(); // Ensures the control is marked as dirty
-			});
-
-			console.error("Form is invalid, cannot submit.");
+		if (result.isValid && result.formValue) {
+			// this.dialogRef.close(result.formValue);
 		}
 	}
 }

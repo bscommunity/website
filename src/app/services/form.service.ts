@@ -49,6 +49,34 @@ export interface FileFieldConfig extends BaseFieldConfig {
  */
 export type FormFieldConfig = TextFieldConfig | FileFieldConfig;
 
+/**
+ * Configuration for form submission
+ */
+export interface FormSubmissionConfig {
+	/**
+	 * Custom processing function executed when form is valid
+	 */
+	onValidSubmit?: (formValue: any) => Promise<void> | void;
+	/**
+	 * Custom processing function executed when form is invalid
+	 */
+	onInvalidSubmit?: (invalidControls: Record<string, any>) => void;
+	/**
+	 * Whether to log debug information
+	 */
+	enableDebugLogging?: boolean;
+}
+
+/**
+ * Result of form submission processing
+ */
+export interface FormSubmissionResult {
+	isValid: boolean;
+	formValue?: any;
+	invalidControls?: Record<string, any>;
+	error?: Error;
+}
+
 @Injectable({ providedIn: "root" })
 export class FormService {
 	private validationService = inject(ValidationService);
@@ -182,4 +210,145 @@ export class FormService {
 		}
 		return url;
 	};
+
+	/**
+	 * Generic form submission handler
+	 */
+	async handleFormSubmission(
+		form: FormGroup,
+		fields: FormFieldConfig[],
+		config: FormSubmissionConfig = {},
+	): Promise<FormSubmissionResult> {
+		const {
+			onValidSubmit,
+			onInvalidSubmit,
+			enableDebugLogging = false,
+		} = config;
+
+		if (enableDebugLogging) {
+			console.log("Trying to submit form");
+		}
+
+		try {
+			if (form.valid) {
+				if (enableDebugLogging) {
+					console.log("Form is valid, submitting...");
+				}
+
+				// Process text field values
+				this.processTextFieldValues(form, fields);
+
+				// Execute custom validation logic if provided
+				if (onValidSubmit) {
+					await onValidSubmit(form.value);
+				}
+
+				// Get updated form value after processing
+				const formValue = { ...form.value };
+
+				if (enableDebugLogging) {
+					console.log("Form value to submit:", formValue);
+				}
+
+				return {
+					isValid: true,
+					formValue,
+				};
+			} else {
+				// Handle invalid form
+				const invalidControls: Record<string, any> = {};
+
+				Object.keys(form.controls).forEach((key) => {
+					const control = form.get(key);
+					if (control?.errors) {
+						invalidControls[key] = {
+							errors: control.errors,
+							invalid: control.invalid,
+						};
+
+						if (enableDebugLogging) {
+							console.log(
+								`${key}: errors:`,
+								control.errors,
+								control.invalid,
+							);
+						}
+
+						// Mark control as touched and dirty to trigger validation messages
+						control.markAsTouched();
+						control.markAsDirty();
+					}
+				});
+
+				if (enableDebugLogging) {
+					console.error("Form is invalid, cannot submit.");
+				}
+
+				// Execute custom invalid submission logic if provided
+				if (onInvalidSubmit) {
+					onInvalidSubmit(invalidControls);
+				}
+
+				return {
+					isValid: false,
+					invalidControls,
+				};
+			}
+		} catch (error) {
+			if (enableDebugLogging) {
+				console.error("Error during form submission:", error);
+			}
+
+			return {
+				isValid: false,
+				error: error as Error,
+			};
+		}
+	}
+
+	/**
+	 * Helper method to get all invalid controls with their errors
+	 */
+	getInvalidControls(form: FormGroup): Record<string, any> {
+		const invalidControls: Record<string, any> = {};
+
+		Object.keys(form.controls).forEach((key) => {
+			const control = form.get(key);
+			if (control?.errors) {
+				invalidControls[key] = {
+					errors: control.errors,
+					invalid: control.invalid,
+					value: control.value,
+				};
+			}
+		});
+
+		return invalidControls;
+	}
+
+	/**
+	 * Simple form submission handler without custom processing
+	 */
+	async submitForm(
+		form: FormGroup,
+		fields: FormFieldConfig[],
+		enableDebugLogging: boolean = false,
+	): Promise<FormSubmissionResult> {
+		return this.handleFormSubmission(form, fields, { enableDebugLogging });
+	}
+
+	/**
+	 * Form submission handler with custom validation callback
+	 */
+	async submitFormWithValidation(
+		form: FormGroup,
+		fields: FormFieldConfig[],
+		validationCallback: (formValue: any) => Promise<void> | void,
+		enableDebugLogging: boolean = false,
+	): Promise<FormSubmissionResult> {
+		return this.handleFormSubmission(form, fields, {
+			onValidSubmit: validationCallback,
+			enableDebugLogging,
+		});
+	}
 }
