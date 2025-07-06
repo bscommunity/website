@@ -32,15 +32,16 @@ import { ExtractService } from "@/services/extract.service";
 export class FileFieldComponent {
 	// Get section HTML component reference
 	readonly container = viewChild.required<ElementRef>("container");
-	readonly onFileDecoded = output<any | null>();
 
 	private _snackBar = inject(MatSnackBar);
 
-	readonly control = input.required<FormControl | null>();
-	readonly title = input<string>("Upload File");
+	readonly key = input.required<string>();
+	readonly title = input.required<string>();
+	readonly accept = input<string[]>([".chart", ".zip"]);
 	readonly isInvalid = input.required<boolean | undefined>();
+	readonly fileName = input<string | null | undefined>();
 
-	fileName = signal<string | null>(null);
+	readonly fileChange = output<File>();
 
 	onInvalidFile(): void {
 		this._snackBar.open("Invalid file type", "Close", {
@@ -62,10 +63,19 @@ export class FileFieldComponent {
 
 	onDrop(event: DragEvent): void {
 		event.preventDefault();
-		if (event.dataTransfer?.files) {
-			this.control()?.setValue(event.dataTransfer.files[0]);
-			console.log(this.control()?.errors);
-			this.fileName.set(event.dataTransfer.files[0].name);
+		this.onDragLeave(event);
+
+		const file = event.dataTransfer?.files.item(0);
+
+		console.log("Type:", file);
+		console.log("Accept:", this.accept());
+		if (!file || !this.accept().some((type) => file.name.endsWith(type))) {
+			this.onInvalidFile();
+			return;
+		}
+
+		if (file) {
+			this.fileChange.emit(file);
 		}
 
 		// Remove visual feedback

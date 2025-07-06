@@ -24,16 +24,19 @@
 	@case ("file") {
 		<div class="flex flex-col gap-1">
 			<app-file-field
+				[key]="config().key"
 				[title]="config().label"
+				[accept]="getFileConfig().accept"
 				[isInvalid]="control()?.invalid && control()?.touched"
-				[control]="control()"
+				[fileName]="control()?.value?.name"
+				(fileChange)="control()?.setValue($event)"
 			>
 				<input
-					[id]="config().label + '-file-upload'"
+					[id]="config().key + '-file-upload'"
 					class="hidden"
 					type="file"
 					[accept]="getFileConfig().accept"
-					[formControl]="control()!"
+					(change)="control()?.setValue($any($event.target).files[0])"
 				/>
 			</app-file-field>
 			@if (control()?.invalid && control()?.touched) {
