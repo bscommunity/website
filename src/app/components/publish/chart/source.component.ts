@@ -32,6 +32,8 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 
 // Services
 import { FormService, type FormFieldConfig } from "@/services/form.service";
+import { DecodeService } from "@/services/decode.service";
+import { ExtractService, type BundleZipData } from "@/services/extract.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
@@ -41,8 +43,6 @@ import { PanelComponent } from "@/components/panel/panel.component";
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
 
 // Types
-import { ExtractService, type BundleZipData } from "@/services/extract.service";
-import { DecodeService, type ChartFileData } from "@/services/decode.service";
 import { type DialogData } from "@/services/publish/publish.service";
 
 interface FormMode {
@@ -136,8 +136,7 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".chart"],
 			required: true,
 			hint: "Upload your chart file (.chart)",
-			onFileSelected: (file: File) =>
-				this.processChartFile(file, this.form),
+			onFileSelected: this.processChartFile.bind(this),
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "bundleFile",
@@ -145,8 +144,7 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".zip"],
 			required: true,
 			hint: "Upload your chart bundle (.zip)",
-			onFileSelected: (file: File) =>
-				this.processBundleFile(file, this.form),
+			onFileSelected: this.processBundleFile.bind(this),
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "chartPreviewUrl",
@@ -175,8 +173,7 @@ export class PublishChartSourceComponent implements OnInit {
 					urlFileExtension: "zip",
 					onValueProcessed:
 						this.mode === "linking"
-							? (url: string) =>
-									this.processBundleUrl(url, this.form)
+							? (url: string) => this.processBundleUrl(url)
 							: undefined,
 				}),
 				this.FIELDS.chartFileField,
@@ -216,15 +213,12 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Fetches the bundle zip from the provided URL and processes it
 	 */
-	private async processBundleUrl(
-		bundleUrl: string,
-		formGroup: FormGroup,
-	): Promise<void> {
+	private async processBundleUrl(bundleUrl: string): Promise<void> {
 		try {
 			const file = await this.extractService.fetchBundleZip(bundleUrl);
 			if (file) {
 				console.log("Bundle zip data fetched successfully:", file);
-				this.processBundleFile(file, formGroup);
+				await this.processBundleFile(file);
 			} else {
 				throw new Error(
 					`Failed to fetch bundle zip from URL: ${bundleUrl}`,
@@ -240,14 +234,17 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Process bundle file data and update form fields
 	 */
-	private async processBundleFile(
-		bundleFile: File,
-		formGroup: FormGroup,
-	): Promise<void> {
+	private async processBundleFile(bundleFile: File): Promise<void> {
 		try {
 			const bundleZipData: BundleZipData =
 				await this.extractService.extractBundleZipData(bundleFile);
-			this.processBundleFileData(bundleZipData, formGroup);
+
+			console.log(
+				"Bundle file data processed successfully:",
+				bundleZipData,
+			);
+
+			await this.processBundleFileData(bundleZipData);
 		} catch (error) {
 			throw new Error("Failed to process bundle file");
 		}
@@ -256,10 +253,9 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Process bundle file data and update form fields
 	 */
-	private processBundleFileData(
+	private async processBundleFileData(
 		bundleZipData: BundleZipData,
-		formGroup: FormGroup,
-	): void {
+	): Promise<void> {
 		let difficulty: Difficulty;
 		switch (bundleZipData.difficulty) {
 			case 4:
@@ -276,7 +272,7 @@ export class PublishChartSourceComponent implements OnInit {
 				break;
 		}
 
-		formGroup.patchValue({
+		await this.form.patchValue({
 			track: bundleZipData.title,
 			artist: bundleZipData.artist,
 			difficulty: difficulty,
@@ -288,18 +284,16 @@ export class PublishChartSourceComponent implements OnInit {
 	/**
 	 * Process chart file data and update form fields
 	 */
-	private async processChartFile(
-		chartFile: File,
-		formGroup: FormGroup,
-	): Promise<void> {
+	private async processChartFile(chartFile: File): Promise<void> {
 		try {
 			const data = await this.decodeService.decodeChartFile(chartFile);
+			console.log("Chart file data processed successfully:", data);
 
 			if (!data) {
 				throw new Error("Invalid chart file data");
 			}
 
-			formGroup.patchValue({
+			this.form.patchValue({
 				notesAmount: data.notesAmount,
 				effectsAmount: data.effectsAmount,
 				bpm: data.bpm,
@@ -330,6 +324,10 @@ export class PublishChartSourceComponent implements OnInit {
 		);
 
 		if (result.isValid && result.formValue) {
+			console.log(
+				"Form submitted successfully with value:",
+				result.formValue,
+			);
 			// this.dialogRef.close(result.formValue);
 		}
 	}

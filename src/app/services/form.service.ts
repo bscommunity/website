@@ -41,7 +41,7 @@ export interface TextFieldConfig extends BaseFieldConfig {
 export interface FileFieldConfig extends BaseFieldConfig {
 	readonly type: "file";
 	accept: (FileType | string)[];
-	onFileSelected: (data: any) => void;
+	onFileSelected: (data: File) => void;
 }
 
 /**
