@@ -136,7 +136,6 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".chart"],
 			required: true,
 			hint: "Upload your chart file (.chart)",
-			onFileSelected: this.processChartFile.bind(this),
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "bundleFile",
@@ -144,7 +143,6 @@ export class PublishChartSourceComponent implements OnInit {
 			accept: [".zip"],
 			required: true,
 			hint: "Upload your chart bundle (.zip)",
-			onFileSelected: this.processBundleFile.bind(this),
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "chartPreviewUrl",
@@ -171,10 +169,6 @@ export class PublishChartSourceComponent implements OnInit {
 					hint: "Must be a direct link to the .zip file",
 					required: true,
 					urlFileExtension: "zip",
-					onValueProcessed:
-						this.mode === "linking"
-							? (url: string) => this.processBundleUrl(url)
-							: undefined,
 				}),
 				this.FIELDS.chartFileField,
 				this.FIELDS.gameplayUrlField,
@@ -210,117 +204,10 @@ export class PublishChartSourceComponent implements OnInit {
 		this.form.patchValue(this.data.formData);
 	}
 
-	/**
-	 * Fetches the bundle zip from the provided URL and processes it
-	 */
-	private async processBundleUrl(bundleUrl: string): Promise<void> {
-		try {
-			const file = await this.extractService.fetchBundleZip(bundleUrl);
-			if (file) {
-				console.log("Bundle zip data fetched successfully:", file);
-				await this.processBundleFile(file);
-			} else {
-				throw new Error(
-					`Failed to fetch bundle zip from URL: ${bundleUrl}`,
-				);
-			}
-		} catch (error) {
-			throw new Error(
-				`Failed to fetch bundle zip from URL: ${bundleUrl}`,
-			);
-		}
-	}
-
-	/**
-	 * Process bundle file data and update form fields
-	 */
-	private async processBundleFile(bundleFile: File): Promise<void> {
-		try {
-			const bundleZipData: BundleZipData =
-				await this.extractService.extractBundleZipData(bundleFile);
-
-			console.log(
-				"Bundle file data processed successfully:",
-				bundleZipData,
-			);
-
-			await this.processBundleFileData(bundleZipData);
-		} catch (error) {
-			throw new Error("Failed to process bundle file");
-		}
-	}
-
-	/**
-	 * Process bundle file data and update form fields
-	 */
-	private async processBundleFileData(
-		bundleZipData: BundleZipData,
-	): Promise<void> {
-		let difficulty: Difficulty;
-		switch (bundleZipData.difficulty) {
-			case 4:
-				difficulty = Difficulty.NORMAL;
-				break;
-			case 3:
-				difficulty = Difficulty.HARD;
-				break;
-			case 1:
-				difficulty = Difficulty.EXTREME;
-				break;
-			default:
-				difficulty = Difficulty.NORMAL;
-				break;
-		}
-
-		await this.form.patchValue({
-			track: bundleZipData.title,
-			artist: bundleZipData.artist,
-			difficulty: difficulty,
-			bpm: bundleZipData.bpm,
-			isDeluxe: bundleZipData.type === "Promode",
-		});
-	}
-
-	/**
-	 * Process chart file data and update form fields
-	 */
-	private async processChartFile(chartFile: File): Promise<void> {
-		try {
-			const data = await this.decodeService.decodeChartFile(chartFile);
-			console.log("Chart file data processed successfully:", data);
-
-			if (!data) {
-				throw new Error("Invalid chart file data");
-			}
-
-			this.form.patchValue({
-				notesAmount: data.notesAmount,
-				effectsAmount: data.effectsAmount,
-				bpm: data.bpm,
-				duration: data.duration,
-			});
-		} catch (error) {
-			console.error("Failed to process chart file:", error);
-			throw new Error("Failed to process chart file");
-		}
-	}
-
 	async onSubmit() {
-		const result = await this.formService.handleFormSubmission(
+		const result = await this.formService.submitForm(
 			this.form,
 			this.formMode.fields,
-			{
-				onValidSubmit: async (formValue) => {
-					console.log("Base form submitted successfully:", formValue);
-				},
-				onInvalidSubmit: (invalidControls) => {
-					console.error(
-						"Form validation failed for controls:",
-						invalidControls,
-					);
-				},
-				enableDebugLogging: true,
-			},
 		);
 
 		if (result.isValid && result.formValue) {
@@ -328,7 +215,7 @@ export class PublishChartSourceComponent implements OnInit {
 				"Form submitted successfully with value:",
 				result.formValue,
 			);
-			// this.dialogRef.close(result.formValue);
+			this.dialogRef.close(result.formValue);
 		}
 	}
 }

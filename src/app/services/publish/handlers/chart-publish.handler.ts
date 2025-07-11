@@ -17,8 +17,20 @@ import { CookieService } from "@/services/cookie.service";
 
 // Libraries
 import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
+import { BundleZipData, ExtractService } from "@/services/extract.service";
+import { ChartFileData, DecodeService } from "@/services/decode.service";
 
-export const initialChartFormData: CreateChartModel = {
+type ChartFormData = CreateChartModel & {
+	chartFile: File | null;
+	chartBundle: File | null;
+};
+
+export const initialChartFormData: ChartFormData = {
+	// Ephemeral data
+	chartFile: null,
+	chartBundle: null,
+	// Form data
+	// These fields are used to create the chart
 	track: "",
 	artist: "",
 	album: "",
@@ -42,6 +54,8 @@ export class ChartPublishHandler
 	implements PublishHandler<CreateChartModel, ChartModel>
 {
 	constructor(
+		private extractService: ExtractService,
+		private decodeService: DecodeService,
 		private chartService: ChartService,
 		private cacheService: CacheService,
 		private cookieService: CookieService,
@@ -59,17 +73,139 @@ export class ChartPublishHandler
 		return { ...initialChartFormData };
 	}
 
-	async submit(formData: CreateChartModel): Promise<ChartModel> {
+	/**
+	 * Fetches the bundle zip from the provided URL and processes it
+	 */
+	private async processBundleUrl(
+		bundleUrl: string,
+	): Promise<Partial<ChartFormData>> {
+		try {
+			const file = await this.extractService.fetchBundleZip(bundleUrl);
+			if (file) {
+				console.log("Bundle zip data fetched successfully:", file);
+				return await this.processBundleFile(file);
+			} else {
+				throw new Error(
+					`Failed to fetch bundle zip from URL: ${bundleUrl}`,
+				);
+			}
+		} catch (error) {
+			throw new Error(
+				`Failed to fetch bundle zip from URL: ${bundleUrl}`,
+			);
+		}
+	}
+
+	/**
+	 * Process bundle file data and update form fields
+	 */
+	private async processBundleFile(
+		bundleFile: File,
+	): Promise<Partial<ChartFormData>> {
+		try {
+			const bundleZipData: BundleZipData =
+				await this.extractService.extractBundleZipData(bundleFile);
+
+			console.log(
+				"Bundle file data processed successfully:",
+				bundleZipData,
+			);
+
+			return await this.processBundleFileData(bundleZipData);
+		} catch (error) {
+			throw new Error("Failed to process bundle file");
+		}
+	}
+
+	/**
+	 * Process bundle file data and update form fields
+	 */
+	private async processBundleFileData(
+		bundleZipData: BundleZipData,
+	): Promise<Partial<ChartFormData>> {
+		let difficulty: Difficulty;
+		switch (bundleZipData.difficulty) {
+			case 4:
+				difficulty = Difficulty.NORMAL;
+				break;
+			case 3:
+				difficulty = Difficulty.HARD;
+				break;
+			case 1:
+				difficulty = Difficulty.EXTREME;
+				break;
+			default:
+				difficulty = Difficulty.NORMAL;
+				break;
+		}
+
+		return {
+			track: bundleZipData.title,
+			artist: bundleZipData.artist,
+			difficulty: difficulty,
+			bpm: bundleZipData.bpm,
+			isDeluxe: bundleZipData.type === "Promode",
+		};
+	}
+
+	/**
+	 * Process chart file data and update form fields
+	 */
+	private async processChartFile(chartFile: File): Promise<ChartFileData> {
+		try {
+			const data = await this.decodeService.decodeChartFile(chartFile);
+			console.log("Chart file data processed successfully:", data);
+
+			if (!data) {
+				throw new Error("Invalid chart file data");
+			}
+
+			return data;
+		} catch (error) {
+			console.error("Failed to process chart file:", error);
+			throw new Error("Failed to process chart file");
+		}
+	}
+
+	async submit(formData: ChartFormData): Promise<ChartModel> {
+		let data = formData;
+
+		// 0. Process bundle/chart files if present
+		if (!formData.chartFile) {
+			throw new Error(
+				"Please provide a chart file or bundle to proceed.",
+			);
+		}
+
+		try {
+			let bundleData: Partial<ChartFormData> | undefined;
+
+			if (formData.chartBundle) {
+				bundleData = await this.processBundleFile(formData.chartBundle);
+			} else if (formData.chartUrl) {
+				bundleData = await this.processBundleUrl(formData.chartUrl);
+			}
+
+			// Merge bundle data with form data
+			if (bundleData) {
+				data = { ...formData, ...bundleData };
+			}
+		} catch (error: any) {
+			throw new Error(
+				error?.message || "Failed to process uploaded files.",
+			);
+		}
+
 		// 1. Search for media info
 		try {
 			const response = await getMediaInfo(
-				formData.track,
-				formData.artist,
+				data.track,
+				data.artist,
 				this.cookieService,
 			);
-			Object.assign(formData, response);
+			Object.assign(data, response);
 		} catch (error: any) {
-			if (!formData.coverUrl) {
+			if (!data.coverUrl) {
 				throw new Error(
 					"We couldn't find the album cover. Please check your track and artist names and try again.",
 				);
@@ -78,17 +214,17 @@ export class ChartPublishHandler
 
 		// 2. Fetch streaming links
 		try {
-			if (formData.trackUrls && formData.trackUrls.length > 0) {
-				formData.trackUrls = await getTrackStreamingLinks(
-					formData.trackUrls[0].url,
-					formData.track,
-					formData.artist,
+			if (data.trackUrls && data.trackUrls.length > 0) {
+				data.trackUrls = await getTrackStreamingLinks(
+					data.trackUrls[0].url,
+					data.track,
+					data.artist,
 				);
 			}
 		} catch {}
 
 		// 3. Submit the chart
-		const response = await this.chartService.createChart(formData);
+		const response = await this.chartService.createChart(data);
 
 		if (!response)
 			throw new Error(

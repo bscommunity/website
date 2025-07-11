@@ -41,7 +41,7 @@ export interface TextFieldConfig extends BaseFieldConfig {
 export interface FileFieldConfig extends BaseFieldConfig {
 	readonly type: "file";
 	accept: (FileType | string)[];
-	onFileSelected: (data: File) => void;
+	onFileSelected?: (data: File) => void;
 }
 
 /**
@@ -144,9 +144,9 @@ export class FormService {
 			throw new Error("Accept array must contain at least one file type");
 		}
 
-		if (typeof config.onFileSelected !== "function") {
+		/* if (typeof config.onFileSelected !== "function") {
 			throw new Error("onFileSelected must be a valid function");
-		}
+		} */
 
 		if (config.required) {
 			validators.push(Validators.required);
