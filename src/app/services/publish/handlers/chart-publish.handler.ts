@@ -20,7 +20,7 @@ import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 import { BundleZipData, ExtractService } from "@/services/extract.service";
 import { ChartFileData, DecodeService } from "@/services/decode.service";
 
-type ChartFormData = CreateChartModel & {
+export type ChartFormData = CreateChartModel & {
 	chartFile: File | null;
 	chartBundle: File | null;
 };
@@ -40,8 +40,8 @@ export const initialChartFormData: ChartFormData = {
 	difficulty: Difficulty.NORMAL,
 	isDeluxe: false,
 	isExplicit: false,
-	chartUrl: "",
-	chartPreviewUrl: "",
+	bundleUrl: "",
+	previewUrl: "",
 	duration: 0,
 	notesAmount: 0,
 	bpm: 0,
@@ -182,8 +182,8 @@ export class ChartPublishHandler
 
 			if (formData.chartBundle) {
 				bundleData = await this.processBundleFile(formData.chartBundle);
-			} else if (formData.chartUrl) {
-				bundleData = await this.processBundleUrl(formData.chartUrl);
+			} else if (formData.bundleUrl) {
+				bundleData = await this.processBundleUrl(formData.bundleUrl);
 			}
 
 			// Merge bundle data with form data
@@ -194,6 +194,16 @@ export class ChartPublishHandler
 			throw new Error(
 				error?.message || "Failed to process uploaded files.",
 			);
+		}
+
+		// Process the chart file
+		try {
+			const chartFileData = await this.processChartFile(
+				formData.chartFile,
+			);
+			data = { ...data, ...chartFileData };
+		} catch (error: any) {
+			throw new Error(error?.message || "Failed to process chart file.");
 		}
 
 		// 1. Search for media info

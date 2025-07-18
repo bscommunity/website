@@ -9,7 +9,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 
 // Models
-import { ChartModel } from "@/models/chart.model";
+import { ChartModelWithLatestVersion } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
@@ -27,21 +27,13 @@ export enum Tendency {
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
-	@Input()
-	set chart(value: ChartModel) {
-		this._chart = value;
-		this.latestVersion = value?.versions?.[0];
-	}
-	get chart(): ChartModel {
-		return this._chart;
-	}
-	private _chart!: ChartModel;
-
-	latestVersion: VersionModel | undefined;
+	@Input() chart!: ChartModelWithLatestVersion;
 
 	transformDuration = transformDuration;
 
-	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(null);
+	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(
+		null,
+	);
 
 	/* tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;

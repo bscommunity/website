@@ -14,7 +14,7 @@ import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty
 import { ChartService } from "@/services/api/chart.service";
 
 // Models
-import { ChartWithLatestVersionModel } from "@/models/chart.model";
+import { ChartModelWithLatestVersion } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
@@ -35,7 +35,7 @@ export class AsideComponent {
 	readonly router = inject(Router);
 	readonly chartService = inject(ChartService);
 
-	readonly chart = input.required<ChartWithLatestVersionModel>();
+	readonly chart = input.required<ChartModelWithLatestVersion>();
 
 	transformDuration = transformDuration;
 }

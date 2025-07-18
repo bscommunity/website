@@ -16,7 +16,7 @@ import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.componen
 import { PageError } from "../error/error";
 
 // Models
-import { ChartWithLatestVersionModel } from "@/models/chart.model";
+import { ChartModelWithLatestVersion } from "@/models/chart.model";
 import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Enums
@@ -49,16 +49,16 @@ export class Chart implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 
-	set chart(value: ChartWithLatestVersionModel) {
+	set chart(value: ChartModelWithLatestVersion) {
 		this._chart = {
 			...value,
-			latestVersion: value.versions?.[0] || undefined,
+			latestVersion: value.versions[0] || undefined,
 		};
 	}
-	get chart(): ChartWithLatestVersionModel {
+	get chart(): ChartModelWithLatestVersion {
 		return this._chart;
 	}
-	private _chart!: ChartWithLatestVersionModel;
+	private _chart!: ChartModelWithLatestVersion;
 
 	difficultyIcon: string | null = null;
 
@@ -75,7 +75,9 @@ export class Chart implements OnInit {
 		}
 
 		if (this.chart) {
-			this.difficultyIcon = getDifficultyIcon(this.chart.difficulty);
+			this.difficultyIcon = getDifficultyIcon(
+				this.chart.latestVersion.difficulty,
+			);
 		}
 	}
 }

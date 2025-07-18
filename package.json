@@ -5,6 +5,7 @@
     "ng": "ng",
     "generate-env": "node scripts/env.js",
     "start": "ng serve",
+    "dev": "ng dev",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

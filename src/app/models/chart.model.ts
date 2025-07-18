@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 // Enums
-import { Difficulty } from "./enums/difficulty.enum";
 import { Genre } from "./enums/genre.enum";
 
 // Models
@@ -9,31 +8,40 @@ import { Contributor } from "./contributor.model";
 import { Version } from "./version.model";
 import { StreamingLink } from "./streaming-link.model";
 
+// Types
+import type { VersionModel } from "./version.model";
+
 export const Chart = z.object({
 	id: z.string(),
 	artist: z.string(),
 	track: z.string(),
 	genre: z.nativeEnum(Genre).optional(),
 	coverUrl: z.string(),
-	difficulty: z.nativeEnum(Difficulty),
-	isDeluxe: z.boolean().default(false),
-	isExplicit: z.boolean().default(false),
 	isFeatured: z.boolean().default(false),
 	isPublic: z.boolean().default(true),
 
 	// Relations
-	versions: Version.array().optional(),
+	versions: Version.array().min(1),
 	contributors: z.array(Contributor).optional(),
 });
 
-const ChartWithLatestVersion = Chart.extend({
-	latestVersion: Version.optional(),
-});
-
 export type ChartModel = z.infer<typeof Chart>;
-export type ChartWithLatestVersionModel = z.infer<
-	typeof ChartWithLatestVersion
->;
+
+export type ChartModelWithLatestVersion = Omit<ChartModel, "latestVersion"> & {
+	latestVersion: VersionModel;
+};
+
+/**
+ * Returns a ChartModelWithLatestVersion, ensuring latestVersion is filled.
+ */
+export function withLatestVersion(
+	chart: Omit<ChartModel, "latestVersion">,
+): ChartModelWithLatestVersion {
+	return {
+		...chart,
+		latestVersion: chart.versions[chart.versions.length - 1],
+	};
+}
 
 export const CreateChart = Chart.omit({
 	id: true,
@@ -45,12 +53,15 @@ export const CreateChart = Chart.omit({
 	.merge(
 		// First version properties
 		Version.pick({
-			chartUrl: true,
-			chartPreviewUrl: true,
+			bundleUrl: true,
+			previewUrl: true,
 			duration: true,
 			notesAmount: true,
 			effectsAmount: true,
 			bpm: true,
+			difficulty: true,
+			isDeluxe: true,
+			isExplicit: true,
 		}),
 	)
 	.extend({

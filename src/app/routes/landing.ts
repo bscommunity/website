@@ -19,9 +19,12 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 			<div
 				class="flex flex-row items-center justify-center gap-4 mt-4 flex-wrap"
 			>
-				<div matTooltip="Coming soon!">
+				<!-- <div matTooltip="Coming soon!">
 					<button mat-flat-button disabled>Access dashboard</button>
-				</div>
+				</div> -->
+				<button mat-flat-button routerLink="/published">
+					Access dashboard
+				</button>
 				<button mat-flat-button routerLink="/release-notes">
 					Check release notes
 				</button>

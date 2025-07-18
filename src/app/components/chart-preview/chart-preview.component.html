@@ -14,7 +14,9 @@
 			alt="Cover"
 			class="w-full h-full aspect-square object-cover"
 		/>
-		<app-difficulty-mark [difficulty]="chart.difficulty" />
+		<app-difficulty-mark
+			[difficulty]="this.chart.latestVersion.difficulty"
+		/>
 		@if (!this.chart.isPublic) {
 			<mat-icon
 				class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -34,10 +36,10 @@
 					{{ this.chart.track }}
 				</p>
 				<span class="inline-flex gap-1 items-center justify-start">
-					@if (this.chart.isExplicit) {
+					@if (this.chart.latestVersion.isExplicit) {
 						<mat-icon class="filled-icon" inline>explicit</mat-icon>
 					}
-					@if (this.chart.isDeluxe) {
+					@if (this.chart.latestVersion.isDeluxe) {
 						<mat-icon
 							svgIcon="deluxe"
 							inline
@@ -74,13 +76,13 @@
 			<div class="flex flex-row items-center justify-start gap-2">
 				<mat-icon inline>timer</mat-icon>
 				<span class="line-clamp-1">{{
-					transformDuration(this.latestVersion?.duration || 0)
+					transformDuration(this.chart.latestVersion.duration || 0)
 				}}</span>
 			</div>
 			<div class="flex flex-row items-center justify-start gap-2">
 				<mat-icon inline>music_note</mat-icon>
 				<span class="line-clamp-1"
-					>{{ this.latestVersion?.notesAmount }} notes</span
+					>{{ this.chart.latestVersion.notesAmount }} notes</span
 				>
 			</div>
 		</div>

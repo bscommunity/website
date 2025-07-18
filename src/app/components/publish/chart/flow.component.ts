@@ -125,7 +125,7 @@ export class PublishChartFlowComponent {
 			this.dialogRef.close({
 				data: this.form.value,
 				additionalData: {
-					mode: "linking",
+					mode: "uploading",
 				},
 			});
 		}

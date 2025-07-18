@@ -298,7 +298,7 @@ export class CacheService {
 		);
 	}
 
-	removeVersion(id: string, versionId: string): void {
+	removeVersion(id: string, versionId: number): void {
 		const chart = this.getChart(id);
 
 		if (!chart || !chart.versions) {

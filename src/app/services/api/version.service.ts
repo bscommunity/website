@@ -39,7 +39,7 @@ export class VersionService {
 	}
 
 	// Delete
-	async deleteVersion(chartId: string, versionId: string): Promise<boolean> {
+	async deleteVersion(chartId: string, versionId: number): Promise<boolean> {
 		console.log("Deleting version with ID:", versionId);
 
 		try {

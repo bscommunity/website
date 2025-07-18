@@ -138,14 +138,14 @@ export class PublishChartSourceComponent implements OnInit {
 			hint: "Upload your chart file (.chart)",
 		}),
 		chartBundleField: this.formService.createFileField({
-			key: "bundleFile",
+			key: "chartBundle",
 			label: "Bundle file",
 			accept: [".zip"],
 			required: true,
 			hint: "Upload your chart bundle (.zip)",
 		}),
 		gameplayUrlField: this.formService.createTextField({
-			key: "chartPreviewUrl",
+			key: "previewUrl",
 			label: "Gameplay",
 			inputType: "url",
 			placeholder: "https://youtu.be/BY_XwvKogC8",
@@ -162,7 +162,7 @@ export class PublishChartSourceComponent implements OnInit {
 			description: "Provide the URL to your chart bundle.",
 			fields: [
 				this.formService.createTextField({
-					key: "chartUrl",
+					key: "bundleUrl",
 					label: "Bundle",
 					inputType: "url",
 					placeholder: "https://example.com/chart.zip",

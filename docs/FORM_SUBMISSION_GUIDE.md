@@ -80,9 +80,9 @@ async onSubmit() {
       onValidSubmit: async (formValue) => {
         // Lógica específica personalizada
         if (this.mode === "linking") {
-          const chartUrl = this.form.get("chartUrl")?.value;
-          if (chartUrl) {
-            await this.processBundleUrl(chartUrl, this.form);
+          const bundleUrl = this.form.get("bundleUrl")?.value;
+          if (bundleUrl) {
+            await this.processBundleUrl(bundleUrl, this.form);
           }
         }
       },

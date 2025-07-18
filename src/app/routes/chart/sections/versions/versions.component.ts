@@ -154,7 +154,7 @@ export class VersionsComponent {
 			description: "Download",
 			icon: "download",
 			callback: (_, item: VersionModel) =>
-				window.open(item.chartUrl, "_blank"),
+				window.open(item.bundleUrl, "_blank"),
 			disabled: () => false,
 		},
 		{

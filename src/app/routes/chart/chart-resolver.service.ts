@@ -6,7 +6,11 @@ import {
 	RouterStateSnapshot,
 } from "@angular/router";
 import { ChartService } from "@/services/api/chart.service";
-import { ChartModel } from "@/models/chart.model";
+import {
+	ChartModel,
+	ChartModelWithLatestVersion,
+	withLatestVersion,
+} from "@/models/chart.model";
 import { AuthService } from "@/services/auth.service";
 import { ZodError } from "zod";
 
@@ -21,7 +25,7 @@ export class ChartResolver implements Resolve<any> {
 	async resolve(
 		route: ActivatedRouteSnapshot,
 		state: RouterStateSnapshot,
-	): Promise<ChartModel | null> {
+	): Promise<ChartModelWithLatestVersion | null> {
 		const chartId = route.paramMap.get("id");
 
 		if (!chartId) {
@@ -35,7 +39,7 @@ export class ChartResolver implements Resolve<any> {
 
 		try {
 			const chart = await this.chartService.getChartById(chartId);
-			return chart;
+			return withLatestVersion(chart);
 		} catch (error: any) {
 			console.error("Error fetching chart", error);
 

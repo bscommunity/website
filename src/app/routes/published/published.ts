@@ -21,7 +21,11 @@ import { Genre } from "@/models/enums/genre.enum";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 
 // Models
-import { ChartModel } from "@/models/chart.model";
+import {
+	ChartModel,
+	ChartModelWithLatestVersion,
+	withLatestVersion,
+} from "@/models/chart.model";
 import { VersionModel } from "@/models/version.model";
 
 // Services
@@ -30,9 +34,7 @@ import { ChartService } from "@/services/api/chart.service";
 // Utils
 import { convertStringToMonth } from "@/lib/time";
 
-type ChartWithLatestVersion = ChartModel & {
-	latestVersion?: VersionModel;
-};
+type ChartWithLatestVersion = ChartModelWithLatestVersion;
 
 type ChartsByMonth = {
 	name: string; // e.g., "2023-10"
@@ -85,16 +87,15 @@ export class Published implements OnInit {
 	filters = [];
 
 	set charts(value: ChartModel[] | undefined) {
-		const charts =
-			value?.map((chart) => {
-				return {
-					...chart,
-					latestVersion: chart.versions?.[0] || undefined,
-				};
-			}) || [];
+		const charts: ChartWithLatestVersion[] =
+			value?.map(withLatestVersion) || [];
 
 		this.availableDifficulties = Array.from(
-			new Set(charts.map((chart) => Difficulty[chart.difficulty])),
+			new Set(
+				charts.map(
+					(chart) => Difficulty[chart.latestVersion.difficulty],
+				),
+			),
 		);
 
 		this.availableGenres = Array.from(
@@ -108,7 +109,9 @@ export class Published implements OnInit {
 		this.availableVersions = Array.from(
 			new Set(
 				charts
-					.map((chart) => (chart.isDeluxe ? "Deluxe" : "Default"))
+					.map((chart) =>
+						chart.latestVersion.isDeluxe ? "Deluxe" : "Default",
+					)
 					.flat(),
 			),
 		);
@@ -162,7 +165,7 @@ export class Published implements OnInit {
 
 	ngOnInit(): void {
 		// Access resolved data
-		this.fetchCharts(true);
+		this.fetchCharts(false);
 	}
 
 	clearFilters() {

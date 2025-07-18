@@ -62,7 +62,6 @@ export const routes: Routes = [
 		loadComponent: () =>
 			import("./routes/chart/chart").then((m) => m.Chart),
 		resolve: { chart: ChartResolver },
-		canActivate: [isAuthenticatedGuard],
 		runGuardsAndResolvers: "always",
 	},
 	{
