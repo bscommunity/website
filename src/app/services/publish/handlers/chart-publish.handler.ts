@@ -246,6 +246,9 @@ export class ChartPublishHandler
 			}
 		} catch {
 			// Ignore errors fetching streaming links
+			console.warn(
+				"Failed to fetch streaming links, proceeding without them.",
+			);
 		}
 
 		return data;

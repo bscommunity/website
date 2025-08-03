@@ -106,7 +106,7 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 	}
 
 	addData(newItem: T) {
-		// this.data = [...this.data(), newItem];
+		this.data.update((items) => [...items, newItem]);
 		this.dataSource.data = this.data();
 	}
 

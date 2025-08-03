@@ -1,4 +1,5 @@
 import {
+	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
 	inject,
@@ -52,6 +53,7 @@ import { type DialogData } from "@/services/publish/publish.service";
 		ChartSectionComponent,
 		TableComponent,
 	],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	templateUrl: "./versions.component.html",
 })
 export class VersionsComponent {
@@ -97,10 +99,7 @@ export class VersionsComponent {
 			description: "Switch version",
 			icon: "swap_horiz",
 			callback: () => {
-				this.openSnackBar(
-					"Version switching wasn't implemented yet.",
-					"Close",
-				);
+				this.openSnackBar("Not implemented yet.", "Close");
 			},
 			disabled: (index, item) => {
 				// If it's a update, we already have versionTable available
@@ -124,20 +123,12 @@ export class VersionsComponent {
 		{
 			description: "Delete version",
 			icon: "delete_forever",
-			callback: this.openRemoveVersionConfirmationDialog.bind(this),
-			disabled: (index, item) => {
-				const versionTable = this.versionTable();
-				if (versionTable) {
-					return (
-						item.id ===
-							versionTable.dataSource.data[
-								versionTable.dataSource.data.length - 1
-							].id ||
-						item.id === versionTable.dataSource.data[0].id
-					);
-				} else {
-					return index === this.versions().length - 1 || index === 0;
-				}
+			callback: this.openRemoveVersionDialog.bind(this),
+			// We only allow deleting the latest version
+			disabled: (_, item) => {
+				return (
+					item.index === 1 || item.index !== this.versions().length
+				);
 			},
 		},
 	];
@@ -175,10 +166,7 @@ export class VersionsComponent {
 			});
 	}
 
-	openRemoveVersionConfirmationDialog(
-		_: number,
-		version: VersionModel,
-	): void {
+	openRemoveVersionDialog(_: number, version: VersionModel): void {
 		console.log("Removing version", version);
 
 		const operation = async () => {
@@ -244,8 +232,8 @@ export class VersionsComponent {
 
 	addVersionToTable(version: VersionModel) {
 		this.versionTable().addData(version);
-		this.cdr.detectChanges();
 		this.openSnackBar("Version added with success!", "Close");
+		this.cdr.detectChanges();
 	}
 
 	removeVersionFromTable(version: VersionModel) {

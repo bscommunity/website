@@ -52,7 +52,7 @@ export class ChartService {
 		const url = `${this.apiUrl}`;
 
 		// Check if we are on refresh cooldown
-		if (!this.cacheService.isOnRefreshCooldown) {
+		/* if (!this.cacheService.isOnRefreshCooldown) {
 			console.log(
 				"Refresh cooldown is over. Fetching charts from API...",
 			);
@@ -89,10 +89,10 @@ export class ChartService {
 					console.error("Failed to fetch charts:", error);
 				},
 			});
-		}
+		} */
 
 		// Return cached charts if already cached before
-		if (forceRefresh || !charts) {
+		if (forceRefresh || !charts?.length) {
 			console.log(
 				"It was not possible to get cached charts. Fetching from API...",
 			);

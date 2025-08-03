@@ -48,24 +48,6 @@ export class CacheService {
 		return parseInt(this.storageService.getItem("chartCount") || "0");
 	}
 
-	private addChartKey(key: string): void {
-		let keys = [];
-		const storageKeys = this.storageService.getItem("chartKeys");
-
-		if (storageKeys) {
-			keys = JSON.parse(storageKeys);
-		}
-
-		// Evita duplicidade de chaves
-		if (!keys.includes(key)) {
-			keys.push(key);
-		}
-
-		// Garante que não há duplicatas
-		const uniqueKeys = Array.from(new Set(keys));
-		this.storageService.setItem("chartKeys", JSON.stringify(uniqueKeys));
-	}
-
 	private increaseChartCount(): void {
 		this.storageService.setItem(
 			"chartCount",
@@ -87,14 +69,7 @@ export class CacheService {
 	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" object is found; otherwise, undefined.
 	 */
 	getAllCharts(remoteChartIds?: string[]): ChartModel[] | undefined {
-		const keys = this.storageService.getItem("chartKeys");
-
-		if (!keys) {
-			return undefined;
-		}
-
-		const storedItems = JSON.parse(keys) as string[];
-		const charts = storedItems
+		const charts = Object.keys(localStorage)
 			.filter((key) => key.startsWith("chart_"))
 			.filter((key) => this.storageService.getItem(key))
 			.map(
@@ -156,7 +131,6 @@ export class CacheService {
 		);
 
 		this.increaseChartCount();
-		this.addChartKey(cacheKey);
 	}
 
 	addCharts(charts: ChartModel[]): void {
