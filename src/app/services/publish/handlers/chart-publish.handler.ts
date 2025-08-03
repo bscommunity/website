@@ -167,8 +167,10 @@ export class ChartPublishHandler
 		}
 	}
 
-	async submit(formData: ChartFormData): Promise<ChartModel> {
-		let data = formData;
+	async preprocessFormData(
+		formData: ChartFormData,
+	): Promise<CreateChartModel> {
+		let data = { ...formData };
 
 		// 0. Process bundle/chart files if present
 		if (!formData.chartFile) {
@@ -188,7 +190,7 @@ export class ChartPublishHandler
 
 			// Merge bundle data with form data
 			if (bundleData) {
-				data = { ...formData, ...bundleData };
+				data = { ...data, ...bundleData };
 			}
 		} catch (error: any) {
 			throw new Error(
@@ -205,6 +207,17 @@ export class ChartPublishHandler
 		} catch (error: any) {
 			throw new Error(error?.message || "Failed to process chart file.");
 		}
+
+		// 3. Return the processed data
+		const { chartFile, ...createChartData } = data;
+
+		return createChartData;
+	}
+
+	async preprocessMediaInfo(
+		formData: CreateChartModel,
+	): Promise<CreateChartModel> {
+		let data = { ...formData };
 
 		// 1. Search for media info
 		try {
@@ -231,15 +244,25 @@ export class ChartPublishHandler
 					data.artist,
 				);
 			}
-		} catch {}
+		} catch {
+			// Ignore errors fetching streaming links
+		}
 
-		// 3. Submit the chart
+		return data;
+	}
+
+	async submit(formData: ChartFormData): Promise<ChartModel> {
+		let data = await this.preprocessFormData(formData);
+		data = await this.preprocessMediaInfo(data);
+
 		const response = await this.chartService.createChart(data);
 
 		if (!response)
 			throw new Error(
 				"No response received from the server. Please try again later.",
 			);
+
+		console.log("Chart created successfully:", response);
 
 		this.cacheService.addChart(response);
 

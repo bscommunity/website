@@ -6,7 +6,7 @@
 	<div
 		class="relative rounded-md overflow-hidden h-[82px] w-[82px] min-w-[82px]"
 		[ngStyle]="{
-			opacity: this.chart.isPublic ? 1 : 0.5,
+			opacity: !this.chart.isPublic && showVisibility() ? 0.5 : 1,
 		}"
 	>
 		<img
@@ -17,7 +17,7 @@
 		<app-difficulty-mark
 			[difficulty]="this.chart.latestVersion.difficulty"
 		/>
-		@if (!this.chart.isPublic) {
+		@if (!this.chart.isPublic && showVisibility()) {
 			<mat-icon
 				class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
 			>

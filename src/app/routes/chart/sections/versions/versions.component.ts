@@ -33,6 +33,7 @@ import { CreateChartModel } from "@/models/chart.model";
 
 // Service
 import {
+	ChartFormData,
 	ChartPublishHandler,
 	initialChartFormData,
 } from "@/services/publish/handlers/chart-publish.handler";
@@ -64,72 +65,8 @@ export class VersionsComponent {
 	readonly versionService = inject(VersionService);
 	readonly chartPublishHandler = inject(ChartPublishHandler);
 
-	openSnackBar(message: string, action: string) {
-		this._snackBar.open(message, action);
-	}
-
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
-
-	openAddVersionDialog(): void {
-		const dialogRef = this.dialog.open(
-			this.chartPublishHandler.getStepComponents()[2],
-			{
-				data: {
-					title: "Upload Chart",
-					description:
-						"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
-					formData: { ...initialChartFormData },
-					inactive: [],
-				} as DialogData<CreateChartModel>,
-			},
-		);
-
-		dialogRef
-			.afterClosed()
-			.subscribe((result: CreateChartModel | "back" | undefined) => {
-				if (result == "back" || result == undefined) return;
-
-				this.dialog.open(PublishDialogLoadingComponent);
-
-				const { chartFileData, ...rest } = result as any;
-				this.addVersion({
-					chartId: this.chartId(),
-					...rest,
-					...chartFileData,
-				});
-			});
-	}
-
-	openRemoveVersionConfirmationDialog(
-		_: number,
-		version: VersionModel,
-	): void {
-		console.log("Removing version", version);
-
-		const operation = async () => {
-			const result = await this.versionService.deleteVersion(
-				this.chartId(),
-				version.id,
-			);
-
-			if (!result) {
-				throw new Error("An error occurred");
-			}
-
-			this.removeVersionFromTable(version);
-		};
-
-		this.dialog.open(ConfirmationDialogComponent, {
-			data: {
-				title: "Remove Version",
-				description:
-					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
-				success: "Version removed with success!",
-				operation,
-			},
-		});
-	}
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
@@ -153,8 +90,7 @@ export class VersionsComponent {
 		{
 			description: "Download",
 			icon: "download",
-			callback: (_, item: VersionModel) =>
-				window.open(item.bundleUrl, "_blank"),
+			href: (_, item) => item.bundleUrl,
 			disabled: () => false,
 		},
 		{
@@ -205,6 +141,69 @@ export class VersionsComponent {
 			},
 		},
 	];
+
+	openSnackBar(message: string, action: string) {
+		this._snackBar.open(message, action);
+	}
+
+	openAddVersionDialog(): void {
+		const dialogRef = this.dialog.open(
+			this.chartPublishHandler.getStepComponents()[2],
+			{
+				data: {
+					title: "Upload Chart",
+					description:
+						"Upload a new version of your chart. Ensure your file meets the submission guidelines.",
+					formData: { ...initialChartFormData },
+					inactive: [],
+					mode: "uploading",
+				} as DialogData<CreateChartModel>,
+			},
+		);
+
+		dialogRef
+			.afterClosed()
+			.subscribe(async (result: ChartFormData | "back" | undefined) => {
+				if (result == "back" || result == undefined) return;
+
+				const data =
+					await this.chartPublishHandler.preprocessFormData(result);
+
+				this.dialog.open(PublishDialogLoadingComponent);
+
+				this.addVersion(data);
+			});
+	}
+
+	openRemoveVersionConfirmationDialog(
+		_: number,
+		version: VersionModel,
+	): void {
+		console.log("Removing version", version);
+
+		const operation = async () => {
+			const result = await this.versionService.deleteVersion(
+				this.chartId(),
+				version.id,
+			);
+
+			if (!result) {
+				throw new Error("An error occurred");
+			}
+
+			this.removeVersionFromTable(version);
+		};
+
+		this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Version",
+				description:
+					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+				success: "Version removed with success!",
+				operation,
+			},
+		});
+	}
 
 	async addVersion(version: CreateVersionModel) {
 		try {

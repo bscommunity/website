@@ -29,16 +29,8 @@
 				[accept]="getFileConfig().accept"
 				[isInvalid]="control()?.invalid && control()?.touched"
 				[fileName]="control()?.value?.name"
-				(fileChange)="control()?.setValue($event)"
-			>
-				<input
-					[id]="config().key + '-file-upload'"
-					class="hidden"
-					type="file"
-					[accept]="getFileConfig().accept"
-					(change)="control()?.setValue($any($event.target).files[0])"
-				/>
-			</app-file-field>
+				(fileChange)="onFileChange($event)"
+			/>
 			@if (control()?.invalid && control()?.touched) {
 				<div
 					class="text-error text-[0.8rem] -mt-2 ml-4"

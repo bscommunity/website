@@ -32,7 +32,7 @@ export interface PublishErrorData {
 
 export type PublishProgressData =
 	| {
-			data: any;
+			data: DialogData["formData"];
 			additionalData?: any;
 	  }
 	| "back"

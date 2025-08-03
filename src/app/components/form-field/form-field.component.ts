@@ -96,6 +96,17 @@ export class FormFieldComponent implements OnInit {
 		}
 	}
 
+	onFileChange(file: File) {
+		const control = this.control();
+
+		if (control) {
+			control.setValue(file);
+			this.updateErrorMessage();
+		}
+
+		console.log("File changed:", file);
+	}
+
 	ngOnInit() {
 		const control = this.control();
 

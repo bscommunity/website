@@ -30,32 +30,68 @@
 						class="flex flex-row items-center justify-center gap-2"
 					>
 						@for (action of actions(); track $index) {
-							<button
-								[matRippleDisabled]="
-									action.disabled(i, element)
-								"
-								[disabled]="action.disabled(i, element)"
-								[matTooltipDisabled]="
-									action.disabled(i, element)
-								"
-								mat-ripple
-								matTooltip="{{ action.description }}"
-								title=""
-								matTooltipPosition="above"
-								matTooltipShowDelay="375"
-								matTooltipClass="!text-sm"
-								(click)="action.callback(i, element)"
-								class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90 disabled:opacity-50"
-							>
-								<span
-									class="text-base align-middle leading-none"
+							@if (action.href) {
+								<a
+									[href]="action.href(i, element)"
+									[class.pointer-events-none]="
+										action.disabled(i, element)
+									"
+									[matTooltipDisabled]="
+										action.disabled(i, element)
+									"
+									mat-ripple
+									matTooltip="{{ action.description }}"
+									title=""
+									matTooltipPosition="above"
+									matTooltipShowDelay="375"
+									matTooltipClass="!text-sm"
+									class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90 disabled:opacity-50"
+									[class.opacity-50]="
+										action.disabled(i, element)
+									"
 								>
-									<mat-icon inline>{{
-										action.icon
-									}}</mat-icon>
-								</span>
-							</button>
+									<ng-container
+										*ngTemplateOutlet="
+											actionContent;
+											context: { $implicit: action }
+										"
+									></ng-container>
+								</a>
+							} @else {
+								<button
+									[matRippleDisabled]="
+										action.disabled(i, element)
+									"
+									[disabled]="action.disabled(i, element)"
+									[matTooltipDisabled]="
+										action.disabled(i, element)
+									"
+									mat-ripple
+									matTooltip="{{ action.description }}"
+									title=""
+									matTooltipPosition="above"
+									matTooltipShowDelay="375"
+									matTooltipClass="!text-sm"
+									(click)="
+										action.callback &&
+											action.callback(i, element)
+									"
+									class="flex flex-row items-center justify-center rounded-lg p-2.5 bg-secondary-container hover:brightness-90 disabled:opacity-50"
+								>
+									<ng-container
+										*ngTemplateOutlet="
+											actionContent;
+											context: { $implicit: action }
+										"
+									></ng-container>
+								</button>
+							}
 						}
+						<ng-template #actionContent let-action>
+							<span class="text-base align-middle leading-none">
+								<mat-icon inline>{{ action.icon }}</mat-icon>
+							</span>
+						</ng-template>
 					</div>
 				</td>
 			</ng-container>

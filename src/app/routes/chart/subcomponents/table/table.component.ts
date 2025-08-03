@@ -1,10 +1,22 @@
-import { AfterViewInit, Component, OnInit, Pipe, PipeTransform, input, model, inject, output, viewChild } from "@angular/core";
+import {
+	AfterViewInit,
+	Component,
+	OnInit,
+	Pipe,
+	PipeTransform,
+	input,
+	model,
+	inject,
+	output,
+	viewChild,
+} from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { MatIconModule } from "@angular/material/icon";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
+import { NgTemplateOutlet } from "@angular/common";
 import {
 	MatSort,
 	MatSortModule,
@@ -22,7 +34,8 @@ export interface Action<T> {
 	description: string;
 	icon: string;
 	disabled: (index: number, item: T) => boolean;
-	callback: (index: number, item: T) => void;
+	callback?: (index: number, item: T) => void;
+	href?: (index: number, item: T) => string;
 }
 
 @Pipe({
@@ -30,7 +43,6 @@ export interface Action<T> {
 })
 export class SafeHtmlPipe implements PipeTransform {
 	private sanitizer = inject(DomSanitizer);
-
 
 	transform(value: string): SafeHtml {
 		return this.sanitizer.bypassSecurityTrustHtml(value);
@@ -41,6 +53,7 @@ export class SafeHtmlPipe implements PipeTransform {
 	selector: "app-table",
 	templateUrl: "./table.component.html",
 	imports: [
+		NgTemplateOutlet,
 		MatTableModule,
 		MatSortModule,
 		MatIconModule,
@@ -51,7 +64,6 @@ export class SafeHtmlPipe implements PipeTransform {
 })
 export class TableComponent<T> implements OnInit, AfterViewInit {
 	private sanitizer = inject(DomSanitizer);
-
 
 	sanitizeContent(content: string): SafeHtml {
 		return this.sanitizer.bypassSecurityTrustHtml(content);

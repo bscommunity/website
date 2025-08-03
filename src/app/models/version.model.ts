@@ -7,7 +7,7 @@ import { Difficulty } from "./enums/difficulty.enum";
 import { KnownIssue } from "./known-issue.model";
 
 export const Version = z.object({
-	id: z.number(),
+	id: z.string(),
 	index: z.number(),
 	chartId: z.string(),
 	duration: z.number(),
@@ -28,8 +28,13 @@ export type VersionModel = z.infer<typeof Version>;
 
 export const CreateVersion = Version.omit({
 	id: true,
+	chartId: true,
+	index: true,
 	downloadsAmount: true,
 	knownIssues: true,
 	publishedAt: true,
+}).extend({
+	chartBundle: z.instanceof(File).optional(),
 });
+
 export type CreateVersionModel = z.infer<typeof CreateVersion>;

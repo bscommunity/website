@@ -28,7 +28,7 @@ export class ChartService {
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Create
-	async createChart(chart: ChartFormData): Promise<ChartModel> {
+	async createChart(chart: CreateChartModel): Promise<ChartModel> {
 		console.log("Creating chart:", chart);
 		const formData = new FormData();
 

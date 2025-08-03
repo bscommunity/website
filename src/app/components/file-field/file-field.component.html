@@ -40,7 +40,14 @@
 					Select the file
 				}
 				<!-- The input with the [formControl] param filled -->
-				<ng-content></ng-content>
+				<!-- <ng-content></ng-content> -->
+				<input
+					[id]="this.key() + '-file-upload'"
+					class="hidden"
+					type="file"
+					[accept]="this.accept()"
+					(change)="this.onChange($any($event.target).files[0])"
+				/>
 			</label>
 		</button>
 	</div>

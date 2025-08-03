@@ -40,6 +40,7 @@ export class FileFieldComponent {
 	readonly accept = input<string[]>([".chart", ".zip"]);
 	readonly isInvalid = input.required<boolean | undefined>();
 	readonly fileName = input<string | null | undefined>();
+	readonly sizeLimit = input<number | null>(10); // Size limit in MB
 
 	readonly fileChange = output<File>();
 
@@ -47,6 +48,16 @@ export class FileFieldComponent {
 		this._snackBar.open("Invalid file type", "Close", {
 			duration: 2000,
 		});
+	}
+
+	onSizeLimitExceeded(): void {
+		this._snackBar.open(
+			`File size exceeds the limit (${this.sizeLimit()}mb)`,
+			"Close",
+			{
+				duration: 2000,
+			},
+		);
 	}
 
 	onDragOver(event: DragEvent): void {
@@ -61,22 +72,44 @@ export class FileFieldComponent {
 		this.container().nativeElement.classList.remove("drag-over");
 	}
 
+	validate(file: File | null | undefined): boolean {
+		if (!file) {
+			this.onInvalidFile();
+			return false;
+		}
+
+		// console.log("Type:", file.type);
+		// console.log("Accept:", this.accept());
+
+		// Validate file type
+		if (!this.accept().some((type) => file.name.endsWith(type))) {
+			this.onInvalidFile();
+			return false;
+		}
+
+		// Check file size limit
+		if (this.sizeLimit() && file.size > this.sizeLimit()! * 1024 * 1024) {
+			this.onSizeLimitExceeded();
+			return false;
+		}
+
+		return true;
+	}
+
+	onChange(file: File): void {
+		if (!this.validate(file)) return;
+		this.fileChange.emit(file);
+	}
+
 	onDrop(event: DragEvent): void {
 		event.preventDefault();
 		this.onDragLeave(event);
 
 		const file = event.dataTransfer?.files.item(0);
 
-		console.log("Type:", file);
-		console.log("Accept:", this.accept());
-		if (!file || !this.accept().some((type) => file.name.endsWith(type))) {
-			this.onInvalidFile();
-			return;
-		}
+		if (!this.validate(file)) return;
 
-		if (file) {
-			this.fileChange.emit(file);
-		}
+		this.fileChange.emit(file!);
 
 		// Remove visual feedback
 		this.container().nativeElement.classList.remove("drag-over");

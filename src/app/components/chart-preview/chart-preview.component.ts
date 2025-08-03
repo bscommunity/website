@@ -30,6 +30,7 @@ export class ChartPreviewComponent {
 	@Input() chart!: ChartModelWithLatestVersion;
 
 	transformDuration = transformDuration;
+	showVisibility = input<boolean>(true);
 
 	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(
 		null,

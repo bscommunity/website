@@ -5,7 +5,7 @@ import { Genre } from "./enums/genre.enum";
 
 // Models
 import { Contributor } from "./contributor.model";
-import { Version } from "./version.model";
+import { CreateVersion, Version } from "./version.model";
 import { StreamingLink } from "./streaming-link.model";
 
 // Types
@@ -13,6 +13,7 @@ import type { VersionModel } from "./version.model";
 
 export const Chart = z.object({
 	id: z.string(),
+	shareId: z.string(),
 	artist: z.string(),
 	track: z.string(),
 	genre: z.nativeEnum(Genre).optional(),
@@ -49,26 +50,18 @@ export const CreateChart = Chart.omit({
 	isPublic: true,
 	versions: true,
 	contributors: true,
+	shareId: true,
 })
 	.merge(
 		// First version properties
-		Version.pick({
-			bundleUrl: true,
-			previewUrl: true,
-			duration: true,
-			notesAmount: true,
-			effectsAmount: true,
-			bpm: true,
-			difficulty: true,
-			isDeluxe: true,
-			isExplicit: true,
-		}),
+		CreateVersion,
 	)
 	.extend({
 		// Additional properties for creation
 		album: z.string().optional().nullable(),
 		trackPreviewUrl: z.string().optional().nullable(),
 		trackUrls: z.array(StreamingLink).optional(),
+		chartBundle: z.any().optional().nullable(),
 	});
 
 export type CreateChartModel = z.infer<typeof CreateChart>;

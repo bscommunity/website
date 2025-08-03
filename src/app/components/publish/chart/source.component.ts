@@ -113,9 +113,6 @@ export class PublishChartSourceComponent implements OnInit {
 	dialogRef = inject<MatDialogRef<PublishChartSourceComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
-	private extractService = inject(ExtractService);
-	private decodeService = inject(DecodeService);
-
 	private formService = inject(FormService);
 
 	form!: FormGroup;
