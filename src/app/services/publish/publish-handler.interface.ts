@@ -1,3 +1,4 @@
+import { ChartModel } from "@/models/chart.model";
 import { Type } from "@angular/core";
 
 /**
@@ -31,8 +32,9 @@ export interface PublishHandler<TFormData = any, TSuccessData = any> {
 
 	/**
 	 * Optional custom validation for the form data.
-	 * @param formData - The data to validate.
-	 * @returns A string with an error message if validation fails, or null if validation passes.
+	 * @param chart - The current chart data for comparison.
+	 * @param formData - The form data to validate.
+	 * @returns A boolean indicating whether the validation passed.
 	 */
-	validate?(formData: TFormData): string | null;
+	validate?(chart: Partial<ChartModel>, formData: TFormData): boolean;
 }
