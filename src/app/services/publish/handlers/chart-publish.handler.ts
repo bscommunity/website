@@ -19,8 +19,6 @@ import { CookieService } from "@/services/cookie.service";
 import { getMediaInfo, getTrackStreamingLinks } from "@/lib/assets";
 import { BundleZipData, ExtractService } from "@/services/extract.service";
 import { ChartFileData, DecodeService } from "@/services/decode.service";
-import { VersionModel } from "@/models/version.model";
-import { similarity } from "@/lib/compare";
 
 export type ChartFormData = CreateChartModel & {
 	chartFile: File | null;
@@ -254,27 +252,6 @@ export class ChartPublishHandler
 		}
 
 		return data;
-	}
-
-	validate(chart: Partial<ChartModel>, formData: ChartFormData): boolean {
-		if (!chart || !chart.track || !chart.artist) {
-			throw new Error(
-				"Chart data is incomplete. Please ensure the chart has a track and artist.",
-			);
-		}
-
-		const trackSimilarity = similarity(
-			chart.track.toLowerCase().trim().replace(/\s+/g, " "),
-			formData.track.toLowerCase().trim().replace(/\s+/g, " "),
-		);
-
-		if (trackSimilarity < 0.8) {
-			throw new Error(
-				`The track name does not match the previously published chart. Please ensure the track is correct.`,
-			);
-		}
-
-		return true;
 	}
 
 	async submit(formData: ChartFormData): Promise<ChartModel> {

@@ -160,12 +160,6 @@ export class VersionsComponent {
 				const data =
 					await this.chartPublishHandler.preprocessFormData(result);
 
-				/* // Validate the form data against the latest version
-				this.chartPublishHandler.validate(
-					{ track: data.track, artist: data.artist },
-					result,
-				); */
-
 				this.dialog.open(PublishDialogLoadingComponent);
 
 				this.addVersion(data);
