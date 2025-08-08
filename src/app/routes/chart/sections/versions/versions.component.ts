@@ -126,9 +126,20 @@ export class VersionsComponent {
 			callback: this.openRemoveVersionDialog.bind(this),
 			// We only allow deleting the latest version
 			disabled: (_, item) => {
-				return (
-					item.index === 1 || item.index !== this.versions().length
-				);
+				const versionTable = this.versionTable();
+				if (versionTable) {
+					return (
+						item.id !==
+						versionTable.dataSource.data[
+							versionTable.dataSource.data.length - 1
+						].id
+					);
+				} else {
+					return (
+						item.id !==
+						this.versions()[this.versions().length - 1].id
+					);
+				}
 			},
 		},
 	];
@@ -211,7 +222,7 @@ export class VersionsComponent {
 				return;
 			}
 
-			console.log("Version added with success:", response);
+			console.log("Version added with success", response);
 
 			this.addVersionToTable(Version.parse(response));
 
@@ -223,8 +234,11 @@ export class VersionsComponent {
 			this.dialog.closeAll();
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
-					title: "Failed to add new version.",
-					error: error.message,
+					title: "Failed to add new version",
+					message: error.statusText,
+					error: error.error
+						? error.error.message
+						: "An error occurred while adding the new version.",
 				},
 			});
 		}

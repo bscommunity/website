@@ -52,7 +52,7 @@ export class Chart implements OnInit {
 	set chart(value: ChartModelWithLatestVersion) {
 		this._chart = {
 			...value,
-			latestVersion: value.versions[0] || undefined,
+			latestVersion: value.versions.at(-1)!,
 		};
 	}
 	get chart(): ChartModelWithLatestVersion {
