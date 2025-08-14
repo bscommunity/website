@@ -5,16 +5,14 @@ import {
 	inject,
 	Input,
 	computed,
-	signal,
-	ViewChild,
 } from "@angular/core";
 
+// Material
 import {
 	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
-	NgForm,
 } from "@angular/forms";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import {
@@ -27,17 +25,11 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 
-// Models
-import { Difficulty } from "@/models/enums/difficulty.enum";
-
 // Services
 import { FormService, type FormFieldConfig } from "@/services/form.service";
-import { DecodeService } from "@/services/decode.service";
-import { ExtractService, type BundleZipData } from "@/services/extract.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
-import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
@@ -73,12 +65,12 @@ interface FormMode {
 				}
 
 				<!-- Disclaimer -->
-				<app-panel>
+				<!-- <app-panel>
 					Your chart bundle
 					<span class="font-medium">does not leaves the browser</span
 					>. Only the necessary metadata is extracted and stored on
 					your submission.
-				</app-panel>
+				</app-panel> -->
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
 				<button
@@ -104,7 +96,6 @@ interface FormMode {
 		MatInputModule,
 		MatSlideToggleModule,
 		ReactiveFormsModule,
-		PanelComponent,
 		FormFieldComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -132,21 +123,19 @@ export class PublishChartSourceComponent implements OnInit {
 			label: "Chart file",
 			accept: [".chart"],
 			required: true,
-			hint: "Upload your chart file (.chart)",
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "chartBundle",
 			label: "Bundle file",
 			accept: [".zip"],
 			required: true,
-			hint: "Upload your chart bundle (.zip)",
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "previewUrl",
 			label: "Gameplay",
 			inputType: "url",
 			placeholder: "https://youtu.be/BY_XwvKogC8",
-			hint: "Must be a YouTube video URL",
+			hint: "Mus be a direct link to a YouTube video",
 			required: false,
 			onValueProcessed: this.formService.extractYouTubeVideoId,
 		}),
@@ -173,8 +162,7 @@ export class PublishChartSourceComponent implements OnInit {
 		},
 		uploading: {
 			title: "Uploading",
-			description:
-				"Upload your chart bundle to the Drive of your synced account.",
+			description: "Upload your chart bundle to Discord's workshop.",
 			fields: [
 				this.FIELDS.chartBundleField,
 				this.FIELDS.chartFileField,

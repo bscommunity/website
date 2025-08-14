@@ -185,12 +185,9 @@ export class Published implements OnInit {
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
-				if (forceRefresh) {
-					this.error =
-						error.error ||
-						"Failed to refresh charts. Please try again.";
-				}
-				console.error(this.error);
+				this.error =
+					error.error ||
+					"Failed to refresh charts. Please try again.";
 
 				this.isRefreshing = false;
 				this.cdr.markForCheck();

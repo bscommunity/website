@@ -34,3 +34,13 @@ html {
 .mdc-form-field {
 	width: 100%;
 }
+
+.mat-mdc-dialog-title::before {
+	display: none !important;
+}
+
+.mat-mdc-dialog-title::after {
+	content: "";
+	display: inline-block;
+	height: 40px;
+}

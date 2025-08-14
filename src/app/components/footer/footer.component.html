@@ -28,7 +28,11 @@
 				</a>
 				<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
 				<div class="flex flex-row items-center justify-start gap-4">
-					<a href="https://discord.com" target="_blank" class="h-8">
+					<a
+						href="https://discord.gg/NNvzMAT6dS"
+						target="_blank"
+						class="h-8"
+					>
 						<mat-icon
 							svgIcon="discord"
 							inline="true"
@@ -37,7 +41,11 @@
 							aria-label="Discord logo"
 						></mat-icon>
 					</a>
-					<a href="https://github.com" target="_blank" class="h-8">
+					<a
+						href="https://github.com/bscommunity"
+						target="_blank"
+						class="h-8"
+					>
 						<mat-icon
 							svgIcon="github"
 							inline="true"
@@ -64,7 +72,7 @@
 						<a
 							class="hover:text-on-surface-variant transition-colors"
 							href="#"
-							>About</a
+							>Guide</a
 						>
 					</li>
 					<li>
@@ -119,10 +127,15 @@
 	<div
 		class="flex flex-row items-center justify-between gap-6 w-full mt-6 md:mt-0"
 	>
-		<!-- Status -->
+		<!-- Status (currently static) -->
 		<div class="flex flex-row items-center justify-start gap-2.5">
-			<div class="min-w-1.5 min-h-1.5 bg-yellow-400 rounded-full"></div>
-			Partially Degraded Services
+			<div
+				class="min-w-1.5 min-h-1.5 bg-gray-50 rounded-full"
+				[style]="{
+					'background-color': status().color,
+				}"
+			></div>
+			{{ status().text }}
 			<!-- External link icon -->
 		</div>
 

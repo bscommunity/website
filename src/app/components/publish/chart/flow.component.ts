@@ -57,16 +57,16 @@ interface Option {
 					</mat-radio-group>
 				</label>
 				<app-panel>
-					You can also
+					Please visit
 					<button (click)="dialogRef.close()">
 						<a
-							[routerLink]="['/settings']"
-							[queryParams]="{ section: 'connections' }"
+							href="http://143.110.226.4:3001/encrypt"
+							target="_blank"
 							class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
-							>connect your bscm account to Google Drive</a
+							>External's website</a
 						>
 					</button>
-					to directly upload files there!
+					to create new chart bundles
 				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
@@ -93,7 +93,6 @@ interface Option {
 		MatIconModule,
 		MatRadioModule,
 		FormsModule,
-		RouterLink,
 		ReactiveFormsModule,
 		PanelComponent,
 	],
