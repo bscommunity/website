@@ -53,6 +53,7 @@
 	--color-on-error-container: var(--mat-sys-on-error-container);
 	--color-surface-variant: var(--mat-sys-surface-variant);
 	--color-on-surface-variant: var(--mat-sys-on-surface-variant);
+	--color-info: oklch(0.5707 0.146 258.52);
 }
 
 html,
@@ -89,6 +90,12 @@ body {
 		"wght" 400,
 		"GRAD" 0,
 		"opsz" 48;
+}
+
+.icon-20 {
+	font-size: 20px;
+	min-width: 20px !important;
+	height: 20px !important;
 }
 
 .stamp-effect {

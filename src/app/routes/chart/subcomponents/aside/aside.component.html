@@ -8,7 +8,7 @@
 			/>
 			<app-difficulty-mark
 				class="hidden md:flex"
-				[difficulty]="chart().difficulty"
+				[difficulty]="chart().latestVersion.difficulty"
 				[size]="96"
 			></app-difficulty-mark>
 		</div>
@@ -16,30 +16,16 @@
 			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-gradient-to-b from-transparent to-background"
 		></div>
 	</div>
-	<app-aside-section class="w-full">
-		<button
-			class="w-full cursor-pointer"
-			type="button"
-			(click)="openEditChartDialog()"
-		>
-			<app-aside-container
-				class="w-full"
-				icon="edit"
-				info="Edit chart"
-				asideContainerClass="hover:bg-surface-container-low"
-			></app-aside-container>
-		</button>
-	</app-aside-section>
 	<app-aside-section title="Chart Info" class="w-full">
 		<app-aside-container
 			class="w-full"
 			icon="timer"
-			[info]="transformDuration(chart().latestVersion?.duration || 0)"
+			[info]="transformDuration(chart().latestVersion.duration || 0)"
 		></app-aside-container>
 		<app-aside-container
 			class="w-full"
 			icon="music_note"
-			[info]="chart().latestVersion?.notesAmount + ' notes'"
+			[info]="chart().latestVersion.notesAmount + ' notes'"
 		></app-aside-container>
 	</app-aside-section>
 	<app-aside-section title="Files" class="w-full">

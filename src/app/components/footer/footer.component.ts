@@ -1,30 +1,65 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnInit, signal } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import { DOCUMENT } from "@angular/common";
+
+import { environment } from "environments/environment";
 
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 
 import {
-	CustomSelectComponent,
+	SelectComponent,
 	type Option,
-} from "@/components/custom-select/custom-select.component";
+} from "@/components/select/select.component";
 
+// Services
 import { ThemeService } from "@/services/theme.service";
 import { StorageService } from "@/services/storage.service";
-import { RouterLink } from "@angular/router";
+import { HttpClient } from "@angular/common/http";
+import { apiUrl } from "@/lib/api";
+
+const STATUS = {
+	LOADING: {
+		color: "#808080",
+		text: "Fetching status...",
+	},
+	OK: {
+		color: "#0cc415",
+		text: "All systems operational",
+	},
+	MINOR: {
+		color: "#ff8c00",
+		text: "Partially degraded service",
+	},
+	MAJOR: {
+		color: "#ff8c00",
+		text: "Partially degraded service",
+	},
+	CRITICAL: {
+		color: "#ff0000",
+		text: "Major outage",
+	},
+};
+
+interface Incident {
+	resolved: boolean;
+	level: "MINOR" | "MAJOR" | "CRITICAL";
+}
+
+interface Project {
+	name: string;
+	incidents: Incident[];
+}
 
 @Component({
 	selector: "app-footer",
-	imports: [
-		MatButtonModule,
-		MatIconModule,
-		CustomSelectComponent,
-		RouterLink,
-	],
+	imports: [MatButtonModule, MatIconModule, SelectComponent, RouterLink],
 	templateUrl: "./footer.component.html",
 	styleUrl: "./footer.component.scss",
 })
 export class FooterComponent implements OnInit {
+	private http = inject(HttpClient);
+
 	private storageService = inject(StorageService);
 	private themeService = inject(ThemeService);
 
@@ -37,18 +72,48 @@ export class FooterComponent implements OnInit {
 	];
 
 	theme: Option = this.themeOptions[0]; // Default selection
+	status = signal(STATUS.LOADING);
 
-	languageOptions = [
-		{ label: "English", value: "en" },
-		{ label: "Spanish", value: "es" },
-	];
+	languageOptions = [{ label: "English", value: "en" }];
 
-	ngOnInit(): void {
+	async fetchStatus() {
+		this.http
+			.get<Project[]>(`${apiUrl}/status`)
+			.subscribe({
+				next: (projects) => {
+					if (!projects) return;
+
+					const bscm = projects.find(
+						(project) => project.name === "bscm",
+					);
+
+					const status =
+						bscm && bscm.incidents && bscm.incidents.length > 0
+							? STATUS[
+							bscm.incidents[0]
+								.level as keyof typeof STATUS
+							]
+							: STATUS.OK;
+
+					if (status) {
+						this.status.set(status);
+					}
+				},
+				error: (error) => {
+					console.error("Error fetching status:", error);
+				},
+			});
+	}
+
+	ngOnInit() {
 		this.theme =
 			this.themeOptions.find(
 				(option) =>
 					option.value === this.storageService.getItem("theme"),
 			) || this.themeOptions[0];
+
+		// Fetch current status from the API
+		this.fetchStatus();
 	}
 
 	onThemeChange(option: Option) {

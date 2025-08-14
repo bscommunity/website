@@ -11,7 +11,7 @@ import type {
 	KnownIssueModel,
 } from "@/models/known-issue.model";
 
-import { apiUrl } from ".";
+import { apiUrl } from "../../lib/api";
 
 @Injectable({
 	providedIn: "root",

@@ -24,7 +24,7 @@ import {
 	withInterceptors,
 } from "@angular/common/http";
 
-import { authInterceptor } from "./auth/auth.interceptor";
+import { authInterceptor } from "./routes/auth/auth.interceptor";
 import { ChartTitleStrategy } from "./routes/chart/chart-title.strategy";
 
 export const appConfig: ApplicationConfig = {

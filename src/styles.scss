@@ -26,3 +26,21 @@ html {
 	/* @include mat.typography-hierarchy($angular-material-theme);
 	@include mat.system-level-typography($angular-material-theme); */
 }
+
+.mdc-label {
+	width: 100%;
+}
+
+.mdc-form-field {
+	width: 100%;
+}
+
+.mat-mdc-dialog-title::before {
+	display: none !important;
+}
+
+.mat-mdc-dialog-title::after {
+	content: "";
+	display: inline-block;
+	height: 40px;
+}

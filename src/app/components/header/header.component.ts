@@ -21,8 +21,9 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 import type { UserModel } from "@/models/user.model";
 
 // Services
-import { AuthService } from "@/auth/auth.service";
-import { UploadDialogService } from "@/services/upload.service";
+import { AuthService } from "@/services/auth.service";
+import { PublishDialogService } from "@/services/publish/publish.service";
+import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
 
 @Component({
 	selector: "app-header",
@@ -40,9 +41,10 @@ import { UploadDialogService } from "@/services/upload.service";
 })
 export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
+	private chartPublishHandler = inject(ChartPublishHandler);
 
 	private _snackBar = inject(MatSnackBar);
-	private uploadDialog = inject(UploadDialogService);
+	private uploadDialog = inject(PublishDialogService);
 
 	user: UserModel | null = null;
 
@@ -55,6 +57,8 @@ export class HeaderComponent implements OnInit {
 				this.user = null;
 			}
 		}); */
+
+		this.uploadDialog.setHandler(this.chartPublishHandler);
 	}
 
 	openWarning() {

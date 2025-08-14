@@ -8,7 +8,7 @@ import { CacheService } from "../cache.service";
 // Models
 import { CreateVersionModel, VersionModel } from "@/models/version.model";
 
-import { apiUrl } from ".";
+import { apiUrl } from "../../lib/api";
 
 @Injectable({
 	providedIn: "root",
@@ -26,10 +26,21 @@ export class VersionService {
 	): Promise<VersionModel> {
 		console.log(`Adding a new version to chart with id ${chartId}`);
 
+		const formData = new FormData();
+
+		// Append the version data as a JSON string under the "version" key
+		const { chartBundle, ...versionData } = version;
+		formData.append("version", JSON.stringify(versionData));
+
+		if (chartBundle) {
+			// Append the bundle file under the "bundle" key
+			formData.append("bundle", chartBundle);
+		}
+
 		const response = await firstValueFrom(
 			this.http.post<VersionModel>(
 				`${this.apiUrl}/${chartId}/versions`,
-				version,
+				formData,
 			),
 		);
 

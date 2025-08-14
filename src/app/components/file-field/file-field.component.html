@@ -1,0 +1,54 @@
+<div
+	#container
+	[ngClass]="{
+		'flex flex-row items-center justify-between w-full rounded border px-4 py-3 mb-1': true,
+		'border-outline': !isInvalid(),
+		'border-error': isInvalid(),
+	}"
+	(dragover)="onDragOver($event)"
+	(dragleave)="onDragLeave($event)"
+	(drop)="onDrop($event)"
+>
+	<p
+		[ngClass]="{
+			'text-on-background': !isInvalid(),
+			'text-error': isInvalid(),
+		}"
+	>
+		{{ title() || "Upload File" }}
+	</p>
+	<div class="flex flex-row items-center justify-end gap-3">
+		@if (fileName() != null) {
+			<p class="italic">
+				{{
+					fileName()!.length > 20
+						? fileName()!.substring(0, 20) + "..."
+						: fileName()
+				}}
+			</p>
+		} @else {
+			<p class="select-none">Drag and drop here, or</p>
+		}
+		<button type="button" class="!p-0" mat-flat-button>
+			<label
+				class="flex w-full h-full px-4 py-2.5 cursor-pointer"
+				[for]="key() + '-file-upload'"
+			>
+				@if (fileName()) {
+					Change
+				} @else {
+					Select the file
+				}
+				<!-- The input with the [formControl] param filled -->
+				<!-- <ng-content></ng-content> -->
+				<input
+					[id]="this.key() + '-file-upload'"
+					class="hidden"
+					type="file"
+					[accept]="this.accept()"
+					(change)="this.onChange($any($event.target).files[0])"
+				/>
+			</label>
+		</button>
+	</div>
+</div>

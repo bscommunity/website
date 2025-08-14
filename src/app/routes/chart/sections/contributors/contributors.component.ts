@@ -14,7 +14,7 @@ import {
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 
 // Dialogs
-import { ConfirmationDialogComponent } from "../../dialogs/confirmation/confirmation-dialog.component";
+import { ConfirmationDialogComponent } from "../../../../components/dialogs/confirmation/confirmation-dialog.component";
 import { AddContributorDialogComponent } from "../../dialogs/add-contributor/add-contributor-dialog.component";
 import { EditContributorDialogComponent } from "../../dialogs/edit-contributor/edit-contributor-dialog.component";
 
@@ -48,21 +48,18 @@ export class ContributorsComponent {
 	readonly dialog = inject(MatDialog);
 	readonly contributorService = inject(ContributorService);
 
-	openSnackBar(message: string, action: string) {
-		this._snackBar.open(message, action);
-	}
-
-	readonly contributorTable = viewChild.required<TableComponent<ContributorModel>>("contributorTable");
+	readonly contributorTable =
+		viewChild.required<TableComponent<ContributorModel>>(
+			"contributorTable",
+		);
 
 	openAddContributorConfirmationDialog(): void {
 		const contributors = this.contributors();
-  this.dialog.open(AddContributorDialogComponent, {
+		this.dialog.open(AddContributorDialogComponent, {
 			data: {
 				chartId: this.chartId(),
 				usersIds: contributors
-					? contributors.map(
-							(contributor) => contributor.user.id,
-						)
+					? contributors.map((contributor) => contributor.user.id)
 					: [],
 			},
 			width: "450px",
@@ -94,14 +91,11 @@ export class ContributorsComponent {
 				contributor.user.id,
 			);
 
+			this.contributorTable().removeData(contributor);
+
 			if (!result) {
 				throw new Error("An error occurred");
 			}
-		};
-
-		const afterOperation = () => {
-			this.removeContributorFromTable(contributor);
-			this.openSnackBar("Contributor removed with success!", "Close");
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
@@ -109,8 +103,8 @@ export class ContributorsComponent {
 				title: "Remove Contributor",
 				description:
 					"Are you sure you want to remove this contributor? The user access to the chart will be lost.",
+				success: "Contributor removed with success!",
 				operation,
-				afterOperation,
 			},
 		});
 	}
@@ -154,9 +148,4 @@ export class ContributorsComponent {
 				item.roles.includes(ContributorRole.AUTHOR),
 		},
 	];
-
-	removeContributorFromTable(contributor: ContributorModel) {
-		this.contributorTable().removeData(contributor);
-		this.openSnackBar("Contributor removed with success!", "Close");
-	}
 }
