@@ -5,21 +5,17 @@ const checkSign = "\u{2705}";
 
 require("dotenv").config({ path: ".env" });
 
-const dotenv = require("dotenv");
-const envConfig = dotenv.parse(fs.readFileSync(".env"));
-
-const envVars = Object.entries(envConfig)
+const envVars = Object.entries(process.env)
 	.map(([key, value]) => {
-		// Try to determine the type of the value
-		if (value === "true" || value === "false") {
+		if (value === 'true' || value === 'false') {
 			return `  ${key}: ${value},`;
-		} else if (!isNaN(value) && value !== "" && value !== null) {
+		} else if (!isNaN(value) && value !== '' && value !== null) {
 			return `  ${key}: ${value},`;
 		} else {
 			return `  ${key}: '${value}',`;
 		}
 	})
-	.join("\n");
+	.join('\n');
 
 const envFile = `export const environment = {\n${envVars}\n};\n`;
 const targetPath = path.join(process.cwd(), "src/environments/environment.ts");
