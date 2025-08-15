@@ -29,12 +29,11 @@
 			<app-settings-wrapper>
 				<app-settings-card
 					class="w-full"
-					title="Cloud uploading"
-					description="With cloud uploading enabled, charts will automatically be uploaded to your Google Drive cloud."
+					title="Auto-private content"
+					description="Automatically set uploaded content to private by default"
 				>
 					<card-footer-label>
-						Your Google Drive account must be connected to enable
-						cloud uploading
+						This setting will apply to all new content you upload.
 					</card-footer-label>
 					<card-footer>
 						<mat-slide-toggle labelPosition="before"
@@ -43,9 +42,10 @@
 					</card-footer>
 				</app-settings-card>
 				<app-settings-card
+					[disabled]="true"
 					class="w-full"
 					title="Delete Account"
-					description="Once you delete your account, there is no going back. All the content you upload will be removed. Please be certain"
+					description="Once you delete your account, there is no going back. All the content you've uploaded will be removed. Please be certain."
 					variant="destructive"
 				>
 					<card-footer>
@@ -62,6 +62,7 @@
 			} @else if (currentTab === 'connections') {
 			<app-settings-wrapper>
 				<app-settings-card
+					[disabled]="true"
 					class="w-full"
 					title="Google Drive"
 					description="Connect your Google Drive account to directly upload content"

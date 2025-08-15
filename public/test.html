@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Song Link API Test</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				padding: 2rem;
+			}
+			button {
+				padding: 0.5rem 1rem;
+				font-size: 1rem;
+			}
+			pre {
+				background: #f4f4f4;
+				padding: 1rem;
+				border-radius: 4px;
+				margin-top: 1rem;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Testar Song Link API</h1>
+		<button id="fetchBtn">Fazer consulta</button>
+		<pre id="output"></pre>
+		<script>
+			document
+				.getElementById("fetchBtn")
+				.addEventListener("click", function () {
+					const output = document.getElementById("output");
+					output.textContent = "Consultando...";
+					fetch(
+						"https://api.song.link/v1-alpha.1/links?url=https%3A%2F%2Fmusic.apple.com%2Fus%2Falbum%2Fdisappointment-feat-rxseboy%2F1612879515%3Fi%3D1612879518%26uo%3D4",
+					)
+						.then((res) => res.json())
+						.then((data) => {
+							output.textContent = JSON.stringify(data, null, 2);
+							console.log(data);
+						})
+						.catch((err) => {
+							output.textContent = "Erro: " + err;
+							console.error(err);
+						});
+				});
+		</script>
+	</body>
+</html>

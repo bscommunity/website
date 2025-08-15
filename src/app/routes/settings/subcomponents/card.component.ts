@@ -9,6 +9,7 @@ import { CommonModule } from "@angular/common";
 			[ngClass]="{
 				'border-surface-container-high': variant() === 'default',
 				'border-error-container': variant() === 'destructive',
+				'opacity-50 **:pointer-events-none': disabled(),
 			}"
 			class="flex flex-col items-start justify-start border rounded-lg overflow-hidden"
 		>
@@ -52,4 +53,5 @@ export class SettingsCardComponent {
 	description = input.required<string>();
 	variant = input<"default" | "destructive">("default");
 	showFooter = input<boolean>(true);
+	disabled = input<boolean>(false);
 }
