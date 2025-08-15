@@ -1,59 +1,66 @@
-# Website
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="/.github/cover.png">
+  <source media="(prefers-color-scheme: light)" srcset="/.github/cover_light.png">
+    <img alt="bscm website" src="/.github/cover_light.png">
+</picture>
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+## 🖥️ About
 
-## Development server
+This repository contains the source code for the dashboard, where creators and community members can publish, manage content and more. It’s designed to be fast, responsive, and easy to use, with a focus on providing a great experience for both players and creators.
 
-To start a local development server, run:
+> [!WARNING]
+> This is a work in progress! We’re actively developing features and improving the experience. Check back often for updates.
 
-```bash
-ng serve
-```
+## 🚀 Features
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Publish and manage content**  
+  Tools for creators to easily publish and update charts.
+- **Lightweight, responsive UI**  
+  Clean, mobile-friendly design focused on user experience.
+- **Community-driven**  
+   Built by players, for players, with a focus on community needs.
 
-## Code scaffolding
+> [!TIP]
+> Check out the [wiki](https://github.com/bscommunity/website/wiki) for more details on features, design decisions, and future plans.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 📦 Project Structure
 
-```bash
-ng generate component component-name
-```
+- `src/` — Main source code (Angular)
+    - `app/` — Components, services, routes, and models
+        - `components/` — Reusable UI components
+        - `services/` — API and utility services
+        - `routes/` — Application routes and navigation
+        - `models/` — Data models and interfaces
+    - `assets/` — Images, icons, and static resources
+    - `environments/` — Environment configs
+    - `styles/` — Global styles and tokens
+    - `types/` — Types for external integrations
+- `public/` — Public files (favicon, cover, etc)
+- `scripts/` — Utility scripts
+- `angular.json`, `tsconfig.json` — Project configs
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🛠️ Running Locally
 
-```bash
-ng generate --help
-```
+1. Install dependencies:
+    ```bash
+    pnpm install
+    ```
+2. Start the development server:
+    ```bash
+    pnpm dev
+    ```
+3. Open [http://localhost:4200](http://localhost:4200) in your browser.
 
-## Building
+> Requires [pnpm](https://pnpm.io/) installed.
 
-To build the project run:
+## 🤝 Contributing
 
-```bash
-ng build
-```
+Contributions are welcome!
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- Found a bug? Open an [issue](https://github.com/bscommunity/bscm/issues)
+- Have a feature idea? Suggest or submit a PR
+- Into design? We still don’t have an official logo, so send us your ideas!
 
-## Running unit tests
+## 📄 License
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This project follows the bscm organization license. See the main repository for details.
