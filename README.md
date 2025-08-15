@@ -6,7 +6,9 @@
 
 ## 🖥️ About
 
-This repository contains the source code for the dashboard, where creators and community members can publish, manage content and more. It’s designed to be fast, responsive, and easy to use, with a focus on providing a great experience for both players and creators.
+This repository contains the source code for the dashboard, where creators and community members can publish, manage content and more.
+
+It’s designed to be fast, responsive, and easy to use, with a focus on providing a great experience for both players and creators.
 
 > [!WARNING]
 > This is a work in progress! We’re actively developing features and improving the experience. Check back often for updates.
@@ -52,6 +54,24 @@ This repository contains the source code for the dashboard, where creators and c
 3. Open [http://localhost:4200](http://localhost:4200) in your browser.
 
 > Requires [pnpm](https://pnpm.io/) installed.
+
+### Environment Variables
+
+Before running the project locally, you need to configure the environment variables. Use the `.env.example` file as a template to create a `.env` file in the project root:
+
+```bash
+cp .env.example .env
+```
+
+Fill in the required values in the `.env` file according to your setup.
+
+The `scripts/env.js` script will read these variables and automatically generate the `src/environments/environment.ts` file used by the Angular application. This script runs automatically during the build/start process, but you can also run it manually with:
+
+```bash
+node scripts/env.js
+```
+
+Make sure all required variables are set to avoid build or runtime errors.
 
 ## 🤝 Contributing
 
