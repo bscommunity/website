@@ -1,10 +1,16 @@
 import { HttpInterceptorFn } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { AuthService } from "../../services/auth.service";
 import { catchError, throwError } from "rxjs";
+
+import { AuthService } from "@/services/auth.service";
+import { apiUrl } from "@/lib/api";
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
 	const authService = inject(AuthService);
+
+	if (!request.url.startsWith(apiUrl)) {
+		return next(request);
+	}
 
 	try {
 		const token = authService.token;
