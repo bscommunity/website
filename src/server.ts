@@ -15,6 +15,23 @@ export async function netlifyAppEngineHandler(request: Request): Promise<Respons
 
 	const pathname = new URL(request.url).pathname;
 
+	// Proxy para Songlink
+	if (pathname === '/api/songlink') {
+		const urlObj = new URL(request.url);
+		const search = urlObj.searchParams.get('url');
+		if (!search) {
+			return Response.json({ error: 'Missing url parameter' }, { status: 400 });
+		}
+		try {
+			const apiUrl = `https://api.song.link/v1-alpha.1/links?url=${encodeURIComponent(search)}`;
+			const apiRes = await fetch(apiUrl);
+			const data = await apiRes.json();
+			return Response.json(data);
+		} catch (err) {
+			return Response.json({ error: 'Failed to fetch from Songlink' }, { status: 500 });
+		}
+	}
+
 	if (pathname === '/download') {
 		return Response.redirect("https://github.com/bscommunity/android/releases/latest/download/app-release.apk");
 	}

@@ -323,7 +323,7 @@ export async function getMediaInfo(
 	// If all attempts failed, throw an error with all the collected error messages
 	throw new Error(
 		`Unable to find information for \"${track}\" by \"${artist}\". ` +
-			`We tried several APIs but all failed. Details: ${errors.map((e) => e.message).join("; ")}`,
+		`We tried several APIs but all failed. Details: ${errors.map((e) => e.message).join("; ")}`,
 	);
 }
 
@@ -332,13 +332,9 @@ export async function getTrackStreamingLinks(
 	track: string,
 	artist: string,
 ): Promise<StreamingLinkModel[]> {
-	const query = new URLSearchParams({
-		url: url,
-	}).toString();
-
 	// First, try to search for the links with Odesli
 	// Odesli returns keys like "youtubeMusic", "youtube", "appleMusic", "itunes", "amazonMusic", "amazonStore"
-	const odesliData = await fetchOdesliApi(query);
+	const odesliData = await fetchOdesliApi(url);
 	console.log("Odesli data", odesliData);
 
 	if (odesliData) {
@@ -401,13 +397,12 @@ async function fetchItunesApi(query: string): Promise<ITunesResponse[]> {
 	return data.results || [];
 }
 
-async function fetchOdesliApi(query: string): Promise<OdesliResponse> {
-	const response = await fetch(`${ODESLI_API_URL}/links?${query}`);
-
+async function fetchOdesliApi(url: string): Promise<OdesliResponse> {
+	// Usa o proxy backend para Odesli
+	const response = await fetch(`/api/songlink?url=${url}`);
 	if (!response.ok) {
 		throw new Error(`Odesli API error: ${response.statusText}`);
 	}
-
 	return response.json();
 }
 
