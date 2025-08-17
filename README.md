@@ -11,7 +11,7 @@ This repository contains the source code for the dashboard, where creators and c
 It’s designed to be fast, responsive, and easy to use, with a focus on providing a great experience for both players and creators.
 
 > [!WARNING]
-> This is a work in progress! We’re actively developing features and improving the experience. Check back often for updates.
+> This is a **_work in progress_**! We’re actively developing features and improving the experience. Check back often for updates.
 
 ## 🚀 Features
 

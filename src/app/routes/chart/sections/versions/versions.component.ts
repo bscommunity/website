@@ -124,7 +124,7 @@ export class VersionsComponent {
 			description: "Delete version",
 			icon: "delete_forever",
 			callback: this.openRemoveVersionDialog.bind(this),
-			// We only allow deleting the latest version
+			// We only allow deleting the latest version (except for the first version)
 			disabled: (_, item) => {
 				const versionTable = this.versionTable();
 				if (versionTable) {
@@ -132,12 +132,13 @@ export class VersionsComponent {
 						item.id !==
 						versionTable.dataSource.data[
 							versionTable.dataSource.data.length - 1
-						].id
+						].id || item.index <= 1
 					);
 				} else {
 					return (
 						item.id !==
 						this.versions()[this.versions().length - 1].id
+						|| item.index <= 1
 					);
 				}
 			},
