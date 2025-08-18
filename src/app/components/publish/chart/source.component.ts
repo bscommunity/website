@@ -136,7 +136,7 @@ export class PublishChartSourceComponent implements OnInit {
 			label: "Gameplay",
 			inputType: "url",
 			placeholder: "https://youtu.be/BY_XwvKogC8",
-			hint: "Mus be a direct link to a YouTube video",
+			hint: "Must be a direct link to a YouTube video",
 			required: false,
 			onValueProcessed: this.formService.extractYouTubeVideoId,
 		}),
