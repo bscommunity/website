@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { Router } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -21,13 +22,13 @@ interface Button {
 			>
 				<mat-icon class="min-w-6"> help </mat-icon>
 				<div class="flex flex-col items-start justify-start">
-					<p>{{ title() }}</p>
+					<b><p>{{ title() }}</p></b>
 					<p>
 						{{ message() }}
 					</p>
 				</div>
 			</div>
-			<button class="!min-w-fit max-md:w-full" mat-flat-button>
+			<button class="!min-w-fit max-md:w-full" mat-flat-button (click)="onClick()">
 				<mat-icon
 					class="!max-w-5"
 					svgIcon="discord"
@@ -46,8 +47,23 @@ export class LargePanelComponent {
 	readonly title = input<string>("");
 	readonly message = input<string>("");
 	readonly button = input<Button>({
-    label: "",
-    link: "",
-    icon: "",
-});
+		label: "",
+		link: "",
+		icon: "",
+	});
+
+	constructor(private router: Router) { }
+
+	onClick() {
+		const link = this.button().link;
+		if (link) {
+			if (link.startsWith('http://') || link.startsWith('https://')) {
+				// External link
+				window.open(link, '_blank');
+			} else {
+				// Internal navigation
+				this.router.navigate([link]);
+			}
+		}
+	}
 }
