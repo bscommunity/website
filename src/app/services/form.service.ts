@@ -285,6 +285,11 @@ export class FormService {
 
 				Object.keys(form.controls).forEach((key) => {
 					const control = form.get(key);
+
+					// Mark ALL controls as touched and dirty to show validation messages
+					control?.markAsTouched();
+					control?.markAsDirty();
+
 					if (control?.errors) {
 						invalidControls[key] = {
 							errors: control.errors,
@@ -298,10 +303,6 @@ export class FormService {
 								control.invalid,
 							);
 						}
-
-						// Mark control as touched and dirty to trigger validation messages
-						control.markAsTouched();
-						control.markAsDirty();
 					}
 				});
 

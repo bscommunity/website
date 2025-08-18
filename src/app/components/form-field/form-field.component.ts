@@ -1,9 +1,11 @@
 import {
 	ChangeDetectionStrategy,
+	ChangeDetectorRef,
 	Component,
 	input,
 	signal,
 	OnInit,
+	inject,
 } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 
@@ -37,11 +39,12 @@ import type {
 		MatHint,
 		FileFieldComponent,
 	],
-	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormFieldComponent implements OnInit {
 	readonly config = input.required<FormFieldConfig>();
 	readonly control = input.required<FormControl | null>();
+
+	private cdr = inject(ChangeDetectorRef);
 
 	errorMessage = signal("");
 
@@ -76,6 +79,7 @@ export class FormFieldComponent implements OnInit {
 				`Control ${this.config().key} is valid or has no errors.`,
 			); */
 			this.errorMessage.set("");
+			this.cdr.markForCheck(); // Force change detection
 			return;
 		}
 
@@ -86,6 +90,7 @@ export class FormFieldComponent implements OnInit {
 		// console.log(`Errors from ${this.config().key}: `, errorMessages);
 
 		this.errorMessage.set(errorMessages[0]);
+		this.cdr.markForCheck(); // Force change detection
 	}
 
 	onBlur() {

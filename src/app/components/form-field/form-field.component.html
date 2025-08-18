@@ -27,11 +27,16 @@
 				[key]="config().key"
 				[title]="config().label"
 				[accept]="getFileConfig().accept"
-				[isInvalid]="control()?.invalid && control()?.touched"
+				[isInvalid]="
+					control()?.invalid &&
+					(control()?.touched || control()?.dirty)
+				"
 				[fileName]="control()?.value?.name"
 				(fileChange)="onFileChange($event)"
 			/>
-			@if (control()?.invalid && control()?.touched) {
+			@if (
+				control()?.invalid && (control()?.touched || control()?.dirty)
+			) {
 				<div
 					class="text-error text-[0.8rem] -mt-2 ml-4"
 					[innerHTML]="errorMessage()"
