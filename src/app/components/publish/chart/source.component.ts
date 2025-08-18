@@ -36,6 +36,7 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
+import { PanelComponent } from "@/components/panel/panel.component";
 
 interface FormMode {
 	title: string;
@@ -65,12 +66,9 @@ interface FormMode {
 				}
 
 				<!-- Disclaimer -->
-				<!-- <app-panel>
-					Your chart bundle
-					<span class="font-medium">does not leaves the browser</span
-					>. Only the necessary metadata is extracted and stored on
-					your submission.
-				</app-panel> -->
+				<app-panel>
+					Your chart file is required for now, as some metadata cannot be extracted from the bundle file. This will be improved in the future.
+				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
 				<button
@@ -97,6 +95,7 @@ interface FormMode {
 		MatSlideToggleModule,
 		ReactiveFormsModule,
 		FormFieldComponent,
+		PanelComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -123,12 +122,14 @@ export class PublishChartSourceComponent implements OnInit {
 			label: "Chart file",
 			accept: [".chart"],
 			required: true,
+			hint: "Must be a .chart file",
 		}),
 		chartBundleField: this.formService.createFileField({
 			key: "chartBundle",
 			label: "Bundle file",
 			accept: [".zip"],
 			required: true,
+			hint: "Must be a .zip file",
 		}),
 		gameplayUrlField: this.formService.createTextField({
 			key: "previewUrl",

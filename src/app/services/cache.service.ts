@@ -2,15 +2,15 @@ import { Injectable, inject } from "@angular/core";
 
 // Services
 import { StorageService } from "./storage.service";
+import { CookieService } from "./cookie.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
-import { CookieService } from "./cookie.service";
 
-const MAX_CACHED_CHARTS = 50;
+const MAX_CACHED_CHARTS = 15;
 
 interface CachedChart extends ChartModel {
 	lastAccessed: string;
