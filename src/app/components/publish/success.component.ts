@@ -43,7 +43,7 @@ import { ChartModelWithLatestVersion } from "@/models/chart.model";
 					<p
 						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary opacity-80 w-full text-center"
 					>
-						v1.0 | {{ data.id }}
+						v1.0 | {{ this.data.id.slice(-4) }}
 					</p>
 				</div>
 			</div>

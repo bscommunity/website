@@ -63,21 +63,24 @@ export class Chart implements OnInit {
 	difficultyIcon: string | null = null;
 
 	ngOnInit(): void {
-		// Access resolved data
-		this.chart = this.route.snapshot.data["chart"];
-		console.warn("Chart data", this.chart);
+		// Escuta mudanças nos parâmetros da rota para recarregar o chart
+		this.route.params.subscribe(() => {
+			// Access resolved data
+			this.chart = this.route.snapshot.data["chart"];
+			console.warn("Chart data", this.chart);
 
-		if (!this.chart?.versions || !this.chart.contributors) {
-			console.error("Chart data is incomplete", this.chart);
-			this.router.navigate(["error"], {
-				state: { error: "Chart data is incomplete" },
-			});
-		}
+			if (!this.chart?.versions || !this.chart.contributors) {
+				console.error("Chart data is incomplete", this.chart);
+				this.router.navigate(["error"], {
+					state: { error: "Chart data is incomplete" },
+				});
+			}
 
-		if (this.chart) {
-			this.difficultyIcon = getDifficultyIcon(
-				this.chart.latestVersion.difficulty,
-			);
-		}
+			if (this.chart) {
+				this.difficultyIcon = getDifficultyIcon(
+					this.chart.latestVersion.difficulty,
+				);
+			}
+		});
 	}
 }
