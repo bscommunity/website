@@ -5,6 +5,7 @@ import {
 	inject,
 	input,
 	viewChild,
+	effect,
 } from "@angular/core";
 
 // Material
@@ -69,6 +70,21 @@ export class VersionsComponent {
 
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
+
+	// Effect to update table when versions input changes
+	// This effect runs when the user creates a new chart from /chart
+	constructor() {
+		effect(() => {
+			const versions = this.versions();
+			const table = this.versionTable();
+
+			if (table && versions.length > 0) {
+				// Update the table data source when versions input changes
+				table.dataSource.data = versions;
+				this.cdr.detectChanges();
+			}
+		});
+	}
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
