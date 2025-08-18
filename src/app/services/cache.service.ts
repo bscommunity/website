@@ -10,7 +10,7 @@ import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
 import { CookieService } from "./cookie.service";
 
-const MAX_CACHED_CHARTS = 5;
+const MAX_CACHED_CHARTS = 50;
 
 interface CachedChart extends ChartModel {
 	lastAccessed: string;
