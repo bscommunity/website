@@ -73,7 +73,7 @@ export class AuthService {
 		try {
 			// Send the code to the backend
 			const response = await firstValueFrom(
-				this.http.post<LoginResponse>(`${apiUrl}/auth/login`, { code }),
+				this.http.post<LoginResponse>(`${apiUrl}/auth/discord`, { code }),
 			);
 
 			// Set the token and user object in cookies
