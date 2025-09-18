@@ -1,49 +1,58 @@
-{
-    "programming": [
-        {
-            "name": "meninocoiso",
-            "role": "Development",
-            "url": "github.com/meninocoiso"
-        }
-    ],
-    "design": [
-        {
-            "name": "meninocoiso",
-            "role": "General UI"
-        },
-        {
-            "name": "dalb245",
-            "role": "App Icon"
-        }
-    ],
-    "localization": [
-        {
-            "name": "MusicCat & big.bob_",
-            "role": "Russian"
-        },
-        {
-            "name": "Farfu & Jahir230",
-            "role": "Spanish"
-        },
-        {
-            "name": "Emeric245",
-            "role": "French"
-        },
-        {
-            "name": "Kingz & DalB245",
-            "role": "German"
-        },
-        {
-            "name": "Tzipirigu",
-            "role": "German"
-        },
-        {
-            "name": "Teddy Sulaiman",
-            "role": "Indonesian"
-        },
-        {
-            "name": "ttdv7",
-            "role": "Hungarian"
-        }
-    ]
-}
+[
+    {
+        "name": "programming",
+        "contributors": [
+            {
+                "name": "meninocoiso",
+                "role": "Development",
+                "url": "github.com/meninocoiso"
+            }
+        ]
+    },
+    {
+        "name": "design",
+        "contributors": [
+            {
+                "name": "meninocoiso",
+                "role": "General UI"
+            },
+            {
+                "name": "dalb245",
+                "role": "App Icon"
+            }
+        ]
+    },
+    {
+        "name": "localization",
+        "contributors": [
+            {
+                "name": "MusicCat & big.bob_",
+                "role": "Russian"
+            },
+            {
+                "name": "Farfu & Jahir230",
+                "role": "Spanish"
+            },
+            {
+                "name": "Emeric245",
+                "role": "French"
+            },
+            {
+                "name": "Kingz & DalB245",
+                "role": "German"
+            },
+            {
+                "name": "Tzipirigu",
+                "role": "German"
+            },
+            {
+                "name": "Teddy Sulaiman",
+                "role": "Indonesian"
+            },
+            {
+                "name": "ttdv7",
+                "role": "Hungarian"
+            }
+        ]
+    }
+]
