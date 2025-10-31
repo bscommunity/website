@@ -13,7 +13,7 @@ import type { VersionModel } from "./version.model";
 
 export const Chart = z.object({
 	id: z.string(),
-	shareId: z.string(),
+	contentId: z.string(),
 	artist: z.string(),
 	track: z.string(),
 	genre: z.nativeEnum(Genre).optional(),
@@ -50,7 +50,7 @@ export const CreateChart = Chart.omit({
 	isPublic: true,
 	versions: true,
 	contributors: true,
-	shareId: true,
+	contentId: true,
 })
 	.merge(
 		// First version properties

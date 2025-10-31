@@ -79,8 +79,8 @@ export class VersionsComponent {
 			const table = this.versionTable();
 
 			if (table && versions.length > 0) {
-				// Update the table data source when versions input changes
-				table.dataSource.data = versions;
+				// The table data is automatically updated through the [data]="versions()" binding
+				// We just need to trigger change detection
 				this.cdr.detectChanges();
 			}
 		});
@@ -118,22 +118,9 @@ export class VersionsComponent {
 				this.openSnackBar("Not implemented yet.", "Close");
 			},
 			disabled: (index, item) => {
-				// If it's a update, we already have versionTable available
-				// Since we only update the table data, and not "versions" array
-				// we need to check the table data directly
-				const versionTable = this.versionTable();
-				if (versionTable) {
-					return (
-						item.id ===
-						versionTable.dataSource.data[
-							versionTable.dataSource.data.length - 1
-						].id
-					);
-				} else {
-					// If it's the initial load, we need to check the versions array,
-					// since it stores the initial data, and we don't have the table data yet
-					return index === this.versions().length - 1;
-				}
+				// Check if this is the latest version by comparing with the versions signal
+				const versions = this.versions();
+				return versions.length === 0 || item.id === versions[versions.length - 1].id;
 			},
 		},
 		{
@@ -142,21 +129,12 @@ export class VersionsComponent {
 			callback: this.openRemoveVersionDialog.bind(this),
 			// We only allow deleting the latest version (except for the first version)
 			disabled: (_, item) => {
-				const versionTable = this.versionTable();
-				if (versionTable) {
-					return (
-						item.id !==
-						versionTable.dataSource.data[
-							versionTable.dataSource.data.length - 1
-						].id || item.index <= 1
-					);
-				} else {
-					return (
-						item.id !==
-						this.versions()[this.versions().length - 1].id
-						|| item.index <= 1
-					);
-				}
+				const versions = this.versions();
+				return (
+					versions.length === 0 ||
+					item.id !== versions[versions.length - 1].id ||
+					item.index <= 1
+				);
 			},
 		},
 	];
