@@ -50,9 +50,8 @@ export class AuthService {
 
 	isLoggedIn = toSignal(this._isLoggedIn$, { initialValue: false });
 
-	get token(): string {
-		const token = this.cookieService.get(this.TOKEN_NAME);
-		if (!token) throw new Error("No token found in cookies");
+	get token(): string | null {
+		const token = this.cookieService.get(this.TOKEN_NAME) ?? null;
 		return token;
 	}
 
@@ -114,7 +113,7 @@ export class AuthService {
 
 	isTokenExpiringSoon(): boolean {
 		const expiry = this.tokenExpiry;
-		if (!expiry) return true;
+		if (!expiry) return false;
 
 		const now = new Date();
 		const timeUntilExpiry = expiry.getTime() - now.getTime();
@@ -148,7 +147,7 @@ export class AuthService {
 		}
 	}
 
-	async getValidToken(): Promise<string> {
+	async getValidToken(): Promise<string | null> {
 		try {
 			// Check if we need to refresh the token
 			if (this.isTokenExpiringSoon()) {

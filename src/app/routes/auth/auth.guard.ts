@@ -18,6 +18,7 @@ export const isAuthenticatedGuard: CanActivateFn = (
 	return authService.isLoggedIn$.pipe(
 		map((isLoggedIn) => {
 			if (!isLoggedIn) {
+				console.log("User is not authenticated");
 				// Redirect unauthenticated users back to auth
 				return router.createUrlTree(["/login"], {
 					queryParams: { returnUrl: state.url },

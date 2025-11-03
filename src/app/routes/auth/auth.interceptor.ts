@@ -13,7 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 	}
 
 	// Skip token injection for auth endpoints to avoid infinite loops
-	if (request.url.includes('/auth/')) {
+	if (request.url.includes("/auth/")) {
 		return next(request);
 	}
 
@@ -22,6 +22,11 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 		return from(authService.getValidToken()).pipe(
 			switchMap((token) => {
 				// console.log(`AuthInterceptor: ${request.method} ${request.url} - using token`);
+
+				if (!token) {
+					console.log("AuthInterceptor: No valid token found");
+					return next(request);
+				}
 
 				const clonedRequest = request.clone({
 					setHeaders: {
@@ -34,9 +39,9 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 
 				return next(clonedRequest).pipe(
 					catchError((error) => {
-						if (error.status === 401) {
+						if (error.status === 401 && authService.isLoggedIn$) {
 							// If we still get 401 after token refresh, logout
-							console.error(
+							console.warn(
 								"AuthInterceptor: Unauthorized request after token refresh, logging out.",
 							);
 							authService.logout();
@@ -45,11 +50,6 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 					}),
 				);
 			}),
-			catchError((error) => {
-				// If getValidToken fails (e.g., refresh failed), proceed without token
-				console.error("AuthInterceptor: Failed to get valid token:", error);
-				return next(request);
-			})
 		);
 	} catch {
 		return next(request);
