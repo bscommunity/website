@@ -40,7 +40,7 @@ export const redirectIfAuthenticatedGuard: CanActivateFn = (
 		map((isLoggedIn) => {
 			if (isLoggedIn) {
 				// Redirect authenticated users to dashboard
-				return router.createUrlTree(["/published"]);
+				return router.createUrlTree(["/dashboard"]);
 			}
 			return true;
 		}),
