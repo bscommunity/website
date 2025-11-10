@@ -35,11 +35,6 @@ export class AppComponent implements OnInit {
 		);
 
 		iconRegistry.addSvgIcon(
-			"label",
-			sanitizer.bypassSecurityTrustResourceUrl("assets/logos/label.svg"),
-		);
-
-		iconRegistry.addSvgIcon(
 			"github",
 			sanitizer.bypassSecurityTrustResourceUrl("assets/logos/github.svg"),
 		);

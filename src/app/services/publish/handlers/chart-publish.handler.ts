@@ -21,13 +21,11 @@ import { BundleZipData, ExtractService } from "@/services/extract.service";
 import { ChartFileData, DecodeService } from "@/services/decode.service";
 
 export type ChartFormData = CreateChartModel & {
-	chartFile: File | null;
 	chartBundle: File | null;
 };
 
 export const initialChartFormData: ChartFormData = {
 	// Ephemeral data
-	chartFile: null,
 	chartBundle: null,
 	// Form data
 	// These fields are used to create the chart
@@ -173,12 +171,6 @@ export class ChartPublishHandler
 		let data = { ...formData };
 
 		// 0. Process bundle/chart files if present
-		if (!formData.chartFile) {
-			throw new Error(
-				"Please provide a chart file or bundle to proceed.",
-			);
-		}
-
 		try {
 			let bundleData: Partial<ChartFormData> | undefined;
 
@@ -198,20 +190,7 @@ export class ChartPublishHandler
 			);
 		}
 
-		// Process the chart file
-		try {
-			const chartFileData = await this.processChartFile(
-				formData.chartFile,
-			);
-			data = { ...data, ...chartFileData };
-		} catch (error: any) {
-			throw new Error(error?.message || "Failed to process chart file.");
-		}
-
-		// 3. Return the processed data
-		const { chartFile, ...createChartData } = data;
-
-		return createChartData;
+		return data;
 	}
 
 	async preprocessMediaInfo(

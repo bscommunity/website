@@ -67,7 +67,8 @@ interface FormMode {
 
 				<!-- Disclaimer -->
 				<app-panel>
-					Your chart file is required for now, as some metadata cannot be extracted from the bundle file. This will be improved in the future.
+					Your chart bundle is not stored. Only the neccessary
+					metadata is extracted on your submission.
 				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
@@ -117,13 +118,6 @@ export class PublishChartSourceComponent implements OnInit {
 	});
 
 	private readonly FIELDS = {
-		chartFileField: this.formService.createFileField({
-			key: "chartFile",
-			label: "Chart file",
-			accept: [".chart"],
-			required: true,
-			hint: "Must be a .chart file",
-		}),
 		chartBundleField: this.formService.createFileField({
 			key: "chartBundle",
 			label: "Bundle file",
@@ -157,7 +151,6 @@ export class PublishChartSourceComponent implements OnInit {
 					required: true,
 					urlFileExtension: "zip",
 				}),
-				this.FIELDS.chartFileField,
 				this.FIELDS.gameplayUrlField,
 			],
 		},
@@ -166,7 +159,6 @@ export class PublishChartSourceComponent implements OnInit {
 			description: "Upload your chart bundle to Discord's workshop.",
 			fields: [
 				this.FIELDS.chartBundleField,
-				this.FIELDS.chartFileField,
 				this.FIELDS.gameplayUrlField,
 			],
 		},

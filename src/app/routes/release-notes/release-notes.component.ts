@@ -6,15 +6,12 @@ import {
 	ReleaseNoteResponse,
 	ReleaseTemplateComponent,
 } from "@/components/release-template/release-template.component";
-import { PublicHeaderComponent } from "@/components/public-header/public-header.component";
-
-// Types
 
 const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
 
 @Component({
 	selector: "app-release-notes",
-	imports: [ReleaseTemplateComponent, PublicHeaderComponent],
+	imports: [ReleaseTemplateComponent],
 	templateUrl: "./release-notes.html",
 })
 export class ReleaseNotes implements OnInit {

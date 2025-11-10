@@ -2,8 +2,6 @@ import { Component, inject, OnInit, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { DOCUMENT } from "@angular/common";
 
-import { environment } from "environments/environment";
-
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 

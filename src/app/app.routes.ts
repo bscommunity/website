@@ -13,22 +13,24 @@ import { DashboardLayoutComponent } from "./layouts/dashboard-layout.component";
 
 export const routes: Routes = [
 	{
-		path: '', // Public section
+		path: "", // Public section
 		component: PublicLayoutComponent,
 		children: [
 			// { path: '', redirectTo: 'home', pathMatch: 'full' },
 			{
 				path: "",
 				loadComponent: () =>
-					import("./routes/landing/landing").then((m) => m.LandingComponent),
+					import("./routes/landing/landing").then(
+						(m) => m.LandingComponent,
+					),
 				title: "bscm",
 			},
 			{
 				path: "release-notes",
 				loadComponent: () =>
-					import("./routes/release-notes/release-notes.component").then(
-						(m) => m.ReleaseNotes,
-					),
+					import(
+						"./routes/release-notes/release-notes.component"
+					).then((m) => m.ReleaseNotes),
 				title: "Release Notes",
 			},
 			{
@@ -49,19 +51,20 @@ export const routes: Routes = [
 			},
 			{
 				path: "link/:type/:id",
-				loadComponent: () => import("./routes/link/link").then((m) => m.Link),
+				loadComponent: () =>
+					import("./routes/link/link").then((m) => m.Link),
 			},
 			// ... other public routes
 		],
 	},
 
 	{
-		path: 'dashboard', // Authenticated dashboard section
+		path: "dashboard", // Authenticated dashboard section
 		component: DashboardLayoutComponent,
 		children: [
-			{ path: '', redirectTo: 'overview', pathMatch: 'full' },
+			// { path: "", redirectTo: "overview", pathMatch: "full" },
 			{
-				path: "overview",
+				path: "",
 				loadComponent: () =>
 					import("./routes/overview/overview").then(
 						(m) => m.OverviewComponent,
@@ -72,14 +75,18 @@ export const routes: Routes = [
 			{
 				path: "published",
 				loadComponent: () =>
-					import("./routes/published/published").then((m) => m.Published),
+					import("./routes/published/published").then(
+						(m) => m.Published,
+					),
 				canActivate: [isAuthenticatedGuard],
 				title: "Published",
 			},
 			{
 				path: "settings",
 				loadComponent: () =>
-					import("./routes/settings/settings").then((m) => m.Settings),
+					import("./routes/settings/settings").then(
+						(m) => m.Settings,
+					),
 				canActivate: [isAuthenticatedGuard],
 				title: "Settings",
 			},
