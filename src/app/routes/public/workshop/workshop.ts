@@ -5,12 +5,18 @@ import { RouterLink } from "@angular/router";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
 
+// Components
+import { Option, SelectComponent } from "@/components/select/select.component";
+import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.component";
+import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
+import { PanelComponent } from "@/components/panel/panel.component";
+
 // Lib
-import { convertStringToMonth } from "@/lib/time";
 
 // Models & Types
 import {
@@ -18,20 +24,33 @@ import {
 	ChartModelWithLatestVersion,
 	withLatestVersion,
 } from "@/models/chart.model";
-import { Option } from "@/components/select/select.component";
+
+// Enums
 import { Difficulty } from "@/models/enums/difficulty.enum";
 import { Genre } from "@/models/enums/genre.enum";
+import { LargePanelComponent } from "@/components/panel/large-panel.component";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
 @Component({
 	selector: "app-workshop",
-	imports: [MatButtonModule, MatTooltipModule, MatIconModule, RouterLink],
+	imports: [
+		MatButtonModule,
+		MatProgressSpinnerModule,
+		MatTooltipModule,
+		MatIconModule,
+		RouterLink,
+		FilterPanelComponent,
+		SearchbarComponent,
+		SelectComponent,
+		PanelComponent,
+		LargePanelComponent,
+		ChartPreviewComponent,
+	],
 	templateUrl: "./workshop.html",
 })
 export class WorkshopComponent implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
-
-	convertStringToMonth = convertStringToMonth;
 
 	sortOptions: Option[] = [
 		{
@@ -93,36 +112,22 @@ export class WorkshopComponent implements OnInit {
 			this.availableVersions,
 		); */
 
-		const chartsByMonth: ChartsByMonth[] = [];
-		charts.forEach((chart) => {
-			const month = chart.latestVersion?.publishedAt
-				? new Date(chart.latestVersion.publishedAt)
-						.toISOString()
-						.slice(0, 7)
-				: "unknown";
-
-			let monthEntry = chartsByMonth.find(
-				(entry) => entry.name === month,
-			);
-			if (!monthEntry) {
-				monthEntry = { name: month, charts: [] };
-				chartsByMonth.push(monthEntry);
-			}
-			monthEntry.charts.push(chart);
-		});
-
-		// console.log("Charts grouped by month:", chartsByMonth);
-
-		this._charts = chartsByMonth.sort((a, b) => {
-			return new Date(b.name).getTime() - new Date(a.name).getTime();
+		this._charts = charts.sort((a, b) => {
+			const dateA = a.latestVersion?.publishedAt
+				? new Date(a.latestVersion.publishedAt)
+				: new Date(0);
+			const dateB = b.latestVersion?.publishedAt
+				? new Date(b.latestVersion.publishedAt)
+				: new Date(0);
+			return dateB.getTime() - dateA.getTime();
 		});
 	}
 
-	get charts(): ChartsByMonth[] | undefined {
+	get charts(): ChartModelWithLatestVersion[] | undefined {
 		return this._charts;
 	}
 
-	private _charts!: ChartsByMonth[] | undefined;
+	private _charts!: ChartModelWithLatestVersion[] | undefined;
 
 	availableDifficulties: Difficulty[] = [];
 	availableGenres: (Genre | undefined)[] = [];

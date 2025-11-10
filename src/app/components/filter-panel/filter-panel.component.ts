@@ -1,17 +1,21 @@
 import { Component, Input, OnInit, signal, input } from "@angular/core";
+
+// Material
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSliderModule } from "@angular/material/slider";
 import { MatChipsModule } from "@angular/material/chips";
+
+// Components
 import {
 	ExpansionPanelComponent,
 	ExpansionPanelData,
-} from "../expansion-panel.component";
-import { MonthPickerComponent } from "../month-picker/month-picker.component";
+} from "@/components/expansion-panel/expansion-panel.component";
+import { MonthPickerComponent } from "@/components/month-picker/month-picker.component";
+
+// Models
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 import { Genre, getGenreLabel } from "@/models/enums/genre.enum";
-import { ChartModel } from "@/models/chart.model";
-import { VersionModel } from "@/models/version.model";
 
 const difficulties: ExpansionPanelData[] = Object.values(Difficulty).map(
 	(name) => ({

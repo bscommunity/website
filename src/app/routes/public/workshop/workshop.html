@@ -93,18 +93,11 @@
 							></app-chart-preview>
 						}
 					</app-list-section> -->
-			@for (month of charts; track $index) {
-			<app-list-section
-				class="w-full"
-				[title]="convertStringToMonth(month.name)"
-			>
-				@for (chart of month.charts; track chart.id) {
-				<app-chart-preview
-					[routerLink]="['/chart', chart.id]"
-					[chart]="chart"
-				></app-chart-preview>
-				}
-			</app-list-section>
+			@for (chart of charts; track chart.id) {
+			<app-chart-preview
+				[routerLink]="['/chart', chart.id]"
+				[chart]="chart"
+			></app-chart-preview>
 			}
 		</ul>
 	</div>

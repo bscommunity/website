@@ -1,11 +1,6 @@
-<section
-	class="w-full inline-flex flex-col justify-start items-start gap-6 overflow-hidden"
->
+<section class="w-full inline-flex flex-col justify-start items-start gap-6 overflow-hidden">
 	<header class="flex flex-col justify-start items-start gap-2">
-		<h3
-			[id]="release().version"
-			class="relative justify-center text-3xl font-semibold leading-9"
-		>
+		<h3 [id]="release().version" class="relative justify-center text-3xl font-semibold leading-9">
 			Release notes for {{ release().version }} {{ icon() }}
 		</h3>
 		<h4 class="relative justify-center text-base font-normal leading-snug">
@@ -16,55 +11,38 @@
 	<div class="flex flex-col justify-start items-start gap-4">
 		<p class="text-on-background text-xs font-normal leading-none">
 			If you encounter any issues, please report them on
-			<a
-				href="https://github.com"
-				target="_blank"
-				class="text-[#b8cf84] text-xs font-normal underline leading-none"
-				>the issues page</a
-			>.
+			<a href="https://github.com/bscommunity/android/issues" target="_blank"
+				class="text-[#b8cf84] text-xs font-normal underline leading-none">the issues page</a>
 		</p>
 		@if (release().extra) {
-			<h5
-				class="relative justify-center text-base font-medium leading-snug"
-			>
-				{{ release().extra }}
-			</h5>
+		<h5 class="relative justify-center text-base font-medium leading-snug">
+			{{ release().extra }}
+		</h5>
 		}
 	</div>
 
-	@if (release().features && release().features!.length > 0) {
-		<app-release-template-item
-			title="Features"
-			icon="local_fire_department"
-			[content]="release().features"
-		></app-release-template-item>
-	}
+	<div class="grid grid-cols-1 md:grid-cols-2 w-full justify-start items-start gap-6 md:gap-12">
+		@if (release().features && release().features!.length > 0) {
+		<app-release-template-item title="Features" icon="local_fire_department"
+			[content]="release().features"></app-release-template-item>
+		}
 
-	@if (release().refactors && release().refactors!.length > 0) {
-		<app-release-template-item
-			title="Refactors"
-			icon="code"
-			[content]="release().refactors"
-		></app-release-template-item>
-	}
+		@if (release().refactors && release().refactors!.length > 0) {
+		<app-release-template-item title="Refactors" icon="code"
+			[content]="release().refactors"></app-release-template-item>
+		}
 
-	@if (release().style && release().style!.length > 0) {
-		<app-release-template-item
-			title="Style"
-			icon="palette"
-			[content]="release().style"
-		></app-release-template-item>
-	}
+		@if (release().style && release().style!.length > 0) {
+		<app-release-template-item title="Style" icon="palette" [content]="release().style"></app-release-template-item>
+		}
 
-	@if (release().fixes && release().fixes!.length > 0) {
-		<app-release-template-item
-			title="Fixes"
-			icon="bug_report"
-			[content]="release().fixes"
-		></app-release-template-item>
-	}
+		@if (release().fixes && release().fixes!.length > 0) {
+		<app-release-template-item title="Fixes" icon="bug_report"
+			[content]="release().fixes"></app-release-template-item>
+		}
+	</div>
 
 	@if (!isLast()) {
-		<div class="flex w-full h-[1px] bg-surface-container-high mt-6"></div>
+	<div class="flex w-full h-[1px] bg-surface-container-high mt-6"></div>
 	}
 </section>

@@ -12,9 +12,9 @@ const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
 @Component({
 	selector: "app-release-notes",
 	imports: [ReleaseTemplateComponent],
-	templateUrl: "./release-notes.html",
+	templateUrl: "./changelog.html",
 })
-export class ReleaseNotes implements OnInit {
+export class Changelog implements OnInit {
 	releaseNotes = signal<ReleaseNote[] | undefined>(undefined);
 
 	releaseEmojis = ["🎉", "🎉", "✨", "🚀", "🥳", "🥳", "🆕", "😎", "😎"];

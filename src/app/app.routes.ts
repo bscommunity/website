@@ -26,27 +26,35 @@ export const routes: Routes = [
 				title: "bscm",
 			},
 			{
-				path: "release-notes",
+				path: "workshop",
 				loadComponent: () =>
-					import(
-						"./routes/public/release-notes/release-notes.component"
-					).then((m) => m.ReleaseNotes),
-				title: "Release Notes",
+					import("./routes/public/workshop/workshop").then(
+						(m) => m.WorkshopComponent,
+					),
+				title: "Workshop",
 			},
 			{
-				path: "privacy-policy",
+				path: "changelog",
 				loadComponent: () =>
 					import(
-						"./routes/public/privacy-policy/privacy-policy"
+						"./routes/public/changelog/changelog"
+					).then((m) => m.Changelog),
+				title: "Changelog",
+			},
+			{
+				path: "privacy",
+				loadComponent: () =>
+					import(
+						"./routes/public/privacy/privacy"
 					).then((m) => m.PrivacyPolicy),
 				title: "Our Privacy Policy: Transparency for Our Community",
 			},
 			{
-				path: "terms-of-service",
+				path: "terms",
 				loadComponent: () =>
 					import(
-						"./routes/public/terms-of-service/terms-of-service"
-					).then((m) => m.TermsOfServiceComponent),
+						"./routes/public/terms/terms"
+					).then((m) => m.TermsOfService),
 				title: "Our Terms of Service",
 			},
 			{
@@ -73,13 +81,13 @@ export const routes: Routes = [
 				title: "Overview",
 			},
 			{
-				path: "published",
+				path: "uploads",
 				loadComponent: () =>
-					import("./routes/dashboard/published/published").then(
-						(m) => m.Published,
+					import("./routes/dashboard/uploads/uploads").then(
+						(m) => m.Uploads,
 					),
 				canActivate: [isAuthenticatedGuard],
-				title: "Published",
+				title: "Uploads",
 			},
 			{
 				path: "settings",

@@ -8,15 +8,15 @@ import {
 import { PublicHeaderComponent } from "@/components/public-header/public-header.component";
 
 @Component({
-	selector: "app-terms-of-service",
+	selector: "app-terms",
 	imports: [
 		LargePanelComponent,
 		TermsTemplateComponent,
 		PublicHeaderComponent,
 	],
-	templateUrl: "./terms-of-service.html",
+	templateUrl: "./terms.html",
 })
-export class TermsOfServiceComponent {
+export class TermsOfService {
 	sections: TermsSection[] = [
 		{
 			title: "Acceptance of Terms",

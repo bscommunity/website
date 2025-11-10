@@ -12,9 +12,9 @@ import {
 } from "@/components/select/select.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
-import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
-import { ListSectionComponent } from "./subcomponents/list-section.component";
+import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.component";
 import { LargePanelComponent } from "@/components/panel/large-panel.component";
+import { ListSectionComponent } from "./subcomponents/list-section.component";
 
 // Enums
 import { Genre } from "@/models/enums/genre.enum";
@@ -41,7 +41,7 @@ type ChartsByMonth = {
 };
 
 @Component({
-	selector: "app-published",
+	selector: "app-uploads",
 	imports: [
 		MatIconModule,
 		MatButtonModule,
@@ -54,9 +54,9 @@ type ChartsByMonth = {
 		LargePanelComponent,
 		ChartPreviewComponent,
 	],
-	templateUrl: "./published.html",
+	templateUrl: "./uploads.html",
 })
-export class Published implements OnInit {
+export class Uploads implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
 

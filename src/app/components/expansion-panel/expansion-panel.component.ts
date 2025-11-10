@@ -19,28 +19,7 @@ export interface ExpansionPanelData {
 		MatSliderModule,
 		MatChipsModule,
 	],
-	template: `
-		<mat-expansion-panel
-			class="!shadow-none !w-full"
-			[expanded]="panelOpenState"
-			(opened)="panelOpenState.set(true)"
-			(closed)="panelOpenState.set(false)"
-		>
-			<mat-expansion-panel-header class="!w-full">
-				<mat-panel-title> {{ title() }} </mat-panel-title>
-			</mat-expansion-panel-header>
-			<mat-chip-set [ariaLabel]="title()">
-				@for (item of data(); track $index) {
-					<mat-chip-option
-						[selected]="item.isSelected"
-						(selectionChange)="selectionChange(item)"
-					>
-						{{ item.name }}
-					</mat-chip-option>
-				}
-			</mat-chip-set>
-		</mat-expansion-panel>
-	`,
+	templateUrl: "./expansion-panel.component.html",
 })
 export class ExpansionPanelComponent {
 	readonly panelOpenState = signal(false);

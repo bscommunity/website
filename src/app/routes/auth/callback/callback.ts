@@ -49,7 +49,7 @@ export class OAuthCallback implements OnInit {
 		try {
 			console.log("Received code: ", code);
 			await this.authService.login(code);
-			this.router.navigate(["/dashboard/published"]);
+			this.router.navigate(["/dashboard/uploads"]);
 		} catch (error: any) {
 			console.error("Error: ", error);
 

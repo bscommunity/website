@@ -72,13 +72,13 @@ export class ChartService {
 						this.cacheService.addCharts(fetchedCharts);
 
 						// If the user is viewing the charts, navigate to the new version
-						if (this.router.url.endsWith("/published")) {
+						if (this.router.url.endsWith("/dashboard/uploads")) {
 							this.router
 								.navigateByUrl("/", {
 									skipLocationChange: true,
 								})
 								.then(() => {
-									this.router.navigate(["/published"]);
+									this.router.navigate(["/dashboard/uploads"]);
 								});
 						}
 					}
