@@ -15,7 +15,6 @@ import {
 } from "@/models/chart.model";
 
 import { apiUrl } from "../../lib/api";
-import { ChartFormData } from "../publish/handlers/chart-publish.handler";
 
 @Injectable({
 	providedIn: "root",

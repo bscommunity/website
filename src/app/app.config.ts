@@ -25,7 +25,7 @@ import {
 } from "@angular/common/http";
 
 import { authInterceptor } from "./routes/auth/auth.interceptor";
-import { ChartTitleStrategy } from "./routes/chart/chart-title.strategy";
+import { ChartTitleStrategy } from "./routes/dashboard/chart/chart-title.strategy";
 
 export const appConfig: ApplicationConfig = {
 	providers: [

@@ -2,26 +2,16 @@ import {
 	Component,
 	ElementRef,
 	inject,
-	signal,
 	output,
 	viewChild,
 	input,
-	InputSignal,
 } from "@angular/core";
-import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { MatDialog } from "@angular/material/dialog";
-
-// Components
-import { ErrorDialogComponent } from "../dialogs/error.component";
-
-// Services
-import { DecodeService } from "@/services/decode.service";
-import { ExtractService } from "@/services/extract.service";
 
 @Component({
 	selector: "app-file-field",

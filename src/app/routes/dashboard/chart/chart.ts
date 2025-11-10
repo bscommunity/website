@@ -13,7 +13,7 @@ import { AsideComponent } from "./subcomponents/aside/aside.component";
 import { KnownIssuesComponent } from "./sections/known-issues/known-issues.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
-import { PageError } from "../error/error";
+import { PageError } from "../../error/error";
 
 // Models
 import { ChartModelWithLatestVersion } from "@/models/chart.model";

@@ -1,63 +1,33 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from "@angular/core";
+import { ChangeDetectorRef, Component, inject, OnInit } from "@angular/core";
+import { RouterLink } from "@angular/router";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatIconModule } from "@angular/material/icon";
 
-// Components
-import {
-	SelectComponent,
-	type Option,
-} from "@/components/select/select.component";
-import { ChartPreviewComponent } from "../../components/chart-preview/chart-preview.component";
-import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
-import { FilterPanelComponent } from "./subcomponents/filter-panel/filter-panel.component";
-import { ListSectionComponent } from "./subcomponents/list-section.component";
-import { LargePanelComponent } from "@/components/panel/large-panel.component";
+// Services
+import { ChartService } from "@/services/api/chart.service";
 
-// Enums
-import { Genre } from "@/models/enums/genre.enum";
-import { Difficulty } from "@/models/enums/difficulty.enum";
+// Lib
+import { convertStringToMonth } from "@/lib/time";
 
-// Models
+// Models & Types
 import {
 	ChartModel,
 	ChartModelWithLatestVersion,
 	withLatestVersion,
 } from "@/models/chart.model";
-import { VersionModel } from "@/models/version.model";
-
-// Services
-import { ChartService } from "@/services/api/chart.service";
-
-// Utils
-import { convertStringToMonth } from "@/lib/time";
-
-type ChartWithLatestVersion = ChartModelWithLatestVersion;
-
-type ChartsByMonth = {
-	name: string; // e.g., "2023-10"
-	charts: ChartWithLatestVersion[];
-};
+import { Option } from "@/components/select/select.component";
+import { Difficulty } from "@/models/enums/difficulty.enum";
+import { Genre } from "@/models/enums/genre.enum";
 
 @Component({
-	selector: "app-published",
-	imports: [
-		MatIconModule,
-		MatButtonModule,
-		SelectComponent,
-		FilterPanelComponent,
-		ListSectionComponent,
-		ChartPreviewComponent,
-		MatProgressSpinnerModule,
-		SearchbarComponent,
-		LargePanelComponent,
-		ChartPreviewComponent,
-	],
-	templateUrl: "./published.html",
+	selector: "app-workshop",
+	imports: [MatButtonModule, MatTooltipModule, MatIconModule, RouterLink],
+	templateUrl: "./workshop.html",
 })
-export class Published implements OnInit {
+export class WorkshopComponent implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
 
@@ -87,7 +57,7 @@ export class Published implements OnInit {
 	filters = [];
 
 	set charts(value: ChartModel[] | undefined) {
-		const charts: ChartWithLatestVersion[] =
+		const charts: ChartModelWithLatestVersion[] =
 			value?.map(withLatestVersion) || [];
 
 		this.availableDifficulties = Array.from(

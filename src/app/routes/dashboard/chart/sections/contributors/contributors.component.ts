@@ -14,7 +14,7 @@ import {
 import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
 
 // Dialogs
-import { ConfirmationDialogComponent } from "../../../../components/dialogs/confirmation/confirmation-dialog.component";
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 import { AddContributorDialogComponent } from "../../dialogs/add-contributor/add-contributor-dialog.component";
 import { EditContributorDialogComponent } from "../../dialogs/edit-contributor/edit-contributor-dialog.component";
 

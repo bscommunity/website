@@ -1,7 +1,7 @@
 import type { Routes } from "@angular/router";
 
 // Resolvers
-import { ChartResolver } from "./routes/chart/chart-resolver.service";
+import { ChartResolver } from "./routes/dashboard/chart/chart-resolver.service";
 
 // Guards
 import {
@@ -20,7 +20,7 @@ export const routes: Routes = [
 			{
 				path: "",
 				loadComponent: () =>
-					import("./routes/landing/landing").then(
+					import("./routes/public/landing/landing").then(
 						(m) => m.LandingComponent,
 					),
 				title: "bscm",
@@ -29,30 +29,30 @@ export const routes: Routes = [
 				path: "release-notes",
 				loadComponent: () =>
 					import(
-						"./routes/release-notes/release-notes.component"
+						"./routes/public/release-notes/release-notes.component"
 					).then((m) => m.ReleaseNotes),
 				title: "Release Notes",
 			},
 			{
 				path: "privacy-policy",
 				loadComponent: () =>
-					import("./routes/privacy-policy/privacy-policy").then(
-						(m) => m.PrivacyPolicy,
-					),
+					import(
+						"./routes/public/privacy-policy/privacy-policy"
+					).then((m) => m.PrivacyPolicy),
 				title: "Our Privacy Policy: Transparency for Our Community",
 			},
 			{
 				path: "terms-of-service",
 				loadComponent: () =>
-					import("./routes/terms-of-service/terms-of-service").then(
-						(m) => m.TermsOfServiceComponent,
-					),
+					import(
+						"./routes/public/terms-of-service/terms-of-service"
+					).then((m) => m.TermsOfServiceComponent),
 				title: "Our Terms of Service",
 			},
 			{
 				path: "link/:type/:id",
 				loadComponent: () =>
-					import("./routes/link/link").then((m) => m.Link),
+					import("./routes/public/link/link").then((m) => m.Link),
 			},
 			// ... other public routes
 		],
@@ -66,7 +66,7 @@ export const routes: Routes = [
 			{
 				path: "",
 				loadComponent: () =>
-					import("./routes/overview/overview").then(
+					import("./routes/dashboard/overview/overview").then(
 						(m) => m.OverviewComponent,
 					),
 				canActivate: [isAuthenticatedGuard],
@@ -75,7 +75,7 @@ export const routes: Routes = [
 			{
 				path: "published",
 				loadComponent: () =>
-					import("./routes/published/published").then(
+					import("./routes/dashboard/published/published").then(
 						(m) => m.Published,
 					),
 				canActivate: [isAuthenticatedGuard],
@@ -84,7 +84,7 @@ export const routes: Routes = [
 			{
 				path: "settings",
 				loadComponent: () =>
-					import("./routes/settings/settings").then(
+					import("./routes/dashboard/settings/settings").then(
 						(m) => m.Settings,
 					),
 				canActivate: [isAuthenticatedGuard],
@@ -93,7 +93,9 @@ export const routes: Routes = [
 			{
 				path: "chart/:id",
 				loadComponent: () =>
-					import("./routes/chart/chart").then((m) => m.Chart),
+					import("./routes/dashboard/chart/chart").then(
+						(m) => m.Chart,
+					),
 				resolve: { chart: ChartResolver },
 				runGuardsAndResolvers: "always",
 			},

@@ -4,23 +4,27 @@ import {
 	inject,
 	OnInit,
 } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
 
 // Material
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+import { MatDialog } from "@angular/material/dialog";
 
 // Components
 import { SettingsWrapperComponent } from "./subcomponents/wrapper.component";
 import { SettingsCardComponent } from "./subcomponents/card.component";
-import { OAuthService } from "@/services/oauth.service";
-import { MatDialog } from "@angular/material/dialog";
-import { ConfirmationDialogComponent } from "../../components/dialogs/confirmation/confirmation-dialog.component";
-import { ActivatedRoute } from "@angular/router";
-import { CommonModule } from "@angular/common";
-import { RouterModule } from "@angular/router";
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
+
+// Animations
 import { settingsAnim } from "./settings.anim";
+
+// Services
+import { OAuthService } from "@/services/oauth.service";
 
 @Component({
 	selector: "app-settings",
