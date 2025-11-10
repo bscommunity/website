@@ -27,6 +27,7 @@
     "@angular/platform-server": "^20.0.0",
     "@angular/router": "^20.0.0",
     "@angular/ssr": "^20.0.0",
+    "@externaladdress4401/protobuf": "^1.2.6",
     "@netlify/angular-runtime": "^2.4.0",
     "@zip.js/zip.js": "^2.7.62",
     "dotenv": "^16.5.0",
