@@ -95,6 +95,9 @@ export class WorkshopComponent implements OnInit {
 	onSearch(query: string) {
 		console.log("Search query:", query);
 
+		this.charts = undefined;
+		this.error = undefined;
+
 		// Handle search query
 		this.chartService.searchCharts(query).subscribe({
 			next: (response) => {

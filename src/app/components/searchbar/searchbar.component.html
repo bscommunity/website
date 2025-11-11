@@ -1,69 +1,102 @@
 <div class="flex flex-1 relative">
 	<span class="text-xl">
-		<mat-icon inline class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6">search</mat-icon>
+		<mat-icon
+			inline
+			class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
+			>search</mat-icon
+		>
 	</span>
 	@if (enableSuggestions()) {
-	<input #input class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
-		type="text" [placeholder]="placeholder()" (input)="onInput($event)" (keydown)="onKeyDown($event)"
-		[matAutocomplete]="auto()!" [disabled]="disabled()" [style.pointerEvents]="disabled() ? 'none' : 'auto'" />
+		<input
+			#input
+			#trigger="matAutocompleteTrigger"
+			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
+			type="text"
+			[placeholder]="placeholder()"
+			(input)="onInput($event)"
+			(keydown)="onKeyDown($event)"
+			[matAutocomplete]="auto()!"
+			[disabled]="disabled()"
+			[style.pointerEvents]="disabled() ? 'none' : 'auto'"
+		/>
 	} @else if (autoComplete() != null) {
-	<input #input class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
-		type="text" [placeholder]="placeholder()" (input)="onInput($event)" (keydown)="onKeyDown($event)"
-		[matAutocomplete]="autoComplete()!" [disabled]="disabled()"
-		[style.pointerEvents]="disabled() ? 'none' : 'auto'" />
+		<input
+			#input
+			#trigger="matAutocompleteTrigger"
+			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full"
+			type="text"
+			[placeholder]="placeholder()"
+			(input)="onInput($event)"
+			(keydown)="onKeyDown($event)"
+			[matAutocomplete]="autoComplete()!"
+			[disabled]="disabled()"
+			[style.pointerEvents]="disabled() ? 'none' : 'auto'"
+		/>
 	} @else {
-	<input #input
-		class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full outline-0 outline-red-400 focus:ring-2 focus:ring-primary transition-all"
-		type="text" [placeholder]="placeholder()" (input)="onInput($event)" (keydown)="onKeyDown($event)"
-		[disabled]="disabled()" [style.pointerEvents]="disabled() ? 'none' : 'auto'" />
+		<input
+			#input
+			class="pr-6 pl-[3.75rem] py-3 bg-surface-container-high text-on-surface-variant rounded-full w-full outline-0 outline-red-400 focus:ring-2 focus:ring-primary transition-all"
+			type="text"
+			[placeholder]="placeholder()"
+			(input)="onInput($event)"
+			(keydown)="onKeyDown($event)"
+			[disabled]="disabled()"
+			[style.pointerEvents]="disabled() ? 'none' : 'auto'"
+		/>
 	}
 	<span class="absolute top-1/2 -translate-y-1/2 right-1.5">
-		@if (isLoading()) {
-		<mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
-		} @else if (this.input() && this.input().nativeElement.value.length > 0) {
-		<button mat-icon-button (click)="clearSearch()" aria-label="Clear search input"
-			class="!flex !items-center !justify-center">
-			<span class="flex flex-1 items-center justify-center">
-				<mat-icon inline>close</mat-icon>
-			</span>
-		</button>
+		@if (this.input() && this.input().nativeElement.value.length > 0) {
+			<button
+				mat-icon-button
+				(click)="clearSearch()"
+				aria-label="Clear search input"
+				class="!flex !items-center !justify-center"
+			>
+				<span class="flex flex-1 items-center justify-center">
+					<mat-icon inline>close</mat-icon>
+				</span>
+			</button>
 		}
 		<ng-content></ng-content>
 	</span>
 </div>
 @if (enableSuggestions()) {
-@if (enableSuggestions()) {
-<mat-autocomplete class="mt-2" #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-	@if (querySuggestions() === "start") {
-	<mat-option class="pointer-events-none select-none w-full">
-		<p class="text-center w-full">Start typing to search</p>
-	</mat-option>
-	} @else if (querySuggestions() === "loading") {
-	<mat-option class="pointer-events-none select-none w-full">
-		<span class="flex items-center justify-center w-full">
-			<mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
-		</span>
-	</mat-option>
-	} @else if (querySuggestions() === "error") {
-	<mat-option class="pointer-events-none select-none w-full">
-		<p class="text-center w-full">
-			We found an error while fetching the data
-		</p>
-	</mat-option>
-	} @else if (querySuggestions().length === 0) {
-	<mat-option class="w-full flex items-center justify-center pointer-events-none select-none">
-		<p class="text-center w-full">No suggestions found</p>
-	</mat-option>
-	} @else {
-	@for (suggestion of querySuggestions(); track $index) {
-	<mat-option [value]="suggestion">
-		{{ suggestion }}
-	</mat-option>
-	}
-	}
-</mat-autocomplete>
+	<mat-autocomplete
+		class="mt-2"
+		#auto="matAutocomplete"
+		(optionSelected)="onOptionSelected($event)"
+	>
+		@if (querySuggestions() === "start") {
+		} @else if (querySuggestions() === "loading") {
+			<mat-option class="pointer-events-none select-none w-full">
+				<span class="flex items-center justify-center w-full">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="24"
+					></mat-progress-spinner>
+				</span>
+			</mat-option>
+		} @else if (querySuggestions() === "error") {
+			<mat-option class="pointer-events-none select-none w-full">
+				<p class="text-center w-full">
+					We found an error while fetching the data
+				</p>
+			</mat-option>
+		} @else if (querySuggestions().length === 0) {
+			<mat-option
+				class="w-full flex items-center justify-center pointer-events-none select-none"
+			>
+				<p class="text-center w-full">No suggestions found</p>
+			</mat-option>
+		} @else {
+			@for (suggestion of querySuggestions(); track $index) {
+				<mat-option [value]="suggestion">
+					{{ suggestion }}
+				</mat-option>
+			}
+		}
+	</mat-autocomplete>
 } @else {
-<mat-autocomplete #auto="matAutocomplete" class="hidden">
-</mat-autocomplete>
-}
+	<mat-autocomplete #auto="matAutocomplete" class="hidden">
+	</mat-autocomplete>
 }

@@ -20,6 +20,7 @@ import { debounceTime } from "rxjs/operators";
 import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { MatIconModule } from "@angular/material/icon";
 import { MatRippleModule } from "@angular/material/core";
+import { ActivatedRoute, Router } from "@angular/router";
 
 export interface Option {
 	value: string;
@@ -37,11 +38,14 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 	private renderer = inject(Renderer2);
 	private elementRef = inject(ElementRef);
 	private cdr = inject(ChangeDetectorRef);
+	private activatedRoute = inject(ActivatedRoute);
+	private router = inject(Router);
 
 	readonly dropdown = viewChild.required<ElementRef>("dropdown");
 
 	readonly class = input("");
 	readonly disabled = input(false);
+	readonly queryParamKey = input<string>('sort');
 
 	readonly options = input<Option[]>([]);
 	readonly selectedOption = model<Option>();
@@ -98,6 +102,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	resizeSubscription: Subscription = new Subscription();
 	scrollSubscription: Subscription = new Subscription();
+	paramsSubscription: Subscription = new Subscription();
 
 	ngAfterViewInit() {
 		if (isPlatformBrowser(this.platformId)) {
@@ -117,16 +122,33 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 					}
 				});
 		}
+
+		this.paramsSubscription = this.activatedRoute.queryParams.subscribe(params => {
+			const value = params[this.queryParamKey()];
+			if (value) {
+				const option = this.options().find(o => o.value === value);
+				if (option) {
+					this.selectedOption.set(option);
+				}
+			}
+		});
 	}
 
 	ngOnDestroy() {
 		if (this.resizeSubscription) this.resizeSubscription.unsubscribe();
 		if (this.scrollSubscription) this.scrollSubscription.unsubscribe();
+		if (this.paramsSubscription) this.paramsSubscription.unsubscribe();
+	}
+
+	updateParams(value: string) {
+		const queryParams = { [this.queryParamKey()]: value || null };
+		this.router.navigate([], { queryParams, queryParamsHandling: 'merge' });
 	}
 
 	selectOption(option: Option): void {
 		this.selectedOption.set(option);
 		this.selectionChange.emit(option);
+		this.updateParams(option.value);
 		this.highlightedIndex = -1;
 
 		this.dropdownOpen = false;
@@ -139,7 +161,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 		if (this.dropdownOpen) {
 			// console.log("Adjusting");
-			this.adjustDropdownPosition();
+			setTimeout(() => this.adjustDropdownPosition(), 0);
 		} else {
 			this.highlightedIndex = -1;
 		}
@@ -165,6 +187,8 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	@HostListener("document:keydown", ["$event"])
 	handleKeydown(event: KeyboardEvent) {
+		if (!this.elementRef.nativeElement.contains(event.target as Node)) return;
+
 		if (this.dropdownOpen) {
 			switch (event.key) {
 				case "ArrowDown":

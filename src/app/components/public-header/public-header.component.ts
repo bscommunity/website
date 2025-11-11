@@ -45,7 +45,7 @@ export class PublicHeaderComponent {
 	onNavigateToSearch() {
 		const value = this.searchInput.nativeElement.value.trim();
 		if (value) {
-			this.router.navigate(['/workshop'], { queryParams: { query: value } });
+			this.router.navigate(['/workshop'], { queryParams: { q: value } });
 		}
 	}
 

@@ -1,31 +1,49 @@
 <main
-	class="flex flex-col-reverse md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16">
+	class="flex flex-col-reverse md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
+>
 	<app-filter-panel class="w-full md:w-1/3 md:max-w-md"></app-filter-panel>
 	<div class="flex flex-col items-start justify-start gap-9 w-full">
 		<app-panel class="w-full" variant="warning">
-			The bscm workshop is currently in beta. <br> You may encounter broken downloads, missing content, or other
-			issues while we continue to improve it.
+			The bscm workshop is currently in beta. <br />
+			You may encounter broken downloads, missing content, or other issues
+			while we continue to improve it.
 		</app-panel>
-		<div class="flex flex-col sm:flex-row items-center justify-start w-full gap-4">
-			<app-searchbar placeholder="Search for charts, tourpasses and themes..." [enableSuggestions]="true"
-				class="flex flex-1 max-md:w-full relative" [disabled]="!charts" [onSearch]="onSearch.bind(this)">
-				@if (!charts) {
-				<mat-progress-spinner class="mr-3" diameter="16" mode="indeterminate"></mat-progress-spinner>
-				}
-			</app-searchbar>
+		<div
+			class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
+		>
+			<app-searchbar
+				placeholder="Search for charts, tourpasses and themes..."
+				[enableSuggestions]="true"
+				class="flex flex-1 max-md:w-full relative"
+				[disabled]="!charts"
+				[onSearch]="onSearch.bind(this)"
+			/>
 			<div class="flex flex-row items-center gap-4">
-				<span class="flex flex-row items-center justify-end gap-4 h-full">
+				<span
+					class="flex flex-row items-center justify-end gap-4 h-full"
+				>
 					<label class="min-w-fit" for="sort-by">Sort by</label>
-					<app-select class="h-full" id="sort-by" [options]="sortOptions" [selectedOption]="sortBy"
-						[disabled]="!charts"></app-select>
+					<app-select
+						class="h-full"
+						id="sort-by"
+						[options]="sortOptions"
+						[selectedOption]="sortBy"
+						[queryParamKey]="'sort'"
+						(selectionChange)="sortBy = $event"
+						[disabled]="!charts"
+					/>
 				</span>
 			</div>
 		</div>
 		@if (filters.length > 0) {
 		<!-- No charts found after filtering -->
-		<div class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full">
+		<div
+			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+		>
 			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"><mat-icon inline>sentiment_dissatisfied</mat-icon></span>
+				<span class="text-6xl"
+					><mat-icon inline>sentiment_dissatisfied</mat-icon></span
+				>
 				<h1 class="text-2xl">
 					We couldn't find anything based on your search
 				</h1>
@@ -33,34 +51,53 @@
 					Try removing some filters or searching for something else
 				</p>
 			</div>
-			<button class="!flex-row-reverse" mat-stroked-button (click)="clearFilters()" (keypress)="clearFilters()">
+			<button
+				class="!flex-row-reverse"
+				mat-stroked-button
+				(click)="clearFilters()"
+				(keypress)="clearFilters()"
+			>
 				<p>Clear filters</p>
 				<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
 			</button>
 		</div>
 		}
-		<ul class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start justify-start w-full"
-			[style.opacity]="!charts ? '0.5' : '1'" [style.pointerEvents]="!charts ? 'none' : 'auto'">
+		<ul
+			class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start justify-start w-full"
+			[style.opacity]="!charts ? '0.5' : '1'"
+			[style.pointerEvents]="!charts ? 'none' : 'auto'"
+		>
 			@for (chart of charts; track chart.id) {
 			<app-chart-preview [chart]="chart"></app-chart-preview>
 			}
 		</ul>
 		@if (error) {
 		<!-- Error state -->
-		<div class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full">
+		<div
+			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+		>
 			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"><mat-icon inline>deployed_code_alert</mat-icon></span>
+				<span class="text-6xl"
+					><mat-icon inline>deployed_code_alert</mat-icon></span
+				>
 				<h1 class="text-2xl">
 					Oops, something went wrong while fetching your charts
 				</h1>
-				<div class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center">
+				<div
+					class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+				>
 					{{ this.error }} <br />
 					<p>
 						Please try again later or check Discord if the problem
 						persists
 					</p>
-					<button mat-stroked-button (click)="fetchCharts()" (keypress)="fetchCharts()" [disabled]="!charts"
-						aria-label="Refresh charts">
+					<button
+						mat-stroked-button
+						(click)="fetchCharts()"
+						(keypress)="fetchCharts()"
+						[disabled]="!charts"
+						aria-label="Refresh charts"
+					>
 						<mat-icon class="!mx-2">refresh</mat-icon>
 
 						@if (!charts) {
@@ -72,10 +109,13 @@
 				</div>
 			</div>
 		</div>
-		} @else {
+		} @else if (!charts) {
 		<!-- Loading state -->
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
-			<mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+			<mat-progress-spinner
+				diameter="36"
+				mode="indeterminate"
+			></mat-progress-spinner>
 		</div>
 		}
 	</div>
