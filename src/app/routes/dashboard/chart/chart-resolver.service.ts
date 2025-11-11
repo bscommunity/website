@@ -8,7 +8,6 @@ import {
 import { ChartService } from "@/services/api/chart.service";
 import {
 	ChartModel,
-	ChartModelWithLatestVersion,
 	withLatestVersion,
 } from "@/models/chart.model";
 import { AuthService } from "@/services/auth.service";
@@ -25,7 +24,7 @@ export class ChartResolver implements Resolve<any> {
 	async resolve(
 		route: ActivatedRouteSnapshot,
 		state: RouterStateSnapshot,
-	): Promise<ChartModelWithLatestVersion | null> {
+	): Promise<ChartModel | null> {
 		const chartId = route.paramMap.get("id");
 
 		if (!chartId) {

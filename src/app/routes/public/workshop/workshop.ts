@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from "@angular/core";
-import { RouterLink } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -15,21 +14,10 @@ import { Option, SelectComponent } from "@/components/select/select.component";
 import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.component";
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { PanelComponent } from "@/components/panel/panel.component";
-
-// Lib
-
-// Models & Types
-import {
-	ChartModel,
-	ChartModelWithLatestVersion,
-	withLatestVersion,
-} from "@/models/chart.model";
-
-// Enums
-import { Difficulty } from "@/models/enums/difficulty.enum";
-import { Genre } from "@/models/enums/genre.enum";
-import { LargePanelComponent } from "@/components/panel/large-panel.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+
+// Models
+import { ChartModel, } from "@/models/chart.model";
 
 @Component({
 	selector: "app-workshop",
@@ -70,89 +58,26 @@ export class WorkshopComponent implements OnInit {
 	];
 
 	sortBy: Option = this.sortOptions[0];
-
 	filters = [];
 
-	set charts(value: ChartModel[] | undefined) {
-		const charts: ChartModelWithLatestVersion[] =
-			value?.map(withLatestVersion) || [];
-
-		this.availableDifficulties = Array.from(
-			new Set(
-				charts.map(
-					(chart) => Difficulty[chart.latestVersion.difficulty],
-				),
-			),
-		);
-
-		this.availableGenres = Array.from(
-			new Set(
-				charts.map((chart) =>
-					!!chart.genre ? Genre[chart.genre] : undefined,
-				),
-			),
-		);
-
-		this.availableVersions = Array.from(
-			new Set(
-				charts
-					.map((chart) =>
-						chart.latestVersion.isDeluxe ? "Deluxe" : "Default",
-					)
-					.flat(),
-			),
-		);
-
-		/* console.log(
-			"Processed: ",
-			this.availableDifficulties,
-			this.availableGenres,
-			this.availableVersions,
-		); */
-
-		this._charts = charts.sort((a, b) => {
-			const dateA = a.latestVersion?.publishedAt
-				? new Date(a.latestVersion.publishedAt)
-				: new Date(0);
-			const dateB = b.latestVersion?.publishedAt
-				? new Date(b.latestVersion.publishedAt)
-				: new Date(0);
-			return dateB.getTime() - dateA.getTime();
-		});
-	}
-
-	get charts(): ChartModelWithLatestVersion[] | undefined {
-		return this._charts;
-	}
-
-	private _charts!: ChartModelWithLatestVersion[] | undefined;
-
-	availableDifficulties: Difficulty[] = [];
-	availableGenres: (Genre | undefined)[] = [];
-	availableVersions: string[] = [];
-	startDate: string | null = null;
-	endDate: string | null = null;
-
-	isRefreshing: boolean = true;
-	error: string | undefined = undefined;
+	charts: ChartModel[] | undefined = undefined;
+	error?: string;
 
 	ngOnInit(): void {
 		// Access resolved data
-		this.fetchCharts(false);
+		this.fetchCharts();
 	}
 
 	clearFilters() {
 		// Clear filters
 	}
 
-	fetchCharts(forceRefresh: boolean = false) {
-		this.isRefreshing = forceRefresh;
+	fetchCharts() {
 		this.error = undefined;
-		this.chartService.getAllCharts(forceRefresh).subscribe({
+		this.chartService.getCharts().subscribe({
 			next: (response) => {
 				console.log("Resolved charts data:", response);
 
-				this.isRefreshing = false;
 				this.charts = response;
 				this.cdr.markForCheck();
 			},
@@ -162,7 +87,6 @@ export class WorkshopComponent implements OnInit {
 					error.error ||
 					"Failed to refresh charts. Please try again.";
 
-				this.isRefreshing = false;
 				this.cdr.markForCheck();
 			},
 		});
@@ -170,8 +94,21 @@ export class WorkshopComponent implements OnInit {
 
 	onSearch(query: string) {
 		console.log("Search query:", query);
-		console.log("Charts before search:", this.charts);
 
 		// Handle search query
+		this.chartService.searchCharts(query).subscribe({
+			next: (response) => {
+				this.charts = response;
+				this.cdr.markForCheck();
+			},
+			error: (error) => {
+				console.error("Error searching charts:", error);
+				this.error =
+					error.error ||
+					"Failed to search charts. Please try again.";
+
+				this.cdr.markForCheck();
+			},
+		});
 	}
 }

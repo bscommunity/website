@@ -7,9 +7,9 @@
 			issues while we continue to improve it.
 		</app-panel>
 		<div class="flex flex-col sm:flex-row items-center justify-start w-full gap-4">
-			<app-searchbar placeholder="Search for charts, tourpasses and themes..."
-				class="flex flex-1 max-md:w-full relative" [disabled]="isRefreshing" [onSearch]="onSearch.bind(this)">
-				@if (isRefreshing) {
+			<app-searchbar placeholder="Search for charts, tourpasses and themes..." [enableSuggestions]="true"
+				class="flex flex-1 max-md:w-full relative" [disabled]="!charts" [onSearch]="onSearch.bind(this)">
+				@if (!charts) {
 				<mat-progress-spinner class="mr-3" diameter="16" mode="indeterminate"></mat-progress-spinner>
 				}
 			</app-searchbar>
@@ -17,7 +17,7 @@
 				<span class="flex flex-row items-center justify-end gap-4 h-full">
 					<label class="min-w-fit" for="sort-by">Sort by</label>
 					<app-select class="h-full" id="sort-by" [options]="sortOptions" [selectedOption]="sortBy"
-						[disabled]="isRefreshing"></app-select>
+						[disabled]="!charts"></app-select>
 				</span>
 			</div>
 		</div>
@@ -40,7 +40,7 @@
 		</div>
 		}
 		<ul class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start justify-start w-full"
-			[style.opacity]="isRefreshing ? '0.5' : '1'" [style.pointerEvents]="isRefreshing ? 'none' : 'auto'">
+			[style.opacity]="!charts ? '0.5' : '1'" [style.pointerEvents]="!charts ? 'none' : 'auto'">
 			@for (chart of charts; track chart.id) {
 			<app-chart-preview [chart]="chart"></app-chart-preview>
 			}
@@ -59,11 +59,11 @@
 						Please try again later or check Discord if the problem
 						persists
 					</p>
-					<button mat-stroked-button (click)="fetchCharts(true)" (keypress)="fetchCharts(true)"
-						[disabled]="isRefreshing" aria-label="Refresh charts">
+					<button mat-stroked-button (click)="fetchCharts()" (keypress)="fetchCharts()" [disabled]="!charts"
+						aria-label="Refresh charts">
 						<mat-icon class="!mx-2">refresh</mat-icon>
 
-						@if (isRefreshing) {
+						@if (!charts) {
 						<p>Refreshing...</p>
 						} @else {
 						<p>Refresh charts</p>
@@ -76,11 +76,6 @@
 		<!-- Loading state -->
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
 			<mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
-			<!-- <mat-progress-spinner
-				diameter="64"
-				mode="indeterminate"
-			></mat-progress-spinner>
-			<p class="text-lg">Loading your charts...</p> -->
 		</div>
 		}
 	</div>

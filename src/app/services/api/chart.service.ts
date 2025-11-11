@@ -46,49 +46,10 @@ export class ChartService {
 	}
 
 	// Read
-	getAllCharts(forceRefresh: boolean = false): Observable<ChartModel[]> {
+	getCharts(forceRefresh: boolean = false, limit?: number, offset?: number): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
-		const url = `${this.apiUrl}`;
-
-		// Check if we are on refresh cooldown
-		/* if (!this.cacheService.isOnRefreshCooldown) {
-			console.log(
-				"Refresh cooldown is over. Fetching charts from API...",
-			);
-
-			// If we are not on refresh cooldown, we can trigger a background fetch to check for updates
-			this.http.get<ChartModel[]>(url).subscribe({
-				next: (fetchedCharts) => {
-					console.log("Fetched charts from API:", fetchedCharts);
-
-					// Set up a cooldown to prevent too many requests
-					this.cacheService.setRefreshCooldown();
-
-					// Compare versions to see if we need to update the cache
-					if (
-						JSON.stringify(fetchedCharts) !== JSON.stringify(charts)
-					) {
-						console.log("Updating charts in cache...");
-						this.cacheService.addCharts(fetchedCharts);
-
-						// If the user is viewing the charts, navigate to the new version
-						if (this.router.url.endsWith("/dashboard/uploads")) {
-							this.router
-								.navigateByUrl("/", {
-									skipLocationChange: true,
-								})
-								.then(() => {
-									this.router.navigate(["/dashboard/uploads"]);
-								});
-						}
-					}
-				},
-				error: (error) => {
-					// Handle error if needed
-					console.error("Failed to fetch charts:", error);
-				},
-			});
-		} */
+		const url = `${this.apiUrl}${limit ? `?limit=${limit}` : ""}${offset ? `${limit ? "&" : "?"}offset=${offset}` : ""
+			}`;
 
 		// Return cached charts if already cached before
 		if (forceRefresh || !charts?.length) {
@@ -149,9 +110,15 @@ export class ChartService {
 
 		return this.http.get<ChartModel[]>(url).pipe(
 			tap((fetchedCharts) => {
-				this.cacheService.addCharts(fetchedCharts);
+				/* this.cacheService.addCharts(fetchedCharts); */
 			}),
 		);
+	}
+
+	getSuggestions(query: string): Observable<string[]> {
+		const url = `${this.apiUrl}/suggestions?query=${query}`;
+
+		return this.http.get<string[]>(url);
 	}
 
 	fetchChartFromRemote(id: string): Observable<ChartModel> {

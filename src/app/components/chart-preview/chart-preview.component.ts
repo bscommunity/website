@@ -9,7 +9,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 
 // Models
-import { ChartModelWithLatestVersion } from "@/models/chart.model";
+import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
@@ -27,7 +27,7 @@ export enum Tendency {
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
-	@Input() chart!: ChartModelWithLatestVersion;
+	@Input() chart!: ChartModel;
 
 	transformDuration = transformDuration;
 	showVisibility = input<boolean>(true);

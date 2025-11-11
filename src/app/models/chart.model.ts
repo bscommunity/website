@@ -22,22 +22,19 @@ export const Chart = z.object({
 	isPublic: z.boolean().default(true),
 
 	// Relations
+	latestVersion: Version,
 	versions: Version.array().min(1),
 	contributors: z.array(Contributor).optional(),
 });
 
 export type ChartModel = z.infer<typeof Chart>;
 
-export type ChartModelWithLatestVersion = Omit<ChartModel, "latestVersion"> & {
-	latestVersion: VersionModel;
-};
-
 /**
- * Returns a ChartModelWithLatestVersion, ensuring latestVersion is filled.
+ * Returns a ChartModel with the latest version included
  */
 export function withLatestVersion(
 	chart: Omit<ChartModel, "latestVersion">,
-): ChartModelWithLatestVersion {
+): ChartModel {
 	return {
 		...chart,
 		latestVersion: chart.versions[chart.versions.length - 1],
@@ -51,6 +48,7 @@ export const CreateChart = Chart.omit({
 	versions: true,
 	contributors: true,
 	contentId: true,
+	latestVersion: true,
 })
 	.merge(
 		// First version properties
@@ -71,5 +69,6 @@ const chartSchema = Chart.omit({
 	isFeatured: true,
 	versions: true,
 	contributors: true,
+	latestVersion: true,
 }).partial();
 export type MutateChartModel = z.infer<typeof chartSchema>;

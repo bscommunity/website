@@ -13,7 +13,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
 // Models
-import { ChartModelWithLatestVersion } from "@/models/chart.model";
+import { ChartModel } from "@/models/chart.model";
 
 @Component({
 	selector: "app-publish-dialog-success",
@@ -77,7 +77,7 @@ import { ChartModelWithLatestVersion } from "@/models/chart.model";
 export class PublishDialogSuccessComponent {
 	dialogRef =
 		inject<MatDialogRef<PublishDialogSuccessComponent>>(MatDialogRef);
-	data = inject<ChartModelWithLatestVersion>(MAT_DIALOG_DATA);
+	data = inject<ChartModel>(MAT_DIALOG_DATA);
 	private router = inject(Router);
 
 	onAccessButtonClicked() {

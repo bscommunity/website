@@ -23,7 +23,6 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 // Models
 import {
 	ChartModel,
-	ChartModelWithLatestVersion,
 	withLatestVersion,
 } from "@/models/chart.model";
 
@@ -33,11 +32,9 @@ import { ChartService } from "@/services/api/chart.service";
 // Utils
 import { convertStringToMonth } from "@/lib/time";
 
-type ChartWithLatestVersion = ChartModelWithLatestVersion;
-
 type ChartsByMonth = {
 	name: string; // e.g., "2023-10"
-	charts: ChartWithLatestVersion[];
+	charts: ChartModel[];
 };
 
 @Component({
@@ -86,7 +83,7 @@ export class Uploads implements OnInit {
 	filters = [];
 
 	set charts(value: ChartModel[] | undefined) {
-		const charts: ChartWithLatestVersion[] =
+		const charts: ChartModel[] =
 			value?.map(withLatestVersion) || [];
 
 		this.availableDifficulties = Array.from(
@@ -126,8 +123,8 @@ export class Uploads implements OnInit {
 		charts.forEach((chart) => {
 			const month = chart.latestVersion?.publishedAt
 				? new Date(chart.latestVersion.publishedAt)
-						.toISOString()
-						.slice(0, 7)
+					.toISOString()
+					.slice(0, 7)
 				: "unknown";
 
 			let monthEntry = chartsByMonth.find(
@@ -174,7 +171,7 @@ export class Uploads implements OnInit {
 	fetchCharts(forceRefresh: boolean = false) {
 		this.isRefreshing = forceRefresh;
 		this.error = undefined;
-		this.chartService.getAllCharts(forceRefresh).subscribe({
+		this.chartService.getCharts(forceRefresh).subscribe({
 			next: (response) => {
 				console.log("Resolved charts data:", response);
 
