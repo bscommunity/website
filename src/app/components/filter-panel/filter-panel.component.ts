@@ -42,7 +42,7 @@ const versions: ExpansionPanelData[] = [
 		MatSliderModule,
 		MatChipsModule,
 		ExpansionPanelComponent,
-		MonthPickerComponent,
+		// MonthPickerComponent,
 	],
 	templateUrl: "./filter-panel.component.html",
 })
@@ -50,36 +50,9 @@ export class FilterPanelComponent {
 	readonly startDate = input<string | null>(null);
 	readonly endDate = input<string | null>(null);
 
-	private _difficulties: Difficulty[] = [];
-	private _genres: (Genre | undefined)[] = [];
-	private _versions: string[] = [];
-
-	@Input()
-	set availableDifficulties(value: Difficulty[]) {
-		this._difficulties = value;
-		this.updateDifficulties(value);
-	}
-	get availableDifficulties(): Difficulty[] {
-		return this._difficulties;
-	}
-
-	@Input()
-	set availableGenres(value: (Genre | undefined)[]) {
-		this._genres = value;
-		this.updateGenres(value);
-	}
-	get availableGenres(): (Genre | undefined)[] {
-		return this._genres;
-	}
-
-	@Input()
-	set availableVersions(value: string[]) {
-		this._versions = value;
-		this.updateVersions(value);
-	}
-	get availableVersions(): string[] {
-		return this._versions;
-	}
+	private _difficulties = difficulties;
+	private _genres = genres;
+	private _versions = versions;
 
 	categories: ExpansionPanelData[] = [
 		{ name: "Charts" },
@@ -87,36 +60,9 @@ export class FilterPanelComponent {
 		{ name: "Themes" },
 	];
 
-	difficulties: ExpansionPanelData[] = [];
-	genres: ExpansionPanelData[] = [];
-	versions: ExpansionPanelData[] = [];
-
-	private updateDifficulties(value: Difficulty[]) {
-		// console.log("Updating difficulties with:", value);
-		this.difficulties = value.map((difficulty) => ({
-			name: getDifficultyLabel(difficulty),
-			value: difficulty,
-		}));
-		// console.log("Updated difficulties:", this.difficulties);
-	}
-
-	private updateGenres(value: (Genre | undefined)[]) {
-		// console.log("Updating genres with:", value);
-		this.genres = value.map((genre) => ({
-			name: getGenreLabel(genre as Genre),
-			value: genre,
-		}));
-		// console.log("Updated genres:", this.genres);
-	}
-
-	private updateVersions(value: string[]) {
-		// console.log("Updating versions with:", value);
-		this.versions = value.map((version) => ({
-			name: version,
-			value: version,
-		}));
-		// console.log("Updated versions:", this.versions);
-	}
+	difficulties: ExpansionPanelData[] = this._difficulties;
+	genres: ExpansionPanelData[] = this._genres;
+	versions: ExpansionPanelData[] = this._versions;
 
 	readonly datePanelOpenState = signal(false);
 

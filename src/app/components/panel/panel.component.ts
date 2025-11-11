@@ -18,9 +18,20 @@ interface Button {
 			class="flex flex-row items-center justify-start gap-4 rounded-lg px-6 py-4 w-full"
 			[ngClass]="{
 				'bg-info/50': variant() === 'info',
+				'bg-[#E8A940]/50': variant() === 'warning'
 			}"
 		>
-			<mat-icon class="icon-20"> help </mat-icon>
+			@switch (variant()) {
+				@case ('info') {
+					<mat-icon>info</mat-icon>
+				}
+				@case ('warning') {
+					<mat-icon>warning</mat-icon>
+				}
+				@default {
+					<mat-icon>info</mat-icon>
+				}
+			}
 			<p class="text-sm">
 				<ng-content></ng-content>
 			</p>
@@ -30,5 +41,5 @@ interface Button {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PanelComponent {
-	readonly variant = input<"info">("info");
+	readonly variant = input<"info" | "warning">("info");
 }
