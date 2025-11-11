@@ -13,7 +13,9 @@ import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
-import { VersionModel } from "@/models/version.model";
+import { MatButtonModule } from "@angular/material/button";
+import { MatRippleModule } from "@angular/material/core";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 export enum Tendency {
 	Up = "up",
@@ -23,14 +25,20 @@ export enum Tendency {
 
 @Component({
 	selector: "app-chart-preview",
-	imports: [MatIconModule, RouterLink, DifficultyMarkComponent, CommonModule],
+	imports: [MatIconModule, RouterLink, DifficultyMarkComponent, CommonModule, MatButtonModule, MatRippleModule, MatTooltipModule],
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
 	@Input() chart!: ChartModel;
 
+	imageLoaded = new Map<string, boolean>();
+
+	readonly contributorsNames = (chart: ChartModel) =>
+		chart.contributors?.map((contributor) => contributor.user.username).join(", ");
+
 	transformDuration = transformDuration;
-	showVisibility = input<boolean>(true);
+	showVisibility = input<boolean>(false);
+	showContributors = input<boolean>(false);
 
 	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(
 		null,

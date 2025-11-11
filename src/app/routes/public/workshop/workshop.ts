@@ -18,6 +18,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 
 // Models
 import { ChartModel, } from "@/models/chart.model";
+import { RouterLink } from "@angular/router";
 
 @Component({
 	selector: "app-workshop",

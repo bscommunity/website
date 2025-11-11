@@ -15,7 +15,7 @@ interface Button {
 	selector: "app-panel",
 	template: `
 		<div
-			class="flex flex-row items-center justify-start gap-4 rounded-lg px-6 py-4 w-full"
+			class="flex flex-col md:flex-row items-start md:items-center justify-start gap-4 rounded-lg px-6 py-4 w-full"
 			[ngClass]="{
 				'bg-info/50': variant() === 'info',
 				'bg-[#E8A940]/50': variant() === 'warning'
