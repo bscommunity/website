@@ -1,77 +1,134 @@
 <nav
-	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9 px-wrapper">
+	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9 px-wrapper"
+>
 	<div class="flex flex-row items-center justify-start gap-16">
-		<a [routerLink]="['/']"
-			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container">
-			<mat-icon class="w-8!" inline svgIcon="logo" aria-hidden="false" aria-label="Site logo"></mat-icon>
+		<a
+			[routerLink]="['/']"
+			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
+		>
+			<mat-icon
+				class="w-8!"
+				inline
+				svgIcon="logo"
+				aria-hidden="false"
+				aria-label="Site logo"
+			></mat-icon>
 		</a>
 		<div class="flex-row items-center justify-start gap-9 hidden md:flex">
-			<a [routerLink]="'/'" class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
+			<a
+				[routerLink]="'/'"
+				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
 				routerLinkActive="opacity-100"
-				[routerLinkActiveOptions]="{ exact: true, queryParams: 'ignored' }">Home</a>
-			<a [routerLink]="'/workshop'" class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
+				[queryParams]="{ queryParams: 'ignored' }"
+				>Home</a
+			>
+			<a
+				[routerLink]="'/workshop'"
+				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
 				routerLinkActive="opacity-100"
-				[routerLinkActiveOptions]="{ exact: true, queryParams: 'ignored' }">Workshop</a>
-			<a [routerLink]="'/changelog'" class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
+				>Workshop</a
+			>
+			<a
+				[routerLink]="'/changelog'"
+				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
 				routerLinkActive="opacity-100"
-				[routerLinkActiveOptions]="{ exact: true, queryParams: 'ignored' }">Changelog</a>
+				>Changelog</a
+			>
 		</div>
 	</div>
 
 	<div class="flex flex-row items-center justify-end gap-4">
-		<a href="https://discord.gg/C5yCfnTAKz" target="_blank"
-			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline">
-			<mat-icon svgIcon="discord" class="w-7 h-7 text-on-secondary-container transition-opacity"
-				aria-hidden="false" aria-label="Discord link"></mat-icon>
+		<a
+			href="https://discord.gg/C5yCfnTAKz"
+			target="_blank"
+			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline"
+		>
+			<mat-icon
+				svgIcon="discord"
+				class="w-7 h-7 text-on-secondary-container transition-opacity"
+				aria-hidden="false"
+				aria-label="Discord link"
+			></mat-icon>
 		</a>
-		<a href="https://github.com/bscommunity" target="_blank"
-			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline">
-			<mat-icon svgIcon="github" class="w-7 h-7 text-on-secondary-container transition-opacity"
-				aria-hidden="false" aria-label="GitHub link"></mat-icon>
+		<a
+			href="https://github.com/bscommunity"
+			target="_blank"
+			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline"
+		>
+			<mat-icon
+				svgIcon="github"
+				class="w-7 h-7 text-on-secondary-container transition-opacity"
+				aria-hidden="false"
+				aria-label="GitHub link"
+			></mat-icon>
 		</a>
-		<div class="relative hidden text-on-surface md:flex" routerLinkActive="hidden!">
+		<div
+			class="relative hidden text-on-surface md:flex"
+			routerLinkActive="hidden!"
+		>
 			<a class="hidden" routerLink="/workshop">placeholder</a>
 			<mat-icon
 				class="absolute top-1/2 left-0 text-xl! -translate-y-1/2 ml-3 text-on-surface opacity-50 pointer-events-none"
-				aria-hidden="false" inline="" aria-label="Search icon">
-				search</mat-icon>
-			<input type="text" placeholder="Search in workshop" id="search-input" #searchInput (input)="onInput($event)"
+				aria-hidden="false"
+				inline=""
+				aria-label="Search icon"
+			>
+				search</mat-icon
+			>
+			<input
+				type="text"
+				placeholder="Search in workshop"
+				id="search-input"
+				#searchInput
+				(input)="onInput($event)"
 				[matAutocomplete]="auto"
-				class="py-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high focus:bg-surface-container-high transition-colors text-on-surface outline focus:placeholder:opacity-0 focus:shadow-md focus:shadow-surface-container/30 duration-300 px-10 ring-offset-0 ring-0 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-0 ring-offset-surface-container" />
+				class="py-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high focus:bg-surface-container-high transition-colors text-on-surface outline focus:placeholder:opacity-0 focus:shadow-md focus:shadow-surface-container/30 duration-300 px-10 ring-offset-0 ring-0 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-0 ring-offset-surface-container"
+			/>
 			<div
-				class="px-2 py-1 text-xs font-medium bg-transparent outline-outline-variant rounded-xs transition-colors flex items-center justify-center outline absolute top-1/2 right-0 -translate-y-1/2 mr-3 select-none">
+				class="px-2 py-1 text-xs font-medium bg-transparent outline-outline-variant rounded-xs transition-colors flex items-center justify-center outline absolute top-1/2 right-0 -translate-y-1/2 mr-3 select-none"
+			>
 				F
 			</div>
 		</div>
-		<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+		<mat-autocomplete
+			#auto="matAutocomplete"
+			(optionSelected)="onOptionSelected($event)"
+		>
 			@if (queryCharts === "start") {
-			<mat-option class="pointer-events-none select-none w-full">
-				<p class="text-center w-full">Start typing to search</p>
-			</mat-option>
+				<mat-option class="pointer-events-none select-none w-full">
+					<p class="text-center w-full">Start typing to search</p>
+				</mat-option>
 			} @else if (queryCharts === undefined) {
-			<mat-option class="pointer-events-none select-none w-full">
-				<span class="flex items-center justify-center w-full">
-					<mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
-				</span>
-			</mat-option>
+				<mat-option class="pointer-events-none select-none w-full">
+					<span class="flex items-center justify-center w-full">
+						<mat-progress-spinner
+							mode="indeterminate"
+							diameter="24"
+						></mat-progress-spinner>
+					</span>
+				</mat-option>
 			} @else if (queryCharts === null) {
-			<mat-option class="pointer-events-none select-none w-full">
-				<p class="text-center w-full">
-					We found an error while fetching the data
-				</p>
-			</mat-option>
+				<mat-option class="pointer-events-none select-none w-full">
+					<p class="text-center w-full">
+						We found an error while fetching the data
+					</p>
+				</mat-option>
 			} @else if (queryCharts.length === 0) {
-			<mat-option class="w-full flex items-center justify-center pointer-events-none select-none">
-				<p class="text-center w-full">No results found</p>
-			</mat-option>
+				<mat-option
+					class="w-full flex items-center justify-center pointer-events-none select-none"
+				>
+					<p class="text-center w-full">No results found</p>
+				</mat-option>
 			} @else {
-			@for (chart of queryCharts; track $index) {
-			<mat-option [value]="chart.track">
-				<span class="flex flex-row items-center justify-start gap-4">
-					{{ chart.track }}
-				</span>
-			</mat-option>
-			}
+				@for (chart of queryCharts; track $index) {
+					<mat-option [value]="chart.track">
+						<span
+							class="flex flex-row items-center justify-start gap-4"
+						>
+							{{ chart.track }}
+						</span>
+					</mat-option>
+				}
 			}
 		</mat-autocomplete>
 	</div>

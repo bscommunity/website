@@ -5,6 +5,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatDialog } from "@angular/material/dialog";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
@@ -16,9 +17,11 @@ import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { PanelComponent } from "@/components/panel/panel.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
+// Dialogs
+import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
+
 // Models
-import { ChartModel, } from "@/models/chart.model";
-import { RouterLink } from "@angular/router";
+import { ChartModel } from "@/models/chart.model";
 
 @Component({
 	selector: "app-workshop",
@@ -38,6 +41,8 @@ import { RouterLink } from "@angular/router";
 export class WorkshopComponent implements OnInit {
 	private chartService = inject(ChartService);
 	private cdr = inject(ChangeDetectorRef);
+
+	private dialog = inject(MatDialog);
 
 	sortOptions: Option[] = [
 		{
@@ -108,11 +113,20 @@ export class WorkshopComponent implements OnInit {
 			error: (error) => {
 				console.error("Error searching charts:", error);
 				this.error =
-					error.error ||
-					"Failed to search charts. Please try again.";
+					error.error || "Failed to search charts. Please try again.";
 
 				this.cdr.markForCheck();
 			},
+		});
+	}
+
+	openChartDialog(chart: ChartModel) {
+		// Open chart dialog
+		this.dialog.open(ChartDialogComponent, {
+			data: {
+				chart,
+			},
+			width: "575px",
 		});
 	}
 }

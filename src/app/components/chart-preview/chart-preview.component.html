@@ -35,6 +35,7 @@
 				[href]=""
 				target="_blank"
 				title="Open in Discord"
+				(click)="$event.stopPropagation()"
 			>
 				<mat-icon svgIcon="discord" inline="true" />
 			</a>
@@ -181,6 +182,7 @@
 			[href]=""
 			target="_blank"
 			title="Share"
+			(click)="$event.stopPropagation()"
 		>
 			<mat-icon
 				inline="true"
@@ -196,6 +198,7 @@
 			[href]=""
 			target="_blank"
 			title="Open in Discord"
+			(click)="$event.stopPropagation()"
 		>
 			<mat-icon svgIcon="discord" inline="true" />
 		</a>

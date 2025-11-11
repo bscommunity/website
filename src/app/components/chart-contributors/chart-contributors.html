@@ -1,0 +1,42 @@
+<mat-expansion-panel
+	class="!shadow-none !w-full"
+	[expanded]="isExpanded()"
+	(opened)="isExpanded.set(true)"
+	(closed)="isExpanded.set(false)"
+>
+	<mat-expansion-panel-header class="!w-full">
+		<mat-panel-title>Credits</mat-panel-title>
+		<p class="description">
+			The following users contributed to this chart:
+		</p>
+		@if (!isExpanded()) {
+		<div class="stacked-avatars">
+			@for (contributor of contributors().slice(0, 3); track
+			contributor.user.id) {
+			<img
+				[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
+				class="avatar"
+			/>
+			} @if (contributors().length > 3) {
+			<span class="more">+{{ contributors().length - 3 }}</span>
+			}
+		</div>
+		}
+	</mat-expansion-panel-header>
+	@if (isExpanded()) {
+	<div class="contributors-list">
+		@for (contributor of contributors(); track contributor.user.id) {
+		<div class="contributor">
+			<img
+				[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
+				class="avatar-small"
+			/>
+			<div class="contributor-info">
+				<p class="username">&#64; {{ contributor.user.username }}</p>
+				<p class="roles">{{ getRolesString(contributor) }}</p>
+			</div>
+		</div>
+		}
+	</div>
+	}
+</mat-expansion-panel>

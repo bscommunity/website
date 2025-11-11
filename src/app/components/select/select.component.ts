@@ -45,7 +45,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	readonly class = input("");
 	readonly disabled = input(false);
-	readonly queryParamKey = input<string>('sort');
+	readonly queryParamKey = input<string>("sort");
 
 	readonly options = input<Option[]>([]);
 	readonly selectedOption = model<Option>();
@@ -54,6 +54,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 	dropdownOpen = false;
 	dropdownSide: "up" | "down" = "down";
 	highlightedIndex = -1;
+	activeDescendantId = "";
 
 	adjustDropdownPosition() {
 		if (typeof window === "undefined") {
@@ -118,20 +119,25 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 				.pipe(debounceTime(200))
 				.subscribe(() => {
 					if (this.dropdownOpen) {
+						// console.log("Adjusting on scroll");
 						this.adjustDropdownPosition();
 					}
 				});
 		}
 
-		this.paramsSubscription = this.activatedRoute.queryParams.subscribe(params => {
-			const value = params[this.queryParamKey()];
-			if (value) {
-				const option = this.options().find(o => o.value === value);
-				if (option) {
-					this.selectedOption.set(option);
+		this.paramsSubscription = this.activatedRoute.queryParams.subscribe(
+			(params) => {
+				const value = params[this.queryParamKey()];
+				if (value) {
+					const option = this.options().find(
+						(o) => o.value === value,
+					);
+					if (option) {
+						this.selectedOption.set(option);
+					}
 				}
-			}
-		});
+			},
+		);
 	}
 
 	ngOnDestroy() {
@@ -142,7 +148,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	updateParams(value: string) {
 		const queryParams = { [this.queryParamKey()]: value || null };
-		this.router.navigate([], { queryParams, queryParamsHandling: 'merge' });
+		this.router.navigate([], { queryParams, queryParamsHandling: "merge" });
 	}
 
 	selectOption(option: Option): void {
@@ -150,20 +156,34 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 		this.selectionChange.emit(option);
 		this.updateParams(option.value);
 		this.highlightedIndex = -1;
+		this.activeDescendantId = "";
 
 		this.dropdownOpen = false;
 		this.cdr.detectChanges(); // Manually trigger change detection
 	}
 
 	toggleDropdown() {
+		if (this.disabled()) return;
+
 		this.dropdownOpen = !this.dropdownOpen;
+
 		this.cdr.detectChanges(); // Trigger change detection
 
 		if (this.dropdownOpen) {
+			// Set highlighted index to the currently selected option
+			const selectedIndex = this.options().findIndex(
+				(option) => option.value === this.selectedOption()?.value,
+			);
+			this.highlightedIndex = selectedIndex >= 0 ? selectedIndex : -1;
+			this.activeDescendantId =
+				this.highlightedIndex >= 0
+					? `option-${this.highlightedIndex}`
+					: "";
 			// console.log("Adjusting");
 			setTimeout(() => this.adjustDropdownPosition(), 0);
 		} else {
 			this.highlightedIndex = -1;
+			this.activeDescendantId = "";
 		}
 	}
 
@@ -187,35 +207,51 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	@HostListener("document:keydown", ["$event"])
 	handleKeydown(event: KeyboardEvent) {
-		if (!this.elementRef.nativeElement.contains(event.target as Node)) return;
+		if (!this.elementRef.nativeElement.contains(event.target as Node))
+			return;
 
 		if (this.dropdownOpen) {
 			switch (event.key) {
 				case "ArrowDown":
 					this.highlightedIndex =
 						(this.highlightedIndex + 1) % this.options().length;
+					this.activeDescendantId = `option-${this.highlightedIndex}`;
 					event.preventDefault();
 					break;
 				case "ArrowUp":
 					this.highlightedIndex =
 						(this.highlightedIndex - 1 + this.options().length) %
 						this.options().length;
+					this.activeDescendantId = `option-${this.highlightedIndex}`;
 					event.preventDefault();
 					break;
 				case "Enter":
 					this.selectOption(this.options()[this.highlightedIndex]);
 					event.preventDefault();
 					break;
+				case " ":
+					if (this.highlightedIndex >= 0) {
+						this.selectOption(
+							this.options()[this.highlightedIndex],
+						);
+					} else {
+						this.dropdownOpen = false;
+						this.activeDescendantId = "";
+					}
+					event.preventDefault();
+					break;
 				case "Escape":
 					this.dropdownOpen = false;
+					this.activeDescendantId = "";
 					event.preventDefault();
 					break;
 				case "Tab":
 					this.dropdownOpen = false;
+					this.activeDescendantId = "";
 					break;
 			}
 		} else {
-			if (event.key === "Enter") {
+			if (event.key === "Enter" || event.key === " ") {
 				this.toggleDropdown();
 				event.preventDefault();
 			}

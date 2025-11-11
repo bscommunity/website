@@ -71,6 +71,7 @@
 			<app-chart-preview
 				[chart]="chart"
 				[showContributors]="true"
+				(click)="openChartDialog(chart)"
 			></app-chart-preview>
 			}
 		</ul>
@@ -98,16 +99,11 @@
 						mat-stroked-button
 						(click)="fetchCharts()"
 						(keypress)="fetchCharts()"
-						[disabled]="!charts"
 						aria-label="Refresh charts"
 					>
 						<mat-icon class="!mx-2">refresh</mat-icon>
 
-						@if (!charts) {
-						<p>Refreshing...</p>
-						} @else {
 						<p>Refresh charts</p>
-						}
 					</button>
 				</div>
 			</div>

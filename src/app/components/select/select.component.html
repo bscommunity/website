@@ -1,47 +1,78 @@
-<button class="relative inline-block w-full {{ class() }}" (click)="toggleDropdown()" (keypress)="toggleDropdown()"
-	role="combobox" aria-controls="options-list" [attr.aria-expanded]="dropdownOpen" [disabled]="disabled()">
+<div class="relative inline-block w-full {{ class() }}">
 	<!-- Trigger -->
-	<div matRipple tabindex="0" aria-controls="options-list"
-		class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 cursor-pointer h-full">
+	<button
+		matRipple
+		aria-controls="options-list"
+		class="flex items-center justify-between bg-secondary-container border-none text-on-secondary-container text-sm rounded-full px-4 py-2 h-full focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+		(click)="toggleDropdown()"
+		(keypress)="toggleDropdown()"
+		role="combobox"
+		aria-controls="options-list"
+		[attr.aria-expanded]="dropdownOpen"
+		[attr.aria-activedescendant]="activeDescendantId"
+		[disabled]="disabled()"
+	>
 		<!-- Trigger Content -->
-		<ng-container *ngIf="selectedOption(); else placeholder">
+		@if (selectedOption()) {
 			<div class="flex items-center space-x-2">
 				@if (selectedOption()?.icon) {
-				<mat-icon inline>{{ selectedOption()?.icon }}</mat-icon>
+					<mat-icon inline>{{ selectedOption()?.icon }}</mat-icon>
 				}
 				<span>{{ selectedOption()?.label }}</span>
 			</div>
-		</ng-container>
-		<ng-template #placeholder>
+		} @else {
 			<span>Select an option</span>
-		</ng-template>
+		}
 		<mat-icon class="ml-2">arrow_drop_down</mat-icon>
-	</div>
+	</button>
 	<!-- Dropdown -->
 	@if (dropdownOpen) {
-	<ul #dropdown id="options-list" role="listbox" [attr.data-state]="dropdownOpen ? 'open' : 'closed'"
-		[attr.data-side]="dropdownSide"
-		class="absolute mt-2 w-full bg-surface-container border border-none rounded-lg overflow-hidden shadow-lg z-10 max-h-60 overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-		(scroll)="onDropdownScroll($event)">
-		<!-- Dropdown options -->
-		@if (showTopShadow) {
-		<div
-			class="sticky top-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-b from-surface-container to-transparent z-20">
-		</div>
-		}
-		<li matRipple *ngFor="let option of options(); let i = index" (click)="selectOption(option)"
-			(keypress)="selectOption(option)" role="option" tabindex="0" [attr.aria-selected]="highlightedIndex === i"
-			[ngClass]="{
-				'bg-secondary-container': highlightedIndex === i,
-			}" class="flex items-center space-x-2 px-4 py-3 hover:bg-secondary-container text-left line-clamp-1 cursor-pointer">
-			<mat-icon inline>{{ option.icon }}</mat-icon>
-			<span>{{ option.label }}</span>
-		</li>
-		@if (showBottomShadow) {
-		<div
-			class="sticky bottom-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-t from-surface-container to-transparent z-20">
-		</div>
-		}
-	</ul>
+		<ul
+			#dropdown
+			id="options-list"
+			role="listbox"
+			[attr.data-state]="dropdownOpen ? 'open' : 'closed'"
+			[attr.data-side]="dropdownSide"
+			class="absolute mt-2 w-full bg-surface-container border border-none rounded-lg overflow-hidden shadow-lg z-10 max-h-60 overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+			(scroll)="onDropdownScroll($event)"
+		>
+			<!-- Dropdown options -->
+			@if (showTopShadow) {
+				<div
+					class="sticky top-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-b from-surface-container to-transparent z-20"
+				></div>
+			}
+			@for (option of options(); track option.value; let i = $index) {
+				<li
+					matRipple
+					id="option-{{ i }}"
+					(click)="selectOption(option)"
+					(keypress)="selectOption(option)"
+					role="option"
+					[attr.aria-selected]="highlightedIndex === i"
+					[ngClass]="{
+						'bg-secondary-container': highlightedIndex === i,
+						'bg-secondary/20':
+							selectedOption()?.value === option.value &&
+							highlightedIndex !== i,
+						'hover:bg-secondary/10': highlightedIndex !== i,
+					}"
+					class="flex items-center space-x-2 px-4 py-3 text-left line-clamp-1 cursor-pointer"
+				>
+					@if (option.icon) {
+						<mat-icon inline>{{ option.icon }}</mat-icon>
+					}
+					<span>{{ option.label }}</span>
+					@if (selectedOption()?.value === option.value) {
+						<mat-icon inline class="ml-auto">check</mat-icon>
+					}
+				</li>
+			}
+			@if (showBottomShadow) {
+				<div
+					class="sticky bottom-0 left-0 w-full h-8 pointer-events-none select-none bg-gradient-to-t from-surface-container to-transparent z-20"
+				></div>
+			}
+		</ul>
 	}
-</button>
+</div>
