@@ -21,7 +21,8 @@
 						></app-avatar>
 					</li>
 					} @if (contributors().length > 3) {
-					<span class="ml-2 text-[#c8c7bf] text-sm whitespace-nowrap"
+					<span
+						class="ml-2 text-on-surface-variant text-sm whitespace-nowrap"
 						>+{{ contributors().length - 3 }}</span
 					>
 					}
@@ -75,10 +76,10 @@
 				[alt]="contributor.user.username"
 			></app-avatar>
 			<div class="contributor-info">
-				<p class="text-[#c8c7bf] text-sm font-medium m-0">
+				<p class="text-on-surface-variant text-sm font-medium m-0">
 					&#64;{{ contributor.user.username }}
 				</p>
-				<p class="text-[#c6c8b9] text-xs m-0">
+				<p class="text-on-surface-variant text-xs m-0">
 					{{ getRolesString(contributor) }}
 				</p>
 			</div>
