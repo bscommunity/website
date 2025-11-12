@@ -97,15 +97,13 @@
 			<div
 				class="flex flex-row items-center justify-center gap-2 pl-1 py-1 md:pl-1.5 pr-2.5 md:py-1.5 rounded-full border border-outline/80"
 			>
-				<ul
-					class="flex flex-row items-center justify-start gap-2 flex-wrap"
-				>
+				<ul class="flex flex-row items-center justify-start">
 					@for (
 						contributor of chart.contributors;
 						track contributor.user.id
 					) {
 						<div
-							class="w-5 h-5 rounded-full bg-surface-variant flex items-center justify-center text-xs font-medium text-on-surface-variant"
+							class="w-5 h-5 rounded-full bg-surface-variant flex items-center justify-center text-xs font-medium text-on-surface-variant -ml-1.5 first:ml-0"
 							title="{{ contributor.user.username }}"
 						>
 							@if (contributor.user.imageUrl) {
@@ -173,35 +171,37 @@
 			</div>
 		}
 	</div>
-	<div
-		class="absolute top-1/2 -translate-y-1/2 right-8 opacity-0 group-hover:opacity-100 transition-[opacity,background-color] duration-150 hidden xl:flex flex-row items-end justify-center gap-2"
-	>
-		<a
-			matRipple
-			matTooltip="Share"
-			class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 w-10 h-10"
-			[href]=""
-			target="_blank"
-			title="Share"
-			(click)="$event.stopPropagation()"
+	@if (showShareActions()) {
+		<div
+			class="absolute top-1/2 -translate-y-1/2 right-8 opacity-0 group-hover:opacity-100 transition-[opacity,background-color] duration-150 hidden xl:flex flex-row items-end justify-center gap-2"
 		>
-			<mat-icon
-				inline="true"
-				class="text-xl! flex! items-center! justify-center!"
+			<a
+				matRipple
+				matTooltip="Share"
+				class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 w-10 h-10"
+				[href]=""
+				target="_blank"
+				title="Share"
+				(click)="$event.stopPropagation()"
 			>
-				<span>share</span>
-			</mat-icon>
-		</a>
-		<a
-			matRipple
-			matTooltip="Open in Discord"
-			class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 h-10 w-10"
-			[href]=""
-			target="_blank"
-			title="Open in Discord"
-			(click)="$event.stopPropagation()"
-		>
-			<mat-icon svgIcon="discord" inline="true" />
-		</a>
-	</div>
+				<mat-icon
+					inline="true"
+					class="text-xl! flex! items-center! justify-center!"
+				>
+					<span>share</span>
+				</mat-icon>
+			</a>
+			<a
+				matRipple
+				matTooltip="Open in Discord"
+				class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 h-10 w-10"
+				[href]=""
+				target="_blank"
+				title="Open in Discord"
+				(click)="$event.stopPropagation()"
+			>
+				<mat-icon svgIcon="discord" inline="true" />
+			</a>
+		</div>
+	}
 </a>

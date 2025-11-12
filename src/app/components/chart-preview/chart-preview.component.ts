@@ -25,7 +25,15 @@ export enum Tendency {
 
 @Component({
 	selector: "app-chart-preview",
-	imports: [MatIconModule, RouterLink, DifficultyMarkComponent, CommonModule, MatButtonModule, MatRippleModule, MatTooltipModule],
+	imports: [
+		MatIconModule,
+		RouterLink,
+		DifficultyMarkComponent,
+		CommonModule,
+		MatButtonModule,
+		MatRippleModule,
+		MatTooltipModule,
+	],
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
@@ -34,11 +42,14 @@ export class ChartPreviewComponent {
 	imageLoaded = new Map<string, boolean>();
 
 	readonly contributorsNames = (chart: ChartModel) =>
-		chart.contributors?.map((contributor) => contributor.user.username).join(", ");
+		chart.contributors
+			?.map((contributor) => contributor.user.username)
+			.join(", ");
 
 	transformDuration = transformDuration;
 	showVisibility = input<boolean>(false);
 	showContributors = input<boolean>(false);
+	showShareActions = input<boolean>(false);
 
 	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(
 		null,
