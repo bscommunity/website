@@ -13,10 +13,12 @@
 				>
 					@for (contributor of contributors().slice(0, 3); track
 					contributor.user.id) {
-					<img
-						[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
-						class="w-12 h-12 rounded-full -ml-2.5 first:ml-0 transition-transform duration-300"
-					/>
+					<app-avatar
+						[src]="contributor.user.imageUrl"
+						[alt]="contributor.user.username"
+						[class]="'transition-transform duration-300 w-12 h-12'"
+						class="-ml-2.5 first:ml-0"
+					></app-avatar>
 					} @if (contributors().length > 3) {
 					<span class="ml-2 text-[#c8c7bf] text-sm whitespace-nowrap"
 						>+{{ contributors().length - 3 }}</span
@@ -66,10 +68,11 @@
 	>
 		@for (contributor of contributors(); track contributor.user.id) {
 		<div class="flex items-center gap-4 mt-4">
-			<img
-				[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
-				class="w-12 h-12 rounded-full"
-			/>
+			<app-avatar
+				[class]="'w-12 h-12'"
+				[src]="contributor.user.imageUrl"
+				[alt]="contributor.user.username"
+			></app-avatar>
 			<div class="contributor-info">
 				<p class="text-[#c8c7bf] text-sm font-medium m-0">
 					&#64;{{ contributor.user.username }}

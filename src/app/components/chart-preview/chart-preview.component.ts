@@ -7,6 +7,7 @@ import { MatIconModule } from "@angular/material/icon";
 
 // Components
 import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
+import { AvatarComponent } from "@/components/avatar/avatar.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
@@ -29,6 +30,7 @@ export enum Tendency {
 		MatIconModule,
 		RouterLink,
 		DifficultyMarkComponent,
+		AvatarComponent,
 		CommonModule,
 		MatButtonModule,
 		MatRippleModule,
@@ -38,8 +40,6 @@ export enum Tendency {
 })
 export class ChartPreviewComponent {
 	@Input() chart!: ChartModel;
-
-	imageLoaded = new Map<string, boolean>();
 
 	readonly contributorsNames = (chart: ChartModel) =>
 		chart.contributors

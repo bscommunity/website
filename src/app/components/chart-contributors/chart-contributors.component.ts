@@ -8,13 +8,16 @@ import {
 // Material
 import { MatIconModule } from "@angular/material/icon";
 
+// Components
+import { AvatarComponent } from "@/components/avatar/avatar.component";
+
 // Models
 import { ContributorModel } from "@/models/contributor.model";
 import { getContributorRoleLabel } from "@/models/enums/role.enum";
 
 @Component({
 	selector: "app-chart-contributors",
-	imports: [MatIconModule],
+	imports: [MatIconModule, AvatarComponent],
 	templateUrl: "./chart-contributors.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })

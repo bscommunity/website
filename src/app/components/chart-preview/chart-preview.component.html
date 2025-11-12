@@ -102,45 +102,14 @@
 						contributor of chart.contributors;
 						track contributor.user.id
 					) {
-						<div
-							class="w-5 h-5 rounded-full bg-surface-variant flex items-center justify-center text-xs font-medium text-on-surface-variant -ml-1.5 first:ml-0"
-							title="{{ contributor.user.username }}"
-						>
-							@if (contributor.user.imageUrl) {
-								@if (
-									imageLoaded.get(contributor.user.id) !==
-									false
-								) {
-									<img
-										[src]="contributor.user.imageUrl"
-										alt="{{ contributor.user.username }}"
-										class="w-5 h-5 rounded-full object-cover"
-										(load)="
-											imageLoaded.set(
-												contributor.user.id,
-												true
-											)
-										"
-										(error)="
-											imageLoaded.set(
-												contributor.user.id,
-												false
-											)
-										"
-									/>
-								}
-							}
-							@if (
-								!contributor.user.imageUrl ||
-								imageLoaded.get(contributor.user.id) === false
-							) {
-								{{
-									contributor.user.username
-										.charAt(0)
-										.toUpperCase()
-								}}
-							}
-						</div>
+						<app-avatar
+							[src]="contributor.user.imageUrl"
+							[alt]="contributor.user.username"
+							[class]="
+								'bg-surface-variant text-xs font-medium text-on-surface-variant'
+							"
+							class="-ml-1.5 first:ml-0 w-5 h-5"
+						></app-avatar>
 					}
 				</ul>
 				<span

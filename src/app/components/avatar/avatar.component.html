@@ -1,15 +1,13 @@
-@if (src()) {
+@if (src() && imageLoaded) {
 	<img
-		class="rounded-full aspect-square object-cover"
-		[ngStyle]="{ width: size() + 'px', height: size() + 'px' }"
+		[ngClass]="imageClasses()"
 		[src]="src()"
 		[alt]="alt()"
+		(load)="onLoad()"
+		(error)="onError()"
 	/>
 } @else {
-	<div
-		class="rounded-full flex items-center justify-center bg-primary-container"
-		[ngStyle]="{ width: size() + 'px', height: size() + 'px' }"
-	>
+	<div [ngClass]="fallbackClasses()">
 		<span>
 			{{ alt()?.charAt(0) }}
 		</span>
