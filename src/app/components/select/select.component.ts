@@ -12,6 +12,7 @@ import {
 	inject,
 	output,
 	viewChild,
+	effect,
 } from "@angular/core";
 
 import { fromEvent, Subscription } from "rxjs";
@@ -20,7 +21,6 @@ import { debounceTime } from "rxjs/operators";
 import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { MatIconModule } from "@angular/material/icon";
 import { MatRippleModule } from "@angular/material/core";
-import { ActivatedRoute, Router } from "@angular/router";
 
 export interface Option {
 	value: string;
@@ -38,14 +38,12 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 	private renderer = inject(Renderer2);
 	private elementRef = inject(ElementRef);
 	private cdr = inject(ChangeDetectorRef);
-	private activatedRoute = inject(ActivatedRoute);
-	private router = inject(Router);
 
 	readonly dropdown = viewChild.required<ElementRef>("dropdown");
 
 	readonly class = input("");
 	readonly disabled = input(false);
-	readonly queryParamKey = input<string>("sort");
+	readonly defaultValue = input<string | null>(null);
 
 	readonly options = input<Option[]>([]);
 	readonly selectedOption = model<Option>();
@@ -125,20 +123,21 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 				});
 		}
 
-		this.paramsSubscription = this.activatedRoute.queryParams.subscribe(
-			(params) => {
-				const value = params[this.queryParamKey()];
-				if (value) {
-					const option = this.options().find(
-						(o) => o.value === value,
-					);
-					if (option) {
-						this.selectedOption.set(option);
-					}
-				}
-			},
-		);
+		// No URL param syncing; initial selection should be provided by parent if needed
 	}
+
+	// Initialize selection from defaultValue when provided and no selection yet
+	private initDefaultEffect = effect(() => {
+		const def = this.defaultValue();
+		const options = this.options();
+		const selected = this.selectedOption();
+		if ((selected == null || !selected.value) && def) {
+			const opt = options.find((o) => o.value === def);
+			if (opt) {
+				this.selectedOption.set(opt);
+			}
+		}
+	});
 
 	ngOnDestroy() {
 		if (this.resizeSubscription) this.resizeSubscription.unsubscribe();
@@ -146,15 +145,9 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 		if (this.paramsSubscription) this.paramsSubscription.unsubscribe();
 	}
 
-	updateParams(value: string) {
-		const queryParams = { [this.queryParamKey()]: value || null };
-		this.router.navigate([], { queryParams, queryParamsHandling: "merge" });
-	}
-
 	selectOption(option: Option): void {
 		this.selectedOption.set(option);
 		this.selectionChange.emit(option);
-		this.updateParams(option.value);
 		this.highlightedIndex = -1;
 		this.activeDescendantId = "";
 

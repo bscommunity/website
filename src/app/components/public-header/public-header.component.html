@@ -121,11 +121,11 @@
 				</mat-option>
 			} @else {
 				@for (chart of queryCharts; track $index) {
-					<mat-option [value]="chart.track">
+					<mat-option [value]="chart">
 						<span
 							class="flex flex-row items-center justify-start gap-4"
 						>
-							{{ chart.track }}
+							{{ chart }}
 						</span>
 					</mat-option>
 				}

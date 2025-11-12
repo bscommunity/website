@@ -1,10 +1,14 @@
 import { Router } from "@angular/router";
 import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { firstValueFrom, Observable, tap } from "rxjs";
 
 // Services
 import { CacheService } from "../cache.service";
+import {
+	WorkshopFilterService,
+	WorkshopFilters,
+} from "../workshop-filter.service";
 
 // Models
 import {
@@ -23,6 +27,7 @@ export class ChartService {
 	private router = inject(Router);
 	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
+	private workshopFilterService = inject(WorkshopFilterService);
 
 	private readonly apiUrl = `${apiUrl}/charts`;
 
@@ -46,10 +51,36 @@ export class ChartService {
 	}
 
 	// Read
-	getCharts(forceRefresh: boolean = false, limit?: number, offset?: number): Observable<ChartModel[]> {
+	getCharts(
+		forceRefresh: boolean = false,
+		hasDeluxe?: boolean,
+		genres?: string[],
+		difficulties?: string[],
+		limit?: number,
+		offset?: number,
+		isDashboard?: boolean,
+	): Observable<ChartModel[]> {
 		const charts = this.cacheService.getAllCharts();
-		const url = `${this.apiUrl}${limit ? `?limit=${limit}` : ""}${offset ? `${limit ? "&" : "?"}offset=${offset}` : ""
-			}`;
+
+		const params: Record<string, string> = {};
+		if (typeof limit === "number") params["limit"] = limit.toString();
+		if (typeof offset === "number") params["offset"] = offset.toString();
+		if (genres && genres.length) params["genres"] = genres.join(",");
+		if (difficulties && difficulties.length)
+			params["difficulties"] = difficulties.join(",");
+		if (typeof hasDeluxe === "boolean")
+			params["hasDeluxe"] = hasDeluxe ? "true" : "false";
+		if (typeof isDashboard === "boolean")
+			params["isDashboard"] = isDashboard ? "true" : "false";
+
+		const queryString = Object.keys(params)
+			.map(
+				(key) =>
+					`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`,
+			)
+			.join("&");
+
+		const url = queryString ? `${this.apiUrl}?${queryString}` : this.apiUrl;
 
 		// Return cached charts if already cached before
 		if (forceRefresh || !charts?.length) {
@@ -105,12 +136,68 @@ export class ChartService {
 		}
 	}
 
-	searchCharts(query: string): Observable<ChartModel[]> {
-		const url = `${this.apiUrl}?query=${query}`;
+	searchCharts(): Observable<ChartModel[]> {
+		const url = `${this.apiUrl}`;
 
 		return this.http.get<ChartModel[]>(url).pipe(
 			tap((fetchedCharts) => {
 				/* this.cacheService.addCharts(fetchedCharts); */
+			}),
+		);
+	}
+
+	/**
+	 * Search charts with comprehensive filters
+	 * Optimized for workshop filtering with all parameters
+	 */
+	searchChartsWithFilters(
+		filters: WorkshopFilters,
+		options?: { isDashboard?: boolean },
+	): Observable<ChartModel[]> {
+		let params = new HttpParams();
+
+		// Add query parameter
+		if (filters.query) {
+			params = params.set("query", filters.query);
+		}
+
+		// Add genre filters
+		if (filters.genres && filters.genres.length > 0) {
+			params = params.set("genres", filters.genres.join(","));
+		}
+
+		// Add difficulty filters
+		if (filters.difficulties && filters.difficulties.length > 0) {
+			params = params.set("difficulties", filters.difficulties.join(","));
+		}
+
+		// Add category filters (map to hasDeluxe if needed)
+		if (filters.categories && filters.categories.length > 0) {
+			const hasDeluxe = filters.categories.includes("Deluxe");
+			params = params.set("hasDeluxe", hasDeluxe.toString());
+		}
+
+		// Add version filters
+		if (filters.versions && filters.versions.length > 0) {
+			params = params.set("versions", filters.versions.join(","));
+		}
+
+		// Add sorting
+		if (filters.sortBy) {
+			params = params.set("sort", filters.sortBy);
+		}
+
+		if (options?.isDashboard) {
+			params = params.set("isDashboard", "true");
+		}
+
+		return this.http.get<ChartModel[]>(this.apiUrl, { params }).pipe(
+			tap((fetchedCharts) => {
+				console.log("Fetched charts with filters:", {
+					filters,
+					count: fetchedCharts.length,
+				});
+				this.cacheService.addCharts(fetchedCharts);
 			}),
 		);
 	}

@@ -14,6 +14,9 @@ export class AvatarComponent {
 
 	imageLoaded = signal(false);
 
+	// TODO: Currently, Angular doesn't allow removing the wrapper/host element,
+	// so some styles get broken since visual and positional classes must be applied independently.
+
 	readonly imageClasses = computed(() =>
 		twMerge(
 			"rounded-full aspect-square object-cover w-10 h-10 z-20 relative",

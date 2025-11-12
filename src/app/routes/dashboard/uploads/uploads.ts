@@ -21,10 +21,7 @@ import { Genre } from "@/models/enums/genre.enum";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 
 // Models
-import {
-	ChartModel,
-	withLatestVersion,
-} from "@/models/chart.model";
+import { ChartModel, withLatestVersion } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
@@ -83,8 +80,7 @@ export class Uploads implements OnInit {
 	filters = [];
 
 	set charts(value: ChartModel[] | undefined) {
-		const charts: ChartModel[] =
-			value?.map(withLatestVersion) || [];
+		const charts: ChartModel[] = value?.map(withLatestVersion) || [];
 
 		this.availableDifficulties = Array.from(
 			new Set(
@@ -123,8 +119,8 @@ export class Uploads implements OnInit {
 		charts.forEach((chart) => {
 			const month = chart.latestVersion?.publishedAt
 				? new Date(chart.latestVersion.publishedAt)
-					.toISOString()
-					.slice(0, 7)
+						.toISOString()
+						.slice(0, 7)
 				: "unknown";
 
 			let monthEntry = chartsByMonth.find(
@@ -171,24 +167,35 @@ export class Uploads implements OnInit {
 	fetchCharts(forceRefresh: boolean = false) {
 		this.isRefreshing = forceRefresh;
 		this.error = undefined;
-		this.chartService.getCharts(forceRefresh).subscribe({
-			next: (response) => {
-				console.log("Resolved charts data:", response);
+		// Send isDashboard=true to restrict results to logged-in user content
+		this.chartService
+			.getCharts(
+				forceRefresh,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				true,
+			)
+			.subscribe({
+				next: (response) => {
+					console.log("Resolved charts data:", response);
 
-				this.isRefreshing = false;
-				this.charts = response;
-				this.cdr.markForCheck();
-			},
-			error: (error) => {
-				console.error("Error fetching charts:", error);
-				this.error =
-					error.error ||
-					"Failed to refresh charts. Please try again.";
+					this.isRefreshing = false;
+					this.charts = response;
+					this.cdr.markForCheck();
+				},
+				error: (error) => {
+					console.error("Error fetching charts:", error);
+					this.error =
+						error.error ||
+						"Failed to refresh charts. Please try again.";
 
-				this.isRefreshing = false;
-				this.cdr.markForCheck();
-			},
-		});
+					this.isRefreshing = false;
+					this.cdr.markForCheck();
+				},
+			});
 	}
 
 	onSearch(query: string) {

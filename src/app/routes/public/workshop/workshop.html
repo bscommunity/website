@@ -1,7 +1,10 @@
 <main
 	class="flex flex-col-reverse md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16"
 >
-	<app-filter-panel class="w-full md:w-1/3 md:max-w-md"></app-filter-panel>
+	<app-filter-panel
+		class="w-full md:w-1/3 md:max-w-md"
+		(filterChange)="onFilterChange($event)"
+	></app-filter-panel>
 	<div class="flex flex-col items-start justify-start gap-6 w-full">
 		<app-panel class="w-full" variant="warning">
 			The bscm workshop is currently in beta. <br />
@@ -15,7 +18,7 @@
 				placeholder="Search for charts, tourpasses and themes..."
 				[enableSuggestions]="true"
 				class="flex flex-1 max-md:w-full relative"
-				[disabled]="!charts"
+				[disabled]="(isLoading$ | async) || !charts"
 				[onSearch]="onSearch.bind(this)"
 			/>
 			<div class="flex flex-row items-center gap-4">
@@ -27,15 +30,14 @@
 						class="h-full"
 						id="sort-by"
 						[options]="sortOptions"
-						[selectedOption]="sortBy"
-						[queryParamKey]="'sort'"
-						(selectionChange)="sortBy = $event"
-						[disabled]="!charts"
+						[defaultValue]="(filters$ | async)?.sortBy?.toString() || null"
+						(selectionChange)="onSortChange($event)"
+						[disabled]="(isLoading$ | async) || !charts"
 					/>
 				</span>
 			</div>
 		</div>
-		@if (filters.length > 0) {
+		@if (hasActiveFilters() && charts?.length === 0) {
 		<!-- No charts found after filtering -->
 		<div
 			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -64,18 +66,20 @@
 		}
 		<ul
 			class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
-			[style.opacity]="!charts ? '0.5' : '1'"
-			[style.pointerEvents]="!charts ? 'none' : 'auto'"
+			[style.opacity]="(isLoading$ | async) ? '0.5' : '1'"
+			[style.pointerEvents]="(isLoading$ | async) ? 'none' : 'auto'"
 		>
 			@for (chart of charts; track chart.id) {
 			<app-chart-preview
 				[chart]="chart"
 				[showContributors]="true"
 				(click)="openChartDialog(chart)"
+				(keydown.enter)="openChartDialog(chart)"
+				(keydown.space)="openChartDialog(chart)"
 			></app-chart-preview>
 			}
 		</ul>
-		@if (error) {
+		@if (error$ | async) { @let error = error$ | async;
 		<!-- Error state -->
 		<div
 			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -90,15 +94,15 @@
 				<div
 					class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
 				>
-					{{ this.error }} <br />
+					{{ error }} <br />
 					<p>
 						Please try again later or check Discord if the problem
 						persists
 					</p>
 					<button
 						mat-stroked-button
-						(click)="fetchCharts()"
-						(keypress)="fetchCharts()"
+						(click)="refreshCharts()"
+						(keypress)="refreshCharts()"
 						aria-label="Refresh charts"
 					>
 						<mat-icon class="!mx-2">refresh</mat-icon>
@@ -108,7 +112,7 @@
 				</div>
 			</div>
 		</div>
-		} @else if (!charts) {
+		} @else if ((isLoading$ | async) && !charts) {
 		<!-- Loading state -->
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
 			<mat-progress-spinner

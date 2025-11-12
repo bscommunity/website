@@ -1,9 +1,18 @@
-import { Component, ViewChild, ElementRef, HostListener, inject } from "@angular/core";
+import {
+	Component,
+	ViewChild,
+	ElementRef,
+	HostListener,
+	inject,
+} from "@angular/core";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
+import {
+	MatAutocompleteModule,
+	MatAutocompleteSelectedEvent,
+} from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
@@ -13,6 +22,7 @@ import { debounceTime } from "rxjs/operators";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { WorkshopFilterService } from "@/services/workshop-filter.service";
 import { Router } from "@angular/router";
 
 // Models
@@ -20,16 +30,24 @@ import { ChartModel } from "@/models/chart.model";
 
 @Component({
 	selector: "app-public-header",
-	imports: [MatIconModule, MatButtonModule, RouterLink, RouterLinkActive, MatAutocompleteModule, MatProgressSpinnerModule],
+	imports: [
+		MatIconModule,
+		MatButtonModule,
+		RouterLink,
+		RouterLinkActive,
+		MatAutocompleteModule,
+		MatProgressSpinnerModule,
+	],
 	templateUrl: "./public-header.component.html",
 })
 export class PublicHeaderComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
+	private workshopFilterService = inject(WorkshopFilterService);
 
 	@ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 
-	queryCharts: ChartModel[] | undefined | null | "start" = "start";
+	queryCharts: string[] | undefined | null | "start" = "start";
 
 	private searchSubject = new Subject<string>();
 	private searchSubscription: Subscription;
@@ -45,7 +63,9 @@ export class PublicHeaderComponent {
 	onNavigateToSearch() {
 		const value = this.searchInput.nativeElement.value.trim();
 		if (value) {
-			this.router.navigate(['/workshop'], { queryParams: { q: value } });
+			// Set query in global workshop state and navigate without params
+			this.workshopFilterService.setQuery(value);
+			this.router.navigate(["/workshop"]);
 		}
 	}
 
@@ -82,7 +102,7 @@ export class PublicHeaderComponent {
 
 		this.queryCharts = undefined;
 
-		this.chartService.searchCharts(value).subscribe({
+		this.chartService.getSuggestions(value).subscribe({
 			next: (charts) => {
 				this.queryCharts = charts;
 			},
