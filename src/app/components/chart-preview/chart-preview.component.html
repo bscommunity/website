@@ -102,14 +102,15 @@
 						contributor of chart.contributors;
 						track contributor.user.id
 					) {
-						<app-avatar
-							[src]="contributor.user.imageUrl"
-							[alt]="contributor.user.username"
-							[class]="
-								'bg-surface-variant text-xs font-medium text-on-surface-variant'
-							"
-							class="-ml-1.5 first:ml-0 w-5 h-5"
-						></app-avatar>
+						<li class="-ml-1.5 first:ml-0 w-5 h-5">
+							<app-avatar
+								[src]="contributor.user.imageUrl"
+								[alt]="contributor.user.username"
+								[class]="
+									'bg-surface-variant text-xs font-medium text-on-surface-variant w-5 h-5'
+								"
+							></app-avatar>
+						</li>
 					}
 				</ul>
 				<span

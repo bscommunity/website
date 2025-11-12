@@ -1,15 +1,15 @@
-@if (src() && imageLoaded) {
-	<img
-		[ngClass]="imageClasses()"
-		[src]="src()"
-		[alt]="alt()"
-		(load)="onLoad()"
-		(error)="onError()"
-	/>
-} @else {
+<div class="relative">
 	<div [ngClass]="fallbackClasses()">
 		<span>
 			{{ alt()?.charAt(0) }}
 		</span>
 	</div>
-}
+	<img
+		[ngClass]="imageClasses()"
+		[ngStyle]="{ visibility: imageLoaded() ? 'visible' : 'hidden' }"
+		[src]="src()"
+		[alt]="alt()"
+		(load)="onLoad()"
+		(error)="onError()"
+	/>
+</div>

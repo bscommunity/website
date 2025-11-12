@@ -13,12 +13,13 @@
 				>
 					@for (contributor of contributors().slice(0, 3); track
 					contributor.user.id) {
-					<app-avatar
-						[src]="contributor.user.imageUrl"
-						[alt]="contributor.user.username"
-						[class]="'transition-transform duration-300 w-12 h-12'"
-						class="-ml-2.5 first:ml-0"
-					></app-avatar>
+					<li class="-ml-2.5 first:ml-0 list-none">
+						<app-avatar
+							[src]="contributor.user.imageUrl"
+							[alt]="contributor.user.username"
+							[class]="'transition-transform duration-300 w-12 h-12'"
+						></app-avatar>
+					</li>
 					} @if (contributors().length > 3) {
 					<span class="ml-2 text-[#c8c7bf] text-sm whitespace-nowrap"
 						>+{{ contributors().length - 3 }}</span
