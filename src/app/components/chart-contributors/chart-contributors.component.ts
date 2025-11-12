@@ -6,7 +6,6 @@ import {
 } from "@angular/core";
 
 // Material
-import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
 
 // Models
@@ -15,9 +14,8 @@ import { getContributorRoleLabel } from "@/models/enums/role.enum";
 
 @Component({
 	selector: "app-chart-contributors",
-	imports: [MatExpansionModule, MatIconModule],
+	imports: [MatIconModule],
 	templateUrl: "./chart-contributors.html",
-	styleUrls: ["./chart-contributors.component.css"],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartContributorsComponent {
@@ -28,5 +26,15 @@ export class ChartContributorsComponent {
 		return contributor.roles
 			.map((r) => getContributorRoleLabel(r))
 			.join(", ");
+	}
+
+	getChartByString(): string {
+		return (
+			"Chart by " +
+			this.contributors()
+				.slice(0, 3)
+				.map((c) => "@" + c.user.username)
+				.join(", ")
+		);
 	}
 }

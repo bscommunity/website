@@ -1,42 +1,84 @@
-<mat-expansion-panel
-	class="!shadow-none !w-full"
-	[expanded]="isExpanded()"
-	(opened)="isExpanded.set(true)"
-	(closed)="isExpanded.set(false)"
->
-	<mat-expansion-panel-header class="!w-full">
-		<mat-panel-title>Credits</mat-panel-title>
-		<p class="description">
-			The following users contributed to this chart:
-		</p>
-		@if (!isExpanded()) {
-		<div class="stacked-avatars">
-			@for (contributor of contributors().slice(0, 3); track
-			contributor.user.id) {
-			<img
-				[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
-				class="avatar"
-			/>
-			} @if (contributors().length > 3) {
-			<span class="more">+{{ contributors().length - 3 }}</span>
-			}
+<div class="custom-expansion-panel !shadow-none !w-full">
+	<div
+		class="header !w-full cursor-pointer"
+		(click)="isExpanded.set(!isExpanded())"
+	>
+		<div class="flex justify-between items-center">
+			<div class="flex flex-row items-center overflow-hidden">
+				<div
+					class="flex items-center transition-all duration-300 ease-in-out"
+					[class.w-0]="isExpanded()"
+					[class.opacity-0]="isExpanded()"
+					[class.scale-95]="isExpanded()"
+				>
+					@for (contributor of contributors().slice(0, 3); track
+					contributor.user.id) {
+					<img
+						[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
+						class="w-12 h-12 rounded-full -ml-2.5 first:ml-0 transition-transform duration-300"
+					/>
+					} @if (contributors().length > 3) {
+					<span class="ml-2 text-[#c8c7bf] text-sm whitespace-nowrap"
+						>+{{ contributors().length - 3 }}</span
+					>
+					}
+					<div class="w-4 bg-red-300"></div>
+				</div>
+				<div class="flex flex-col items-start justify-start min-w-0">
+					<div
+						class="text-on-surface-variant font-medium transition-all duration-300 ease-in-out"
+					>
+						Credits
+					</div>
+					<p
+						class="text-on-surface-variant text-sm m-0 transition-all duration-200 ease-in-out"
+						[class.opacity-0]="isExpanded()"
+						[class.max-h-0]="isExpanded()"
+						[class.opacity-100]="!isExpanded()"
+						[class.max-h-6]="!isExpanded()"
+					>
+						{{ getChartByString() }}
+					</p>
+					<p
+						class="text-on-surface-variant text-sm m-0 transition-all duration-200 ease-in-out"
+						[class.opacity-100]="isExpanded()"
+						[class.max-h-6]="isExpanded()"
+						[class.opacity-0]="!isExpanded()"
+						[class.max-h-0]="!isExpanded()"
+					>
+						The following users contributed to this chart:
+					</p>
+				</div>
+			</div>
+			<mat-icon
+				class="transition-transform duration-300 ease-in-out"
+				[class.rotate-180]="isExpanded()"
+				>expand_more</mat-icon
+			>
 		</div>
-		}
-	</mat-expansion-panel-header>
-	@if (isExpanded()) {
-	<div class="contributors-list">
+	</div>
+	<div
+		class="content transition-all duration-300 ease-in-out overflow-hidden"
+		[class.max-h-0]="!isExpanded()"
+		[class.opacity-0]="!isExpanded()"
+		[class.max-h-[1000px]]="isExpanded()"
+		[class.opacity-100]="isExpanded()"
+	>
 		@for (contributor of contributors(); track contributor.user.id) {
-		<div class="contributor">
+		<div class="flex items-center gap-4 mt-4">
 			<img
 				[src]="contributor.user.imageUrl || '/assets/images/default-avatar.png'"
-				class="avatar-small"
+				class="w-12 h-12 rounded-full"
 			/>
 			<div class="contributor-info">
-				<p class="username">&#64; {{ contributor.user.username }}</p>
-				<p class="roles">{{ getRolesString(contributor) }}</p>
+				<p class="text-[#c8c7bf] text-sm font-medium m-0">
+					&#64; {{ contributor.user.username }}
+				</p>
+				<p class="text-[#c6c8b9] text-xs m-0">
+					{{ getRolesString(contributor) }}
+				</p>
 			</div>
 		</div>
 		}
 	</div>
-	}
-</mat-expansion-panel>
+</div>

@@ -17,9 +17,9 @@
 		<div class="flex-row items-center justify-start gap-9 hidden md:flex">
 			<a
 				[routerLink]="'/'"
+				[routerLinkActiveOptions]="{ exact: true }"
 				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
 				routerLinkActive="opacity-100"
-				[queryParams]="{ queryParams: 'ignored' }"
 				>Home</a
 			>
 			<a
