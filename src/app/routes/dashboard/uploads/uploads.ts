@@ -169,15 +169,7 @@ export class Uploads implements OnInit {
 		this.error = undefined;
 		// Send isDashboard=true to restrict results to logged-in user content
 		this.chartService
-			.getCharts(
-				forceRefresh,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				true,
-			)
+			.getCharts(undefined, { isDashboard: true, forceRefresh })
 			.subscribe({
 				next: (response) => {
 					console.log("Resolved charts data:", response);

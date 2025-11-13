@@ -10,11 +10,20 @@ import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
 
-const MAX_CACHED_CHARTS = 15;
+const MAX_CACHED_CHARTS_PERSISTENT = 15;
+const MAX_CACHED_CHARTS_SESSION = 30;
+const CACHE_VALIDITY_HOURS = 4;
 
 interface CachedChart extends ChartModel {
 	lastAccessed: string;
 }
+
+interface DefaultCacheMetadata {
+	timestamp: string;
+	filters: string; // JSON stringified filters
+}
+
+export type STORAGE = "persistent" | "session";
 
 @Injectable({
 	providedIn: "root",
@@ -44,6 +53,81 @@ export class CacheService {
 		});
 	}
 
+	/**
+	 * Checks if the default cache is still valid (within 4 hours)
+	 */
+	public isDefaultCacheValid(): boolean {
+		const metadata = this.storageService.getItem("defaultCacheMetadata");
+		if (!metadata) {
+			return false;
+		}
+
+		try {
+			const parsed: DefaultCacheMetadata = JSON.parse(metadata);
+			const cacheDate = new Date(parsed.timestamp);
+			const currentDate = new Date();
+			const hoursDiff =
+				(currentDate.getTime() - cacheDate.getTime()) /
+				(1000 * 60 * 60);
+
+			return hoursDiff < CACHE_VALIDITY_HOURS;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	/**
+	 * Sets metadata for default cache (no filters/queries)
+	 */
+	public setDefaultCacheMetadata(filters: any): void {
+		const metadata: DefaultCacheMetadata = {
+			timestamp: new Date().toISOString(),
+			filters: JSON.stringify(filters),
+		};
+		this.storageService.setItem(
+			"defaultCacheMetadata",
+			JSON.stringify(metadata),
+		);
+	}
+
+	/**
+	 * Gets the stored default cache metadata
+	 */
+	public getDefaultCacheMetadata(): DefaultCacheMetadata | null {
+		const metadata = this.storageService.getItem("defaultCacheMetadata");
+		if (!metadata) {
+			return null;
+		}
+		try {
+			return JSON.parse(metadata);
+		} catch (error) {
+			return null;
+		}
+	}
+
+	/**
+	 * Checks if current filters match the default cache
+	 */
+	public isDefaultFilters(filters: any): boolean {
+		if (!filters) return true;
+
+		const hasQuery = filters.query && filters.query.trim() !== "";
+		const hasGenres = filters.genres && filters.genres.length > 0;
+		const hasDifficulties =
+			filters.difficulties && filters.difficulties.length > 0;
+		const hasCategories =
+			filters.categories && filters.categories.length > 0;
+		const hasVersions = filters.versions && filters.versions.length > 0;
+
+		return (
+			!hasQuery &&
+			!hasGenres &&
+			!hasDifficulties &&
+			!hasCategories &&
+			!hasVersions
+		);
+	}
+
 	private getChartCount(): number {
 		return parseInt(this.storageService.getItem("chartCount") || "0");
 	}
@@ -65,17 +149,30 @@ export class CacheService {
 	/**
 	 * Retrieves all charts stored in the browser's localStorage and removes those not found remotely.
 	 *
+	 * @param storage - The type of storage to use ("persistent" for localStorage, "session" for sessionStorage). Default is "persistent".
 	 * @param remoteChartIds - List of chart IDs found remotely.
 	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" object is found; otherwise, undefined.
 	 */
-	getAllCharts(remoteChartIds?: string[]): ChartModel[] | undefined {
-		const charts = Object.keys(localStorage)
+	getAllCharts(
+		storage: STORAGE = "persistent",
+		remoteChartIds?: string[],
+	): ChartModel[] | undefined {
+		const charts = Object.keys(
+			storage === "persistent"
+				? window.localStorage
+				: window.sessionStorage,
+		)
 			.filter((key) => key.startsWith("chart_"))
-			.filter((key) => this.storageService.getItem(key))
+			.filter((key) =>
+				this.storageService.getItem(key, storage === "session"),
+			)
 			.map(
 				(key) =>
 					JSON.parse(
-						this.storageService.getItem(key)!,
+						this.storageService.getItem(
+							key,
+							storage === "session",
+						)!,
 					) as CachedChart,
 			);
 
@@ -91,14 +188,23 @@ export class CacheService {
 		return charts;
 	}
 
-	getChart(id: string): CachedChart | undefined {
-		const chart = this.storageService.getItem(`chart_${id}`);
+	getChart(
+		id: string,
+		storage: STORAGE = "persistent",
+	): CachedChart | undefined {
+		const chart = this.storageService.getItem(
+			`chart_${id}`,
+			storage === "session",
+		);
 		return chart ? JSON.parse(chart) : undefined;
 	}
 
-	addChart(chart: ChartModel): void {
+	addChart(
+		chart: ChartModel,
+		maxCache: number = MAX_CACHED_CHARTS_PERSISTENT,
+	): void {
 		// If we have reached the maximum number of cached charts, we need to remove the oldest one
-		if (this.getChartCount() >= MAX_CACHED_CHARTS) {
+		if (this.getChartCount() >= maxCache) {
 			const allCharts = this.getAllCharts() as CachedChart[];
 
 			if (!allCharts || allCharts.length === 0) {
@@ -133,10 +239,10 @@ export class CacheService {
 		this.increaseChartCount();
 	}
 
-	addCharts(charts: ChartModel[]): void {
+	addCharts(charts: ChartModel[], storage: STORAGE = "persistent"): void {
 		console.log("Adding charts to cache:", charts);
 
-		const currentCharts = this.getAllCharts();
+		const currentCharts = this.getAllCharts(storage);
 		const currentChartIds = currentCharts?.map((chart) => chart.id);
 
 		// Remove charts that are not in the new list
@@ -153,9 +259,14 @@ export class CacheService {
 				!currentCharts ||
 				!currentCharts.some((c) => c.id === chart.id)
 			) {
-				this.addChart(chart);
+				this.addChart(
+					chart,
+					storage === "persistent"
+						? MAX_CACHED_CHARTS_PERSISTENT
+						: MAX_CACHED_CHARTS_SESSION,
+				);
 			} else {
-				this.updateChart(chart);
+				this.updateChart(chart, storage);
 			}
 		});
 	}
@@ -168,7 +279,10 @@ export class CacheService {
 		}
 	}
 
-	updateChart(updatedChart: ChartModel): void {
+	updateChart(
+		updatedChart: ChartModel,
+		storage: STORAGE = "persistent",
+	): void {
 		const chart = this.getChart(updatedChart.id);
 
 		if (!chart) {
@@ -181,12 +295,14 @@ export class CacheService {
 				...updatedChart,
 				lastAccessed: new Date().toISOString(),
 			}),
+			storage === "session",
 		);
 
-		console.log(
+		console.log(`Chart ${updatedChart.id} updated in cache.`);
+		/* console.log(
 			`Chart ${updatedChart.id} updated in cache:`,
 			this.getChart(updatedChart.id),
-		);
+		); */
 	}
 
 	// Contributors
@@ -354,6 +470,7 @@ export class CacheService {
 		this.storageService.removeItem("chartKeys"); */
 
 		this.storageService.clear();
+		this.storageService.clear(true); // Clear sessionStorage too
 		this.cookieService.delete("lastRefresh");
 	}
 }

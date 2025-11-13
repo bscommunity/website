@@ -22,7 +22,7 @@ import { debounceTime } from "rxjs/operators";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
-import { WorkshopFilterService } from "@/services/workshop-filter.service";
+import { FilterService } from "@/services/filter.service";
 import { Router } from "@angular/router";
 
 // Models
@@ -43,7 +43,7 @@ import { ChartModel } from "@/models/chart.model";
 export class PublicHeaderComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
-	private workshopFilterService = inject(WorkshopFilterService);
+	private workshopFilterService = inject(FilterService);
 
 	@ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 

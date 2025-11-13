@@ -52,14 +52,7 @@
 				[disabled]="disabled()"
 			>
 				<span class="flex flex-1 items-center justify-center">
-					@if (isLoading()) {
-						<mat-progress-spinner
-							diameter="20"
-							mode="indeterminate"
-						></mat-progress-spinner>
-					} @else {
-						<mat-icon inline>close</mat-icon>
-					}
+					<mat-icon inline>close</mat-icon>
 				</span>
 			</button>
 		}

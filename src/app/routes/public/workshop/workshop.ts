@@ -7,7 +7,7 @@ import {
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
+import { map, switchMap, takeUntil } from "rxjs/operators";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -18,10 +18,8 @@ import { MatDialog } from "@angular/material/dialog";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
-import {
-	WorkshopFilterService,
-	WorkshopFilters,
-} from "@/services/workshop-filter.service";
+import { FilterService } from "@/services/filter.service";
+import type { WorkshopFilters } from "@/services/filter.service";
 
 // Components
 import { Option, SelectComponent } from "@/components/select/select.component";
@@ -58,7 +56,7 @@ import {
 })
 export class WorkshopComponent implements OnInit, OnDestroy {
 	private chartService = inject(ChartService);
-	private filterService = inject(WorkshopFilterService);
+	private filterService = inject(FilterService);
 	private cdr = inject(ChangeDetectorRef);
 	private dialog = inject(MatDialog);
 
@@ -83,15 +81,9 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 
 	ngOnInit(): void {
 		// Subscribe to filter changes and reload charts
-		this.filterService
-			.getFilterChanges$()
+		this.filterService.filterChanges$
 			.pipe(takeUntil(this.destroy$))
-			.subscribe((filters) => {
-				this.loadChartsWithFilters(filters);
-			});
-
-		// Load charts with initial filters
-		this.loadChartsWithFilters(this.filterService.getFilters());
+			.subscribe((filters) => this.loadChartsWithFilters(filters));
 	}
 
 	ngOnDestroy(): void {
@@ -106,10 +98,8 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 		this.charts = undefined;
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
-		// Keep existing charts while loading for pulse animation
-
 		this.chartService
-			.searchChartsWithFilters(filters)
+			.getCharts(filters, { storage: "session" })
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {

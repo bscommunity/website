@@ -24,10 +24,8 @@ import {
 } from "@/components/expansion-panel/expansion-panel.component";
 
 // Services
-import {
-	WorkshopFilterService,
-	WorkshopFilters,
-} from "@/services/workshop-filter.service";
+import { FilterService } from "@/services/filter.service";
+import type { WorkshopFilters } from "@/services/filter.service";
 
 // Models
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
@@ -65,7 +63,7 @@ const categories: ExpansionPanelData[] = [
 	templateUrl: "./filter-panel.component.html",
 })
 export class FilterPanelComponent implements OnInit, OnDestroy {
-	private filterService = inject(WorkshopFilterService);
+	private filterService = inject(FilterService);
 
 	readonly startDate = input<string | null>(null);
 	readonly endDate = input<string | null>(null);
@@ -151,7 +149,7 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 			.filter((v) => v.isSelected)
 			.map((v) => v.name || "");
 
-		this.filterService.setFilters({
+		this.filterService.updateFilters({
 			categories: selectedCategories,
 			difficulties: selectedDifficulties,
 			genres: selectedGenres,
