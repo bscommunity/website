@@ -44,10 +44,19 @@ interface ChartDialogData {
 					[contributors]="data.chart.contributors"
 				></app-chart-contributors>
 			}
-			<app-chart-video-preview
-				[coverUrl]="data.chart.coverUrl"
-				[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
-			></app-chart-video-preview>
+			<div
+				class="flex flex-row items-center justify-center gap-2 h-42 md:h-48"
+			>
+				<img
+					[src]="data.chart.coverUrl"
+					alt="Chart Cover"
+					class="h-full object-contain rounded-[28px]"
+				/>
+				<app-chart-video-preview
+					class="h-full w-full"
+					[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
+				></app-chart-video-preview>
+			</div>
 			<ul class="flex flex-row flex-wrap items-start justify-start gap-2">
 				@for (button of buttons; track button.icon) {
 					<li

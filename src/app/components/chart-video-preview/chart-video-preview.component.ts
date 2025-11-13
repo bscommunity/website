@@ -15,8 +15,6 @@ import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 })
 export class ChartVideoPreviewComponent {
 	private sanitizer = inject(DomSanitizer);
-
-	coverUrl = input.required<string>();
 	previewUrl = input.required<string | null>();
 
 	embedUrl = computed(() => {
