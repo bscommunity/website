@@ -39,33 +39,7 @@
 				</span>
 			</div>
 		</div>
-		@if (hasActiveFilters() && charts?.length === 0) {
-		<!-- No charts found after filtering -->
-		<div
-			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-		>
-			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"
-					><mat-icon inline>sentiment_dissatisfied</mat-icon></span
-				>
-				<h1 class="text-2xl">
-					We couldn't find anything based on your search
-				</h1>
-				<p class="max-w-[50%] text-center">
-					Try removing some filters or searching for something else
-				</p>
-			</div>
-			<button
-				class="!flex-row-reverse"
-				mat-stroked-button
-				(click)="clearFilters()"
-				(keypress)="clearFilters()"
-			>
-				<p>Clear filters</p>
-				<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
-			</button>
-		</div>
-		}
+
 		<ul
 			class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
 			[class.animate-pulse]="(isLoading$ | async)"
@@ -81,7 +55,16 @@
 			></app-chart-preview>
 			}
 		</ul>
-		@if (error$ | async) { @let error = error$ | async;
+
+		@if ((isLoading$ | async) && !charts) {
+		<!-- Loading state -->
+		<div class="flex flex-col items-center justify-center gap-6 w-full">
+			<mat-progress-spinner
+				diameter="36"
+				mode="indeterminate"
+			></mat-progress-spinner>
+		</div>
+		} @else if (error$ | async) { @let error = error$ | async;
 		<!-- Error state -->
 		<div
 			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -114,13 +97,31 @@
 				</div>
 			</div>
 		</div>
-		} @else if ((isLoading$ | async) && !charts) {
-		<!-- Loading state -->
-		<div class="flex flex-col items-center justify-center gap-6 w-full">
-			<mat-progress-spinner
-				diameter="36"
-				mode="indeterminate"
-			></mat-progress-spinner>
+		} @else if (hasActiveFilters() && charts?.length === 0) {
+		<!-- No charts found after filtering -->
+		<div
+			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+		>
+			<div class="flex flex-col items-center justify-center gap-4">
+				<span class="text-6xl"
+					><mat-icon inline>sentiment_dissatisfied</mat-icon></span
+				>
+				<h1 class="text-2xl">
+					We couldn't find anything based on your search
+				</h1>
+				<p class="max-w-[50%] text-center">
+					Try removing some filters or searching for something else
+				</p>
+			</div>
+			<button
+				class="!flex-row-reverse"
+				mat-stroked-button
+				(click)="clearFilters()"
+				(keypress)="clearFilters()"
+			>
+				<p>Clear filters</p>
+				<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
+			</button>
 		</div>
 		}
 	</div>

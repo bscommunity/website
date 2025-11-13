@@ -103,6 +103,7 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 	 * Load charts based on provided filters
 	 */
 	private loadChartsWithFilters(filters: WorkshopFilters): void {
+		this.charts = undefined;
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
 		// Keep existing charts while loading for pulse animation

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
-import { DomSanitizer } from "@angular/platform-browser";
 
 // Material
 import {
@@ -18,6 +17,7 @@ import { ChartModel } from "@/models/chart.model";
 import { MatChipsModule } from "@angular/material/chips";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 import { ChartContributorsComponent } from "@/components/chart-contributors/chart-contributors.component";
+import { ChartVideoPreviewComponent } from "@/components/chart-video-preview/chart-video-preview.component";
 
 interface ChartDialogData {
 	chart: ChartModel;
@@ -44,32 +44,10 @@ interface ChartDialogData {
 					[contributors]="data.chart.contributors"
 				></app-chart-contributors>
 			}
-			<div
-				class="flex flex-row items-center justify-center gap-2 h-42 md:h-48"
-				(click)="openVideo()"
-			>
-				<img
-					[src]="data.chart.coverUrl"
-					alt="Chart Cover"
-					class="h-full object-contain rounded-[28px] shadow-md"
-				/>
-				@if (getEmbedUrl()) {
-					<iframe
-						[src]="getEmbedUrl()"
-						[style.pointer-events]="'none'"
-						class="h-full w-full object-contain rounded-[28px] shadow-md cursor-pointer"
-						allowfullscreen
-					></iframe>
-				} @else {
-					<div
-						class="flex items-center justify-center h-full w-full rounded-[28px] bg-on-surface/10"
-					>
-						<p class="text-center text-sm px-3">
-							No preview available.
-						</p>
-					</div>
-				}
-			</div>
+			<app-chart-video-preview
+				[coverUrl]="data.chart.coverUrl"
+				[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
+			></app-chart-video-preview>
 			<ul class="flex flex-row flex-wrap items-start justify-start gap-2">
 				@for (button of buttons; track button.icon) {
 					<li
@@ -110,12 +88,11 @@ interface ChartDialogData {
 		MatIcon,
 		MatChipsModule,
 		ChartContributorsComponent,
+		ChartVideoPreviewComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartDialogComponent {
-	private sanitizer = inject(DomSanitizer);
-
 	dialogRef = inject<MatDialogRef<ChartDialogComponent>>(MatDialogRef);
 	data = inject<ChartDialogData>(MAT_DIALOG_DATA);
 
@@ -141,21 +118,6 @@ export class ChartDialogComponent {
 			data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.latestVersion.publishedAt.toString())}`,
 		},
 	];
-
-	getEmbedUrl() {
-		if (!this.data.chart.latestVersion.previewUrl) return "";
-		const url = new URL(this.data.chart.latestVersion.previewUrl);
-		const videoId = url.searchParams.get("v");
-		if (!videoId) return "";
-		const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&rel=0&playlist=${videoId}`;
-		return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
-	}
-
-	openVideo() {
-		if (this.data.chart.latestVersion.previewUrl) {
-			window.open(this.data.chart.latestVersion.previewUrl, "_blank");
-		}
-	}
 
 	formatDuration(duration: number) {
 		const minutes = Math.floor(duration / 60);
