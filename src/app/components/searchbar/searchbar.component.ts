@@ -6,7 +6,6 @@ import {
 	viewChild,
 	OnInit,
 	OnDestroy,
-	AfterViewInit,
 	inject,
 	signal,
 } from "@angular/core";
@@ -38,7 +37,7 @@ import { ChartService } from "@/services/api/chart.service";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchbarComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SearchbarComponent implements OnInit, OnDestroy {
 	readonly autoComplete = input<MatAutocomplete | null>(null);
 
 	readonly input = viewChild.required<ElementRef<HTMLInputElement>>("input");
@@ -75,8 +74,6 @@ export class SearchbarComponent implements OnInit, OnDestroy, AfterViewInit {
 				}
 			});
 	}
-
-	ngAfterViewInit() {}
 
 	onInput(event: Event) {
 		this.searchSubject.next((event.target as HTMLInputElement).value);

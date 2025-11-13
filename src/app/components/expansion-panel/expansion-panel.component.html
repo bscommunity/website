@@ -7,7 +7,7 @@
 	<mat-expansion-panel-header class="!w-full">
 		<mat-panel-title> {{ title() }} </mat-panel-title>
 	</mat-expansion-panel-header>
-	<mat-chip-set [ariaLabel]="title()">
+	<mat-chip-set [ariaLabel]="title()" [disabled]="disabled()">
 		@for (item of data(); track $index) {
 			<mat-chip-option
 				[selected]="item.isSelected"

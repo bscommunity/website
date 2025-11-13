@@ -105,7 +105,7 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 	private loadChartsWithFilters(filters: WorkshopFilters): void {
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
-		this.charts = undefined;
+		// Keep existing charts while loading for pulse animation
 
 		this.chartService
 			.searchChartsWithFilters(filters)
@@ -124,6 +124,7 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 						"Failed to load charts. Please try again.";
 					this.filterService.setError(errorMessage);
 					this.charts = [];
+					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},
 			});
@@ -185,18 +186,5 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 	 */
 	hasActiveFilters(): boolean {
 		return this.filterService.hasActiveFilters();
-	}
-
-	/**
-	 * Get count of active filters for display
-	 */
-	getActiveFilterCount(): number {
-		return Object.values(this.filterService.getActiveFilters()).reduce(
-			(count, val) => {
-				if (Array.isArray(val)) return count + val.length;
-				return count + (val ? 1 : 0);
-			},
-			0,
-		);
 	}
 }

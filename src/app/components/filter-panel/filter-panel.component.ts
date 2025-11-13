@@ -70,13 +70,12 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 	readonly startDate = input<string | null>(null);
 	readonly endDate = input<string | null>(null);
 	readonly initialSelected = input<ExpansionPanelData[]>([]);
+	readonly disabled = input<boolean>(false);
 
 	@Output() filterChange = new EventEmitter<ExpansionPanelData[]>();
 
 	private filterSubject = new Subject<ExpansionPanelData[]>();
 	private filterSubscription!: Subscription;
-	private urlSyncSubscription!: Subscription;
-	private isInitializing = true;
 	private isSyncingFromService = false;
 
 	private _difficulties = difficulties;
@@ -105,30 +104,16 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 
 		// Initialize selections from service state
 		this.applyFiltersToSelections(this.filterService.getFilters());
-
-		// Subscribe to service filters to keep panel in sync with URL changes
-		this.urlSyncSubscription = this.filterService.filters$.subscribe(
-			(filters) => {
-				if (!this.isInitializing) {
-					this.applyFiltersToSelections(filters);
-				}
-			},
-		);
-
-		this.isInitializing = false;
 	}
 
 	ngOnDestroy(): void {
 		if (this.filterSubscription) {
 			this.filterSubscription.unsubscribe();
 		}
-		if (this.urlSyncSubscription) {
-			this.urlSyncSubscription.unsubscribe();
-		}
 	}
 
 	onFilterChange(data: ExpansionPanelData[] | null): void {
-		if (this.isSyncingFromService) {
+		if (this.disabled() || this.isSyncingFromService) {
 			return;
 		}
 

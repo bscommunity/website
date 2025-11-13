@@ -101,7 +101,6 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 	resizeSubscription: Subscription = new Subscription();
 	scrollSubscription: Subscription = new Subscription();
-	paramsSubscription: Subscription = new Subscription();
 
 	ngAfterViewInit() {
 		if (isPlatformBrowser(this.platformId)) {
@@ -122,8 +121,6 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 					}
 				});
 		}
-
-		// No URL param syncing; initial selection should be provided by parent if needed
 	}
 
 	// Initialize selection from defaultValue when provided and no selection yet
@@ -142,7 +139,6 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 	ngOnDestroy() {
 		if (this.resizeSubscription) this.resizeSubscription.unsubscribe();
 		if (this.scrollSubscription) this.scrollSubscription.unsubscribe();
-		if (this.paramsSubscription) this.paramsSubscription.unsubscribe();
 	}
 
 	selectOption(option: Option): void {

@@ -25,6 +25,7 @@ export class ExpansionPanelComponent {
 	readonly panelOpenState = signal(false);
 	readonly title = input("");
 	readonly data = input<ExpansionPanelData[] | null>(null);
+	readonly disabled = input<boolean>(false);
 	readonly dataChange = output<ExpansionPanelData[] | null>();
 
 	selectionChange(item: ExpansionPanelData): void {
