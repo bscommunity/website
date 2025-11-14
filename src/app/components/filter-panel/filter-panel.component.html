@@ -17,37 +17,33 @@
 		<app-expansion-panel
 			class="w-full"
 			title="Categories"
-			[data]="categories"
-			(dataChange)="onFilterChange($event)"
+			[data]="categories()"
+			(optionSelectionChange)="onSelectionChange('categories', $event)"
 			[disabled]="disabled()"
-			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
 			class="w-full"
 			title="Difficulties"
-			[data]="difficulties"
-			(dataChange)="onFilterChange($event)"
+			[data]="difficulties()"
+			(optionSelectionChange)="onSelectionChange('difficulties', $event)"
 			[disabled]="disabled()"
-			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
 			class="w-full"
 			title="Genres"
-			[data]="genres"
-			(dataChange)="onFilterChange($event)"
+			[data]="genres()"
+			(optionSelectionChange)="onSelectionChange('genres', $event)"
 			[disabled]="disabled()"
-			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
 			class="w-full"
 			title="Versions"
-			[data]="versions"
-			(dataChange)="onFilterChange($event)"
+			[data]="versions()"
+			(optionSelectionChange)="onSelectionChange('versions', $event)"
 			[disabled]="disabled()"
-			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<!-- <mat-expansion-panel

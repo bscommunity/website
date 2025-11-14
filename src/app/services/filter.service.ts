@@ -13,6 +13,7 @@ import { z } from "zod";
 import { SortOption } from "@/models/enums/sort-option.enum";
 
 const DEFAULT_SORT_OPTION = SortOption.LAST_UPDATED;
+const FILTER_CHANGE_DEBOUNCE_MS = 600;
 
 /**
  * Schema for workshop filters
@@ -74,10 +75,10 @@ export class FilterService {
 
 	/**
 	 * Debounced filter changes - use this to trigger API calls
-	 * Emits only when filters actually change, with 300ms debounce
+	 * Emits only when filters actually change, with configurable debounce
 	 */
 	readonly filterChanges$: Observable<WorkshopFilters> = this.filters$.pipe(
-		debounceTime(300),
+		debounceTime(FILTER_CHANGE_DEBOUNCE_MS),
 		distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
 	);
 

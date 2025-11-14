@@ -1,31 +1,15 @@
-import {
-	Component,
-	OnInit,
-	signal,
-	input,
-	Output,
-	EventEmitter,
-	OnDestroy,
-	inject,
-} from "@angular/core";
-import { Subject, Subscription } from "rxjs";
-import { debounceTime } from "rxjs/operators";
-
-// Material
-import { MatExpansionModule } from "@angular/material/expansion";
-import { MatIconModule } from "@angular/material/icon";
-import { MatSliderModule } from "@angular/material/slider";
-import { MatChipsModule } from "@angular/material/chips";
+import { Component, computed, inject, input } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 // Components
 import {
 	ExpansionPanelComponent,
 	ExpansionPanelData,
+	ExpansionPanelSelectionChange,
 } from "@/components/expansion-panel/expansion-panel.component";
 
 // Services
 import { FilterService } from "@/services/filter.service";
-import type { WorkshopFilters } from "@/services/filter.service";
 
 // Models
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
@@ -53,150 +37,65 @@ const categories: ExpansionPanelData[] = [
 
 @Component({
 	selector: "app-filter-panel",
-	imports: [
-		MatIconModule,
-		MatExpansionModule,
-		MatSliderModule,
-		MatChipsModule,
-		ExpansionPanelComponent,
-	],
+	imports: [ExpansionPanelComponent],
 	templateUrl: "./filter-panel.component.html",
 })
-export class FilterPanelComponent implements OnInit, OnDestroy {
+export class FilterPanelComponent {
 	private filterService = inject(FilterService);
 
-	readonly startDate = input<string | null>(null);
-	readonly endDate = input<string | null>(null);
-	readonly initialSelected = input<ExpansionPanelData[]>([]);
 	readonly disabled = input<boolean>(false);
-
-	@Output() filterChange = new EventEmitter<ExpansionPanelData[]>();
-
-	private filterSubject = new Subject<ExpansionPanelData[]>();
-	private filterSubscription!: Subscription;
-	private isSyncingFromService = false;
-
-	isSyncing = false;
 
 	private _difficulties = difficulties;
 	private _genres = genres;
 	private _versions = versions;
 	private _categories = categories;
+	private readonly toggleHandlers: Record<
+		ToggleableFilter,
+		(value: string) => void
+	> = {
+		categories: (val) => this.filterService.toggleCategory(val),
+		difficulties: (val) => this.filterService.toggleDifficulty(val),
+		genres: (val) => this.filterService.toggleGenre(val),
+		versions: (val) => this.filterService.toggleVersion(val),
+	};
+	private readonly filtersSignal = toSignal(this.filterService.filters$, {
+		initialValue: this.filterService.getFilters(),
+	});
 
-	categories: ExpansionPanelData[] = this._categories;
-	difficulties: ExpansionPanelData[] = this._difficulties;
-	genres: ExpansionPanelData[] = this._genres;
-	versions: ExpansionPanelData[] = this._versions;
+	readonly categories = computed(() =>
+		this.withSelection(this._categories, this.filtersSignal().categories),
+	);
 
-	selectedItems: ExpansionPanelData[] = [];
+	readonly difficulties = computed(() =>
+		this.withSelection(
+			this._difficulties,
+			this.filtersSignal().difficulties,
+			true,
+		),
+	);
 
-	readonly datePanelOpenState = signal(false);
+	readonly genres = computed(() =>
+		this.withSelection(this._genres, this.filtersSignal().genres, true),
+	);
 
-	ngOnInit(): void {
-		// Setup debounced filter updates
-		this.filterSubscription = this.filterSubject
-			.pipe(debounceTime(600))
-			.subscribe(() => {
-				if (!this.isSyncingFromService) {
-					this.updateFiltersInService();
-				}
-			});
+	readonly versions = computed(() =>
+		this.withSelection(this._versions, this.filtersSignal().versions),
+	);
 
-		// Initialize selections from service state
-		this.applyFiltersToSelections(this.filterService.getFilters());
-	}
-
-	ngOnDestroy(): void {
-		if (this.filterSubscription) {
-			this.filterSubscription.unsubscribe();
-		}
-	}
-
-	onFilterChange(data: ExpansionPanelData[] | null): void {
-		if (this.disabled() || this.isSyncingFromService) {
+	onSelectionChange(
+		filter: ToggleableFilter,
+		selection: ExpansionPanelSelectionChange,
+	): void {
+		if (this.disabled()) {
 			return;
 		}
 
-		if (data) {
-			this.selectedItems = [
-				...this.categories.filter((c) => c.isSelected),
-				...this.difficulties.filter((d) => d.isSelected),
-				...this.genres.filter((g) => g.isSelected),
-				...this.versions.filter((v) => v.isSelected),
-			];
-			this.filterSubject.next(this.selectedItems);
-			this.filterChange.emit(this.selectedItems);
+		const value = this.getOptionValue(filter, selection.item);
+		if (!value) {
+			return;
 		}
-	}
 
-	/**
-	 * Update service with selected filters
-	 */
-	private updateFiltersInService(): void {
-		const selectedCategories = this.categories
-			.filter((c) => c.isSelected)
-			.map((c) => c.name || "");
-
-		const selectedDifficulties = this.difficulties
-			.filter((d) => d.isSelected)
-			.map((d) => d.value || "")
-			.filter((v) => v);
-
-		const selectedGenres = this.genres
-			.filter((g) => g.isSelected)
-			.map((g) => g.value || "")
-			.filter((v) => v);
-
-		const selectedVersions = this.versions
-			.filter((v) => v.isSelected)
-			.map((v) => v.name || "");
-
-		this.filterService.updateFilters({
-			categories: selectedCategories,
-			difficulties: selectedDifficulties,
-			genres: selectedGenres,
-			versions: selectedVersions,
-		});
-	}
-
-	/**
-	 * Reflect provided filters in the local selection state
-	 */
-	private applyFiltersToSelections(filters: WorkshopFilters): void {
-		this.isSyncingFromService = true;
-		this.isSyncing = true;
-
-		this.categories.forEach((category) => {
-			category.isSelected =
-				filters.categories?.includes(category.name) || false;
-		});
-
-		this.difficulties.forEach((difficulty) => {
-			difficulty.isSelected =
-				(filters.difficulties?.includes(difficulty.value || "") ??
-					false) ||
-				false;
-		});
-
-		this.genres.forEach((genre) => {
-			genre.isSelected =
-				(filters.genres?.includes(genre.value || "") ?? false) || false;
-		});
-
-		this.versions.forEach((version) => {
-			version.isSelected =
-				filters.versions?.includes(version.name) || false;
-		});
-
-		this.selectedItems = [
-			...this.categories.filter((c) => c.isSelected),
-			...this.difficulties.filter((d) => d.isSelected),
-			...this.genres.filter((g) => g.isSelected),
-			...this.versions.filter((v) => v.isSelected),
-		];
-
-		this.isSyncingFromService = false;
-		this.isSyncing = false;
+		this.toggleHandlers[filter](value);
 	}
 
 	/**
@@ -207,23 +106,32 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 	}
 
 	clearFilters(): void {
-		this.isSyncingFromService = true;
-		this.isSyncing = true;
-
-		// Clear all selections locally
-		this.categories.forEach((c) => (c.isSelected = false));
-		this.difficulties.forEach((d) => (d.isSelected = false));
-		this.genres.forEach((g) => (g.isSelected = false));
-		this.versions.forEach((v) => (v.isSelected = false));
-		this.selectedItems = [];
-
-		// Reset filters in service
 		this.filterService.resetFilters();
+	}
 
-		this.isSyncingFromService = false;
-		this.isSyncing = false;
+	private withSelection(
+		options: ExpansionPanelData[],
+		selectedValues: readonly string[],
+		useValue = false,
+	): ExpansionPanelData[] {
+		const selection = new Set(selectedValues);
+		return options.map((option) => ({
+			...option,
+			isSelected: selection.has(
+				useValue ? (option.value ?? option.name) : option.name,
+			),
+		}));
+	}
 
-		// Emit the change
-		this.filterChange.emit([]);
+	private getOptionValue(
+		filter: ToggleableFilter,
+		option: ExpansionPanelData,
+	): string | undefined {
+		if (filter === "categories" || filter === "versions") {
+			return option.name;
+		}
+		return option.value;
 	}
 }
+
+type ToggleableFilter = "categories" | "difficulties" | "genres" | "versions";

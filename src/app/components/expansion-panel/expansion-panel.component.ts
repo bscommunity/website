@@ -1,8 +1,6 @@
 import { Component, signal, input, output } from "@angular/core";
 
 import { MatExpansionModule } from "@angular/material/expansion";
-import { MatIconModule } from "@angular/material/icon";
-import { MatSliderModule } from "@angular/material/slider";
 import {
 	MatChipsModule,
 	MatChipSelectionChange,
@@ -14,14 +12,14 @@ export interface ExpansionPanelData {
 	isSelected?: boolean;
 }
 
+export interface ExpansionPanelSelectionChange {
+	item: ExpansionPanelData;
+	selected: boolean;
+}
+
 @Component({
 	selector: "app-expansion-panel",
-	imports: [
-		MatIconModule,
-		MatExpansionModule,
-		MatSliderModule,
-		MatChipsModule,
-	],
+	imports: [MatExpansionModule, MatChipsModule],
 	templateUrl: "./expansion-panel.component.html",
 })
 export class ExpansionPanelComponent {
@@ -29,17 +27,15 @@ export class ExpansionPanelComponent {
 	readonly title = input("");
 	readonly data = input<ExpansionPanelData[] | null>(null);
 	readonly disabled = input<boolean>(false);
-	readonly suppressEvents = input<boolean>(false);
-	readonly dataChange = output<ExpansionPanelData[] | null>();
+	readonly optionSelectionChange = output<ExpansionPanelSelectionChange>();
 
-	selectionChange(
+	handleChipSelectionChange(
 		event: MatChipSelectionChange,
 		item: ExpansionPanelData,
 	): void {
-		if (this.suppressEvents() || !event.isUserInput) {
+		if (this.disabled() || !event.isUserInput) {
 			return;
 		}
-		item.isSelected = event.selected;
-		this.dataChange.emit(this.data());
+		this.optionSelectionChange.emit({ item, selected: event.selected });
 	}
 }

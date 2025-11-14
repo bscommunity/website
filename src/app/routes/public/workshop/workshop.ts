@@ -176,15 +176,6 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	/**
-	 * Handle filter changes from filter panel
-	 */
-	onFilterChange(filters: any[]): void {
-		console.log("Selected filters:", filters);
-		// Filter panel component will handle updating the service
-		// This is here for potential future use
-	}
-
-	/**
 	 * Clear all active filters
 	 */
 	clearFilters(): void {
