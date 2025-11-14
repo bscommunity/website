@@ -58,16 +58,7 @@
 			}
 		</ul>
 
-		@if (totalPages > 1) {
-		<mat-paginator
-			[length]="totalCharts"
-			[pageSize]="pageSize"
-			[pageIndex]="currentPage - 1"
-			(page)="onPageChange($event)"
-			[disabled]="(isLoading$ | async)"
-			aria-label="Select page"
-		></mat-paginator>
-		} @if ((isLoading$ | async) && !charts) {
+		@if ((isLoading$ | async) && !charts) {
 		<!-- Loading state -->
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
 			<mat-progress-spinner
@@ -133,6 +124,18 @@
 				<p>Clear filters</p>
 				<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
 			</button>
+		</div>
+		} @if (totalPages > 1) {
+		<div class="flex items-center justify-end w-full">
+			<mat-paginator
+				[length]="totalCharts"
+				[hidePageSize]="true"
+				[pageSize]="pageSize"
+				[pageIndex]="currentPage - 1"
+				(page)="onPageChange($event)"
+				[disabled]="(isLoading$ | async)"
+				aria-label="Select page"
+			></mat-paginator>
 		</div>
 		}
 	</div>

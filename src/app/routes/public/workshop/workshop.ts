@@ -15,7 +15,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatPaginatorModule, PageEvent } from "@angular/material/paginator";
+import {
+	MatPaginatorIntl,
+	MatPaginatorModule,
+	PageEvent,
+} from "@angular/material/paginator";
 import { MatDialog } from "@angular/material/dialog";
 
 // Services
@@ -40,6 +44,9 @@ import {
 	SortOption,
 } from "@/models/enums/sort-option.enum";
 
+// Intl
+import { PaginatorIntl } from "@/components/paginator/paginator-intl";
+
 @Component({
 	selector: "app-workshop",
 	imports: [
@@ -55,6 +62,7 @@ import {
 		PanelComponent,
 		ChartPreviewComponent,
 	],
+	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	templateUrl: "./workshop.html",
 })
 export class WorkshopComponent implements OnInit, OnDestroy {

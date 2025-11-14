@@ -50,8 +50,6 @@ export class ChartService {
 		);
 	}
 
-	private lastFilters: WorkshopFilters | null = null;
-
 	/**
 	 * Generates a cache key based on filters for sessionStorage
 	 */
