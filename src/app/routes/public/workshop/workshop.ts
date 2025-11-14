@@ -5,6 +5,7 @@ import {
 	OnInit,
 	OnDestroy,
 	ViewChild,
+	AfterViewInit,
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { Subject } from "rxjs";
@@ -65,7 +66,7 @@ import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	templateUrl: "./workshop.html",
 })
-export class WorkshopComponent implements OnInit, OnDestroy {
+export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	private chartService = inject(ChartService);
 	private filterService = inject(FilterService);
 	private cdr = inject(ChangeDetectorRef);
@@ -115,6 +116,10 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 	ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
+	}
+
+	ngAfterViewInit(): void {
+		this.searchbar.setValue(this.filterService.getFilters().query);
 	}
 
 	/**

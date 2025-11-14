@@ -101,6 +101,10 @@ export class SearchbarComponent implements OnInit, OnDestroy {
 		this.trigger()?.closePanel();
 	}
 
+	setValue(value: string) {
+		this.input().nativeElement.value = value;
+	}
+
 	ngOnDestroy() {
 		this.searchSubscription.unsubscribe();
 	}
