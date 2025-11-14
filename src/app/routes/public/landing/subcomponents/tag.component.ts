@@ -7,9 +7,7 @@ import { MatIconModule } from "@angular/material/icon";
 	template: `
 		<a
 			[href]="href()"
-			class="{{
-				class()
-			}} flex flex-row items-stretch rounded-full py-1 px-1 bg-surface-container-low border border-outline-variant gap-3 text-sm hover:bg-surface-container group transition-all duration-700 ease-in-out overflow-hidden h-14 md:h-11"
+			class="flex flex-row items-stretch rounded-full py-1 px-1 bg-surface-container-low border border-outline-variant gap-3 text-sm hover:bg-surface-container group transition-all duration-700 ease-in-out overflow-hidden h-14 md:h-11"
 			[class.max-w-12]="!label()"
 			[class.max-w-full]="!!label()"
 		>

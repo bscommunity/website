@@ -6,6 +6,8 @@ import {
 	debounceTime,
 	distinctUntilChanged,
 	Subject,
+	skip,
+	shareReplay,
 } from "rxjs";
 
 // Models
@@ -77,9 +79,11 @@ export class FilterService {
 	 * Debounced filter changes - use this to trigger API calls
 	 * Emits only when filters actually change, with configurable debounce
 	 */
-	readonly filterChanges$: Observable<WorkshopFilters> = this.filters$.pipe(
+	readonly filterChanges$ = this.filters$.pipe(
+		skip(1), // ignore the initial BehaviorSubject emission
 		debounceTime(FILTER_CHANGE_DEBOUNCE_MS),
 		distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
 	// ===== FILTER OPERATIONS =====

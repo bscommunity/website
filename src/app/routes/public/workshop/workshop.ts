@@ -8,7 +8,7 @@ import {
 	AfterViewInit,
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
-import { Subject } from "rxjs";
+import { firstValueFrom, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
 // Material
@@ -97,6 +97,9 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	pageSize = 20;
 
 	ngOnInit(): void {
+		// Initial load (immediate, no debounce)
+		this.loadChartsWithFilters(this.filterService.getFilters());
+
 		// Subscribe to filter changes and reload charts
 		this.filterService.filterChanges$
 			.pipe(takeUntil(this.destroy$))
@@ -111,7 +114,48 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 			.subscribe(() => {
 				this.searchbar.clearSearch();
 			});
+
+		// DEBUG LOGGING
+		/* this.isLoading$.subscribe((value) => {
+			console.log("isLoading:", value);
+		});
+		console.log("Charts", this.charts); */
 	}
+
+	/* 
+	
+	ngOnInit(): void {
+		// Initial load (immediate, no debounce)
+		this.loadChartsWithFilters(this.filterService.getFilters());
+
+		// Subscribe to filter changes with debounce (skip the first emission to avoid double load)
+		this.filterService.filters$
+			.pipe(
+				debounceTime(600),
+				distinctUntilChanged(
+					(a, b) => JSON.stringify(a) === JSON.stringify(b),
+				),
+				skip(1), // Skip the first debounced emission to prevent re-loading on init
+				takeUntil(this.destroy$),
+			)
+			.subscribe((filters) => {
+				this.currentPage = 1; // Reset to first page on filter change
+				this.loadChartsWithFilters(filters);
+			});
+
+		// Subscribe to clear search events
+		this.filterService.clearSearch$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.searchbar.clearSearch();
+			});
+
+		this.isLoading$.subscribe((value) => {
+			console.log("isLoading:", value);
+		});
+		console.log("Charts", this.charts);
+	}
+	*/
 
 	ngOnDestroy(): void {
 		this.destroy$.next();
