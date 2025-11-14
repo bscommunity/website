@@ -4,16 +4,17 @@ import {
 	ElementRef,
 	HostListener,
 	inject,
+	ChangeDetectorRef,
 } from "@angular/core";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
-import { MatButtonModule } from "@angular/material/button";
 import {
-	MatAutocompleteModule,
+	MatAutocompleteTrigger,
 	MatAutocompleteSelectedEvent,
 } from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatIconModule } from "@angular/material/icon";
+import { MatButtonModule } from "@angular/material/button";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 // RxJS
@@ -44,8 +45,10 @@ export class PublicHeaderComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
 	private workshopFilterService = inject(FilterService);
+	private cdr = inject(ChangeDetectorRef);
 
 	@ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
+	@ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
 
 	queryCharts: string[] | undefined | null | "start" = "start";
 
@@ -66,6 +69,11 @@ export class PublicHeaderComponent {
 			// Set query in global workshop state and navigate without params
 			this.workshopFilterService.setQuery(value);
 			this.router.navigate(["/workshop"]);
+
+			// Reset the input and close suggestions
+			this.searchInput.nativeElement.value = "";
+			this.autoTrigger.closePanel();
+			this.queryCharts = "start";
 		}
 	}
 
@@ -97,18 +105,22 @@ export class PublicHeaderComponent {
 	onSearch(value: string): void {
 		if (value.length < 2) {
 			this.queryCharts = "start";
+			this.cdr.detectChanges();
 			return;
 		}
 
 		this.queryCharts = undefined;
+		this.cdr.detectChanges();
 
 		this.chartService.getSuggestions(value).subscribe({
 			next: (charts) => {
 				this.queryCharts = charts;
+				this.cdr.detectChanges();
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
 				this.queryCharts = null;
+				this.cdr.detectChanges();
 			},
 		});
 	}
