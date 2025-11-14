@@ -5,6 +5,7 @@ import {
 	combineLatest,
 	debounceTime,
 	distinctUntilChanged,
+	Subject,
 } from "rxjs";
 
 // Models
@@ -47,6 +48,7 @@ export class FilterService {
 	);
 	private readonly isLoadingSubject = new BehaviorSubject<boolean>(true);
 	private readonly errorSubject = new BehaviorSubject<string | null>(null);
+	private readonly clearSearchSubject = new Subject<void>();
 
 	// Public observables
 	readonly filters$ = this.filtersSubject
@@ -59,6 +61,7 @@ export class FilterService {
 
 	readonly isLoading$ = this.isLoadingSubject.asObservable();
 	readonly error$ = this.errorSubject.asObservable();
+	readonly clearSearch$ = this.clearSearchSubject.asObservable();
 
 	/**
 	 * Combined state observable - use this for comprehensive state management
@@ -189,6 +192,7 @@ export class FilterService {
 	 */
 	resetFilters(): void {
 		this.filtersSubject.next(this.getDefaultFilters());
+		this.clearSearchSubject.next();
 	}
 
 	// ===== STATE MANAGEMENT =====

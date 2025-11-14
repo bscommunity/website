@@ -175,7 +175,7 @@ export class Uploads implements OnInit {
 					console.log("Resolved charts data:", response);
 
 					this.isRefreshing = false;
-					this.charts = response;
+					this.charts = response.first;
 					this.cdr.markForCheck();
 				},
 				error: (error) => {

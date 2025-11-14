@@ -16,6 +16,7 @@
 			class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
 		>
 			<app-searchbar
+				#searchbar
 				placeholder="Search for charts, tourpasses and themes..."
 				[enableSuggestions]="true"
 				class="flex flex-1 max-md:w-full relative"
@@ -57,7 +58,16 @@
 			}
 		</ul>
 
-		@if ((isLoading$ | async) && !charts) {
+		@if (totalPages > 1) {
+		<mat-paginator
+			[length]="totalCharts"
+			[pageSize]="pageSize"
+			[pageIndex]="currentPage - 1"
+			(page)="onPageChange($event)"
+			[disabled]="(isLoading$ | async)"
+			aria-label="Select page"
+		></mat-paginator>
+		} @if ((isLoading$ | async) && !charts) {
 		<!-- Loading state -->
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
 			<mat-progress-spinner

@@ -4,16 +4,18 @@ import {
 	inject,
 	OnInit,
 	OnDestroy,
+	ViewChild,
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { Subject } from "rxjs";
-import { map, switchMap, takeUntil } from "rxjs/operators";
+import { takeUntil } from "rxjs/operators";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatPaginatorModule, PageEvent } from "@angular/material/paginator";
 import { MatDialog } from "@angular/material/dialog";
 
 // Services
@@ -46,6 +48,7 @@ import {
 		MatProgressSpinnerModule,
 		MatTooltipModule,
 		MatIconModule,
+		MatPaginatorModule,
 		FilterPanelComponent,
 		SearchbarComponent,
 		SelectComponent,
@@ -61,6 +64,8 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 	private dialog = inject(MatDialog);
 
 	private destroy$ = new Subject<void>();
+
+	@ViewChild("searchbar") searchbar!: SearchbarComponent;
 
 	// Make getSortOptionLabel available in template
 	getSortOptionLabel = getSortOptionLabel;
@@ -78,12 +83,25 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 
 	// Current data
 	charts: ChartModel[] | undefined = undefined;
+	totalCharts = 0;
+	currentPage = 1;
+	pageSize = 20;
 
 	ngOnInit(): void {
 		// Subscribe to filter changes and reload charts
 		this.filterService.filterChanges$
 			.pipe(takeUntil(this.destroy$))
-			.subscribe((filters) => this.loadChartsWithFilters(filters));
+			.subscribe((filters) => {
+				this.currentPage = 1; // Reset to first page on filter change
+				this.loadChartsWithFilters(filters);
+			});
+
+		// Subscribe to clear search events
+		this.filterService.clearSearch$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.searchbar.clearSearch();
+			});
 	}
 
 	ngOnDestroy(): void {
@@ -98,13 +116,21 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 		this.charts = undefined;
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
+
+		const offset = (this.currentPage - 1) * this.pageSize;
+
 		this.chartService
-			.getCharts(filters, { storage: "session" })
+			.getCharts(filters, {
+				limit: this.pageSize,
+				offset,
+				storage: "session",
+			})
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
 					console.log("Loaded charts:", response);
-					this.charts = response;
+					this.charts = response.first;
+					this.totalCharts = response.second;
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},
@@ -170,6 +196,21 @@ export class WorkshopComponent implements OnInit, OnDestroy {
 			},
 			width: "575px",
 		});
+	}
+
+	/**
+	 * Handle page change
+	 */
+	onPageChange(event: PageEvent): void {
+		this.currentPage = event.pageIndex + 1;
+		this.loadChartsWithFilters(this.filterService.getFilters());
+	}
+
+	/**
+	 * Get total pages
+	 */
+	get totalPages(): number {
+		return Math.ceil(this.totalCharts / this.pageSize);
 	}
 
 	/**

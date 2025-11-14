@@ -17,6 +17,11 @@ import {
 
 import { apiUrl } from "@/lib/api";
 
+interface ChartsResponse {
+	first: ChartModel[];
+	second: number;
+}
+
 @Injectable({
 	providedIn: "root",
 })
@@ -75,7 +80,7 @@ export class ChartService {
 			forceRefresh?: boolean;
 			storage?: "persistent" | "session";
 		},
-	): Observable<ChartModel[]> {
+	): Observable<ChartsResponse> {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
 		const cacheKey = this.generateCacheKey(filters);
 
@@ -101,8 +106,57 @@ export class ChartService {
 			}
 		}
 
+		console.log(
+			`Fetching charts with filters:`,
+			filters,
+			`| Using cache: ${shouldUseCache} (storage: ${storageType})`,
+			options,
+		);
+
 		// Return cached data if available and valid
-		if (shouldUseCache) {
+		// 1) Paginated requests: try per-page cache in sessionStorage
+		if (options?.limit) {
+			const pageKey = `${options.limit}:${options.offset || 0}`;
+			const sessionData = this.storageService.getItem(cacheKey, true);
+			if (sessionData) {
+				try {
+					const parsed = JSON.parse(sessionData);
+					const pages = (parsed?.pages || {}) as Record<
+						string,
+						ChartModel[]
+					>;
+					const total: number =
+						typeof parsed?.total === "number"
+							? parsed.total
+							: typeof parsed?.second === "number"
+								? parsed.second
+								: Array.isArray(parsed?.first)
+									? (parsed.first as ChartModel[]).length
+									: 0;
+
+					if (Array.isArray(pages[pageKey])) {
+						console.log(
+							`Returning page ${pageKey} from session cache (filtered/default query)`,
+						);
+						return new Observable((subscriber) => {
+							subscriber.next({
+								first: pages[pageKey],
+								second: total,
+							});
+							subscriber.complete();
+						});
+					}
+				} catch (error) {
+					console.error(
+						"Failed to parse paginated session cache:",
+						error,
+					);
+				}
+			}
+		}
+
+		// 2) Non-paginated: reuse existing cache strategy
+		if (shouldUseCache && !options?.limit) {
 			if (isDefaultQuery) {
 				const charts = this.cacheService.getAllCharts("persistent");
 				if (charts && charts.length > 0) {
@@ -110,7 +164,12 @@ export class ChartService {
 						`Returning ${charts.length} charts from persistent cache (default query)`,
 					);
 					return new Observable((subscriber) => {
-						subscriber.next(charts);
+						subscriber.next({
+							first: charts,
+							// Note: persistent cache stores individual charts only.
+							// Since we're only using cache when not paginating, charts.length suffices here.
+							second: charts.length,
+						});
 						subscriber.complete();
 					});
 				}
@@ -118,12 +177,24 @@ export class ChartService {
 				const sessionData = this.storageService.getItem(cacheKey, true);
 				if (sessionData) {
 					try {
-						const charts = JSON.parse(sessionData) as ChartModel[];
+						const parsed = JSON.parse(sessionData);
+						// Support legacy cache (array only) and new shape ({ first, second })
+						const charts = Array.isArray(parsed)
+							? (parsed as ChartModel[])
+							: ((parsed?.first || []) as ChartModel[]);
+						const total = Array.isArray(parsed)
+							? charts.length
+							: typeof parsed?.second === "number"
+								? (parsed.second as number)
+								: charts.length;
 						console.log(
 							`Returning ${charts.length} charts from session cache (filtered query)`,
 						);
 						return new Observable((subscriber) => {
-							subscriber.next(charts);
+							subscriber.next({
+								first: charts,
+								second: total,
+							});
 							subscriber.complete();
 						});
 					} catch (error) {
@@ -176,25 +247,71 @@ export class ChartService {
 
 		// Fetch from remote API
 		console.log("Fetching charts from remote API with filters:", filters);
-		return this.http.get<ChartModel[]>(this.apiUrl, { params }).pipe(
+		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(
 			tap((fetchedCharts) => {
-				console.log(`Fetched ${fetchedCharts.length} charts from API`);
+				console.log(
+					`Fetched ${fetchedCharts.first.length} charts from API`,
+				);
 
-				if (isDefaultQuery) {
-					// Store default data in persistent storage with metadata
-					console.log("Caching default charts to persistent storage");
-					this.cacheService.addCharts(fetchedCharts, "persistent");
-					this.cacheService.setDefaultCacheMetadata(filters);
-				} else {
-					// Store filtered data in sessionStorage with specific key
-					console.log(
-						`Caching filtered charts to session storage (key: ${cacheKey})`,
+				if (!options?.limit) {
+					if (isDefaultQuery) {
+						// Store default data in persistent storage with metadata
+						console.log(
+							"Caching default charts to persistent storage",
+						);
+						this.cacheService.addCharts(
+							fetchedCharts.first,
+							"persistent",
+						);
+						this.cacheService.setDefaultCacheMetadata(filters);
+					} else {
+						// Store filtered data in sessionStorage with specific key
+						console.log(
+							`Caching filtered charts to session storage (key: ${cacheKey})`,
+						);
+						// When not paginating, we still store a minimal object for compatibility
+						this.storageService.setItem(
+							cacheKey,
+							JSON.stringify({
+								first: fetchedCharts.first,
+								second: fetchedCharts.second,
+								updatedAt: new Date().toISOString(),
+							}),
+							true, // use sessionStorage
+						);
+					}
+				}
+
+				// Always update per-page cache in session when paginating
+				if (options?.limit) {
+					const pageKey = `${options.limit}:${options.offset || 0}`;
+					const sessionData = this.storageService.getItem(
+						cacheKey,
+						true,
 					);
+					let parsed: any = {};
+					try {
+						parsed = sessionData ? JSON.parse(sessionData) : {};
+					} catch {
+						parsed = {};
+					}
+					parsed.pages = parsed.pages || {};
+					parsed.pages[pageKey] = fetchedCharts.first;
+					parsed.total = fetchedCharts.second;
+					parsed.updatedAt = new Date().toISOString();
 					this.storageService.setItem(
 						cacheKey,
-						JSON.stringify(fetchedCharts),
-						true, // use sessionStorage
+						JSON.stringify(parsed),
+						true,
 					);
+
+					// Optionally keep individual charts fresh in persistent cache for quick detail views
+					try {
+						this.cacheService.addCharts(
+							fetchedCharts.first,
+							"persistent",
+						);
+					} catch {}
 				}
 			}),
 			shareReplay(1),

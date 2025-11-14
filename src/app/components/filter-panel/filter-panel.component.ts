@@ -194,4 +194,15 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 
 		this.isSyncingFromService = false;
 	}
+
+	/**
+	 * Check if there are active filters
+	 */
+	hasActiveFilters(): boolean {
+		return this.filterService.hasActiveFilters();
+	}
+
+	clearFilters(): void {
+		this.filterService.resetFilters();
+	}
 }

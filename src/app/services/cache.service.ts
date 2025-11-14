@@ -10,7 +10,7 @@ import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
 
-const MAX_CACHED_CHARTS_PERSISTENT = 15;
+const MAX_CACHED_CHARTS_PERSISTENT = 20;
 const MAX_CACHED_CHARTS_SESSION = 30;
 const CACHE_VALIDITY_HOURS = 4;
 
