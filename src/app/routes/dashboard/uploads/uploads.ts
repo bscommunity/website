@@ -164,12 +164,12 @@ export class Uploads implements OnInit {
 		// Clear filters
 	}
 
-	fetchCharts(forceRefresh: boolean = false) {
-		this.isRefreshing = forceRefresh;
+	fetchCharts(disableCache: boolean = false) {
+		this.isRefreshing = disableCache;
 		this.error = undefined;
 		// Send isDashboard=true to restrict results to logged-in user content
 		this.chartService
-			.getCharts(undefined, { isDashboard: true, forceRefresh })
+			.getCharts(undefined, { isDashboard: true, disableCache })
 			.subscribe({
 				next: (response) => {
 					console.log("Resolved charts data:", response);

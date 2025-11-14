@@ -9,10 +9,12 @@ import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
+import { SortOption } from "@/models/enums/sort-option.enum";
 
 const MAX_CACHED_CHARTS_PERSISTENT = 20;
 const MAX_CACHED_CHARTS_SESSION = 30;
 const CACHE_VALIDITY_HOURS = 4;
+const DEFAULT_CHARTS_CACHE_KEY = "defaultChartsCache";
 
 interface CachedChart extends ChartModel {
 	lastAccessed: string;
@@ -21,6 +23,11 @@ interface CachedChart extends ChartModel {
 interface DefaultCacheMetadata {
 	timestamp: string;
 	filters: string; // JSON stringified filters
+}
+
+interface DefaultChartsCachePayload {
+	charts: ChartModel[];
+	total: number;
 }
 
 export type STORAGE = "persistent" | "session";
@@ -118,14 +125,49 @@ export class CacheService {
 		const hasCategories =
 			filters.categories && filters.categories.length > 0;
 		const hasVersions = filters.versions && filters.versions.length > 0;
+		const hasCustomSort =
+			filters.sortBy && filters.sortBy !== SortOption.LAST_UPDATED;
 
 		return (
 			!hasQuery &&
 			!hasGenres &&
 			!hasDifficulties &&
 			!hasCategories &&
-			!hasVersions
+			!hasVersions &&
+			!hasCustomSort
 		);
+	}
+
+	public setDefaultChartsCache(charts: ChartModel[], total: number): void {
+		const payload: DefaultChartsCachePayload = {
+			charts,
+			total,
+		};
+		this.storageService.setItem(
+			DEFAULT_CHARTS_CACHE_KEY,
+			JSON.stringify(payload),
+		);
+	}
+
+	public getDefaultChartsCache(): DefaultChartsCachePayload | null {
+		const cached = this.storageService.getItem(DEFAULT_CHARTS_CACHE_KEY);
+		if (!cached) {
+			return null;
+		}
+
+		try {
+			const parsed = JSON.parse(cached) as DefaultChartsCachePayload;
+			if (
+				!Array.isArray(parsed.charts) ||
+				typeof parsed.total !== "number"
+			) {
+				throw new Error("Invalid default cache payload");
+			}
+			return parsed;
+		} catch (error) {
+			this.storageService.removeItem(DEFAULT_CHARTS_CACHE_KEY);
+			return null;
+		}
 	}
 
 	private getChartCount(): number {

@@ -75,7 +75,7 @@ export class ChartService {
 			limit?: number;
 			offset?: number;
 			isDashboard?: boolean;
-			forceRefresh?: boolean;
+			disableCache?: boolean;
 			storage?: "persistent" | "session";
 		},
 	): Observable<ChartsResponse> {
@@ -87,7 +87,7 @@ export class ChartService {
 		let storageType: "persistent" | "session" =
 			options?.storage || "persistent";
 
-		if (!options?.forceRefresh) {
+		if (!options?.disableCache) {
 			if (isDefaultQuery) {
 				// For default queries, use persistent cache with 4-hour validity
 				shouldUseCache = this.cacheService.isDefaultCacheValid();
@@ -156,17 +156,15 @@ export class ChartService {
 		// 2) Non-paginated: reuse existing cache strategy
 		if (shouldUseCache && !options?.limit) {
 			if (isDefaultQuery) {
-				const charts = this.cacheService.getAllCharts("persistent");
-				if (charts && charts.length > 0) {
+				const cachedDefault = this.cacheService.getDefaultChartsCache();
+				if (cachedDefault?.charts?.length) {
 					console.log(
-						`Returning ${charts.length} charts from persistent cache (default query)`,
+						`Returning ${cachedDefault.charts.length} charts from persistent cache (default query)`,
 					);
 					return new Observable((subscriber) => {
 						subscriber.next({
-							first: charts,
-							// Note: persistent cache stores individual charts only.
-							// Since we're only using cache when not paginating, charts.length suffices here.
-							second: charts.length,
+							first: cachedDefault.charts,
+							second: cachedDefault.total,
 						});
 						subscriber.complete();
 					});
@@ -233,7 +231,7 @@ export class ChartService {
 
 		// Add sorting
 		if (filters?.sortBy) {
-			params = params.set("sort", filters.sortBy);
+			params = params.set("sortBy", filters.sortBy);
 		}
 
 		// Add options
@@ -256,6 +254,10 @@ export class ChartService {
 						// Store default data in persistent storage with metadata
 						console.log(
 							"Caching default charts to persistent storage",
+						);
+						this.cacheService.setDefaultChartsCache(
+							fetchedCharts.first,
+							fetchedCharts.second,
 						);
 						this.cacheService.addCharts(
 							fetchedCharts.first,
