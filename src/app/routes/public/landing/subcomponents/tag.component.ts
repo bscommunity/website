@@ -1,5 +1,4 @@
-import { Component, input } from "@angular/core";
-
+import { Component, input, signal, OnInit } from "@angular/core";
 import { MatIconModule } from "@angular/material/icon";
 
 @Component({
@@ -10,24 +9,56 @@ import { MatIconModule } from "@angular/material/icon";
 			[href]="href()"
 			class="{{
 				class()
-			}} flex flex-row items-center rounded-full py-1 pl-1 pr-4 bg-surface-container-low border border-outline-variant gap-3 text-sm hover:bg-surface-container group"
+			}} flex flex-row items-stretch rounded-full py-1 px-1 bg-surface-container-low border border-outline-variant gap-3 text-sm hover:bg-surface-container group transition-all duration-700 ease-in-out overflow-hidden h-14 md:h-11"
+			[class.max-w-12]="!label()"
+			[class.max-w-full]="!!label()"
 		>
-			<div class="bg-primary-container px-3 py-1.5 rounded-full">
-				<span class="font-normal">{{ label() }}</span>
-			</div>
-			<p class="flex md:hidden">{{ mobileText() }}</p>
-			<p class="hidden md:flex">{{ text() }}</p>
-			<mat-icon
-				class="transition-transform duration-300 group-hover:translate-x-0.5"
-				>keyboard_double_arrow_right</mat-icon
+			<div
+				class="bg-primary-container px-3 py-1.5 rounded-full flex items-center justify-center self-stretch min-w-fit"
 			>
+				<span class="font-normal text-center">{{
+					label() || "..."
+				}}</span>
+			</div>
+
+			@if (label()) {
+				<p
+					class="hidden self-center text-center md:flex"
+					[class.fade-in]="!hasInitialLabel()"
+					[class.opacity-0]="!hasInitialLabel()"
+				>
+					{{ text() }}
+				</p>
+
+				<p
+					class="flex self-center text-center md:hidden"
+					[class.fade-in]="!hasInitialLabel()"
+					[class.opacity-0]="!hasInitialLabel()"
+				>
+					{{ mobileText() }}
+				</p>
+
+				<mat-icon
+					class="self-center transition-transform duration-300 group-hover:translate-x-0.5 min-w-6 mr-3!"
+					>keyboard_double_arrow_right</mat-icon
+				>
+			}
 		</a>
 	`,
 })
-export class LandingTagComponent {
+export class LandingTagComponent implements OnInit {
 	class = input<string>("");
-	label = input<string>();
-	mobileText = input<string>();
-	text = input<string>("");
+	label = input<string | undefined>(undefined);
+	mobileText = input<string | undefined>(undefined);
+	text = input<string | undefined>(undefined);
 	href = input<string>("#");
+
+	hasInitialLabel = signal(false);
+
+	ngOnInit() {
+		// If there was already a label on the first render, avoid the fade-in
+		if (this.label()) {
+			this.hasInitialLabel.set(true);
+		}
+	}
 }

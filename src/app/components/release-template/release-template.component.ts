@@ -11,6 +11,7 @@ export interface ReleaseNote {
 	refactors?: string[];
 	fixes?: string[];
 	style?: string[];
+	tags?: { name: string; description: string }[];
 	/* fixes: {
 		description: string;
 		issue: number;

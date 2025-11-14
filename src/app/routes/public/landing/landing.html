@@ -4,13 +4,22 @@
 	<div
 		class="bg-[length:40px_40px] bg-[linear-gradient(to_right,var(--mat-sys-outline-variant)_1px,transparent_1px),linear-gradient(to_bottom,var(--mat-sys-outline-variant)_1px,transparent_1px)] absolute top-0 left-0 w-full h-full pointer-events-none -z-50 mask-radial-from-0% mask-radial-to-75% mask-radial-at-center opacity-30"
 	></div>
-	<app-landing-tag
-		label="BETA"
-		class="px-8"
-		href="/changelog"
-		text="Check the release notes to see what's new!"
-		mobileText="Check what's new!"
-	/>
+
+	<div class="px-8">
+		<app-landing-tag
+			class="flex items-center justify-center"
+			[label]="releaseLabel"
+			[text]="desktopReleaseText"
+			[mobileText]="mobileReleaseText"
+			href="/changelog"
+		/>
+	</div>
+
+	<!-- Debug button -->
+	<!-- <button mat-button (click)="toggleDebug()" class="mt-4">
+		Debug: {{ isDebugMode ? 'Texts Undefined' : 'Texts Normal' }}
+	</button> -->
+
 	<h1
 		class="text-[46px] font-extrabold leading-tight px-8 mt-6 md:max-w-[32rem]"
 	>
@@ -20,6 +29,7 @@
 		Your hub for discovering, downloading, and managing community-made
 		charts, tourpasses, and themes
 	</h2>
+
 	<div
 		class="flex flex-row items-center justify-center gap-4 mt-4 flex-wrap px-8"
 	>

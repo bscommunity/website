@@ -1,13 +1,10 @@
-import { Component, OnInit, signal } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 
 // Components
-import {
-	type ReleaseNote,
-	ReleaseNoteResponse,
-	ReleaseTemplateComponent,
-} from "@/components/release-template/release-template.component";
+import { ReleaseTemplateComponent } from "@/components/release-template/release-template.component";
 
-const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
+// Services
+import { ChangelogService } from "@/services/changelog.service";
 
 @Component({
 	selector: "app-release-notes",
@@ -15,7 +12,8 @@ const GITHUB_URL = "https://api.github.com/repos/bscommunity/android/releases";
 	templateUrl: "./changelog.html",
 })
 export class Changelog implements OnInit {
-	releaseNotes = signal<ReleaseNote[] | undefined>(undefined);
+	changelogService = inject(ChangelogService);
+	releaseNotes = this.changelogService.releaseNotes;
 
 	releaseEmojis = ["🎉", "🎉", "✨", "🚀", "🥳", "🥳", "🆕", "😎", "😎"];
 
@@ -27,61 +25,6 @@ export class Changelog implements OnInit {
 	}
 
 	ngOnInit() {
-		this.fetchReleaseNotes();
-	}
-
-	private async fetchReleaseNotes() {
-		try {
-			const response = await fetch(GITHUB_URL, {
-				headers: {
-					Accept: "application/vnd.github.v3+json",
-				},
-				cache: "no-cache",
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to fetch release notes");
-			}
-
-			const data = (await response.json()) as ReleaseNoteResponse[];
-
-			console.log(this.releaseNotes());
-
-			this.releaseNotes.set(
-				data.map((release) => {
-					const lines = release.body.split("\n");
-					const features = lines
-						.filter((line) => line.trim().startsWith("- feat:"))
-						.map((line) => line.replace(/^- feat:\s*/, "").trim());
-					const refactors = lines
-						.filter((line) => line.trim().startsWith("- refactor:"))
-						.map((line) =>
-							line.replace(/^- refactor:\s*/, "").trim(),
-						);
-					const style = lines
-						.filter((line) => line.trim().startsWith("- style:"))
-						.map((line) => line.replace(/^- style:\s*/, "").trim());
-					const fixes = lines
-						.filter((line) => line.trim().startsWith("- fix:"))
-						.map((line) => line.replace(/^- fix:\s*/, "").trim());
-
-					return {
-						version: release.tag_name,
-						date: release.published_at,
-						features,
-						refactors,
-						style,
-						fixes,
-					} as ReleaseNote;
-				}),
-			);
-
-			/* console.log(
-				"Release notes fetched successfully:",
-				this.releaseNotes(),
-			); */
-		} catch (error) {
-			console.error("Error fetching release notes:", error);
-		}
+		this.changelogService.fetchReleaseNotes();
 	}
 }
