@@ -76,6 +76,8 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 	private filterSubscription!: Subscription;
 	private isSyncingFromService = false;
 
+	isSyncing = false;
+
 	private _difficulties = difficulties;
 	private _genres = genres;
 	private _versions = versions;
@@ -162,6 +164,7 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 	 */
 	private applyFiltersToSelections(filters: WorkshopFilters): void {
 		this.isSyncingFromService = true;
+		this.isSyncing = true;
 
 		this.categories.forEach((category) => {
 			category.isSelected =
@@ -193,6 +196,7 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 		];
 
 		this.isSyncingFromService = false;
+		this.isSyncing = false;
 	}
 
 	/**
@@ -203,6 +207,23 @@ export class FilterPanelComponent implements OnInit, OnDestroy {
 	}
 
 	clearFilters(): void {
+		this.isSyncingFromService = true;
+		this.isSyncing = true;
+
+		// Clear all selections locally
+		this.categories.forEach((c) => (c.isSelected = false));
+		this.difficulties.forEach((d) => (d.isSelected = false));
+		this.genres.forEach((g) => (g.isSelected = false));
+		this.versions.forEach((v) => (v.isSelected = false));
+		this.selectedItems = [];
+
+		// Reset filters in service
 		this.filterService.resetFilters();
+
+		this.isSyncingFromService = false;
+		this.isSyncing = false;
+
+		// Emit the change
+		this.filterChange.emit([]);
 	}
 }

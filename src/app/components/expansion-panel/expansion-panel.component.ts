@@ -3,7 +3,10 @@ import { Component, signal, input, output } from "@angular/core";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSliderModule } from "@angular/material/slider";
-import { MatChipsModule } from "@angular/material/chips";
+import {
+	MatChipsModule,
+	MatChipSelectionChange,
+} from "@angular/material/chips";
 
 export interface ExpansionPanelData {
 	name: string;
@@ -26,10 +29,17 @@ export class ExpansionPanelComponent {
 	readonly title = input("");
 	readonly data = input<ExpansionPanelData[] | null>(null);
 	readonly disabled = input<boolean>(false);
+	readonly suppressEvents = input<boolean>(false);
 	readonly dataChange = output<ExpansionPanelData[] | null>();
 
-	selectionChange(item: ExpansionPanelData): void {
-		item.isSelected = !item.isSelected;
+	selectionChange(
+		event: MatChipSelectionChange,
+		item: ExpansionPanelData,
+	): void {
+		if (this.suppressEvents() || !event.isUserInput) {
+			return;
+		}
+		item.isSelected = event.selected;
 		this.dataChange.emit(this.data());
 	}
 }

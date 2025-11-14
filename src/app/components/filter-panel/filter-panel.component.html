@@ -20,6 +20,7 @@
 			[data]="categories"
 			(dataChange)="onFilterChange($event)"
 			[disabled]="disabled()"
+			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
@@ -28,6 +29,7 @@
 			[data]="difficulties"
 			(dataChange)="onFilterChange($event)"
 			[disabled]="disabled()"
+			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
@@ -36,6 +38,7 @@
 			[data]="genres"
 			(dataChange)="onFilterChange($event)"
 			[disabled]="disabled()"
+			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<app-expansion-panel
@@ -44,6 +47,7 @@
 			[data]="versions"
 			(dataChange)="onFilterChange($event)"
 			[disabled]="disabled()"
+			[suppressEvents]="isSyncing"
 		></app-expansion-panel>
 
 		<!-- <mat-expansion-panel

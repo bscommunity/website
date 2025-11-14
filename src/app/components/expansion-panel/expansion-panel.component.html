@@ -12,7 +12,7 @@
 			<mat-chip-option
 				class="disabled:animate-pulse"
 				[selected]="item.isSelected"
-				(selectionChange)="selectionChange(item)"
+				(selectionChange)="selectionChange($event, item)"
 			>
 				{{ item.name }}
 			</mat-chip-option>
