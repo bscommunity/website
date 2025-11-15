@@ -95,6 +95,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	totalCharts = 0;
 	currentPage = 1;
 	pageSize = 20;
+	placeholders = Array(20);
 
 	ngOnInit(): void {
 		// Initial load (immediate, no debounce)

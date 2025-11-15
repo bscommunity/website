@@ -1,3 +1,7 @@
 {
-	"cSpell.words": ["bscm", "spotify", "tourpass", "tourpasses"]
+	"cSpell.words": ["bscm", "spotify", "tourpass", "tourpasses"],
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"eslint.validate": ["typescript", "html"],
+	"eslint.format.enable": true
 }

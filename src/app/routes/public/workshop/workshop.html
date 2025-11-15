@@ -32,7 +32,9 @@
 						class="h-full"
 						id="sort-by"
 						[options]="sortOptions"
-						[defaultValue]="(filters$ | async)?.sortBy?.toString() || null"
+						[defaultValue]="
+							(filters$ | async)?.sortBy?.toString() || null
+						"
 						(selectionChange)="onSortChange($event)"
 						[disabled]="(isLoading$ | async) || !charts"
 					/>
@@ -40,102 +42,108 @@
 			</div>
 		</div>
 
-		<ul
-			class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
-			[class.animate-pulse]="(isLoading$ | async)"
-			[style.pointerEvents]="(isLoading$ | async) ? 'none' : 'auto'"
-		>
-			@for (chart of charts; track chart.id) {
-			<app-chart-preview
-				[chart]="chart"
-				[showContributors]="true"
-				[showShareActions]="true"
-				(click)="openChartDialog(chart)"
-				(keydown.enter)="openChartDialog(chart)"
-				(keydown.space)="openChartDialog(chart)"
-			></app-chart-preview>
-			}
-		</ul>
-
 		@if ((isLoading$ | async) && !charts) {
-		<!-- Loading state -->
-		<div class="flex flex-col items-center justify-center gap-6 w-full">
-			<mat-progress-spinner
-				diameter="36"
-				mode="indeterminate"
-			></mat-progress-spinner>
-		</div>
-		} @else if (error$ | async) { @let error = error$ | async;
-		<!-- Error state -->
-		<div
-			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-		>
-			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"
-					><mat-icon inline>deployed_code_alert</mat-icon></span
-				>
-				<h1 class="text-2xl">
-					Oops, something went wrong while fetching your charts
-				</h1>
-				<div
-					class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
-				>
-					{{ error }} <br />
-					<p>
-						Please try again later or check Discord if the problem
-						persists
-					</p>
-					<button
-						mat-stroked-button
-						(click)="refreshCharts()"
-						(keypress)="refreshCharts()"
-						aria-label="Refresh charts"
+			<ul
+				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
+			>
+				@for (placeholder of placeholders; track $index) {
+					<div
+						class="animate-pulse bg-surface-container-low rounded-2xl h-[122px] w-full"
+					></div>
+				}
+			</ul>
+		} @else if (error$ | async) {
+			@let error = error$ | async;
+			<!-- Error state -->
+			<div
+				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+			>
+				<div class="flex flex-col items-center justify-center gap-4">
+					<span class="text-6xl"
+						><mat-icon inline>deployed_code_alert</mat-icon></span
 					>
-						<mat-icon class="!mx-2">refresh</mat-icon>
+					<h1 class="text-2xl">
+						Oops, something went wrong while fetching your charts
+					</h1>
+					<div
+						class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+					>
+						{{ error }} <br />
+						<p>
+							Please try again later or check Discord if the
+							problem persists
+						</p>
+						<button
+							mat-stroked-button
+							(click)="refreshCharts()"
+							(keypress)="refreshCharts()"
+							aria-label="Refresh charts"
+						>
+							<mat-icon class="!mx-2">refresh</mat-icon>
 
-						<p>Refresh charts</p>
-					</button>
+							<p>Refresh charts</p>
+						</button>
+					</div>
 				</div>
 			</div>
-		</div>
 		} @else if (hasActiveFilters() && charts?.length === 0) {
-		<!-- No charts found after filtering -->
-		<div
-			class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-		>
-			<div class="flex flex-col items-center justify-center gap-4">
-				<span class="text-6xl"
-					><mat-icon inline>sentiment_dissatisfied</mat-icon></span
-				>
-				<h1 class="text-2xl">
-					We couldn't find anything based on your search
-				</h1>
-				<p class="max-w-[50%] text-center">
-					Try removing some filters or searching for something else
-				</p>
-			</div>
-			<button
-				class="!flex-row-reverse"
-				mat-stroked-button
-				(click)="clearFilters()"
-				(keypress)="clearFilters()"
+			<!-- No charts found after filtering -->
+			<div
+				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 			>
-				<p>Clear filters</p>
-				<mat-icon class="!mr-0 !ml-2">cancel</mat-icon>
-			</button>
-		</div>
-		} @if (totalPages > 1) {
-		<div class="flex items-center justify-end w-full">
-			<mat-paginator
-				[length]="totalCharts"
-				[hidePageSize]="true"
-				[pageSize]="pageSize"
-				[pageIndex]="currentPage - 1"
-				(page)="onPageChange($event)"
-				[disabled]="(isLoading$ | async)"
-				aria-label="Select page"
-			></mat-paginator>
-		</div>
+				<div class="flex flex-col items-center justify-center gap-4">
+					<span class="text-6xl"
+						><mat-icon inline
+							>sentiment_dissatisfied</mat-icon
+						></span
+					>
+					<h1 class="text-2xl">
+						We couldn't find anything based on your search
+					</h1>
+					<p class="max-w-[50%] text-center">
+						Try removing some filters or searching for something
+						else
+					</p>
+				</div>
+				<button
+					class="!flex-row-reverse"
+					mat-stroked-button
+					(click)="clearFilters()"
+					(keypress)="clearFilters()"
+				>
+					<p>Clear filters</p>
+					<mat-icon class="mr-0! ml-2!">cancel</mat-icon>
+				</button>
+			</div>
+		} @else {
+			<ul
+				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
+			>
+				@for (chart of charts; track chart.id) {
+					<app-chart-preview
+						[chart]="chart"
+						[showContributors]="true"
+						[showShareActions]="true"
+						(click)="openChartDialog(chart)"
+						(keydown.enter)="openChartDialog(chart)"
+						(keydown.space)="openChartDialog(chart)"
+					></app-chart-preview>
+				}
+			</ul>
+
+			@if (totalPages > 1) {
+				<div class="flex items-center justify-end w-full">
+					<mat-paginator
+						[length]="totalCharts"
+						[hidePageSize]="true"
+						[pageSize]="pageSize"
+						[pageIndex]="currentPage - 1"
+						(page)="onPageChange($event)"
+						[disabled]="isLoading$ | async"
+						aria-label="Select page"
+					></mat-paginator>
+				</div>
+			}
 		}
 	</div>
 </main>

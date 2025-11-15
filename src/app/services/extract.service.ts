@@ -58,7 +58,8 @@ export class ExtractService {
 			reader
 				.getEntries()
 				.then((entries) => {
-					const infoEntry = entries.find(
+					reject(new Error("Not implemented"));
+					/* const infoEntry = entries.find(
 						(entry) => entry.filename === "info.json",
 					);
 
@@ -80,7 +81,7 @@ export class ExtractService {
 								),
 							);
 						}
-					});
+					}); */
 				})
 				.catch(reject);
 		});

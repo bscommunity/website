@@ -1,30 +1,19 @@
 import { Injectable, inject } from "@angular/core";
-import {
-	Resolve,
-	Router,
-	ActivatedRouteSnapshot,
-	RouterStateSnapshot,
-} from "@angular/router";
+import { Resolve, Router, ActivatedRouteSnapshot } from "@angular/router";
 import { ChartService } from "@/services/api/chart.service";
-import {
-	ChartModel,
-	withLatestVersion,
-} from "@/models/chart.model";
+import { ChartModel, withLatestVersion } from "@/models/chart.model";
 import { AuthService } from "@/services/auth.service";
 import { ZodError } from "zod";
 
 @Injectable({
 	providedIn: "root",
 })
-export class ChartResolver implements Resolve<any> {
+export class ChartResolver implements Resolve<ChartModel | null> {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
 	private authService = inject(AuthService);
 
-	async resolve(
-		route: ActivatedRouteSnapshot,
-		state: RouterStateSnapshot,
-	): Promise<ChartModel | null> {
+	async resolve(route: ActivatedRouteSnapshot): Promise<ChartModel | null> {
 		const chartId = route.paramMap.get("id");
 
 		if (!chartId) {
@@ -39,12 +28,13 @@ export class ChartResolver implements Resolve<any> {
 		try {
 			const chart = await this.chartService.getChartById(chartId);
 			return withLatestVersion(chart);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			console.error("Error fetching chart", error);
 
 			// Handle Zod validation errors
 			if (error instanceof ZodError) {
-				console.error("Zod validation failed", error.errors);
+				// console.error("Zod validation failed", error.errors);
 				this.router.navigate(["error"], {
 					state: { error: "Invalid chart data structure" },
 				});
