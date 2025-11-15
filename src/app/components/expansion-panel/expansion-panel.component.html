@@ -1,15 +1,16 @@
 <mat-expansion-panel
-	class="!shadow-none !w-full"
+	class="shadow-none! w-full!"
 	[expanded]="panelOpenState"
 	(opened)="panelOpenState.set(true)"
 	(closed)="panelOpenState.set(false)"
 >
-	<mat-expansion-panel-header class="!w-full">
+	<mat-expansion-panel-header class="w-full!">
 		<mat-panel-title> {{ title() }} </mat-panel-title>
 	</mat-expansion-panel-header>
 	<mat-chip-set [ariaLabel]="title()" [disabled]="disabled()">
 		@for (item of data(); track $index) {
 			<mat-chip-option
+				title="{{ item.name }}"
 				class="disabled:animate-pulse"
 				[selected]="item.isSelected"
 				(selectionChange)="handleChipSelectionChange($event, item)"

@@ -1,0 +1,10 @@
+<div class="flex flex-row items-center justify-start gap-2.5">
+	<div
+		class="min-w-1.5 min-h-1.5 bg-gray-50 rounded-full"
+		[style]="{
+			'background-color': status().color,
+		}"
+	></div>
+	{{ status().text }}
+	<!-- External link icon -->
+</div>

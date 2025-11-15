@@ -7,7 +7,7 @@ import { MatIconModule } from "@angular/material/icon";
 	template: `
 		<a
 			[href]="href()"
-			class="flex flex-row items-stretch rounded-full py-1 px-1 bg-surface-container-low border border-outline-variant gap-3 text-sm hover:bg-surface-container group transition-all duration-700 ease-in-out overflow-hidden max-h-14 md:h-11"
+			class="flex flex-row items-stretch rounded-full py-1 px-1 bg-surface-container-low outline outline-outline-variant gap-3 text-sm hover:bg-surface-container group transition-all duration-700 ease-in-out overflow-hidden max-h-14 md:h-11 text-on-surface"
 			[class.max-w-12]="!label()"
 			[class.max-w-full]="!!label()"
 		>
@@ -29,7 +29,7 @@ import { MatIconModule } from "@angular/material/icon";
 				</p>
 
 				<p
-					class="flex self-center text-center md:hidden"
+					class="flex self-center text-center md:hidden! line-clamp-2! text-ellipsis"
 					[class.fade-in]="!hasInitialLabel()"
 					[class.opacity-0]="!hasInitialLabel()"
 				>

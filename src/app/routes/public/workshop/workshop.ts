@@ -8,7 +8,7 @@ import {
 	AfterViewInit,
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
-import { firstValueFrom, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 
 // Material
@@ -217,6 +217,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	 */
 	onPageChange(event: PageEvent): void {
 		this.currentPage = event.pageIndex + 1;
+		window.scrollTo({ top: 0, behavior: "smooth" });
 		this.loadChartsWithFilters(this.filterService.getFilters());
 	}
 
