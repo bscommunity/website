@@ -1,0 +1,20 @@
+<div
+	class="flex-col bg-red-400 gap-4 p-4 w-screen mt-28 h-screen transition-all"
+	[attr.data-state]="isOpen ? 'open' : 'closed'"
+>
+	<app-mobile-menu-item
+		[link]="'/'"
+		[text]="'Home'"
+		(closeMenu)="onClose()"
+	></app-mobile-menu-item>
+	<app-mobile-menu-item
+		[link]="'/workshop'"
+		[text]="'Workshop'"
+		(closeMenu)="onClose()"
+	></app-mobile-menu-item>
+	<app-mobile-menu-item
+		[link]="'/changelog'"
+		[text]="'Changelog'"
+		(closeMenu)="onClose()"
+	></app-mobile-menu-item>
+</div>

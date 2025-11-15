@@ -6,28 +6,28 @@ import {
 	inject,
 	ChangeDetectorRef,
 } from "@angular/core";
+import { RouterLink, RouterLinkActive } from "@angular/router";
+import { Router } from "@angular/router";
+import { DOCUMENT } from "@angular/common";
 
-import {
-	MatAutocompleteTrigger,
-	MatAutocompleteSelectedEvent,
-} from "@angular/material/autocomplete";
+// Material
+import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
-import { RouterLink, RouterLinkActive } from "@angular/router";
 
 // RxJS
-import { Subject, Subscription } from "rxjs";
+import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
 import { FilterService } from "@/services/filter.service";
-import { Router } from "@angular/router";
 
-// Models
-import { ChartModel } from "@/models/chart.model";
+// Components
+import { MobileMenuComponent } from "./subcomponents/mobile-menu.component";
+import { MatRipple } from "@angular/material/core";
 
 @Component({
 	selector: "app-public-header",
@@ -38,6 +38,8 @@ import { ChartModel } from "@/models/chart.model";
 		RouterLinkActive,
 		MatAutocompleteModule,
 		MatProgressSpinnerModule,
+		MobileMenuComponent,
+		MatRipple,
 	],
 	templateUrl: "./public-header.component.html",
 })
@@ -47,20 +49,32 @@ export class PublicHeaderComponent {
 	private workshopFilterService = inject(FilterService);
 	private cdr = inject(ChangeDetectorRef);
 
+	private document = inject(DOCUMENT);
+
 	@ViewChild("searchInput") searchInput!: ElementRef<HTMLInputElement>;
 	@ViewChild(MatAutocompleteTrigger) autoTrigger!: MatAutocompleteTrigger;
 
 	queryCharts: string[] | undefined | null | "start" = "start";
+	isMobileMenuOpen = false;
 
 	private searchSubject = new Subject<string>();
-	private searchSubscription: Subscription;
 
 	constructor() {
-		this.searchSubscription = this.searchSubject
-			.pipe(debounceTime(300))
-			.subscribe((value) => {
-				this.onSearch(value);
-			});
+		this.searchSubject.pipe(debounceTime(300)).subscribe((value) => {
+			this.onSearch(value);
+		});
+	}
+
+	toggleMobileMenu() {
+		this.document.defaultView?.scrollTo({ behavior: "instant", top: 0 });
+		this.isMobileMenuOpen = !this.isMobileMenuOpen;
+		this.document.body.style.overflow = this.isMobileMenuOpen
+			? "hidden"
+			: "";
+	}
+
+	closeMobileMenu() {
+		this.isMobileMenuOpen = false;
 	}
 
 	onNavigateToSearch() {
@@ -125,7 +139,7 @@ export class PublicHeaderComponent {
 		});
 	}
 
-	onOptionSelected(event: MatAutocompleteSelectedEvent) {
+	onOptionSelected() {
 		this.onNavigateToSearch();
 	}
 }

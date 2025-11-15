@@ -1,5 +1,6 @@
 <nav
-	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 max-md:bg-surface-container border-b-outline-variant max-md:border-b py-9 px-wrapper"
+	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 py-9 data-[state=open]:bg-surface-container border-transparent data-[state=open]:border-b-outline-variant border-b px-wrapper transition-colors group z-30 relative h-28"
+	[attr.data-state]="isMobileMenuOpen ? 'open' : 'closed'"
 >
 	<div class="flex flex-row items-center justify-start gap-16">
 		<a
@@ -41,7 +42,7 @@
 		<a
 			href="https://discord.gg/C5yCfnTAKz"
 			target="_blank"
-			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline"
+			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
 		>
 			<mat-icon
 				svgIcon="discord"
@@ -53,7 +54,7 @@
 		<a
 			href="https://github.com/bscommunity"
 			target="_blank"
-			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors flex items-center justify-center outline"
+			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
 		>
 			<mat-icon
 				svgIcon="github"
@@ -62,6 +63,23 @@
 				aria-label="GitHub link"
 			></mat-icon>
 		</a>
+		<button
+			matRipple
+			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors items-center justify-center outline flex md:hidden"
+			(click)="toggleMobileMenu()"
+		>
+			<mat-icon
+				class="w-7 h-7 text-on-secondary-container"
+				aria-hidden="false"
+				aria-label="Toggle menu"
+			>
+				@if (isMobileMenuOpen) {
+					close_small
+				} @else {
+					dehaze
+				}
+			</mat-icon>
+		</button>
 		<div
 			class="relative hidden text-on-surface md:flex"
 			routerLinkActive="hidden!"
@@ -92,7 +110,7 @@
 		</div>
 		<mat-autocomplete
 			#auto="matAutocomplete"
-			(optionSelected)="onOptionSelected($event)"
+			(optionSelected)="onOptionSelected()"
 		>
 			@if (queryCharts === "start") {
 				<mat-option class="pointer-events-none select-none w-full">
@@ -132,4 +150,10 @@
 			}
 		</mat-autocomplete>
 	</div>
+	<app-mobile-menu
+		class="h-screen opacity-0 data-[state='open']:opacity-100 transition-opacity pointer-events-auto -z-50 fixed top-0 left-0"
+		[isOpen]="isMobileMenuOpen"
+		(closeMenu)="closeMobileMenu()"
+		[attr.data-state]="isMobileMenuOpen ? 'open' : 'closed'"
+	></app-mobile-menu>
 </nav>
