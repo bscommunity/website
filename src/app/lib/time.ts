@@ -6,15 +6,28 @@ export function transformDuration(value: number): string {
 
 // eg. 2 weeks ago, 1 day ago, 3 hours ago, 5 minutes ago
 export function convertDateTimeToHumanReadable(value: string): string {
-	const date = new Date(value);
+	const date = new Date(value.endsWith("Z") ? value : value + "Z");
 	const now = new Date();
 	const diff = now.getTime() - date.getTime();
+
+	if (diff < 1) {
+		return "just now";
+	}
+
 	const seconds = Math.floor(diff / 1000);
 	const minutes = Math.floor(seconds / 60);
 	const hours = Math.floor(minutes / 60);
 	const days = Math.floor(hours / 24);
 	const weeks = Math.floor(days / 7);
+	const months = Math.floor(weeks / 4);
+	const years = Math.floor(months / 12);
 
+	if (years > 0) {
+		return years === 1 ? "1 year ago" : `${years} years ago`;
+	}
+	if (months > 0) {
+		return months === 1 ? "1 month ago" : `${months} months ago`;
+	}
 	if (weeks > 0) {
 		return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
 	}

@@ -51,9 +51,7 @@ export class ChartPreviewComponent {
 	showContributors = input<boolean>(false);
 	showShareActions = input<boolean>(false);
 
-	readonly routerLink = input<string | any[] | UrlTree | null | undefined>(
-		null,
-	);
+	readonly routerLink = input<string | UrlTree | null | undefined>(null);
 
 	/* tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { Router } from "@angular/router";
 
 // Material
 import {
@@ -36,7 +35,7 @@ interface ChartDialogData {
 			</h3>
 		</div>
 
-		<mat-dialog-content class="mat-typography !flex flex-col gap-6">
+		<mat-dialog-content class="mat-typography flex! flex-col gap-6">
 			@if (
 				data.chart.contributors && data.chart.contributors.length > 0
 			) {
@@ -78,7 +77,13 @@ interface ChartDialogData {
 			</ul>
 		</mat-dialog-content>
 		<mat-dialog-actions class="flex flex-col md:flex-row">
-			<a class="flex! flex-1!" mat-stroked-button (click)="onShare()">
+			<a
+				class="flex! flex-1!"
+				tabindex="0"
+				mat-stroked-button
+				(click)="onShare()"
+				(keypress)="onShare()"
+			>
 				<mat-icon> share </mat-icon>
 				Share
 			</a>
