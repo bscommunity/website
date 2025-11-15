@@ -75,6 +75,7 @@ export class PublicHeaderComponent {
 
 	closeMobileMenu() {
 		this.isMobileMenuOpen = false;
+		this.document.body.style.overflow = "";
 	}
 
 	onNavigateToSearch() {

@@ -138,11 +138,7 @@
 			class="flex flex-col items-start justify-normal gap-9 order-2 md:order-1"
 		>
 			<div class="flex flex-row items-center justify-start gap-9">
-				<app-select
-					[options]="themeOptions"
-					[selectedOption]="theme"
-					(selectionChange)="onThemeChange($event)"
-				></app-select>
+				<app-theme-picker></app-theme-picker>
 
 				<!--  <mat-form-field class="w-28">
                     <mat-select value="en" class="w-fit" disabled>

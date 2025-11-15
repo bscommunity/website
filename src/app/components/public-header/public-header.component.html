@@ -151,7 +151,7 @@
 		</mat-autocomplete>
 	</div>
 	<app-mobile-menu
-		class="h-screen opacity-0 data-[state='open']:opacity-100 transition-opacity pointer-events-auto -z-50 fixed top-0 left-0"
+		class="h-screen opacity-0 data-[state='open']:opacity-100 data-[state='closed']:pointer-events-none transition-opacity pointer-events-auto -z-50 fixed top-0 left-0 flex md:hidden"
 		[isOpen]="isMobileMenuOpen"
 		(closeMenu)="closeMobileMenu()"
 		[attr.data-state]="isMobileMenuOpen ? 'open' : 'closed'"
