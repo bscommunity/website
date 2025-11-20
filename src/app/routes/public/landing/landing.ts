@@ -7,7 +7,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
 
 // Screens
-import { WorkshopScreenComponent } from "./subcomponents/workshop-screen/workshop-screen.component";
+// import { WorkshopScreenComponent } from "./subcomponents/workshop-screen/workshop-screen.component";
 
 // Subcomponents
 import { LandingTagComponent } from "./subcomponents/tag.component";
@@ -24,7 +24,7 @@ import { ChangelogService } from "@/services/changelog.service";
 		RouterLink,
 		LandingTagComponent,
 		// Screens
-		WorkshopScreenComponent,
+		// WorkshopScreenComponent,
 	],
 	templateUrl: "./landing.html",
 })
