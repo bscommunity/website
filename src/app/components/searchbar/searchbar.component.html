@@ -18,7 +18,7 @@
 			[matAutocomplete]="auto()!"
 			[disabled]="disabled()"
 		/>
-	} @else if (autoComplete() != null) {
+	} @else if (autoComplete() !== null) {
 		<input
 			#input
 			#trigger="matAutocompleteTrigger"
@@ -48,7 +48,7 @@
 				type="button"
 				(click)="clearSearch()"
 				aria-label="Clear search input"
-				class="!flex !items-center !justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+				class="flex! items-center! justify-center! disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
 				[disabled]="disabled()"
 			>
 				<span class="flex flex-1 items-center justify-center">

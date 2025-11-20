@@ -1,4 +1,4 @@
-import { Injectable, Type } from "@angular/core";
+import { inject, Injectable, Type } from "@angular/core";
 import { PublishHandler } from "../publish-handler.interface";
 
 // Components
@@ -51,15 +51,13 @@ export const initialChartFormData: ChartFormData = {
 export class ChartPublishHandler
 	implements PublishHandler<CreateChartModel, ChartModel>
 {
-	constructor(
-		private extractService: ExtractService,
-		private decodeService: DecodeService,
-		private chartService: ChartService,
-		private cacheService: CacheService,
-		private cookieService: CookieService,
-	) {}
+	private extractService = inject(ExtractService);
+	private decodeService = inject(DecodeService);
+	private chartService = inject(ChartService);
+	private cacheService = inject(CacheService);
+	private cookieService = inject(CookieService);
 
-	getStepComponents(): Type<any>[] {
+	getStepComponents(): Type<unknown>[] {
 		return [
 			PublishTypeComponent,
 			PublishChartFlowComponent,
@@ -74,7 +72,7 @@ export class ChartPublishHandler
 	/**
 	 * Fetches the bundle zip from the provided URL and processes it
 	 */
-	private async processBundleUrl(
+	private async processBundleFromUrl(
 		bundleUrl: string,
 	): Promise<Partial<ChartFormData>> {
 		try {
@@ -88,6 +86,7 @@ export class ChartPublishHandler
 				);
 			}
 		} catch (error) {
+			console.error("Failed to fetch bundle zip:", error);
 			throw new Error(
 				`Failed to fetch bundle zip from URL: ${bundleUrl}`,
 			);
@@ -177,7 +176,9 @@ export class ChartPublishHandler
 			if (formData.chartBundle) {
 				bundleData = await this.processBundleFile(formData.chartBundle);
 			} else if (formData.bundleUrl) {
-				bundleData = await this.processBundleUrl(formData.bundleUrl);
+				bundleData = await this.processBundleFromUrl(
+					formData.bundleUrl,
+				);
 			}
 
 			// Merge bundle data with form data

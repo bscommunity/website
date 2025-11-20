@@ -6,6 +6,9 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatIconModule } from "@angular/material/icon";
 
+// Screens
+import { WorkshopScreenComponent } from "./subcomponents/workshop-screen/workshop-screen.component";
+
 // Subcomponents
 import { LandingTagComponent } from "./subcomponents/tag.component";
 
@@ -20,6 +23,8 @@ import { ChangelogService } from "@/services/changelog.service";
 		MatIconModule,
 		RouterLink,
 		LandingTagComponent,
+		// Screens
+		WorkshopScreenComponent,
 	],
 	templateUrl: "./landing.html",
 })
