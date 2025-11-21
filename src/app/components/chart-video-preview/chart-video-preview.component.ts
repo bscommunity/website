@@ -5,7 +5,7 @@ import {
 	inject,
 	computed,
 } from "@angular/core";
-import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
+import { DomSanitizer } from "@angular/platform-browser";
 
 @Component({
 	selector: "app-chart-video-preview",

@@ -5,13 +5,15 @@ import { MatButtonModule } from "@angular/material/button";
 import {
 	MAT_DIALOG_DATA,
 	MatDialogActions,
-	MatDialogClose,
 	MatDialogContent,
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBar } from "@angular/material/snack-bar";
+
+// Models
+import { getApiErrorMessage } from "@/models/api-error.model";
 
 export interface ConfirmationDialogData {
 	title: string;
@@ -48,12 +50,9 @@ export class ConfirmationDialogComponent {
 				this.data.success ?? "Operation completed successfully",
 				"Close",
 			);
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error(error);
-			this._matSnackBar.open(
-				this.data.error ?? error.error ?? "An error occurred",
-				"Close",
-			);
+			this._matSnackBar.open(getApiErrorMessage(error), "Close");
 		}
 
 		this.isLoading.set(false);

@@ -5,12 +5,6 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 
-interface Button {
-	label: string;
-	link: string;
-	icon?: string;
-}
-
 @Component({
 	selector: "app-panel",
 	template: `
@@ -18,14 +12,14 @@ interface Button {
 			class="flex flex-col md:flex-row items-start md:items-center justify-start gap-4 rounded-lg px-6 py-4 w-full"
 			[ngClass]="{
 				'bg-info/50': variant() === 'info',
-				'bg-[#E8A940]/50': variant() === 'warning'
+				'bg-[#E8A940]/50': variant() === 'warning',
 			}"
 		>
 			@switch (variant()) {
-				@case ('info') {
+				@case ("info") {
 					<mat-icon>info</mat-icon>
 				}
-				@case ('warning') {
+				@case ("warning") {
 					<mat-icon>warning</mat-icon>
 				}
 				@default {

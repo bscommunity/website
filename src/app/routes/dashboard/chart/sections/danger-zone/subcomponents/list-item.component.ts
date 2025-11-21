@@ -1,4 +1,4 @@
-import { Component, input, inject } from "@angular/core";
+import { Component, input, inject, OnChanges } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 // Material
@@ -9,7 +9,7 @@ import { MatButtonModule } from "@angular/material/button";
 	templateUrl: "./list-item.component.html",
 	imports: [MatButtonModule],
 })
-export class DangerZoneListItemComponent {
+export class DangerZoneListItemComponent implements OnChanges {
 	private sanitizer = inject(DomSanitizer);
 
 	readonly title = input<string>("");

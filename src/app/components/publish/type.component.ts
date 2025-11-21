@@ -72,7 +72,7 @@ export class PublishTypeComponent {
 	});
 
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
-	currentContentType: string = "Chart";
+	currentContentType = "Chart";
 
 	onSubmit() {
 		if (this.form.valid) {

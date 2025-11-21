@@ -83,7 +83,7 @@ export class ChangelogService {
 					.map((line) => line.replace(/^- fix:\s*/, "").trim());
 
 				// Parse tags
-				let tags: ReleaseTag[] = [];
+				const tags: ReleaseTag[] = [];
 				const tagsIndex = lines.findIndex(
 					(line) => line.trim() === "## Tags:",
 				);

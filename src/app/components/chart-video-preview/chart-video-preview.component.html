@@ -1,5 +1,5 @@
 @if (embedUrl()) {
-	<div
+	<button
 		class="relative h-full w-full group cursor-pointer rounded-[28px] overflow-hidden"
 		(click)="openVideo()"
 	>
@@ -44,7 +44,7 @@
 		<div
 			class="flex w-full h-full absolute top-0 left-0 bg-surface-container-high animate-pulse z-20"
 		></div>
-	</div>
+	</button>
 } @else {
 	<div
 		class="flex items-center justify-center h-full w-full rounded-[28px] bg-on-surface/10"

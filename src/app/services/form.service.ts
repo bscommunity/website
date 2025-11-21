@@ -358,7 +358,7 @@ export class FormService {
 	async submitForm(
 		form: FormGroup,
 		fields: FormFieldConfig[],
-		enableDebugLogging: boolean = false,
+		enableDebugLogging = false,
 	): Promise<FormSubmissionResult> {
 		return this.handleFormSubmission(form, fields, { enableDebugLogging });
 	}
@@ -370,7 +370,7 @@ export class FormService {
 		form: FormGroup,
 		fields: FormFieldConfig[],
 		validationCallback: (formValue: any) => Promise<void> | void,
-		enableDebugLogging: boolean = false,
+		enableDebugLogging = false,
 	): Promise<FormSubmissionResult> {
 		return this.handleFormSubmission(form, fields, {
 			onValidSubmit: validationCallback,

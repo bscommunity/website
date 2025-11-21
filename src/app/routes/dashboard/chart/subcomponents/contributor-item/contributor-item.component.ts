@@ -29,7 +29,7 @@ import { MatButtonModule } from "@angular/material/button";
 })
 export class ContributorItemComponent {
 	readonly user = input.required<SimplifiedUserModel>();
-	readonly roles = input.required<WritableSignal<Map<string, Array<ContributorRole>>>>();
+	readonly roles = input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 	readonly canRemove = input(false, { transform: (value: string /*T:VAE*/) => value !== "false" });
 	readonly remove = output<string>();
 }

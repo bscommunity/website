@@ -13,7 +13,7 @@ import { ContributorRole } from "@/models/enums/role.enum";
 })
 export class ContributorTagsComponent {
 	readonly userId = input.required<string>();
-	readonly roles = input.required<WritableSignal<Map<string, Array<ContributorRole>>>>();
+	readonly roles = input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 
 	readonly baseRoles = Object.values(ContributorRole).filter(
 		(r) => r !== "AUTHOR",

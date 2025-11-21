@@ -35,7 +35,7 @@ export class ReleaseTemplateComponent implements OnInit {
 	readonly isLast = input.required<boolean>();
 	readonly icon = input.required<string>();
 
-	releaseDate: string = "";
+	releaseDate = "";
 
 	ngOnInit(): void {
 		// console.log("Release data:", this.release);

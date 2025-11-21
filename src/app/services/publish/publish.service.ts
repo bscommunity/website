@@ -16,12 +16,12 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { AuthService } from "../auth.service";
 
 // Types
-export type DialogData<TFormData = any> = {
+export interface DialogData<TFormData = any> {
 	title?: string | null;
 	description?: string | null;
 	formData: TFormData;
 	inactive?: string[];
-};
+}
 
 export interface PublishErrorData {
 	title?: string | null;

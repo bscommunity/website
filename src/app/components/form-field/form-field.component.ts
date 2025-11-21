@@ -1,5 +1,4 @@
 import {
-	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
 	input,
@@ -83,7 +82,7 @@ export class FormFieldComponent implements OnInit {
 			return;
 		}
 
-		const errorMessages = Object.entries(errors).map(([key, _]) => {
+		const errorMessages = Object.entries(errors).map(([key]) => {
 			return this.config().validationMessages?.[key] || `${key} error`;
 		});
 

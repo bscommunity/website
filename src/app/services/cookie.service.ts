@@ -102,8 +102,8 @@ export class CookieService {
 	 * @returns all the cookies in json
 	 *
 	 */
-	getAll(): { [key: string]: string } {
-		const cookies: { [key: string]: string } = {};
+	getAll(): Record<string, string> {
+		const cookies: Record<string, string> = {};
 		const cookieString: any = this.documentIsAccessible
 			? this.document?.cookie
 			: this.request?.headers.cookie;

@@ -72,7 +72,12 @@ export class HeaderComponent implements OnInit {
 		);
 	}
 
-	openProfile() {}
+	openProfile() {
+		this._snackBar.open("Profile page is not implemented yet!", "Ok", {
+			horizontalPosition: "right",
+			verticalPosition: "bottom",
+		});
+	}
 
 	openUploadDialog() {
 		this.uploadDialog.open();
