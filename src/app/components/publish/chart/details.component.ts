@@ -34,7 +34,7 @@ import { initialChartFormData as initialFormData } from "@/services/publish/hand
 	template: `
 		<h2 mat-dialog-title>{{ title }}</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography !flex flex-col gap-2">
+			<mat-dialog-content class="mat-typography flex! flex-col gap-2">
 				<p class="mb-2">
 					{{ description }}
 				</p>

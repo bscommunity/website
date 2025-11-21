@@ -5,8 +5,9 @@ import {
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
 } from "@angular/router";
-import { AuthService } from "@/services/auth.service";
+import { from } from "rxjs";
 import { map } from "rxjs/operators";
+import { AuthService } from "@/services/auth.service";
 
 export const isAuthenticatedGuard: CanActivateFn = (
 	route: ActivatedRouteSnapshot,
@@ -15,7 +16,7 @@ export const isAuthenticatedGuard: CanActivateFn = (
 	const authService = inject(AuthService);
 	const router = inject(Router);
 
-	return authService.isLoggedIn$.pipe(
+	return from(authService.checkAuthStatus()).pipe(
 		map((isLoggedIn) => {
 			if (!isLoggedIn) {
 				console.log("User is not authenticated");

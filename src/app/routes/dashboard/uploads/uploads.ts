@@ -173,6 +173,7 @@ export class Uploads implements OnInit, OnDestroy {
 					console.log("Resolved charts data:", response);
 					this.charts = response.first;
 					this.filterService.setLoading(false);
+					this.filterService.setError(null);
 					this.cdr.markForCheck();
 				},
 				error: (error) => {
@@ -181,7 +182,7 @@ export class Uploads implements OnInit, OnDestroy {
 						error?.error?.message ||
 						error?.error ||
 						"Failed to refresh charts. Please try again.";
-					this.error = msg;
+					this.filterService.setError(msg);
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},

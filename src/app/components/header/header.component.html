@@ -13,13 +13,6 @@
 				aria-hidden="false"
 				aria-label="Site logo"
 			></mat-icon>
-			<mat-icon
-				svgIcon="label"
-				inline
-				class="select-none pointer-events-none !w-[110px] !h-[13px]"
-				aria-hidden="false"
-				aria-label="Site label"
-			></mat-icon>
 		</a>
 
 		<ul class="hidden flex-row items-center justify-center gap-4 md:flex">
@@ -44,7 +37,7 @@
 			<li>
 				<button
 					mat-stroked-button
-					class="!pl-8"
+					class="pl-8!"
 					(click)="openUploadDialog()"
 				>
 					<mat-icon>cloud_upload</mat-icon>
@@ -110,7 +103,7 @@
 	>
 		<li class="w-full">
 			<a
-				class="!w-full"
+				class="w-full!"
 				mat-stroked-button
 				[routerLink]="['/dashboard']"
 				[routerLinkActiveOptions]="{ exact: true }"
@@ -120,12 +113,12 @@
 		</li>
 		<li class="w-full">
 			<a
-				class="!w-full"
+				class="w-full!"
 				mat-stroked-button
 				[routerLink]="['/dashboard/uploads']"
 				[routerLinkActiveOptions]="{ exact: true }"
 				routerLinkActive="!bg-primary !text-on-primary !border-primary"
-				>Published</a
+				>Uploads</a
 			>
 		</li>
 		<li class="mr-wrapper">
@@ -133,9 +126,9 @@
 				(click)="openUploadDialog()"
 				type="button"
 				mat-flat-button
-				class="!p-0"
+				class="p-0!"
 			>
-				<mat-icon class="!p-0 !m-0">cloud_upload</mat-icon>
+				<mat-icon class="p-0! m-0!">cloud_upload</mat-icon>
 			</button>
 		</li>
 	</ul>
