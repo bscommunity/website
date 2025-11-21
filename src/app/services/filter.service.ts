@@ -27,7 +27,7 @@ const WorkshopFiltersSchema = z.object({
 	difficulties: z.array(z.string()).default([]),
 	categories: z.array(z.string()).default([]),
 	versions: z.array(z.string()).default([]),
-	sortBy: z.nativeEnum(SortOption).default(SortOption.LAST_UPDATED),
+	sortBy: z.enum(SortOption).default(SortOption.LAST_UPDATED),
 });
 
 export type WorkshopFilters = z.infer<typeof WorkshopFiltersSchema>;

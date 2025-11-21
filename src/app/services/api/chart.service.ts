@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { firstValueFrom, Observable, shareReplay, tap } from "rxjs";
+import { firstValueFrom, Observable, of, shareReplay, tap } from "rxjs";
 
 // Services
 import { CacheService } from "../cache.service";
@@ -106,7 +106,7 @@ export class ChartService {
 			filters.sortBy || "",
 		].join("|");
 
-		return `charts_${btoa(key)}`;
+		return `charts_${encodeURIComponent(key)}`;
 	}
 
 	// Read
@@ -159,12 +159,9 @@ export class ChartService {
 					cachedDefault?.charts?.length &&
 					this.cacheService.isDefaultCacheValid()
 				) {
-					return new Observable((subscriber) => {
-						subscriber.next({
-							first: cachedDefault.charts,
-							second: cachedDefault.total,
-						});
-						subscriber.complete();
+					return of({
+						first: cachedDefault.charts,
+						second: cachedDefault.total,
 					});
 				}
 			} else {
@@ -177,21 +174,15 @@ export class ChartService {
 					if (isPaginated && pageKey) {
 						const cachedPage = cachedPayload.pages?.[pageKey];
 						if (cachedPage) {
-							return new Observable((subscriber) => {
-								subscriber.next({
-									first: cachedPage,
-									second: this.getCachedTotal(cachedPayload),
-								});
-								subscriber.complete();
+							return of({
+								first: cachedPage,
+								second: this.getCachedTotal(cachedPayload),
 							});
 						}
 					} else {
-						return new Observable((subscriber) => {
-							subscriber.next({
-								first: cachedPayload.first,
-								second: this.getCachedTotal(cachedPayload),
-							});
-							subscriber.complete();
+						return of({
+							first: cachedPayload.first,
+							second: this.getCachedTotal(cachedPayload),
 						});
 					}
 				}
@@ -269,11 +260,11 @@ export class ChartService {
 				if (cacheScope === "public") {
 					this.cacheService.addCharts(
 						fetchedCharts.first,
-						"persistent",
+						storageType,
 					);
 				}
 			}),
-			shareReplay(1),
+			shareReplay({ bufferSize: 1, refCount: true }),
 		);
 	}
 
@@ -344,6 +335,8 @@ export class ChartService {
 		}
 	}
 
+	// Cache storage now only understands the current payload format; any mismatched
+	// structures are discarded to avoid carrying legacy assumptions forward.
 	private getStoredChartsCache(
 		key: string,
 		storage: STORAGE,
@@ -355,35 +348,20 @@ export class ChartService {
 
 		try {
 			const parsed = JSON.parse(raw);
-			if (Array.isArray(parsed)) {
-				return {
-					first: parsed as ChartModel[],
-					second: parsed.length,
-				};
-			}
-
 			if (
 				parsed &&
 				typeof parsed === "object" &&
 				Array.isArray(parsed.first) &&
 				typeof parsed.second === "number"
 			) {
+				if (parsed.pages) {
+					Object.keys(parsed.pages).forEach((pageKey) => {
+						if (!Array.isArray(parsed.pages[pageKey])) {
+							delete parsed.pages[pageKey];
+						}
+					});
+				}
 				return parsed as CachedChartsPayload;
-			}
-
-			if (
-				parsed &&
-				typeof parsed === "object" &&
-				Array.isArray(parsed.charts) &&
-				typeof parsed.total === "number"
-			) {
-				return {
-					first: parsed.charts as ChartModel[],
-					second: parsed.total as number,
-					filters: parsed.filters,
-					scope: parsed.scope,
-					updatedAt: parsed.updatedAt,
-				};
 			}
 		} catch (error) {
 			console.error("Failed to parse charts cache payload:", error);
@@ -597,7 +575,7 @@ export class ChartService {
 		this.saveTrackedCacheEntries(scope, entries);
 	}
 
-	// Older builds stored raw string arrays, so we gracefully upgrade them here.
+	// Tracked cache entries are always stored using the typed metadata shape above.
 	private getTrackedCacheEntries(scope: CacheScope): TrackedCacheEntry[] {
 		const indexKey = this.getScopeIndexKey(scope);
 		if (!indexKey) {
@@ -612,31 +590,11 @@ export class ChartService {
 		try {
 			const parsed = JSON.parse(stored);
 			if (Array.isArray(parsed)) {
-				if (parsed.every((item) => typeof item === "string")) {
-					return parsed.map((key) => ({
-						key,
-						storage:
-							CACHE_SCOPE_STRATEGIES[scope]?.defaultStorage ??
-							"persistent",
-					}));
-				}
-
-				return parsed
-					.filter(
-						(item) =>
-							item &&
-							typeof item === "object" &&
-							typeof item.key === "string" &&
-							(item.storage === "session" ||
-								item.storage === "persistent"),
-					)
-					.map((item) => ({
-						key: item.key,
-						storage: item.storage,
-					}));
+				return parsed.filter((entry) =>
+					this.isValidTrackedEntry(entry),
+				);
 			}
 		} catch {
-			// Reset the corrupted index to avoid repeated parsing issues
 			this.storageService.removeItem(indexKey);
 		}
 
@@ -652,7 +610,31 @@ export class ChartService {
 			return;
 		}
 
-		this.storageService.setItem(indexKey, JSON.stringify(entries));
+		const uniqueEntries = entries.reduce<TrackedCacheEntry[]>(
+			(collection, entry) => {
+				if (!this.isValidTrackedEntry(entry)) {
+					return collection;
+				}
+
+				const alreadyTracked = collection.some(
+					(saved) =>
+						saved.key === entry.key &&
+						saved.storage === entry.storage,
+				);
+				if (!alreadyTracked) {
+					collection.push(entry);
+				}
+				return collection;
+			},
+			[],
+		);
+
+		if (!uniqueEntries.length) {
+			this.storageService.removeItem(indexKey);
+			return;
+		}
+
+		this.storageService.setItem(indexKey, JSON.stringify(uniqueEntries));
 	}
 
 	// Only scopes that opt-in should incur the bookkeeping overhead.
@@ -662,6 +644,16 @@ export class ChartService {
 
 	private getScopeIndexKey(scope: CacheScope): string | undefined {
 		return CACHE_SCOPE_STRATEGIES[scope]?.cacheIndexKey;
+	}
+
+	private isValidTrackedEntry(entry: unknown): entry is TrackedCacheEntry {
+		return (
+			Boolean(entry) &&
+			typeof entry === "object" &&
+			typeof (entry as TrackedCacheEntry).key === "string" &&
+			((entry as TrackedCacheEntry).storage === "session" ||
+				(entry as TrackedCacheEntry).storage === "persistent")
+		);
 	}
 
 	private chartMatchesFilters(
