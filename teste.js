@@ -9,7 +9,11 @@ async function main() {
 
 	const parsed = reader.parseProto(ChartProto);
 
-	console.log(parsed);
+	console.log("Notes amount:", parsed.notes.length);
+	console.log("Effects amount:", parsed.effects.length);
+
+	// Save to JSON file
+	await fs.writeFileSync("./output.json", JSON.stringify(parsed, null, 2));
 }
 
 main();

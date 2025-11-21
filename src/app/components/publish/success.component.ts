@@ -19,7 +19,7 @@ import { ChartModel } from "@/models/chart.model";
 	selector: "app-publish-dialog-success",
 	template: `
 		<h2 mat-dialog-title>Success!</h2>
-		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
+		<mat-dialog-content class="mat-typography flex! flex-col gap-2">
 			<p class="mb-2">
 				Your chart was submitted successfully and is ready for review or
 				use
@@ -82,6 +82,6 @@ export class PublishDialogSuccessComponent {
 
 	onAccessButtonClicked() {
 		this.dialogRef.close();
-		this.router.navigate([`chart/${this.data.id}`]);
+		this.router.navigate([`dashboard/chart/${this.data.id}`]);
 	}
 }

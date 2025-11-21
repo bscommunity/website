@@ -10,6 +10,7 @@ import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
 import { KnownIssueModel } from "@/models/known-issue.model";
 import { SortOption } from "@/models/enums/sort-option.enum";
+import { WorkshopFilters } from "./filter.service";
 
 const MAX_CACHED_CHARTS_PERSISTENT = 20;
 const MAX_CACHED_CHARTS_SESSION = 30;
@@ -79,6 +80,7 @@ export class CacheService {
 
 			return hoursDiff < CACHE_VALIDITY_HOURS;
 		} catch (error) {
+			console.error("Error parsing default cache metadata:", error);
 			return false;
 		}
 	}
@@ -86,7 +88,7 @@ export class CacheService {
 	/**
 	 * Sets metadata for default cache (no filters/queries)
 	 */
-	public setDefaultCacheMetadata(filters: any): void {
+	public setDefaultCacheMetadata(filters: WorkshopFilters | undefined): void {
 		const metadata: DefaultCacheMetadata = {
 			timestamp: new Date().toISOString(),
 			filters: JSON.stringify(filters),
@@ -108,6 +110,7 @@ export class CacheService {
 		try {
 			return JSON.parse(metadata);
 		} catch (error) {
+			console.error("Error parsing default cache metadata:", error);
 			return null;
 		}
 	}
@@ -115,7 +118,7 @@ export class CacheService {
 	/**
 	 * Checks if current filters match the default cache
 	 */
-	public isDefaultFilters(filters: any): boolean {
+	public isDefaultFilters(filters: WorkshopFilters | undefined): boolean {
 		if (!filters) return true;
 
 		const hasQuery = filters.query && filters.query.trim() !== "";
@@ -165,6 +168,7 @@ export class CacheService {
 			}
 			return parsed;
 		} catch (error) {
+			console.error("Error parsing default charts cache:", error);
 			this.storageService.removeItem(DEFAULT_CHARTS_CACHE_KEY);
 			return null;
 		}
@@ -259,6 +263,8 @@ export class CacheService {
 
 				return oldestDate < currentDate ? oldest : current;
 			});
+
+			console.log("Full cache. Removing oldest chart:", oldestChart);
 
 			this.removeChart(oldestChart.id);
 		}
@@ -459,7 +465,7 @@ export class CacheService {
 			return;
 		}
 
-		let versions = chart.versions || [];
+		const versions = chart.versions || [];
 		versions[0]?.knownIssues.push(knownIssue);
 
 		this.storageService.setItem(

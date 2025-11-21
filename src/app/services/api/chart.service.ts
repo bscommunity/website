@@ -306,12 +306,10 @@ export class ChartService {
 					);
 
 					// Optionally keep individual charts fresh in persistent cache for quick detail views
-					try {
-						this.cacheService.addCharts(
-							fetchedCharts.first,
-							"persistent",
-						);
-					} catch {}
+					this.cacheService.addCharts(
+						fetchedCharts.first,
+						"persistent",
+					);
 				}
 			}),
 			shareReplay(1),
@@ -326,22 +324,22 @@ export class ChartService {
 			try {
 				return Chart.parse(cachedChart);
 			} catch (error) {
+				console.error(
+					"Failed to parse cached chart, fetching from remote:",
+					error,
+				);
 				// Fall back to API fetch if parsing fails.
 			}
 		}
 
 		const response = await firstValueFrom(this.fetchChartFromRemote(id));
 
-		try {
-			const parsedChart = Chart.parse(response);
+		const parsedChart = Chart.parse(response);
 
-			// We need to add, since we don't know if it's already cached
-			// The user may just pasted the URL in the browser
-			this.cacheService.addChart(parsedChart);
-			return parsedChart;
-		} catch (error) {
-			throw error;
-		}
+		// We need to add, since we don't know if it's already cached
+		// The user may just pasted the URL in the browser
+		this.cacheService.addChart(parsedChart);
+		return parsedChart;
 	}
 
 	getSuggestions(query: string): Observable<string[]> {
@@ -378,6 +376,7 @@ export class ChartService {
 
 			return true;
 		} catch (error) {
+			console.error("Error deleting chart:", error);
 			return false;
 		}
 	}

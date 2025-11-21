@@ -1,4 +1,13 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from "@angular/core";
+import {
+	ChangeDetectorRef,
+	Component,
+	OnDestroy,
+	OnInit,
+	inject,
+} from "@angular/core";
+import { AsyncPipe } from "@angular/common";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -16,27 +25,32 @@ import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.com
 import { LargePanelComponent } from "@/components/panel/large-panel.component";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 
-// Enums
-import { Genre } from "@/models/enums/genre.enum";
-import { Difficulty } from "@/models/enums/difficulty.enum";
-
 // Models
 import { ChartModel, withLatestVersion } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { FilterService } from "@/services/filter.service";
+import type { WorkshopFilters } from "@/services/filter.service";
 
 // Utils
 import { convertStringToMonth } from "@/lib/time";
 
-type ChartsByMonth = {
+// Enums
+import {
+	getSortOptionLabel,
+	SortOption,
+} from "@/models/enums/sort-option.enum";
+
+interface ChartsByMonth {
 	name: string; // e.g., "2023-10"
 	charts: ChartModel[];
-};
+}
 
 @Component({
 	selector: "app-uploads",
 	imports: [
+		AsyncPipe,
 		MatIconModule,
 		MatButtonModule,
 		SelectComponent,
@@ -50,30 +64,20 @@ type ChartsByMonth = {
 	],
 	templateUrl: "./uploads.html",
 })
-export class Uploads implements OnInit {
+export class Uploads implements OnInit, OnDestroy {
 	private chartService = inject(ChartService);
+	private filterService = inject(FilterService);
 	private cdr = inject(ChangeDetectorRef);
+
+	private destroy$ = new Subject<void>();
 
 	convertStringToMonth = convertStringToMonth;
 
-	sortOptions: Option[] = [
-		{
-			label: "Newest",
-			value: "newest",
-		},
-		{
-			label: "Oldest",
-			value: "oldest",
-		},
-		{
-			label: "Most Popular",
-			value: "most-popular",
-		},
-		{
-			label: "Least Popular",
-			value: "least-popular",
-		},
-	];
+	// Sort options
+	sortOptions: Option[] = Object.values(SortOption).map((option) => ({
+		value: option,
+		label: getSortOptionLabel(option),
+	}));
 
 	sortBy: Option = this.sortOptions[0];
 
@@ -81,39 +85,6 @@ export class Uploads implements OnInit {
 
 	set charts(value: ChartModel[] | undefined) {
 		const charts: ChartModel[] = value?.map(withLatestVersion) || [];
-
-		this.availableDifficulties = Array.from(
-			new Set(
-				charts.map(
-					(chart) => Difficulty[chart.latestVersion.difficulty],
-				),
-			),
-		);
-
-		this.availableGenres = Array.from(
-			new Set(
-				charts.map((chart) =>
-					!!chart.genre ? Genre[chart.genre] : undefined,
-				),
-			),
-		);
-
-		this.availableVersions = Array.from(
-			new Set(
-				charts
-					.map((chart) =>
-						chart.latestVersion.isDeluxe ? "Deluxe" : "Default",
-					)
-					.flat(),
-			),
-		);
-
-		/* console.log(
-			"Processed: ",
-			this.availableDifficulties,
-			this.availableGenres,
-			this.availableVersions,
-		); */
 
 		const chartsByMonth: ChartsByMonth[] = [];
 		charts.forEach((chart) => {
@@ -146,54 +117,91 @@ export class Uploads implements OnInit {
 
 	private _charts!: ChartsByMonth[] | undefined;
 
-	availableDifficulties: Difficulty[] = [];
-	availableGenres: (Genre | undefined)[] = [];
-	availableVersions: string[] = [];
-	startDate: string | null = null;
-	endDate: string | null = null;
-
-	isRefreshing: boolean = true;
 	error: string | undefined = undefined;
 
+	// Expose observables (not used by template, but kept for parity and future use)
+	filters$ = this.filterService.filters$;
+	isLoading$ = this.filterService.isLoading$;
+	error$ = this.filterService.error$;
+
 	ngOnInit(): void {
-		// Access resolved data
+		// Inicializar sort pela store de filtros (se existir)
+		const initialFilters = this.filterService.getFilters();
+		const initialSort = initialFilters.sortBy ?? this.sortOptions[0].value;
+		this.sortBy =
+			this.sortOptions.find((o) => o.value === initialSort) ||
+			this.sortOptions[0];
+
+		// Carregamento inicial
 		this.fetchCharts(false);
+
+		// Recarregar quando filtros mudarem
+		this.filterService.filterChanges$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.fetchCharts(false);
+			});
+
+		// Sincronizar erros
+
+		this.error$.pipe(takeUntil(this.destroy$)).subscribe((err) => {
+			this.error = err || undefined;
+			this.cdr.markForCheck();
+		});
 	}
 
-	clearFilters() {
-		// Clear filters
+	ngOnDestroy(): void {
+		this.destroy$.next();
+		this.destroy$.complete();
 	}
 
-	fetchCharts(disableCache: boolean = false) {
-		this.isRefreshing = disableCache;
+	fetchCharts(disableCache = false) {
+		const filters: WorkshopFilters = this.filterService.getFilters();
 		this.error = undefined;
-		// Send isDashboard=true to restrict results to logged-in user content
+		this.filterService.setLoading(true);
+
+		// isDashboard=true to fetch uploads specific data
 		this.chartService
-			.getCharts(undefined, { isDashboard: true, disableCache })
+			.getCharts(filters, {
+				isDashboard: true,
+				disableCache,
+				storage: "persistent",
+			})
+			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
 					console.log("Resolved charts data:", response);
-
-					this.isRefreshing = false;
 					this.charts = response.first;
+					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},
 				error: (error) => {
 					console.error("Error fetching charts:", error);
-					this.error =
-						error.error ||
+					const msg =
+						error?.error?.message ||
+						error?.error ||
 						"Failed to refresh charts. Please try again.";
-
-					this.isRefreshing = false;
+					this.error = msg;
+					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},
 			});
 	}
 
+	onSortChange(sortBy: Option): void {
+		this.filterService.setSortBy(sortBy.value as SortOption);
+	}
+
 	onSearch(query: string) {
 		console.log("Search query:", query);
-		console.log("Charts before search:", this.charts);
+		this.filterService.setQuery(query);
+	}
 
-		// Handle search query
+	clearFilters() {
+		this.filterService.resetFilters();
+	}
+
+	hasActiveFilters(): boolean {
+		return this.filterService.hasActiveFilters();
 	}
 }

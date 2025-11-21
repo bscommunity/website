@@ -16,7 +16,7 @@ import { MatButtonModule } from "@angular/material/button";
 
 // Components
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
-import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+// import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 import {
 	TableComponent,
@@ -120,7 +120,10 @@ export class VersionsComponent {
 			disabled: (index, item) => {
 				// Check if this is the latest version by comparing with the versions signal
 				const versions = this.versions();
-				return versions.length === 0 || item.id === versions[versions.length - 1].id;
+				return (
+					versions.length === 0 ||
+					item.id === versions[versions.length - 1].id
+				);
 			},
 		},
 		{
@@ -163,12 +166,12 @@ export class VersionsComponent {
 			.subscribe(async (result: ChartFormData | "back" | undefined) => {
 				if (result == "back" || result == undefined) return;
 
-				const data =
+				/* const data =
 					await this.chartPublishHandler.preprocessFormData(result);
 
 				this.dialog.open(PublishDialogLoadingComponent);
 
-				this.addVersion(data);
+				this.addVersion(data); */
 			});
 	}
 

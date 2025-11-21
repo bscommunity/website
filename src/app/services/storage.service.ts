@@ -22,7 +22,7 @@ export class StorageService {
 	 * @param value - The value to store.
 	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
 	 */
-	setItem(key: string, value: string, useSession: boolean = false): void {
+	setItem(key: string, value: string, useSession = false): void {
 		this.checkWindow();
 		const storage = useSession
 			? window.sessionStorage
@@ -37,7 +37,7 @@ export class StorageService {
 	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
 	 * @returns The value associated with the key, or null if not found.
 	 */
-	getItem(key: string, useSession: boolean = false): string | null {
+	getItem(key: string, useSession = false): string | null {
 		this.checkWindow();
 		const storage = useSession
 			? window.sessionStorage
@@ -51,7 +51,7 @@ export class StorageService {
 	 * @param key - The key of the item to remove.
 	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
 	 */
-	removeItem(key: string, useSession: boolean = false): void {
+	removeItem(key: string, useSession = false): void {
 		this.checkWindow();
 		const storage = useSession
 			? window.sessionStorage
@@ -64,7 +64,7 @@ export class StorageService {
 	 *
 	 * @param useSession - If true, clears sessionStorage; otherwise, clears localStorage. Defaults to false.
 	 */
-	clear(useSession: boolean = false): void {
+	clear(useSession = false): void {
 		this.checkWindow();
 		const storage = useSession
 			? window.sessionStorage
