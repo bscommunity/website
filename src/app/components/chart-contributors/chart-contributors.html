@@ -1,36 +1,43 @@
-<div class="custom-expansion-panel !shadow-none !w-full">
+<div class="custom-expansion-panel shadow-none! w-full">
 	<div
-		class="header !w-full cursor-pointer"
+		class="header w-full! cursor-pointer"
+		tabindex="0"
 		(click)="isExpanded.set(!isExpanded())"
+		(keydown)="isExpanded.set(!isExpanded())"
 	>
-		<div class="flex justify-between items-center">
-			<div class="flex flex-row items-center overflow-hidden">
+		<div class="flex justify-between items-start gap-2">
+			<div class="flex flex-row items-start overflow-hidden">
 				<div
 					class="flex items-center transition-all duration-300 ease-in-out delay-100"
 					[class.opacity-0]="isExpanded()"
 					[class.max-w-0]="isExpanded()"
 					[class.max-w-full]="!isExpanded()"
 				>
-					@for (contributor of contributors().slice(0, 3); track
-					contributor.user.id) {
-					<li class="-ml-2.5 first:ml-0 list-none">
-						<app-avatar
-							[src]="contributor.user.imageUrl"
-							[alt]="contributor.user.username"
-							[class]="'transition-transform duration-300 w-12 h-12'"
-						></app-avatar>
-					</li>
-					} @if (contributors().length > 3) {
-					<span
-						class="ml-2 text-on-surface-variant text-sm whitespace-nowrap"
-						>+{{ contributors().length - 3 }}</span
-					>
+					@for (
+						contributor of contributors().slice(0, 3);
+						track contributor.user.id
+					) {
+						<li class="-ml-2.5 first:ml-0 list-none">
+							<app-avatar
+								[src]="contributor.user.imageUrl"
+								[alt]="contributor.user.username"
+								[class]="
+									'transition-transform duration-300 w-12 h-12'
+								"
+							></app-avatar>
+						</li>
+					}
+					@if (contributors().length > 3) {
+						<span
+							class="ml-2 text-on-surface-variant text-sm whitespace-nowrap"
+							>+{{ contributors().length - 3 }}</span
+						>
 					}
 					<div class="w-4 bg-red-300"></div>
 				</div>
 				<!-- TODO: Without setting a fixed height with overflow-hidden, the height bumps up a little bit when the two text are swapped -->
 				<div
-					class="flex flex-col items-start justify-start min-w-0 h-12 overflow-hidden"
+					class="flex flex-col items-start justify-start min-w-0 h-16 md:h-12 overflow-hidden"
 				>
 					<div
 						class="text-on-surface-variant font-medium transition-all duration-300 ease-in-out"
@@ -58,7 +65,7 @@
 				</div>
 			</div>
 			<mat-icon
-				class="transition-transform duration-300 ease-in-out"
+				class="transition-transform duration-300 ease-in-out mt-2"
 				[class.rotate-180]="isExpanded()"
 				>expand_more</mat-icon
 			>
@@ -72,21 +79,21 @@
 		[class.opacity-100]="isExpanded()"
 	>
 		@for (contributor of contributors(); track contributor.user.id) {
-		<div class="flex items-center gap-4 mt-4">
-			<app-avatar
-				[class]="'w-12 h-12'"
-				[src]="contributor.user.imageUrl"
-				[alt]="contributor.user.username"
-			></app-avatar>
-			<div class="contributor-info">
-				<p class="text-on-surface-variant text-sm font-medium m-0">
-					&#64;{{ contributor.user.username }}
-				</p>
-				<p class="text-on-surface-variant text-xs m-0">
-					{{ getRolesString(contributor) }}
-				</p>
+			<div class="flex items-center gap-4 mt-4">
+				<app-avatar
+					[class]="'w-12 h-12'"
+					[src]="contributor.user.imageUrl"
+					[alt]="contributor.user.username"
+				></app-avatar>
+				<div class="contributor-info">
+					<p class="text-on-surface-variant text-sm font-medium m-0">
+						&#64;{{ contributor.user.username }}
+					</p>
+					<p class="text-on-surface-variant text-xs m-0">
+						{{ getRolesString(contributor) }}
+					</p>
+				</div>
 			</div>
-		</div>
 		}
 	</div>
 </div>

@@ -19,7 +19,7 @@ export class AvatarComponent {
 
 	readonly imageClasses = computed(() =>
 		twMerge(
-			"rounded-full aspect-square object-cover w-10 h-10 z-20 relative",
+			"rounded-full aspect-square object-cover w-10 h-10 z-20 relative max-w-[inherit]",
 			this.class(),
 		),
 	);

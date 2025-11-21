@@ -7,16 +7,21 @@ import {
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatChipsModule } from "@angular/material/chips";
 
 // Types
 import { MatIcon } from "@angular/material/icon";
 
-// Models
-import { ChartModel } from "@/models/chart.model";
-import { MatChipsModule } from "@angular/material/chips";
-import { convertDateTimeToHumanReadable } from "@/lib/time";
+// Components
 import { ChartContributorsComponent } from "@/components/chart-contributors/chart-contributors.component";
 import { ChartVideoPreviewComponent } from "@/components/chart-video-preview/chart-video-preview.component";
+
+// Models
+import { ChartModel } from "@/models/chart.model";
+
+// Libs
+import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 interface ChartDialogData {
 	chart: ChartModel;
@@ -76,11 +81,13 @@ interface ChartDialogData {
 				}
 			</ul>
 		</mat-dialog-content>
-		<mat-dialog-actions class="flex flex-col md:flex-row">
+		<mat-dialog-actions
+			class="flex! flex-col md:flex-row! gap-2 w-full items-stretch"
+		>
 			<a
-				class="flex! flex-1!"
 				tabindex="0"
 				mat-stroked-button
+				class="flex-1 w-full md:w-auto min-h-10 mx-0!"
 				(click)="onShare()"
 				(keypress)="onShare()"
 			>
@@ -88,9 +95,21 @@ interface ChartDialogData {
 				Share
 			</a>
 			<a
-				class="flex! flex-1!"
+				class="hidden! md:flex! flex-1 w-auto min-h-10 mx-0!"
+				tabindex="1"
+				mat-flat-button
+				(click)="downloadChart()"
+				(keypress)="downloadChart()"
+			>
+				Download
+			</a>
+			<a
+				class="flex! md:hidden! w-full min-h-10 mx-0!"
+				tabindex="1"
 				mat-flat-button
 				href="bscm://link/chart/{{ data.chart.id }}"
+				(click)="onOpenInApp()"
+				(keypress)="onOpenInApp()"
 			>
 				Open in app
 			</a>
@@ -109,6 +128,8 @@ interface ChartDialogData {
 export class ChartDialogComponent {
 	dialogRef = inject<MatDialogRef<ChartDialogComponent>>(MatDialogRef);
 	data = inject<ChartDialogData>(MAT_DIALOG_DATA);
+
+	private _snackBar = inject(MatSnackBar);
 
 	buttons = [
 		{
@@ -139,12 +160,39 @@ export class ChartDialogComponent {
 		return `${minutes}m${seconds}s`;
 	}
 
+	downloadChart() {
+		window.open(this.data.chart.latestVersion.bundleUrl, "_blank");
+		this.dialogRef.close();
+	}
+
+	onOpenInApp() {
+		// Show a snackbar to ask the user to download the app if not installed
+		const action = this._snackBar.open(
+			"Opening in app... You may need to download it first.",
+			"Download app",
+			{
+				duration: 5000,
+			},
+		);
+
+		action.onAction().subscribe(() => {
+			window.open("https://bscm.netlify.app/download", "_blank");
+		});
+
+		this.dialogRef.close();
+	}
+
 	onShare() {
 		// Generate shareable link
-		/* const chartId = this.data.chart.id;
-        const url = this.router.serializeUrl(
-            this.router.createUrlTree([`/charts/${chartId}`]),
-        ); */
+		const url = `${window.location.origin}/link/chart/${this.data.chart.id}`;
+
+		// Copy to clipboard
+		navigator.clipboard.writeText(url);
+
+		// Show snackbar
+		this._snackBar.open("Chart link copied to clipboard!", "Close", {
+			duration: 3000,
+		});
 
 		this.dialogRef.close();
 	}

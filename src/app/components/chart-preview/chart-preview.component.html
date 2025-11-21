@@ -33,7 +33,10 @@
 				matTooltipPosition="above"
 				matRipple
 				class="flex items-center justify-center rounded-full bg-secondary-container hover:bg-primary-container transition-colors p-2 h-10 w-10"
-				[href]=""
+				[href]="
+					'https://discord.com/channels/951981656301006878/1404808964163768361/' +
+					this.chart.id
+				"
 				target="_blank"
 				title="Open in Discord"
 				(click)="$event.stopPropagation()"
@@ -165,7 +168,10 @@
 				matRipple
 				matTooltip="Open in Discord"
 				class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 h-10 w-10"
-				[href]=""
+				[href]="
+					'https://discord.com/channels/951981656301006878/1404808964163768361/' +
+					this.chart.id
+				"
 				target="_blank"
 				title="Open in Discord"
 				(click)="$event.stopPropagation()"
