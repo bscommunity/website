@@ -4,7 +4,7 @@
 	<div class="flex flex-row items-center justify-between w-full px-wrapper">
 		<a
 			[routerLink]="['/dashboard']"
-			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
+			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container min-w-40"
 		>
 			<mat-icon
 				class="w-8!"
@@ -46,7 +46,9 @@
 			</li>
 		</ul>
 
-		<div class="flex flex-row items-center justify-end gap-2 md:gap-4">
+		<div
+			class="flex flex-row items-center justify-end gap-2 md:gap-4 min-w-40"
+		>
 			<button
 				mat-ripple
 				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 opacity-50"

@@ -26,7 +26,7 @@ interface Button {
 				class="flex flex-row items-start md:items-center justify-start gap-6"
 			>
 				<mat-icon class="min-w-6"> help </mat-icon>
-				<div class="flex flex-col items-start justify-start">
+				<div class="flex flex-col items-start justify-start gap-1">
 					<b
 						><p>{{ title() }}</p></b
 					>

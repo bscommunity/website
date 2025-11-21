@@ -71,20 +71,24 @@ interface FormMode {
 
 				<!-- Disclaimer -->
 				<app-panel>
-					Your chart bundle is not stored. Only the neccessary
-					metadata is extracted on your submission.
+					Your chart bundle is not stored. Only the necessary metadata
+					is extracted on your submission.
 				</app-panel>
 			</mat-dialog-content>
-			<mat-dialog-actions align="center">
+			<mat-dialog-actions align="center" class="gap-2">
 				<button
-					class="w-[49%]!"
+					class="w-full md:w-[49%]! mx-0!"
 					mat-button
 					type="button"
 					(click)="dialogRef.close('back')"
 				>
 					Back
 				</button>
-				<button class="w-[49%]!" mat-flat-button type="submit">
+				<button
+					class="w-full md:w-[49%]! mx-0!"
+					mat-flat-button
+					type="submit"
+				>
 					Continue
 				</button>
 			</mat-dialog-actions>

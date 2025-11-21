@@ -26,7 +26,7 @@ import { MatIconModule } from "@angular/material/icon";
 					<mat-icon>info</mat-icon>
 				}
 			}
-			<p class="text-sm">
+			<p class="text-sm flex-1">
 				<ng-content></ng-content>
 			</p>
 		</div>
