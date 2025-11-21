@@ -24,7 +24,7 @@ interface ChartsResponse {
 	second: number;
 }
 
-type CacheScope = "public" | "uploads";
+type CacheScope = "public" | "private";
 
 interface CachedChartsPayload extends ChartsResponse {
 	pages?: Record<string, ChartModel[]>;
@@ -33,6 +33,30 @@ interface CachedChartsPayload extends ChartsResponse {
 	scope?: CacheScope;
 	updatedAt?: string;
 }
+
+interface CacheScopeStrategy {
+	defaultStorage: STORAGE;
+	shouldTrackMutations: boolean;
+	cacheIndexKey?: string;
+}
+
+interface TrackedCacheEntry {
+	key: string;
+	storage: STORAGE;
+}
+
+// Controls how each route scope wants data to be cached by default.
+const CACHE_SCOPE_STRATEGIES: Record<CacheScope, CacheScopeStrategy> = {
+	public: {
+		defaultStorage: "session",
+		shouldTrackMutations: false,
+	},
+	private: {
+		defaultStorage: "persistent",
+		shouldTrackMutations: true,
+		cacheIndexKey: "private_charts_cache_index",
+	},
+};
 
 @Injectable({
 	providedIn: "root",
@@ -43,7 +67,6 @@ export class ChartService {
 	private http = inject(HttpClient);
 
 	private readonly apiUrl = `${apiUrl}/charts`;
-	private readonly uploadsCacheIndexKey = "uploads_cache_index";
 
 	// Create
 	async createChart(chart: CreateChartModel): Promise<ChartModel> {
@@ -63,7 +86,7 @@ export class ChartService {
 		);
 
 		this.cacheService.addChart(createdChart);
-		this.updateUploadsCachesWithChart(createdChart);
+		this.updateScopedCachesWithChart("private", createdChart);
 
 		return createdChart;
 	}
@@ -99,21 +122,24 @@ export class ChartService {
 	): Observable<ChartsResponse> {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
 		const isDashboardRequest = options?.isDashboard ?? false;
-
+		// Public (workshop) and private (dashboard) screens decide caching very differently.
+		const cacheScope: CacheScope = isDashboardRequest
+			? "private"
+			: "public";
+		const scopeStrategy = CACHE_SCOPE_STRATEGIES[cacheScope];
+		const defaultStorage = scopeStrategy?.defaultStorage ?? "session";
+		// Callers can override storage, but otherwise we follow the scope strategy
+		// and keep the default landing query in persistent storage as before.
 		const storageType: STORAGE =
 			options?.storage ??
-			(isDashboardRequest
+			(cacheScope === "public" && isDefaultQuery
 				? "persistent"
-				: isDefaultQuery
-					? "persistent"
-					: "session");
-
-		const cacheScope: CacheScope = isDashboardRequest
-			? "uploads"
-			: "public";
+				: defaultStorage);
 		const baseCacheKey = this.generateCacheKey(filters);
 		const cacheKey =
-			cacheScope === "uploads" ? `${baseCacheKey}_uploads` : baseCacheKey;
+			cacheScope === "public"
+				? baseCacheKey
+				: `${baseCacheKey}_${cacheScope}`;
 		const canReadCache = !options?.disableCache;
 		const isPaginated = Boolean(options?.limit);
 		const pageKey =
@@ -297,7 +323,7 @@ export class ChartService {
 		);
 
 		this.cacheService.updateChart(updatedChart);
-		this.updateUploadsCachesWithChart(updatedChart);
+		this.updateScopedCachesWithChart("private", updatedChart);
 
 		return updatedChart;
 	}
@@ -309,7 +335,7 @@ export class ChartService {
 				this.http.delete<ChartModel>(`${this.apiUrl}/${id}`),
 			);
 			this.cacheService.removeChart(id);
-			this.removeChartFromUploadsCaches(id);
+			this.removeChartFromScopedCaches("private", id);
 
 			return true;
 		} catch (error) {
@@ -374,6 +400,7 @@ export class ChartService {
 		scope: CacheScope,
 		filters?: WorkshopFilters,
 	): void {
+		// Non-paginated caches only need the latest batch plus metadata.
 		const payload: CachedChartsPayload = {
 			first: response.first,
 			second: response.second,
@@ -388,9 +415,7 @@ export class ChartService {
 			storage === "session",
 		);
 
-		if (scope === "uploads") {
-			this.trackUploadsCacheKey(key);
-		}
+		this.trackScopedCacheEntry(scope, { key, storage });
 	}
 
 	private persistPaginatedChartsCache(
@@ -423,9 +448,7 @@ export class ChartService {
 			storage === "session",
 		);
 
-		if (scope === "uploads") {
-			this.trackUploadsCacheKey(key);
-		}
+		this.trackScopedCacheEntry(scope, { key, storage });
 	}
 
 	private getCachedTotal(payload: CachedChartsPayload): number {
@@ -438,38 +461,12 @@ export class ChartService {
 		return payload.first.length;
 	}
 
-	private trackUploadsCacheKey(key: string): void {
-		const keys = this.getUploadsCacheKeys();
-		if (keys.includes(key)) {
-			return;
-		}
-		keys.push(key);
-		this.saveUploadsCacheKeys(keys);
-	}
-
-	private getUploadsCacheKeys(): string[] {
-		const stored = this.storageService.getItem(this.uploadsCacheIndexKey);
-		if (!stored) {
-			return [];
-		}
-
-		try {
-			const parsed = JSON.parse(stored);
-			return Array.isArray(parsed) ? (parsed as string[]) : [];
-		} catch {
-			return [];
-		}
-	}
-
-	private saveUploadsCacheKeys(keys: string[]): void {
-		this.storageService.setItem(
-			this.uploadsCacheIndexKey,
-			JSON.stringify(keys),
-		);
-	}
-
-	private updateUploadsCachesWithChart(chart: ChartModel): void {
-		this.mutateUploadsCaches((payload) => {
+	// Synchronize any tracked caches for a scope after create/update operations.
+	private updateScopedCachesWithChart(
+		scope: CacheScope,
+		chart: ChartModel,
+	): void {
+		this.mutateTrackedCaches(scope, (payload) => {
 			if (!this.chartMatchesFilters(chart, payload.filters)) {
 				const filtered = payload.first.filter(
 					(entry) => entry.id !== chart.id,
@@ -498,8 +495,9 @@ export class ChartService {
 		});
 	}
 
-	private removeChartFromUploadsCaches(id: string): void {
-		this.mutateUploadsCaches((payload) => {
+	// Drop a chart from any cached pages for the given scope after deletion.
+	private removeChartFromScopedCaches(scope: CacheScope, id: string): void {
+		this.mutateTrackedCaches(scope, (payload) => {
 			const nextCharts = payload.first.filter((chart) => chart.id !== id);
 			if (nextCharts.length === payload.first.length) {
 				return payload;
@@ -519,18 +517,24 @@ export class ChartService {
 		});
 	}
 
-	private mutateUploadsCaches(
+	// Utility used by create/update/delete flows to tweak cached payloads in place.
+	private mutateTrackedCaches(
+		scope: CacheScope,
 		mutator: (payload: CachedChartsPayload) => CachedChartsPayload | null,
 	): void {
-		const keys = this.getUploadsCacheKeys();
-		if (!keys.length) {
+		if (!this.scopeSupportsTracking(scope)) {
 			return;
 		}
 
-		const remainingKeys: string[] = [];
-		keys.forEach((key) => {
-			const payload = this.getStoredChartsCache(key, "persistent");
-			if (!payload || (payload.scope && payload.scope !== "uploads")) {
+		const entries = this.getTrackedCacheEntries(scope);
+		if (!entries.length) {
+			return;
+		}
+
+		const remainingEntries: TrackedCacheEntry[] = [];
+		entries.forEach((entry) => {
+			const payload = this.getStoredChartsCache(entry.key, entry.storage);
+			if (!payload || (payload.scope && payload.scope !== scope)) {
 				return;
 			}
 
@@ -551,17 +555,113 @@ export class ChartService {
 
 			const result = mutator(clonedPayload);
 			if (!result) {
-				this.storageService.removeItem(key);
+				this.storageService.removeItem(
+					entry.key,
+					entry.storage === "session",
+				);
 				return;
 			}
 
-			result.scope = "uploads";
+			result.scope = scope;
 			result.updatedAt = new Date().toISOString();
-			this.storageService.setItem(key, JSON.stringify(result), false);
-			remainingKeys.push(key);
+			this.storageService.setItem(
+				entry.key,
+				JSON.stringify(result),
+				entry.storage === "session",
+			);
+			remainingEntries.push(entry);
 		});
 
-		this.saveUploadsCacheKeys(remainingKeys);
+		this.saveTrackedCacheEntries(scope, remainingEntries);
+	}
+
+	// Keeps a lightweight index of which cache keys should be mutated later.
+	private trackScopedCacheEntry(
+		scope: CacheScope,
+		entry: TrackedCacheEntry,
+	): void {
+		if (!this.scopeSupportsTracking(scope)) {
+			return;
+		}
+
+		const entries = this.getTrackedCacheEntries(scope);
+		const alreadyTracked = entries.some(
+			(current) =>
+				current.key === entry.key && current.storage === entry.storage,
+		);
+		if (alreadyTracked) {
+			return;
+		}
+
+		entries.push(entry);
+		this.saveTrackedCacheEntries(scope, entries);
+	}
+
+	// Older builds stored raw string arrays, so we gracefully upgrade them here.
+	private getTrackedCacheEntries(scope: CacheScope): TrackedCacheEntry[] {
+		const indexKey = this.getScopeIndexKey(scope);
+		if (!indexKey) {
+			return [];
+		}
+
+		const stored = this.storageService.getItem(indexKey);
+		if (!stored) {
+			return [];
+		}
+
+		try {
+			const parsed = JSON.parse(stored);
+			if (Array.isArray(parsed)) {
+				if (parsed.every((item) => typeof item === "string")) {
+					return parsed.map((key) => ({
+						key,
+						storage:
+							CACHE_SCOPE_STRATEGIES[scope]?.defaultStorage ??
+							"persistent",
+					}));
+				}
+
+				return parsed
+					.filter(
+						(item) =>
+							item &&
+							typeof item === "object" &&
+							typeof item.key === "string" &&
+							(item.storage === "session" ||
+								item.storage === "persistent"),
+					)
+					.map((item) => ({
+						key: item.key,
+						storage: item.storage,
+					}));
+			}
+		} catch {
+			// Reset the corrupted index to avoid repeated parsing issues
+			this.storageService.removeItem(indexKey);
+		}
+
+		return [];
+	}
+
+	private saveTrackedCacheEntries(
+		scope: CacheScope,
+		entries: TrackedCacheEntry[],
+	): void {
+		const indexKey = this.getScopeIndexKey(scope);
+		if (!indexKey) {
+			return;
+		}
+
+		this.storageService.setItem(indexKey, JSON.stringify(entries));
+	}
+
+	// Only scopes that opt-in should incur the bookkeeping overhead.
+	private scopeSupportsTracking(scope: CacheScope): boolean {
+		return Boolean(CACHE_SCOPE_STRATEGIES[scope]?.shouldTrackMutations);
+	}
+
+	private getScopeIndexKey(scope: CacheScope): string | undefined {
+		return CACHE_SCOPE_STRATEGIES[scope]?.cacheIndexKey;
 	}
 
 	private chartMatchesFilters(
