@@ -44,6 +44,9 @@ import { VersionService } from "@/services/api/version.service";
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 
+// Utils
+import { getApiErrorMessage } from "@/models/api-error.model";
+
 @Component({
 	selector: "app-chart-versions-section",
 	imports: [
@@ -226,17 +229,20 @@ export class VersionsComponent {
 
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Failed to add new version:", error);
+
+			const errorMessage = getApiErrorMessage(
+				error,
+				"An error occurred while adding the new version.",
+			);
 
 			this.dialog.closeAll();
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					title: "Failed to add new version",
-					message: error.statusText,
-					error: error.error
-						? error.error.message
-						: "An error occurred while adding the new version.",
+					message: errorMessage.message,
+					error: errorMessage.error,
 				},
 			});
 		}

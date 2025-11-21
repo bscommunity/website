@@ -19,6 +19,7 @@ import { MatButtonModule } from "@angular/material/button";
 import {
 	MatAutocomplete,
 	MatAutocompleteModule,
+	MatAutocompleteSelectedEvent,
 	MatAutocompleteTrigger,
 } from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
@@ -43,7 +44,7 @@ export class SearchbarComponent implements OnInit, OnDestroy {
 	readonly input = viewChild.required<ElementRef<HTMLInputElement>>("input");
 	readonly auto = viewChild<MatAutocomplete>("auto");
 	readonly trigger = viewChild(MatAutocompleteTrigger);
-	readonly onSearch = input<(value: string) => void>(() => {});
+	readonly onSearch = input.required<(value: string) => void>();
 	readonly debounceDuration = input<number>(300);
 	readonly placeholder = input<string>("Search");
 	readonly disabled = input<boolean>(false);
@@ -57,8 +58,6 @@ export class SearchbarComponent implements OnInit, OnDestroy {
 
 	private searchSubject = new Subject<string>();
 	private searchSubscription!: Subscription;
-
-	constructor() {}
 
 	ngOnInit() {
 		this.searchSubscription = this.searchSubject
@@ -88,7 +87,7 @@ export class SearchbarComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	onOptionSelected(event: any) {
+	onOptionSelected(event: MatAutocompleteSelectedEvent) {
 		const value = event.option.value;
 		this.input().nativeElement.value = value;
 		this.onSearch()(value);

@@ -16,7 +16,7 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { AuthService } from "../auth.service";
 
 // Types
-export interface DialogData<TFormData = any> {
+export interface DialogData<TFormData = Record<string, unknown>> {
 	title?: string | null;
 	description?: string | null;
 	formData: TFormData;
@@ -26,14 +26,14 @@ export interface DialogData<TFormData = any> {
 export interface PublishErrorData {
 	title?: string | null;
 	message: string;
-	error: any;
+	error: unknown;
 	redirectTo?: string;
 }
 
 export type PublishProgressData =
 	| {
 			data: DialogData["formData"];
-			additionalData?: any;
+			additionalData?: Record<string, unknown>;
 	  }
 	| "back"
 	| "next";
@@ -41,7 +41,10 @@ export type PublishProgressData =
 @Injectable({
 	providedIn: "root",
 })
-export class PublishDialogService<TFormData = any, TSuccessData = any> {
+export class PublishDialogService<
+	TFormData = Record<string, unknown>,
+	TSuccessData = unknown,
+> {
 	private authService = inject(AuthService);
 
 	private router = inject(Router);
@@ -52,7 +55,7 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 
 	private handler!: PublishHandler<TFormData, TSuccessData>;
 	private formData!: TFormData;
-	private additionalData: any = {};
+	private additionalData: Record<string, unknown> = {};
 
 	setHandler(handler: PublishHandler<TFormData, TSuccessData>) {
 		this.handler = handler;
@@ -83,7 +86,7 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 	}
 
 	private openCurrentStep() {
-		const dialogRef = this.dialog.open<any>(this.getStepComponent(), {
+		const dialogRef = this.dialog.open<unknown>(this.getStepComponent(), {
 			disableClose: this.currentStepSubject.value !== 0,
 			data: {
 				formData: this.formData,
@@ -103,7 +106,7 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
 				this.formData = { ...this.formData, ...result };
-				this.additionalData = result.additionalData;
+				this.additionalData = result.additionalData || {};
 
 				this.moveToStep(this.currentStepSubject.value + 1);
 			}
@@ -158,15 +161,23 @@ export class PublishDialogService<TFormData = any, TSuccessData = any> {
 				disableClose: true,
 				data: response,
 			});
-		} catch (error: any) {
+		} catch (error: unknown) {
 			loadingDialog.close();
+			const errorMessage =
+				(error && typeof error === "object" && "statusText" in error
+					? (error as { statusText?: string }).statusText
+					: undefined) ||
+				"There was an error while submitting the content.";
+			const errorDetail =
+				error && typeof error === "object" && "error" in error
+					? (error as { error?: { message?: unknown } }).error
+							?.message || error
+					: error;
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
 					title: "Failed to submit content",
-					message:
-						error.statusText ||
-						"There was an error while submitting the content.",
-					error: error.error?.message || error,
+					message: errorMessage,
+					error: errorDetail,
 				},
 			});
 		} finally {

@@ -52,7 +52,7 @@ export class ConfirmationDialogComponent {
 			);
 		} catch (error: unknown) {
 			console.error(error);
-			this._matSnackBar.open(getApiErrorMessage(error), "Close");
+			this._matSnackBar.open(getApiErrorMessage(error).error, "Close");
 		}
 
 		this.isLoading.set(false);

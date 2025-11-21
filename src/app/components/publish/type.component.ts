@@ -12,7 +12,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 // Types
-// import { type DialogData } from "@/services/publish.service";
+import { type DialogData } from "@/services/publish/publish.service";
 
 @Component({
 	selector: "app-publish-type",
@@ -20,9 +20,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 		<h2 mat-dialog-title>Submit</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
 			<mat-dialog-content class="mat-typography">
-				<label id="content-type-group">
+				<p id="content-type-group">
 					Choose the type of content you'd like to submit.
-				</label>
+				</p>
 				<mat-radio-group
 					aria-labelledby="content-type-group"
 					class="flex items-start flex-col my-4"
@@ -65,7 +65,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 export class PublishTypeComponent {
 	private fb = inject(FormBuilder);
 	dialogRef = inject<MatDialogRef<PublishTypeComponent>>(MatDialogRef);
-	data = inject<any>(MAT_DIALOG_DATA);
+	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
 		contentType: "",

@@ -15,7 +15,7 @@ export class DangerZoneListItemComponent implements OnChanges {
 	readonly title = input<string>("");
 	readonly description = input<string>("");
 	readonly buttonLabel = input<string>("");
-	readonly buttonAction = input<() => void>(() => { });
+	readonly buttonAction = input.required<() => void>();
 
 	safeDescription: SafeHtml = "";
 

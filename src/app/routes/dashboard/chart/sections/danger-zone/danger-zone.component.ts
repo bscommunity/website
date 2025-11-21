@@ -1,11 +1,4 @@
-import {
-	Component,
-	inject,
-	input,
-	Input,
-	output,
-	EventEmitter,
-} from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 
 // Modules
 import { MatButtonModule } from "@angular/material/button";
@@ -20,7 +13,7 @@ import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/c
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
-import { Router, RouterModule } from "@angular/router";
+import { RouterModule } from "@angular/router";
 
 @Component({
 	selector: "app-chart-danger-zone-section",

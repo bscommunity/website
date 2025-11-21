@@ -10,11 +10,14 @@ import { Type } from "@angular/core";
  * Implement this interface to define the components, initial data, submission logic,
  * and optional custom validation for each step of the publish flow.
  */
-export interface PublishHandler<TFormData = any, TSuccessData = any> {
+export interface PublishHandler<
+	TFormData = Record<string, unknown>,
+	TSuccessData = unknown,
+> {
 	/* Get the components for each step in the publish flow.
 	 * @returns An array of component types that will be used in the publish steps.
 	 */
-	getStepComponents(): Type<any>[];
+	getStepComponents(): Type<unknown>[];
 
 	/**
 	 * Get the initial form data for the publish process.

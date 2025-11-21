@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
 // Components
@@ -20,7 +20,7 @@ import { ChangelogService } from "@/services/changelog.service";
 	`,
 })
 export class PublicLayoutComponent implements OnInit {
-	constructor(private changelogService: ChangelogService) {}
+	private changelogService = inject(ChangelogService);
 
 	ngOnInit() {
 		this.changelogService.fetchReleaseNotes();

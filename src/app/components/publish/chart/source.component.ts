@@ -38,6 +38,10 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 import { type DialogData } from "@/services/publish/publish.service";
 import { PanelComponent } from "@/components/panel/panel.component";
 
+interface SourceDialogData extends DialogData {
+	mode?: "linking" | "uploading";
+}
+
 interface FormMode {
 	title: string;
 	description: string;
@@ -51,7 +55,7 @@ interface FormMode {
 			{{ formMode.title }}
 		</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography !flex flex-col gap-4">
+			<mat-dialog-content class="mat-typography flex! flex-col gap-4">
 				<p class="mb-2">
 					{{ formMode.description }} Ensure your file meets the
 					submission guidelines.
@@ -73,14 +77,14 @@ interface FormMode {
 			</mat-dialog-content>
 			<mat-dialog-actions align="center">
 				<button
-					class="!w-[49%]"
+					class="w-[49%]!"
 					mat-button
 					type="button"
 					(click)="dialogRef.close('back')"
 				>
 					Back
 				</button>
-				<button class="!w-[49%]" mat-flat-button type="submit">
+				<button class="w-[49%]!" mat-flat-button type="submit">
 					Continue
 				</button>
 			</mat-dialog-actions>
@@ -102,7 +106,7 @@ interface FormMode {
 })
 export class PublishChartSourceComponent implements OnInit {
 	dialogRef = inject<MatDialogRef<PublishChartSourceComponent>>(MatDialogRef);
-	data = inject<DialogData>(MAT_DIALOG_DATA);
+	data = inject<SourceDialogData>(MAT_DIALOG_DATA);
 
 	private formService = inject(FormService);
 
@@ -170,8 +174,11 @@ export class PublishChartSourceComponent implements OnInit {
 
 	ngOnInit() {
 		// Initialize form controls based on the provided data
-		if ((this.data as any).mode) {
-			this.mode = (this.data as any).mode;
+		if (
+			this.data.mode &&
+			(this.data.mode === "linking" || this.data.mode === "uploading")
+		) {
+			this.mode = this.data.mode;
 		}
 
 		this.form = this.formService.createFormGroup(

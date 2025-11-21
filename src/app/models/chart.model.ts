@@ -8,9 +8,6 @@ import { Contributor } from "./contributor.model";
 import { CreateVersion, Version } from "./version.model";
 import { StreamingLink } from "./streaming-link.model";
 
-// Types
-import type { VersionModel } from "./version.model";
-
 export const Chart = z.object({
 	id: z.string(),
 	contentId: z.string(),
@@ -64,11 +61,11 @@ export const CreateChart = Chart.omit({
 
 export type CreateChartModel = z.infer<typeof CreateChart>;
 
-const chartSchema = Chart.omit({
+export const MutateChartSchema = Chart.omit({
 	id: true,
 	isFeatured: true,
 	versions: true,
 	contributors: true,
 	latestVersion: true,
 }).partial();
-export type MutateChartModel = z.infer<typeof chartSchema>;
+export type MutateChartModel = z.infer<typeof MutateChartSchema>;

@@ -6,6 +6,7 @@ import {
 	inject,
 	signal,
 } from "@angular/core";
+import { Router } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -19,21 +20,19 @@ import {
 	MatDialogTitle,
 } from "@angular/material/dialog";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
+import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
 
-// Types
+// Models
 import { ContributorModel } from "@/models/contributor.model";
-import { ContributorRole } from "@/models/enums/role.enum";
+
+// Libs
+import { compareArrays, elementToKey } from "@/lib/compare";
 
 // Services
-import { UserService } from "@/services/api/user.service";
-import { ContributorTagsComponent } from "../../subcomponents/contributor-tags/contributor-tags.component";
 import { ContributorService } from "@/services/api/contributor.service";
-import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
-import { compareArrays, elementToKey } from "@/lib/compare";
-import { Router } from "@angular/router";
-import { MatSnackBar } from "@angular/material/snack-bar";
 
 export interface DialogData {
 	chartId: string;
@@ -82,7 +81,8 @@ export class EditContributorDialogComponent {
 
 		try {
 			this.isLoading.update(() => true);
-			const response = await this.contributorService.updateContributor(
+
+			await this.contributorService.updateContributor(
 				this.data.chartId,
 				this.data.contributor.user.id,
 				this.roles().get(this.data.contributor.user.id) || [],

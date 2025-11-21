@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, Observable, tap } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 // Services
 import { CacheService } from "../cache.service";
@@ -8,7 +8,6 @@ import { CacheService } from "../cache.service";
 // Models
 import { ContributorRole } from "@/models/enums/role.enum";
 import {
-	Contributor,
 	ContributorModel,
 	SimplifiedContributorModel,
 } from "@/models/contributor.model";

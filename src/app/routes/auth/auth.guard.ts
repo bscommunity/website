@@ -29,10 +29,7 @@ export const isAuthenticatedGuard: CanActivateFn = (
 	);
 };
 
-export const redirectIfAuthenticatedGuard: CanActivateFn = (
-	route: ActivatedRouteSnapshot,
-	state: RouterStateSnapshot,
-) => {
+export const redirectIfAuthenticatedGuard: CanActivateFn = () => {
 	const authService = inject(AuthService);
 	const router = inject(Router);
 

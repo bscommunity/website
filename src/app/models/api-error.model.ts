@@ -13,10 +13,23 @@ export function isApiError(error: unknown): error is ApiError {
 	);
 }
 
-export function getApiErrorMessage(error: unknown): string {
+export function getApiErrorMessage(
+	error: unknown,
+	placeholder?: string,
+): {
+	error: string;
+	message?: string;
+	statusCode?: number;
+} {
 	if (isApiError(error)) {
-		return error.error;
+		return {
+			error: error.error,
+			message: error.message,
+			statusCode: error.statusCode,
+		};
 	}
 
-	return "An unknown error occurred";
+	return {
+		error: placeholder || "An unknown error occurred",
+	};
 }

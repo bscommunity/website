@@ -12,6 +12,9 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 // Services
 import { AuthService } from "@/services/auth.service";
 
+// Models
+import { getApiErrorMessage } from "@/models/api-error.model";
+
 @Component({
 	selector: "app-oauth-callback",
 	imports: [MatProgressSpinnerModule],
@@ -50,15 +53,18 @@ export class OAuthCallback implements OnInit {
 			console.log("Received code: ", code);
 			await this.authService.login(code);
 			this.router.navigate(["/dashboard/uploads"]);
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Error: ", error);
+
+			const errorMessage = getApiErrorMessage(
+				error,
+				"An error occurred during login",
+			);
 
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
-					message: error.statusText,
-					error: error.error // this is stupid but too lazy to fix
-						? error.error.message
-						: "An error occurred during login",
+					message: errorMessage.message,
+					error: errorMessage.error,
 					redirectTo: "/login",
 				},
 				disableClose: true,

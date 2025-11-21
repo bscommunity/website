@@ -186,6 +186,7 @@ export class AuthService {
 			this._isLoggedIn$.next(true);
 			return true;
 		} catch (error) {
+			console.error("Auth check failed:", error);
 			this._isLoggedIn$.next(false);
 			return false;
 		}

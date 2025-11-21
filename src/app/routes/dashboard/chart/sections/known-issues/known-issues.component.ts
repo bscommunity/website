@@ -3,7 +3,6 @@ import {
 	Component,
 	inject,
 	signal,
-	WritableSignal,
 	input,
 	model,
 } from "@angular/core";

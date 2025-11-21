@@ -12,6 +12,9 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 // Services
 import { OAuthService } from "@/services/oauth.service";
 
+// Models
+import { getApiErrorMessage } from "@/models/api-error.model";
+
 @Component({
 	selector: "app-google-callback",
 	imports: [MatProgressSpinnerModule],
@@ -52,16 +55,19 @@ export class GoogleOAuthCallback implements OnInit {
 			this.router.navigate(["/dashboard/settings"], {
 				queryParams: { section: "connections" },
 			});
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Error: ", error);
+
+			const errorMessage = getApiErrorMessage(
+				error,
+				"An error occurred during login",
+			);
 
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
-					message: error.statusText,
-					error: error.error // this is stupid but too lazy to fix
-						? error.error.message
-						: "An error occurred during login",
-					redirectTo: "/dashboard/settings?section=connections",
+					message: errorMessage.message,
+					error: errorMessage.error,
+					redirectTo: "/login",
 				},
 				disableClose: true,
 			});
