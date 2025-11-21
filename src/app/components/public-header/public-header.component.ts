@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatRipple } from "@angular/material/core";
 
 // RxJS
 import { Subject } from "rxjs";
@@ -27,7 +28,6 @@ import { FilterService } from "@/services/filter.service";
 
 // Components
 import { MobileMenuComponent } from "./subcomponents/mobile-menu.component";
-import { MatRipple } from "@angular/material/core";
 
 @Component({
 	selector: "app-public-header",

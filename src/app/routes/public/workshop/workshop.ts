@@ -209,7 +209,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				chart,
 			},
 			width: "575px",
-			maxHeight: "90vh",
+			maxHeight: "85vh",
 		});
 	}
 

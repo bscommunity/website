@@ -22,6 +22,7 @@ import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { convertDateTimeToHumanReadable } from "@/lib/time";
+import { MatRipple } from "@angular/material/core";
 
 interface ChartDialogData {
 	chart: ChartModel;
@@ -31,7 +32,7 @@ interface ChartDialogData {
 	selector: "app-dialog-chart",
 	template: `
 		<div
-			class="flex flex-col items-start justify-start px-9 pt-9 pb-4 md:pb-6"
+			class="flex flex-col items-start justify-start px-9 pt-9 pb-4 md:pb-6 relative"
 		>
 			<h6 class="mb-2 text-sm font-medium">Chart</h6>
 			<h2 class="text-2xl font-bold">
@@ -40,6 +41,16 @@ interface ChartDialogData {
 			<h3 class="text-lg text-on-surface/70">
 				{{ data.chart.artist }}
 			</h3>
+
+			<button
+				class="rounded-full aspect-square flex md:hidden absolute! top-7! right-6! cursor-pointer p-2"
+				matRipple
+				(click)="dialogRef.close()"
+			>
+				<mat-icon class=" text-on-surface/70 hover:text-on-surface">
+					close
+				</mat-icon>
+			</button>
 		</div>
 
 		<mat-dialog-content
@@ -126,6 +137,7 @@ interface ChartDialogData {
 		MatChipsModule,
 		ChartContributorsComponent,
 		ChartVideoPreviewComponent,
+		MatRipple,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
