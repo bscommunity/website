@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	input,
+} from "@angular/core";
 import { Router } from "@angular/router";
 
 // Material
@@ -22,15 +27,21 @@ interface Button {
 			>
 				<mat-icon class="min-w-6"> help </mat-icon>
 				<div class="flex flex-col items-start justify-start">
-					<b><p>{{ title() }}</p></b>
+					<b
+						><p>{{ title() }}</p></b
+					>
 					<p>
 						{{ message() }}
 					</p>
 				</div>
 			</div>
-			<button class="!min-w-fit max-md:w-full" mat-flat-button (click)="onClick()">
+			<button
+				class="min-w-fit! max-md:w-full"
+				mat-flat-button
+				(click)="onClick()"
+			>
 				<mat-icon
-					class="!max-w-5"
+					class="max-w-5!"
 					svgIcon="discord"
 					inline="true"
 					aria-hidden="false"
@@ -52,14 +63,14 @@ export class LargePanelComponent {
 		icon: "",
 	});
 
-	constructor(private router: Router) { }
+	private router = inject(Router);
 
 	onClick() {
 		const link = this.button().link;
 		if (link) {
-			if (link.startsWith('http://') || link.startsWith('https://')) {
+			if (link.startsWith("http://") || link.startsWith("https://")) {
 				// External link
-				window.open(link, '_blank');
+				window.open(link, "_blank");
 			} else {
 				// Internal navigation
 				this.router.navigate([link]);

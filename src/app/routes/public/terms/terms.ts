@@ -5,15 +5,10 @@ import {
 	type TermsSection,
 	TermsTemplateComponent,
 } from "@/components/terms-template/terms-template.component";
-import { PublicHeaderComponent } from "@/components/public-header/public-header.component";
 
 @Component({
 	selector: "app-terms",
-	imports: [
-		LargePanelComponent,
-		TermsTemplateComponent,
-		PublicHeaderComponent,
-	],
+	imports: [LargePanelComponent, TermsTemplateComponent],
 	templateUrl: "./terms.html",
 })
 export class TermsOfService {

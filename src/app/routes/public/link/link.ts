@@ -8,7 +8,6 @@ import { MatButtonModule } from "@angular/material/button";
 // Components
 import { QrCodeComponent } from "ng-qrcode";
 import { LargePanelComponent } from "@/components/panel/large-panel.component";
-import { PublicHeaderComponent } from "@/components/public-header/public-header.component";
 
 @Component({
 	selector: "app-link",
@@ -17,7 +16,6 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 		MatButtonModule,
 		QrCodeComponent,
 		LargePanelComponent,
-		PublicHeaderComponent,
 	],
 	templateUrl: "./link.html",
 })

@@ -1,4 +1,3 @@
-<app-public-header />
 <main
 	class="flex flex-col lg:flex-row items-center justify-center gap-wrapper md:gap-6 w-full min-h-[calc(100vh-7rem)] px-wrapper py-wrapper md:py-12"
 >
@@ -6,44 +5,44 @@
 		class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 	>
 		@if (contentId && contentType) {
-		<div class="flex flex-col items-center justify-center gap-4">
-			<span class="md:text-6xl text-5xl"
-				><mat-icon inline>share</mat-icon></span
-			>
-			<h1 class="text-2xl w-full text-center">
-				Someone shared a {{ contentType }} with you!
-			</h1>
-			<p class="md:max-w-[55%] text-center">
-				Access it on the app to be able to check all the details and
-				download it.
-			</p>
-		</div>
+			<div class="flex flex-col items-center justify-center gap-4">
+				<span class="md:text-6xl text-5xl"
+					><mat-icon inline>share</mat-icon></span
+				>
+				<h1 class="text-2xl w-full text-center">
+					Someone shared a {{ contentType }} with you!
+				</h1>
+				<p class="md:max-w-[55%] text-center">
+					Access it on the app to be able to check all the details and
+					download it.
+				</p>
+			</div>
 
-		<qr-code
-			[value]="`bscm://${contentType}/${contentId}`"
-			size="200"
-			errorCorrectionLevel="M"
-			centerImageSrc="undefined"
-			centerImageSize="undefined"
-			[margin]="2"
-			styleClass="rounded"
-		></qr-code>
+			<qr-code
+				[value]="`bscm://${contentType}/${contentId}`"
+				size="200"
+				errorCorrectionLevel="M"
+				centerImageSrc="undefined"
+				centerImageSize="undefined"
+				[margin]="2"
+				styleClass="rounded"
+			></qr-code>
 
-		<a href="bscm://{{ contentType }}/{{ contentId }}">
-			<button mat-stroked-button>
-				<p>Open app</p>
-			</button>
-		</a>
+			<a href="bscm://{{ contentType }}/{{ contentId }}">
+				<button mat-stroked-button>
+					<p>Open app</p>
+				</button>
+			</a>
 		} @else {
-		<div class="flex flex-col items-center justify-center gap-4">
-			<span class="md:text-6xl text-5xl"
-				><mat-icon inline>share</mat-icon></span
-			>
-			<h1 class="text-2xl w-full text-center">Invalid link</h1>
-			<p class="md:max-w-[55%] text-center">
-				The link you are trying to access is invalid.
-			</p>
-		</div>
+			<div class="flex flex-col items-center justify-center gap-4">
+				<span class="md:text-6xl text-5xl"
+					><mat-icon inline>share</mat-icon></span
+				>
+				<h1 class="text-2xl w-full text-center">Invalid link</h1>
+				<p class="md:max-w-[55%] text-center">
+					The link you are trying to access is invalid.
+				</p>
+			</div>
 		}
 	</div>
 	<app-large-panel

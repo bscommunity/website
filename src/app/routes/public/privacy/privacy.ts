@@ -6,7 +6,6 @@ import {
 	type TermsSection,
 	TermsTemplateComponent,
 } from "@/components/terms-template/terms-template.component";
-import { PublicHeaderComponent } from "@/components/public-header/public-header.component";
 
 @Component({
 	selector: "app-privacy-policy",
@@ -14,7 +13,6 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 		LargePanelComponent,
 		TermsTemplateComponent,
 		TermsTemplateComponent,
-		PublicHeaderComponent,
 	],
 	templateUrl: "./privacy.html",
 })
