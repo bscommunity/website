@@ -37,7 +37,7 @@
 				</div>
 				<!-- TODO: Without setting a fixed height with overflow-hidden, the height bumps up a little bit when the two text are swapped -->
 				<div
-					class="flex flex-col items-start justify-start min-w-0 h-16 md:h-12 overflow-hidden"
+					class="flex flex-col items-start justify-start min-w-0 max-h-16 md:h-12 overflow-hidden"
 				>
 					<div
 						class="text-on-surface-variant font-medium transition-all duration-300 ease-in-out"
@@ -49,14 +49,14 @@
 						[class.opacity-0]="isExpanded()"
 						[class.max-h-0]="isExpanded()"
 						[class.opacity-100]="!isExpanded()"
-						[class.max-h-6]="!isExpanded()"
+						[class.max-h-12]="!isExpanded()"
 					>
 						{{ getChartByString() }}
 					</p>
 					<p
 						class="text-on-surface-variant text-sm m-0 transition-all duration-200 ease-in-out delay-75"
 						[class.opacity-100]="isExpanded()"
-						[class.max-h-6]="isExpanded()"
+						[class.max-h-12]="isExpanded()"
 						[class.opacity-0]="!isExpanded()"
 						[class.max-h-0]="!isExpanded()"
 					>

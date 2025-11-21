@@ -13,7 +13,7 @@ export const Chart = z.object({
 	contentId: z.string(),
 	artist: z.string(),
 	track: z.string(),
-	genre: z.nativeEnum(Genre).optional(),
+	genre: z.enum(Genre).optional(),
 	coverUrl: z.string(),
 	isFeatured: z.boolean().default(false),
 	isPublic: z.boolean().default(true),

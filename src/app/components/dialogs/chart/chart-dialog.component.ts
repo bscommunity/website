@@ -30,7 +30,9 @@ interface ChartDialogData {
 @Component({
 	selector: "app-dialog-chart",
 	template: `
-		<div class="flex flex-col items-start justify-start px-9 pt-9 pb-6">
+		<div
+			class="flex flex-col items-start justify-start px-9 pt-9 pb-4 md:pb-6"
+		>
 			<h6 class="mb-2 text-sm font-medium">Chart</h6>
 			<h2 class="text-2xl font-bold">
 				{{ data.chart.track }}
@@ -40,7 +42,9 @@ interface ChartDialogData {
 			</h3>
 		</div>
 
-		<mat-dialog-content class="mat-typography flex! flex-col gap-6">
+		<mat-dialog-content
+			class="mat-typography flex! flex-col gap-4 md:gap-6"
+		>
 			@if (
 				data.chart.contributors && data.chart.contributors.length > 0
 			) {
@@ -107,7 +111,7 @@ interface ChartDialogData {
 				class="flex! md:hidden! w-full min-h-10 mx-0!"
 				tabindex="1"
 				mat-flat-button
-				href="bscm://link/chart/{{ data.chart.id }}"
+				href="bscm://chart/{{ data.chart.contentId }}"
 				(click)="onOpenInApp()"
 				(keypress)="onOpenInApp()"
 			>
@@ -131,28 +135,37 @@ export class ChartDialogComponent {
 
 	private _snackBar = inject(MatSnackBar);
 
-	buttons = [
-		{
-			icon: "timer",
-			data: this.formatDuration(this.data.chart.latestVersion.duration),
-		},
-		{
-			icon: "music_note",
-			data: `${this.data.chart.latestVersion.notesAmount} notes`,
-		},
-		{
-			icon: "blur_on",
-			data: `${this.data.chart.latestVersion.effectsAmount} effects`,
-		},
-		{
-			icon: "download",
-			data: `${this.data.chart.latestVersion.downloadsAmount} downloads`,
-		},
-		{
-			icon: "calendar_today",
-			data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.latestVersion.publishedAt.toString())}`,
-		},
-	];
+	get buttons() {
+		return [
+			{
+				icon: "timer",
+				data: this.formatDuration(
+					this.data.chart.latestVersion.duration,
+				),
+				amount: this.data.chart.latestVersion.duration,
+			},
+			{
+				icon: "music_note",
+				data: `${this.data.chart.latestVersion.notesAmount} notes`,
+				amount: this.data.chart.latestVersion.notesAmount,
+			},
+			{
+				icon: "blur_on",
+				data: `${this.data.chart.latestVersion.effectsAmount} effects`,
+				amount: this.data.chart.latestVersion.effectsAmount,
+			},
+			{
+				icon: "download",
+				data: `${this.data.chart.latestVersion.downloadsAmount} downloads`,
+				amount: this.data.chart.latestVersion.downloadsAmount,
+			},
+			{
+				icon: "calendar_today",
+				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.latestVersion.publishedAt.toString())}`,
+				amount: null,
+			},
+		].filter((button) => button.amount === null || button.amount > 0);
+	}
 
 	formatDuration(duration: number) {
 		const minutes = Math.floor(duration / 60);
@@ -168,7 +181,7 @@ export class ChartDialogComponent {
 	onOpenInApp() {
 		// Show a snackbar to ask the user to download the app if not installed
 		const action = this._snackBar.open(
-			"Opening in app... You may need to download it first.",
+			"If the app is not installed, you can download it here.",
 			"Download app",
 			{
 				duration: 5000,
@@ -184,7 +197,7 @@ export class ChartDialogComponent {
 
 	onShare() {
 		// Generate shareable link
-		const url = `${window.location.origin}/link/chart/${this.data.chart.id}`;
+		const url = `${window.location.origin}/link/chart/${this.data.chart.contentId}`;
 
 		// Copy to clipboard
 		navigator.clipboard.writeText(url);
