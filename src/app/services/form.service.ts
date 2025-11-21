@@ -10,7 +10,17 @@ import {
 	ValidatorFn,
 	FormGroup,
 	FormControl,
+	ValidationErrors,
 } from "@angular/forms";
+
+/**
+ * Information about an invalid form control
+ */
+interface InvalidControlInfo {
+	errors: ValidationErrors;
+	invalid: boolean;
+	value?: unknown;
+}
 
 /**
  * Base configuration for form fields
@@ -56,11 +66,15 @@ export interface FormSubmissionConfig {
 	/**
 	 * Custom processing function executed when form is valid
 	 */
-	onValidSubmit?: (formValue: any) => Promise<void> | void;
+	onValidSubmit?: (
+		formValue: Record<string, unknown>,
+	) => Promise<void> | void;
 	/**
 	 * Custom processing function executed when form is invalid
 	 */
-	onInvalidSubmit?: (invalidControls: Record<string, any>) => void;
+	onInvalidSubmit?: (
+		invalidControls: Record<string, InvalidControlInfo>,
+	) => void;
 	/**
 	 * Whether to log debug information
 	 */
@@ -72,8 +86,8 @@ export interface FormSubmissionConfig {
  */
 export interface FormSubmissionResult {
 	isValid: boolean;
-	formValue?: any;
-	invalidControls?: Record<string, any>;
+	formValue?: Record<string, unknown>;
+	invalidControls?: Record<string, InvalidControlInfo>;
 	error?: Error;
 }
 
@@ -167,7 +181,7 @@ export class FormService {
 	 */
 	createFormGroup(
 		fields: FormFieldConfig[],
-		initialData: Record<string, any> = {},
+		initialData: Record<string, unknown> = {},
 	): FormGroup {
 		const group: Record<string, FormControl> = {};
 
@@ -281,7 +295,7 @@ export class FormService {
 				};
 			} else {
 				// Handle invalid form
-				const invalidControls: Record<string, any> = {};
+				const invalidControls: Record<string, InvalidControlInfo> = {};
 
 				Object.keys(form.controls).forEach((key) => {
 					const control = form.get(key);
@@ -294,6 +308,7 @@ export class FormService {
 						invalidControls[key] = {
 							errors: control.errors,
 							invalid: control.invalid,
+							value: control.value,
 						};
 
 						if (enableDebugLogging) {
@@ -335,8 +350,8 @@ export class FormService {
 	/**
 	 * Helper method to get all invalid controls with their errors
 	 */
-	getInvalidControls(form: FormGroup): Record<string, any> {
-		const invalidControls: Record<string, any> = {};
+	getInvalidControls(form: FormGroup): Record<string, InvalidControlInfo> {
+		const invalidControls: Record<string, InvalidControlInfo> = {};
 
 		Object.keys(form.controls).forEach((key) => {
 			const control = form.get(key);
@@ -369,7 +384,9 @@ export class FormService {
 	async submitFormWithValidation(
 		form: FormGroup,
 		fields: FormFieldConfig[],
-		validationCallback: (formValue: any) => Promise<void> | void,
+		validationCallback: (
+			formValue: Record<string, unknown>,
+		) => Promise<void> | void,
 		enableDebugLogging = false,
 	): Promise<FormSubmissionResult> {
 		return this.handleFormSubmission(form, fields, {

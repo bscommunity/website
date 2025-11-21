@@ -1,6 +1,21 @@
 import { Request } from "express";
-import { Injectable, REQUEST, PLATFORM_ID, RESPONSE_INIT, inject } from "@angular/core";
+import {
+	Injectable,
+	REQUEST,
+	PLATFORM_ID,
+	RESPONSE_INIT,
+	inject,
+} from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
+
+interface CookieOptions {
+	expires?: number | Date;
+	path?: string;
+	domain?: string;
+	secure?: boolean;
+	sameSite?: "Lax" | "None" | "Strict";
+	partitioned?: boolean;
+}
 
 @Injectable({
 	providedIn: "root",
@@ -26,7 +41,7 @@ export class CookieService {
 	 */
 	static getCookieRegExp(name: string): RegExp {
 		const escapedName: string = name.replace(
-			/([\[\]\{\}\(\)\|\=\;\+\?\,\.\*\^\$])/gi,
+			/([[\]{}()|=;+?,.*^$])/gi,
 			"\\$1",
 		);
 
@@ -63,11 +78,10 @@ export class CookieService {
 	check(name: string): boolean {
 		name = encodeURIComponent(name);
 		const regExp: RegExp = CookieService.getCookieRegExp(name);
-		return regExp.test(
-			this.documentIsAccessible
-				? this.document.cookie!
-				: this.request?.headers.cookie!,
-		);
+		const cookieSource = this.documentIsAccessible
+			? this.document.cookie
+			: this.request?.headers?.cookie || "";
+		return regExp.test(cookieSource);
 	}
 
 	/**
@@ -82,10 +96,11 @@ export class CookieService {
 			name = encodeURIComponent(name);
 
 			const regExp: RegExp = CookieService.getCookieRegExp(name);
+			const cookieSource = this.documentIsAccessible
+				? this.document.cookie
+				: this.request?.headers?.cookie || "";
 			const result: RegExpExecArray = regExp.exec(
-				this.documentIsAccessible
-					? this.document.cookie!
-					: this.request?.headers.cookie!,
+				cookieSource,
 			) as RegExpExecArray;
 
 			return result[1]
@@ -104,13 +119,13 @@ export class CookieService {
 	 */
 	getAll(): Record<string, string> {
 		const cookies: Record<string, string> = {};
-		const cookieString: any = this.documentIsAccessible
+		const cookieString: string | undefined = this.documentIsAccessible
 			? this.document?.cookie
-			: this.request?.headers.cookie;
+			: this.request?.headers?.cookie;
 
 		if (cookieString && cookieString !== "") {
 			cookieString.split(";").forEach((currentCookie: string) => {
-				const [cookieName, cookieValue] = currentCookie.split("=");
+				const [cookieName, cookieValue = ""] = currentCookie.split("=");
 				cookies[
 					CookieService.safeDecodeURIComponent(
 						cookieName.replace(/^ /, ""),
@@ -163,23 +178,12 @@ export class CookieService {
 	 * @param options  Body with cookie's params
 	 *
 	 */
-	set(
-		name: string,
-		value: string,
-		options?: {
-			expires?: number | Date;
-			path?: string;
-			domain?: string;
-			secure?: boolean;
-			sameSite?: "Lax" | "None" | "Strict";
-			partitioned?: boolean;
-		},
-	): void;
+	set(name: string, value: string, options?: CookieOptions): void;
 
 	set(
 		name: string,
 		value: string,
-		expiresOrOptions?: number | Date | any,
+		expiresOrOptions?: number | Date | CookieOptions,
 		path?: string,
 		domain?: string,
 		secure?: boolean,
@@ -203,7 +207,7 @@ export class CookieService {
 				partitioned,
 			};
 
-			this.set(name, value, optionsBody);
+			this.set(name, value, optionsBody as CookieOptions);
 			return;
 		}
 
@@ -308,12 +312,10 @@ export class CookieService {
 		secure?: boolean,
 		sameSite: "Lax" | "None" | "Strict" = "Lax",
 	): void {
-		const cookies: any = this.getAll();
+		const cookies: Record<string, string> = this.getAll();
 
 		for (const cookieName in cookies) {
-			if (cookies.hasOwnProperty(cookieName)) {
-				this.delete(cookieName, path, domain, secure, sameSite);
-			}
+			this.delete(cookieName, path, domain, secure, sameSite);
 		}
 	}
 }

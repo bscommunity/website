@@ -183,10 +183,10 @@ export class FilterService {
 	 */
 	clearFilters(keys: FilterKey[]): void {
 		const defaults = this.getDefaultFilters();
-		const updates: Partial<WorkshopFilters> = {};
+		const updates: Record<string, unknown> = {};
 
 		keys.forEach((key) => {
-			(updates as any)[key] = defaults[key];
+			updates[key] = defaults[key];
 		});
 
 		this.updateFilters(updates);

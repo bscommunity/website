@@ -95,13 +95,18 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 
 	ngAfterViewInit(): void {
 		this.dataSource.sort = this.sort();
-		this.dataSource.sortingDataAccessor = (item: any, property) => {
+		this.dataSource.sortingDataAccessor = (
+			item: T,
+			property: string,
+		): string | number => {
+			const itemRecord = item as Record<string, unknown>;
 			// console.log("Sorting data accessor", item, property);
-			if (typeof item[property] === "number") {
+			const value = itemRecord[property];
+			if (typeof value === "number") {
 				// Convert the value to a number for proper numeric comparison
-				return Number(item.index);
+				return value;
 			}
-			return item[property];
+			return value as string;
 		};
 	}
 
