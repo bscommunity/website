@@ -4,6 +4,7 @@ import { firstValueFrom, Observable, shareReplay, tap } from "rxjs";
 
 // Services
 import { CacheService } from "../cache.service";
+import type { STORAGE } from "../cache.service";
 import { StorageService } from "../storage.service";
 import type { WorkshopFilters } from "../filter.service";
 
@@ -16,10 +17,21 @@ import {
 } from "@/models/chart.model";
 
 import { apiUrl } from "@/lib/api";
+import { SortOption } from "@/models/enums/sort-option.enum";
 
 interface ChartsResponse {
 	first: ChartModel[];
 	second: number;
+}
+
+type CacheScope = "public" | "uploads";
+
+interface CachedChartsPayload extends ChartsResponse {
+	pages?: Record<string, ChartModel[]>;
+	total?: number;
+	filters?: WorkshopFilters;
+	scope?: CacheScope;
+	updatedAt?: string;
 }
 
 @Injectable({
@@ -31,6 +43,7 @@ export class ChartService {
 	private http = inject(HttpClient);
 
 	private readonly apiUrl = `${apiUrl}/charts`;
+	private readonly uploadsCacheIndexKey = "uploads_cache_index";
 
 	// Create
 	async createChart(chart: CreateChartModel): Promise<ChartModel> {
@@ -45,9 +58,14 @@ export class ChartService {
 			formData.append("bundle", chartBundle);
 		}
 
-		return await firstValueFrom(
+		const createdChart = await firstValueFrom(
 			this.http.post<ChartModel>(this.apiUrl, formData),
 		);
+
+		this.cacheService.addChart(createdChart);
+		this.updateUploadsCachesWithChart(createdChart);
+
+		return createdChart;
 	}
 
 	/**
@@ -76,91 +94,45 @@ export class ChartService {
 			offset?: number;
 			isDashboard?: boolean;
 			disableCache?: boolean;
-			storage?: "persistent" | "session";
+			storage?: STORAGE;
 		},
 	): Observable<ChartsResponse> {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
-		const cacheKey = this.generateCacheKey(filters);
+		const isDashboardRequest = options?.isDashboard ?? false;
 
-		// Check if we should use cache
-		let shouldUseCache = false;
-		let storageType: "persistent" | "session" =
-			options?.storage || "persistent";
+		const storageType: STORAGE =
+			options?.storage ??
+			(isDashboardRequest
+				? "persistent"
+				: isDefaultQuery
+					? "persistent"
+					: "session");
 
-		if (!options?.disableCache) {
-			if (isDefaultQuery) {
-				// For default queries, use persistent cache with 4-hour validity
-				shouldUseCache = this.cacheService.isDefaultCacheValid();
-				storageType = "persistent";
-				console.log(`Default query - cache valid: ${shouldUseCache}`);
-			} else {
-				// For filtered queries, check sessionStorage for this specific filter combination
-				const sessionData = this.storageService.getItem(cacheKey, true);
-				shouldUseCache = !!sessionData;
-				storageType = "session";
-				console.log(
-					`Filtered query - session cache exists: ${shouldUseCache}`,
-				);
-			}
-		}
+		const cacheScope: CacheScope = isDashboardRequest
+			? "uploads"
+			: "public";
+		const baseCacheKey = this.generateCacheKey(filters);
+		const cacheKey =
+			cacheScope === "uploads" ? `${baseCacheKey}_uploads` : baseCacheKey;
+		const canReadCache = !options?.disableCache;
+		const isPaginated = Boolean(options?.limit);
+		const pageKey =
+			isPaginated && options?.limit
+				? `${options.limit}:${options.offset || 0}`
+				: undefined;
 
-		console.log(
-			`Fetching charts with filters:`,
-			filters,
-			`| Using cache: ${shouldUseCache} (storage: ${storageType})`,
-			options,
-		);
-
-		// Return cached data if available and valid
-		// 1) Paginated requests: try per-page cache in sessionStorage
-		if (options?.limit) {
-			const pageKey = `${options.limit}:${options.offset || 0}`;
-			const sessionData = this.storageService.getItem(cacheKey, true);
-			if (sessionData) {
-				try {
-					const parsed = JSON.parse(sessionData);
-					const pages = (parsed?.pages || {}) as Record<
-						string,
-						ChartModel[]
-					>;
-					const total: number =
-						typeof parsed?.total === "number"
-							? parsed.total
-							: typeof parsed?.second === "number"
-								? parsed.second
-								: Array.isArray(parsed?.first)
-									? (parsed.first as ChartModel[]).length
-									: 0;
-
-					if (Array.isArray(pages[pageKey])) {
-						console.log(
-							`Returning page ${pageKey} from session cache (filtered/default query)`,
-						);
-						return new Observable((subscriber) => {
-							subscriber.next({
-								first: pages[pageKey],
-								second: total,
-							});
-							subscriber.complete();
-						});
-					}
-				} catch (error) {
-					console.error(
-						"Failed to parse paginated session cache:",
-						error,
-					);
-				}
-			}
-		}
-
-		// 2) Non-paginated: reuse existing cache strategy
-		if (shouldUseCache && !options?.limit) {
-			if (isDefaultQuery) {
+		if (canReadCache) {
+			if (
+				!isPaginated &&
+				cacheScope === "public" &&
+				storageType === "persistent" &&
+				isDefaultQuery
+			) {
 				const cachedDefault = this.cacheService.getDefaultChartsCache();
-				if (cachedDefault?.charts?.length) {
-					console.log(
-						`Returning ${cachedDefault.charts.length} charts from persistent cache (default query)`,
-					);
+				if (
+					cachedDefault?.charts?.length &&
+					this.cacheService.isDefaultCacheValid()
+				) {
 					return new Observable((subscriber) => {
 						subscriber.next({
 							first: cachedDefault.charts,
@@ -170,142 +142,105 @@ export class ChartService {
 					});
 				}
 			} else {
-				const sessionData = this.storageService.getItem(cacheKey, true);
-				if (sessionData) {
-					try {
-						const parsed = JSON.parse(sessionData);
-						// Support legacy cache (array only) and new shape ({ first, second })
-						const charts = Array.isArray(parsed)
-							? (parsed as ChartModel[])
-							: ((parsed?.first || []) as ChartModel[]);
-						const total = Array.isArray(parsed)
-							? charts.length
-							: typeof parsed?.second === "number"
-								? (parsed.second as number)
-								: charts.length;
-						console.log(
-							`Returning ${charts.length} charts from session cache (filtered query)`,
-						);
+				const cachedPayload = this.getStoredChartsCache(
+					cacheKey,
+					storageType,
+				);
+
+				if (cachedPayload) {
+					if (isPaginated && pageKey) {
+						const cachedPage = cachedPayload.pages?.[pageKey];
+						if (cachedPage) {
+							return new Observable((subscriber) => {
+								subscriber.next({
+									first: cachedPage,
+									second: this.getCachedTotal(cachedPayload),
+								});
+								subscriber.complete();
+							});
+						}
+					} else {
 						return new Observable((subscriber) => {
 							subscriber.next({
-								first: charts,
-								second: total,
+								first: cachedPayload.first,
+								second: this.getCachedTotal(cachedPayload),
 							});
 							subscriber.complete();
 						});
-					} catch (error) {
-						console.error("Failed to parse session cache:", error);
 					}
 				}
 			}
 		}
 
-		// Build HTTP params
 		let params = new HttpParams();
 
-		// Add query parameter
 		if (filters?.query) {
 			params = params.set("query", filters.query);
 		}
 
-		// Add genre filters
 		if (filters?.genres && filters?.genres.length > 0) {
 			params = params.set("genres", filters.genres.join(","));
 		}
 
-		// Add difficulty filters
 		if (filters?.difficulties && filters?.difficulties.length > 0) {
 			params = params.set("difficulties", filters.difficulties.join(","));
 		}
 
-		// Add category filters (map to hasDeluxe if needed)
 		if (filters?.categories && filters?.categories.length > 0) {
 			const hasDeluxe = filters.categories.includes("Deluxe");
 			params = params.set("hasDeluxe", hasDeluxe.toString());
 		}
 
-		// Add version filters
 		if (filters?.versions && filters?.versions.length > 0) {
 			params = params.set("versions", filters.versions.join(","));
 		}
 
-		// Add sorting
 		if (filters?.sortBy) {
 			params = params.set("sortBy", filters.sortBy);
 		}
 
-		// Add options
 		if (options?.limit)
 			params = params.set("limit", options.limit.toString());
 		if (options?.offset)
 			params = params.set("offset", options.offset.toString());
-		if (options?.isDashboard) params = params.set("isDashboard", "true");
+		if (options?.isDashboard) {
+			params = params.set("isDashboard", "true");
+		}
 
-		// Fetch from remote API
-		console.log("Fetching charts from remote API with filters:", filters);
 		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(
 			tap((fetchedCharts) => {
-				console.log(
-					`Fetched ${fetchedCharts.first.length} charts from API`,
-				);
-
-				if (!options?.limit) {
-					if (isDefaultQuery) {
-						// Store default data in persistent storage with metadata
-						console.log(
-							"Caching default charts to persistent storage",
-						);
+				if (!isPaginated) {
+					if (
+						cacheScope === "public" &&
+						storageType === "persistent" &&
+						isDefaultQuery
+					) {
 						this.cacheService.setDefaultChartsCache(
 							fetchedCharts.first,
 							fetchedCharts.second,
 						);
-						this.cacheService.addCharts(
-							fetchedCharts.first,
-							"persistent",
-						);
 						this.cacheService.setDefaultCacheMetadata(filters);
 					} else {
-						// Store filtered data in sessionStorage with specific key
-						console.log(
-							`Caching filtered charts to session storage (key: ${cacheKey})`,
-						);
-						// When not paginating, we still store a minimal object for compatibility
-						this.storageService.setItem(
+						this.persistChartsCache(
 							cacheKey,
-							JSON.stringify({
-								first: fetchedCharts.first,
-								second: fetchedCharts.second,
-								updatedAt: new Date().toISOString(),
-							}),
-							true, // use sessionStorage
+							fetchedCharts,
+							storageType,
+							cacheScope,
+							filters,
 						);
 					}
+				} else if (pageKey) {
+					this.persistPaginatedChartsCache(
+						cacheKey,
+						fetchedCharts,
+						pageKey,
+						storageType,
+						cacheScope,
+						filters,
+					);
 				}
 
-				// Always update per-page cache in session when paginating
-				if (options?.limit) {
-					const pageKey = `${options.limit}:${options.offset || 0}`;
-					const sessionData = this.storageService.getItem(
-						cacheKey,
-						true,
-					);
-					let parsed: any = {};
-					try {
-						parsed = sessionData ? JSON.parse(sessionData) : {};
-					} catch {
-						parsed = {};
-					}
-					parsed.pages = parsed.pages || {};
-					parsed.pages[pageKey] = fetchedCharts.first;
-					parsed.total = fetchedCharts.second;
-					parsed.updatedAt = new Date().toISOString();
-					this.storageService.setItem(
-						cacheKey,
-						JSON.stringify(parsed),
-						true,
-					);
-
-					// Optionally keep individual charts fresh in persistent cache for quick detail views
+				if (cacheScope === "public") {
 					this.cacheService.addCharts(
 						fetchedCharts.first,
 						"persistent",
@@ -362,6 +297,7 @@ export class ChartService {
 		);
 
 		this.cacheService.updateChart(updatedChart);
+		this.updateUploadsCachesWithChart(updatedChart);
 
 		return updatedChart;
 	}
@@ -373,11 +309,337 @@ export class ChartService {
 				this.http.delete<ChartModel>(`${this.apiUrl}/${id}`),
 			);
 			this.cacheService.removeChart(id);
+			this.removeChartFromUploadsCaches(id);
 
 			return true;
 		} catch (error) {
 			console.error("Error deleting chart:", error);
 			return false;
 		}
+	}
+
+	private getStoredChartsCache(
+		key: string,
+		storage: STORAGE,
+	): CachedChartsPayload | null {
+		const raw = this.storageService.getItem(key, storage === "session");
+		if (!raw) {
+			return null;
+		}
+
+		try {
+			const parsed = JSON.parse(raw);
+			if (Array.isArray(parsed)) {
+				return {
+					first: parsed as ChartModel[],
+					second: parsed.length,
+				};
+			}
+
+			if (
+				parsed &&
+				typeof parsed === "object" &&
+				Array.isArray(parsed.first) &&
+				typeof parsed.second === "number"
+			) {
+				return parsed as CachedChartsPayload;
+			}
+
+			if (
+				parsed &&
+				typeof parsed === "object" &&
+				Array.isArray(parsed.charts) &&
+				typeof parsed.total === "number"
+			) {
+				return {
+					first: parsed.charts as ChartModel[],
+					second: parsed.total as number,
+					filters: parsed.filters,
+					scope: parsed.scope,
+					updatedAt: parsed.updatedAt,
+				};
+			}
+		} catch (error) {
+			console.error("Failed to parse charts cache payload:", error);
+			this.storageService.removeItem(key, storage === "session");
+		}
+
+		return null;
+	}
+
+	private persistChartsCache(
+		key: string,
+		response: ChartsResponse,
+		storage: STORAGE,
+		scope: CacheScope,
+		filters?: WorkshopFilters,
+	): void {
+		const payload: CachedChartsPayload = {
+			first: response.first,
+			second: response.second,
+			filters,
+			scope,
+			updatedAt: new Date().toISOString(),
+		};
+
+		this.storageService.setItem(
+			key,
+			JSON.stringify(payload),
+			storage === "session",
+		);
+
+		if (scope === "uploads") {
+			this.trackUploadsCacheKey(key);
+		}
+	}
+
+	private persistPaginatedChartsCache(
+		key: string,
+		response: ChartsResponse,
+		pageKey: string,
+		storage: STORAGE,
+		scope: CacheScope,
+		filters?: WorkshopFilters,
+	): void {
+		const existing =
+			this.getStoredChartsCache(key, storage) ||
+			({} as CachedChartsPayload);
+		const pages = existing.pages ? { ...existing.pages } : {};
+		pages[pageKey] = response.first;
+
+		const payload: CachedChartsPayload = {
+			...existing,
+			first: response.first,
+			second: response.second,
+			pages,
+			filters,
+			scope,
+			updatedAt: new Date().toISOString(),
+		};
+
+		this.storageService.setItem(
+			key,
+			JSON.stringify(payload),
+			storage === "session",
+		);
+
+		if (scope === "uploads") {
+			this.trackUploadsCacheKey(key);
+		}
+	}
+
+	private getCachedTotal(payload: CachedChartsPayload): number {
+		if (typeof payload.second === "number") {
+			return payload.second;
+		}
+		if (typeof payload.total === "number") {
+			return payload.total;
+		}
+		return payload.first.length;
+	}
+
+	private trackUploadsCacheKey(key: string): void {
+		const keys = this.getUploadsCacheKeys();
+		if (keys.includes(key)) {
+			return;
+		}
+		keys.push(key);
+		this.saveUploadsCacheKeys(keys);
+	}
+
+	private getUploadsCacheKeys(): string[] {
+		const stored = this.storageService.getItem(this.uploadsCacheIndexKey);
+		if (!stored) {
+			return [];
+		}
+
+		try {
+			const parsed = JSON.parse(stored);
+			return Array.isArray(parsed) ? (parsed as string[]) : [];
+		} catch {
+			return [];
+		}
+	}
+
+	private saveUploadsCacheKeys(keys: string[]): void {
+		this.storageService.setItem(
+			this.uploadsCacheIndexKey,
+			JSON.stringify(keys),
+		);
+	}
+
+	private updateUploadsCachesWithChart(chart: ChartModel): void {
+		this.mutateUploadsCaches((payload) => {
+			if (!this.chartMatchesFilters(chart, payload.filters)) {
+				const filtered = payload.first.filter(
+					(entry) => entry.id !== chart.id,
+				);
+				if (filtered.length === payload.first.length) {
+					return payload;
+				}
+				payload.first = filtered;
+				payload.second = payload.first.length;
+				return payload;
+			}
+
+			const existingIndex = payload.first.findIndex(
+				(current) => current.id === chart.id,
+			);
+
+			if (existingIndex >= 0) {
+				payload.first[existingIndex] = chart;
+			} else {
+				payload.first.unshift(chart);
+			}
+
+			this.sortChartsByOption(payload.first, payload.filters?.sortBy);
+			payload.second = payload.first.length;
+			return payload;
+		});
+	}
+
+	private removeChartFromUploadsCaches(id: string): void {
+		this.mutateUploadsCaches((payload) => {
+			const nextCharts = payload.first.filter((chart) => chart.id !== id);
+			if (nextCharts.length === payload.first.length) {
+				return payload;
+			}
+
+			payload.first = nextCharts;
+			payload.second = payload.first.length;
+			if (payload.pages) {
+				Object.keys(payload.pages).forEach((page) => {
+					payload.pages![page] = payload.pages![page].filter(
+						(chart) => chart.id !== id,
+					);
+				});
+			}
+
+			return payload;
+		});
+	}
+
+	private mutateUploadsCaches(
+		mutator: (payload: CachedChartsPayload) => CachedChartsPayload | null,
+	): void {
+		const keys = this.getUploadsCacheKeys();
+		if (!keys.length) {
+			return;
+		}
+
+		const remainingKeys: string[] = [];
+		keys.forEach((key) => {
+			const payload = this.getStoredChartsCache(key, "persistent");
+			if (!payload || (payload.scope && payload.scope !== "uploads")) {
+				return;
+			}
+
+			const sourcePages = payload.pages;
+			const clonedPayload: CachedChartsPayload = {
+				...payload,
+				first: [...payload.first],
+				pages: sourcePages
+					? Object.keys(sourcePages).reduce(
+							(acc, page) => {
+								acc[page] = [...sourcePages[page]];
+								return acc;
+							},
+							{} as Record<string, ChartModel[]>,
+						)
+					: undefined,
+			};
+
+			const result = mutator(clonedPayload);
+			if (!result) {
+				this.storageService.removeItem(key);
+				return;
+			}
+
+			result.scope = "uploads";
+			result.updatedAt = new Date().toISOString();
+			this.storageService.setItem(key, JSON.stringify(result), false);
+			remainingKeys.push(key);
+		});
+
+		this.saveUploadsCacheKeys(remainingKeys);
+	}
+
+	private chartMatchesFilters(
+		chart: ChartModel,
+		filters?: WorkshopFilters,
+	): boolean {
+		if (!filters) {
+			return true;
+		}
+
+		const normalizedQuery = filters.query?.trim().toLowerCase();
+		if (normalizedQuery) {
+			const haystack = `${chart.artist} ${chart.track}`.toLowerCase();
+			if (!haystack.includes(normalizedQuery)) {
+				return false;
+			}
+		}
+
+		if (filters.genres?.length) {
+			if (!chart.genre || !filters.genres.includes(chart.genre)) {
+				return false;
+			}
+		}
+
+		if (filters.difficulties?.length) {
+			const difficultySet = new Set(filters.difficulties);
+			const matchesDifficulty = chart.versions?.some((version) =>
+				difficultySet.has(version.difficulty),
+			);
+			if (!matchesDifficulty) {
+				return false;
+			}
+		}
+
+		const wantsDeluxe = Boolean(
+			filters.versions?.includes("Deluxe") ||
+				filters.categories?.includes("Deluxe"),
+		);
+		if (wantsDeluxe) {
+			const hasDeluxe = chart.versions?.some(
+				(version) => version.isDeluxe,
+			);
+			if (!hasDeluxe) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private sortChartsByOption(
+		charts: ChartModel[],
+		sortBy?: SortOption,
+	): void {
+		switch (sortBy) {
+			case SortOption.LAST_UPDATED:
+				charts.sort(
+					(a, b) =>
+						this.toTimestamp(b.latestVersion?.publishedAt) -
+						this.toTimestamp(a.latestVersion?.publishedAt),
+				);
+				break;
+			case SortOption.MOST_DOWNLOADED:
+				charts.sort(
+					(a, b) =>
+						(b.latestVersion?.downloadsAmount ?? 0) -
+						(a.latestVersion?.downloadsAmount ?? 0),
+				);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private toTimestamp(value?: string | Date): number {
+		if (!value) {
+			return 0;
+		}
+		return new Date(value).getTime();
 	}
 }
