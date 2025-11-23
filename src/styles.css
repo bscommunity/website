@@ -128,7 +128,7 @@ body {
 	}
 
 	50% {
-		transform: scaleY(2);
+		transform: scaleY(1.1);
 	}
 }
 

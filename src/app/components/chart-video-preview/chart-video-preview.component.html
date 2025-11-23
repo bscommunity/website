@@ -63,12 +63,12 @@
 			class="relative flex items-center justify-center w-32 h-32 group cursor-pointer"
 			[attr.aria-label]="isPlaying() ? 'Pause audio' : 'Play audio'"
 		>
-			<!-- Círculo de progresso -->
+			<!-- Progress circle -->
 			<svg
 				class="absolute inset-0 w-full h-full -rotate-90"
 				viewBox="0 0 100 100"
 			>
-				<!-- Círculo de fundo -->
+				<!-- Background circle -->
 				<circle
 					cx="50"
 					cy="50"
@@ -78,7 +78,7 @@
 					stroke-width="4"
 					class="text-on-surface/20"
 				/>
-				<!-- Círculo de progresso -->
+				<!-- Progress circle -->
 				<circle
 					cx="50"
 					cy="50"
@@ -93,10 +93,10 @@
 				/>
 			</svg>
 
-			<!-- Ícone de play/pause -->
+			<!-- Play/Pause icon -->
 			<div class="z-10 flex items-center justify-center">
 				@if (isPlaying()) {
-					<!-- Ícone de pause -->
+					<!-- Pause icon -->
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-12 w-12 text-primary group-hover:scale-110 transition-transform"
@@ -106,7 +106,7 @@
 						<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
 					</svg>
 				} @else {
-					<!-- Ícone de play -->
+					<!-- Play icon -->
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="h-12 w-12 text-primary group-hover:scale-110 transition-transform"
@@ -118,7 +118,7 @@
 				}
 			</div>
 
-			<!-- Visualizador de áudio animado -->
+			<!-- Animated audio visualizer -->
 			@if (isPlaying()) {
 				<div
 					class="absolute inset-0 flex items-center justify-center gap-1 pointer-events-none"
@@ -142,6 +142,14 @@
 					<div
 						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
 						style="height: 25%; animation-delay: 600ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 35%; animation-delay: 600ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 15%; animation-delay: 600ms"
 					></div>
 				</div>
 			}

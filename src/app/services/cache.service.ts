@@ -503,20 +503,6 @@ export class CacheService {
 	}
 
 	clearCache(): void {
-		/* const keys = this.storageService.getItem("chartKeys");
-
-		if (keys) {
-			const storedKeys = JSON.parse(keys) as string[];
-			storedKeys.forEach((key) => {
-				if (key.startsWith("chart_")) {
-					this.storageService.removeItem(key);
-				}
-			});
-		}
-
-		this.storageService.removeItem("chartCount");
-		this.storageService.removeItem("chartKeys"); */
-
 		this.storageService.clear();
 		this.storageService.clear(true); // Clear sessionStorage too
 		this.cookieService.delete("lastRefresh");

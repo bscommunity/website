@@ -27,6 +27,8 @@ export class ChartVideoPreviewComponent {
 	progress = signal(0);
 	duration = signal(0);
 
+	maxAudioDuration = 15;
+
 	embedUrl = computed(() => {
 		const url = this.previewUrl();
 		if (!url) return null;
@@ -66,8 +68,19 @@ export class ChartVideoPreviewComponent {
 	onTimeUpdate(event: Event) {
 		const audio = event.target as HTMLAudioElement;
 		if (audio.duration) {
-			const progressValue = (audio.currentTime / audio.duration) * 100;
+			const progressValue =
+				(audio.currentTime /
+					Math.min(audio.duration, this.maxAudioDuration)) *
+				100;
 			this.progress.set(progressValue);
+
+			// Limite de duração
+			if (audio.currentTime >= this.maxAudioDuration) {
+				audio.pause();
+				audio.currentTime = 0;
+				this.isPlaying.set(false);
+				this.progress.set(0);
+			}
 		}
 	}
 
