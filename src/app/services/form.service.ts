@@ -157,9 +157,10 @@ export class FormService {
 			if (field.type === "text" && field.onValueProcessed) {
 				const control = form.get(field.key);
 				if (control instanceof FormControl) {
-					const processedValue = await field.onValueProcessed(
-						control.value as string,
-					);
+					const value = control.value as string;
+					// Skip processing if the field is empty (optional field with no input)
+					if (value == null || value === "") continue;
+					const processedValue = await field.onValueProcessed(value);
 					if (processedValue) control.setValue(processedValue);
 				}
 			}
