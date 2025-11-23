@@ -3,7 +3,9 @@
 	"version": 1,
 	"cli": {
 		"packageManager": "pnpm",
-		"schematicCollections": ["angular-eslint"]
+		"schematicCollections": [
+			"angular-eslint"
+		]
 	},
 	"newProjectRoot": "projects",
 	"projects": {
@@ -24,7 +26,6 @@
 						"outputPath": "dist/website",
 						"index": "src/index.html",
 						"browser": "src/main.ts",
-						"polyfills": ["zone.js"],
 						"tsConfig": "tsconfig.app.json",
 						"inlineStyleLanguage": "css",
 						"assets": [
@@ -88,9 +89,8 @@
 				"test": {
 					"builder": "@angular/build:karma",
 					"options": {
-						"polyfills": ["zone.js", "zone.js/testing"],
 						"tsConfig": "tsconfig.spec.json",
-						"inlineStyleLanguage": "scss",
+						"inlineStyleLanguage": "css",
 						"assets": [
 							{
 								"glob": "**/*",
@@ -98,14 +98,20 @@
 							},
 							"src/assets"
 						],
-						"styles": ["src/styles.scss", "src/styles.css"],
+						"styles": [
+							"src/styles.scss",
+							"src/styles.css"
+						],
 						"scripts": []
 					}
 				},
 				"lint": {
 					"builder": "@angular-eslint/builder:lint",
 					"options": {
-						"lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+						"lintFilePatterns": [
+							"src/**/*.ts",
+							"src/**/*.html"
+						]
 					}
 				}
 			}

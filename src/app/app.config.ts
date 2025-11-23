@@ -1,6 +1,6 @@
 import {
 	type ApplicationConfig,
-	provideZoneChangeDetection,
+	provideZonelessChangeDetection,
 } from "@angular/core";
 import {
 	provideRouter,
@@ -29,7 +29,7 @@ import { ChartTitleStrategy } from "./routes/dashboard/chart/chart-title.strateg
 export const appConfig: ApplicationConfig = {
 	providers: [
 		MatIconRegistry, // MatIconRegistry config
-		provideZoneChangeDetection({ eventCoalescing: true }),
+		provideZonelessChangeDetection(),
 		provideClientHydration(withEventReplay()),
 		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 		provideRouter(
