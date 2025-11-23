@@ -4,6 +4,9 @@ import {
 	input,
 	inject,
 	computed,
+	signal,
+	ViewChild,
+	ElementRef,
 } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 
@@ -17,6 +20,12 @@ export class ChartVideoPreviewComponent {
 	private sanitizer = inject(DomSanitizer);
 	previewUrl = input.required<string | null>();
 	audioPreviewUrl = input.required<string | null>();
+
+	@ViewChild("audioElement") audioElement?: ElementRef<HTMLAudioElement>;
+
+	isPlaying = signal(false);
+	progress = signal(0);
+	duration = signal(0);
 
 	embedUrl = computed(() => {
 		const url = this.previewUrl();
@@ -39,5 +48,36 @@ export class ChartVideoPreviewComponent {
 		if (url) {
 			window.open(url, "_blank");
 		}
+	}
+
+	toggleAudio() {
+		const audio = this.audioElement?.nativeElement;
+		if (!audio) return;
+
+		if (this.isPlaying()) {
+			audio.pause();
+			this.isPlaying.set(false);
+		} else {
+			audio.play();
+			this.isPlaying.set(true);
+		}
+	}
+
+	onTimeUpdate(event: Event) {
+		const audio = event.target as HTMLAudioElement;
+		if (audio.duration) {
+			const progressValue = (audio.currentTime / audio.duration) * 100;
+			this.progress.set(progressValue);
+		}
+	}
+
+	onLoadedMetadata(event: Event) {
+		const audio = event.target as HTMLAudioElement;
+		this.duration.set(audio.duration);
+	}
+
+	onEnded() {
+		this.isPlaying.set(false);
+		this.progress.set(0);
 	}
 }

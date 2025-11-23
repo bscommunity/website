@@ -15,6 +15,7 @@ export const Chart = z.object({
 	track: z.string(),
 	genre: z.enum(Genre).optional(),
 	coverUrl: z.string(),
+	trackPreviewUrl: z.string().optional().nullable(),
 	isFeatured: z.boolean().default(false),
 	isPublic: z.boolean().default(true),
 

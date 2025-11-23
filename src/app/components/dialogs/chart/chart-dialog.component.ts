@@ -73,6 +73,7 @@ interface ChartDialogData {
 				/>
 				<app-chart-video-preview
 					class="h-full w-full"
+					[audioPreviewUrl]="data.chart.trackPreviewUrl ?? null"
 					[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
 				></app-chart-video-preview>
 			</div>

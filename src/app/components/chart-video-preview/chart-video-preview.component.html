@@ -45,6 +45,108 @@
 			class="flex w-full h-full absolute top-0 left-0 bg-surface-container-high animate-pulse z-20"
 		></div>
 	</button>
+} @else if (audioPreviewUrl()) {
+	<div
+		class="flex items-center justify-center h-full w-full rounded-[28px] bg-on-surface/10 relative"
+	>
+		<audio
+			#audioElement
+			[src]="audioPreviewUrl()"
+			(timeupdate)="onTimeUpdate($event)"
+			(loadedmetadata)="onLoadedMetadata($event)"
+			(ended)="onEnded()"
+			class="hidden"
+		></audio>
+
+		<button
+			(click)="toggleAudio()"
+			class="relative flex items-center justify-center w-32 h-32 group cursor-pointer"
+			[attr.aria-label]="isPlaying() ? 'Pause audio' : 'Play audio'"
+		>
+			<!-- Círculo de progresso -->
+			<svg
+				class="absolute inset-0 w-full h-full -rotate-90"
+				viewBox="0 0 100 100"
+			>
+				<!-- Círculo de fundo -->
+				<circle
+					cx="50"
+					cy="50"
+					r="45"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="4"
+					class="text-on-surface/20"
+				/>
+				<!-- Círculo de progresso -->
+				<circle
+					cx="50"
+					cy="50"
+					r="45"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="4"
+					class="text-primary transition-all duration-200"
+					[style.stroke-dasharray]="283"
+					[style.stroke-dashoffset]="283 - (283 * progress()) / 100"
+					stroke-linecap="round"
+				/>
+			</svg>
+
+			<!-- Ícone de play/pause -->
+			<div class="z-10 flex items-center justify-center">
+				@if (isPlaying()) {
+					<!-- Ícone de pause -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-12 w-12 text-primary group-hover:scale-110 transition-transform"
+						fill="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+					</svg>
+				} @else {
+					<!-- Ícone de play -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-12 w-12 text-primary group-hover:scale-110 transition-transform"
+						fill="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path d="M8 5v14l11-7z" />
+					</svg>
+				}
+			</div>
+
+			<!-- Visualizador de áudio animado -->
+			@if (isPlaying()) {
+				<div
+					class="absolute inset-0 flex items-center justify-center gap-1 pointer-events-none"
+				>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 20%; animation-delay: 0ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 40%; animation-delay: 150ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 30%; animation-delay: 300ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 50%; animation-delay: 450ms"
+					></div>
+					<div
+						class="w-1 bg-primary/30 rounded-full animate-audio-wave"
+						style="height: 25%; animation-delay: 600ms"
+					></div>
+				</div>
+			}
+		</button>
+	</div>
 } @else {
 	<div
 		class="flex items-center justify-center h-full w-full rounded-[28px] bg-on-surface/10"

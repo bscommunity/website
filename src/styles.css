@@ -120,6 +120,22 @@ body {
 	}
 }
 
+@keyframes audioWave {
+
+	0%,
+	100% {
+		transform: scaleY(1);
+	}
+
+	50% {
+		transform: scaleY(2);
+	}
+}
+
+.animate-audio-wave {
+	animation: audioWave 1s ease-in-out infinite;
+}
+
 @layer base {
 
 	button:not(:disabled),
