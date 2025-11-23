@@ -46,7 +46,10 @@ export class ChartVideoPreviewComponent {
 	});
 
 	openVideo() {
-		const url = this.previewUrl();
+		const videoId = this.previewUrl();
+		const url = videoId
+			? `https://www.youtube.com/watch?v=${videoId}`
+			: null;
 		if (url) {
 			window.open(url, "_blank");
 		}

@@ -77,8 +77,12 @@ export class DeleteChartComponent {
 		const response = await this.chartService.deleteChart(this.data.id);
 
 		if (response) {
-			this.router.navigate(["/dashboard/uploads"]);
+			this.router.navigate(["/dashboard/uploads"], { replaceUrl: true });
 			this.dialogRef.close(false);
+
+			this._matSnackBar.open("Chart deleted successfully", "Dismiss", {
+				duration: 2000,
+			});
 		} else {
 			console.error("Failed to delete chart", response);
 			this._matSnackBar.open("Failed to delete chart", "Dismiss", {
