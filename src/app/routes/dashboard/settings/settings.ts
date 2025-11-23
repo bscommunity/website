@@ -5,7 +5,7 @@ import {
 	OnInit,
 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CommonModule } from "@angular/common";
+
 import { RouterModule } from "@angular/router";
 
 // Material
@@ -30,15 +30,14 @@ import { OAuthService } from "@/services/oauth.service";
 	selector: "app-settings",
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 	imports: [
-		CommonModule,
-		RouterModule,
-		MatTabsModule,
-		MatButtonModule,
-		MatSlideToggleModule,
-		MatIconModule,
-		SettingsWrapperComponent,
-		SettingsCardComponent,
-	],
+    RouterModule,
+    MatTabsModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+    MatIconModule,
+    SettingsWrapperComponent,
+    SettingsCardComponent
+],
 	templateUrl: "./settings.html",
 	animations: [settingsAnim],
 })

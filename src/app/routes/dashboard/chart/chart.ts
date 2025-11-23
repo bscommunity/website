@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
-import { CommonModule } from "@angular/common";
+
 
 // Modules
 import { FormsModule } from "@angular/forms";
@@ -28,20 +28,17 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 @Component({
 	selector: "app-chart",
 	imports: [
-		// Modules
-		CommonModule,
-		FormsModule,
-		MatButtonModule,
-		MatIconModule,
-		MatTooltipModule,
-		// Components
-		AsideComponent,
-		KnownIssuesComponent,
-		ContributorsComponent,
-		DangerZoneComponent,
-		VersionsComponent,
-		PageError,
-	],
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    AsideComponent,
+    KnownIssuesComponent,
+    ContributorsComponent,
+    DangerZoneComponent,
+    VersionsComponent,
+    PageError
+],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
 	templateUrl: "./chart.html",
 })

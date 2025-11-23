@@ -15,7 +15,6 @@ import {
 	provideClientHydration,
 	withEventReplay,
 } from "@angular/platform-browser";
-import { provideAnimationsAsync } from "@angular/platform-browser/animations/async";
 
 import { MatIconRegistry } from "@angular/material/icon";
 import {
@@ -32,7 +31,6 @@ export const appConfig: ApplicationConfig = {
 		MatIconRegistry, // MatIconRegistry config
 		provideZoneChangeDetection({ eventCoalescing: true }),
 		provideClientHydration(withEventReplay()),
-		provideAnimationsAsync(),
 		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 		provideRouter(
 			routes,
