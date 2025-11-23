@@ -27,16 +27,17 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 
 // Services
 import { FormService, type FormFieldConfig } from "@/services/form.service";
+import { ValidationService } from "@/services/validation.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
+import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
 
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
-import { PanelComponent } from "@/components/panel/panel.component";
 
 interface SourceDialogData extends DialogData {
 	mode?: "linking" | "uploading";
@@ -113,6 +114,7 @@ export class PublishChartSourceComponent implements OnInit {
 	data = inject<SourceDialogData>(MAT_DIALOG_DATA);
 
 	private formService = inject(FormService);
+	private validationService = inject(ValidationService);
 
 	form!: FormGroup;
 	@Input() mode: "linking" | "uploading" = "linking";
@@ -140,7 +142,7 @@ export class PublishChartSourceComponent implements OnInit {
 			placeholder: "https://youtu.be/BY_XwvKogC8",
 			hint: "Must be a direct link to a YouTube video",
 			required: false,
-			onValueProcessed: this.formService.extractYouTubeVideoId,
+			onValueProcessed: this.validationService.extractYouTubeVideoId,
 		}),
 	};
 
