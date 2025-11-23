@@ -11,96 +11,107 @@
 	<div class="flex flex-col gap-6 w-full md:w-2/3">
 		<nav mat-tab-nav-bar>
 			@for (tab of tabs; track tab.value) {
-			<a
-				mat-tab-link
-				[attr.aria-current]="currentTab === tab.value ? 'page' : null"
-				[active]="currentTab === tab.value"
-				[routerLink]="[]"
-				[queryParams]="{ section: tab.value }"
-				(click)="currentTab = tab.value"
-			>
-				{{ tab.label }}
-			</a>
+				<a
+					mat-tab-link
+					[attr.aria-current]="
+						currentTab === tab.value ? 'page' : null
+					"
+					[active]="currentTab === tab.value"
+					[routerLink]="[]"
+					[queryParams]="{ section: tab.value }"
+					(click)="currentTab = tab.value"
+				>
+					{{ tab.label }}
+				</a>
 			}
 		</nav>
 
-		<div [@tabSlide]="currentTab">
-			@if (currentTab === 'account') {
-			<app-settings-wrapper>
-				<app-settings-card
-					class="w-full"
-					title="Auto-private content"
-					description="Automatically set uploaded content to private by default"
+		<div class="settings-container">
+			@if (currentTab === "account") {
+				<app-settings-wrapper
+					class="settings-tab"
+					animate.enter="slide-in-left"
+					animate.leave="slide-out-left"
 				>
-					<card-footer-label>
-						This setting will apply to all new content you upload.
-					</card-footer-label>
-					<card-footer>
-						<mat-slide-toggle labelPosition="before"
-							>Enabled</mat-slide-toggle
-						>
-					</card-footer>
-				</app-settings-card>
-				<app-settings-card
-					[disabled]="true"
-					class="w-full"
-					title="Delete Account"
-					description="Once you delete your account, there is no going back. All the content you've uploaded will be removed. Please be certain."
-					variant="destructive"
+					<app-settings-card
+						class="w-full"
+						title="Auto-private content"
+						description="Automatically set uploaded content to private by default"
+					>
+						<card-footer-label>
+							This setting will apply to all new content you
+							upload.
+						</card-footer-label>
+						<card-footer>
+							<mat-slide-toggle labelPosition="before"
+								>Enabled</mat-slide-toggle
+							>
+						</card-footer>
+					</app-settings-card>
+					<app-settings-card
+						[disabled]="true"
+						class="w-full"
+						title="Delete Account"
+						description="Once you delete your account, there is no going back. All the content you've uploaded will be removed. Please be certain."
+						variant="destructive"
+					>
+						<card-footer>
+							<button
+								mat-flat-button
+								class="bg-error-container! text-on-error-container!"
+								(click)="deleteAccount()"
+							>
+								Delete account
+							</button>
+						</card-footer>
+					</app-settings-card>
+				</app-settings-wrapper>
+			} @else if (currentTab === "connections") {
+				<app-settings-wrapper
+					class="settings-tab"
+					animate.enter="slide-in-right"
+					animate.leave="slide-out-right"
 				>
-					<card-footer>
-						<button
-							mat-flat-button
-							class="!bg-error-container !text-on-error-container"
-							(click)="deleteAccount()"
-						>
-							Delete account
-						</button>
-					</card-footer>
-				</app-settings-card>
-			</app-settings-wrapper>
-			} @else if (currentTab === 'connections') {
-			<app-settings-wrapper>
-				<app-settings-card
-					[disabled]="true"
-					class="w-full"
-					title="Google Drive"
-					description="Connect your Google Drive account to directly upload content"
-					[showFooter]="false"
-				>
-					<card-content class="w-full">
-						@if (hasDriveScope()) {
-						<button
-							class="!w-full mt-2 !bg-surface-container-high"
-							mat-button
-							disabled
-						>
-							<mat-icon> check</mat-icon>
-							Connected to Google Drive
-						</button>
-						<button
-							class="w-full text-end mt-2 text-on-error-container hover:underline"
-							(click)="openUnlinkConfirmationDialog()"
-						>
-							Unlink account
-						</button>
-						} @else {
-						<a
-							[href]="oAuthUrl"
-							class="!w-full mt-2 !bg-surface-container-high"
-							mat-button
-						>
-							<mat-icon
-								svgIcon="google"
-								aria-hidden="false"
-								aria-label="Google logo"
-							></mat-icon>
-							Continue with Google
-						</a>
-						}
-					</card-content>
-				</app-settings-card>
-			</app-settings-wrapper>
+					<app-settings-card
+						[disabled]="true"
+						class="w-full"
+						title="Google Drive"
+						description="Connect your Google Drive account to directly upload content"
+						[showFooter]="false"
+					>
+						<card-content class="w-full">
+							@if (hasDriveScope()) {
+								<button
+									class="w-full! mt-2 bg-surface-container-high!"
+									mat-button
+									disabled
+								>
+									<mat-icon> check</mat-icon>
+									Connected to Google Drive
+								</button>
+								<button
+									class="w-full text-end mt-2 text-on-error-container hover:underline"
+									(click)="openUnlinkConfirmationDialog()"
+								>
+									Unlink account
+								</button>
+							} @else {
+								<a
+									[href]="oAuthUrl"
+									class="w-full! mt-2 bg-surface-container-high!"
+									mat-button
+								>
+									<mat-icon
+										svgIcon="google"
+										aria-hidden="false"
+										aria-label="Google logo"
+									></mat-icon>
+									Continue with Google
+								</a>
+							}
+						</card-content>
+					</app-settings-card>
+				</app-settings-wrapper>
 			}
 		</div>
 	</div>

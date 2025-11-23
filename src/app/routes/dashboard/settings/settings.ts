@@ -20,9 +20,6 @@ import { SettingsWrapperComponent } from "./subcomponents/wrapper.component";
 import { SettingsCardComponent } from "./subcomponents/card.component";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 
-// Animations
-import { settingsAnim } from "./settings.anim";
-
 // Services
 import { OAuthService } from "@/services/oauth.service";
 
@@ -30,16 +27,80 @@ import { OAuthService } from "@/services/oauth.service";
 	selector: "app-settings",
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 	imports: [
-    RouterModule,
-    MatTabsModule,
-    MatButtonModule,
-    MatSlideToggleModule,
-    MatIconModule,
-    SettingsWrapperComponent,
-    SettingsCardComponent
-],
+		RouterModule,
+		MatTabsModule,
+		MatButtonModule,
+		MatSlideToggleModule,
+		MatIconModule,
+		SettingsWrapperComponent,
+		SettingsCardComponent,
+	],
 	templateUrl: "./settings.html",
-	animations: [settingsAnim],
+	styles: [
+		`
+			.settings-container {
+				position: relative;
+			}
+			.settings-tab {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+			}
+			.slide-in-left {
+				animation: slideInLeft 200ms ease;
+			}
+			@keyframes slideInLeft {
+				from {
+					transform: translateX(-30px);
+					opacity: 0;
+				}
+				to {
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+			.slide-out-left {
+				animation: slideOutLeft 200ms ease;
+			}
+			@keyframes slideOutLeft {
+				from {
+					transform: translateX(0);
+					opacity: 1;
+				}
+				to {
+					transform: translateX(-30px);
+					opacity: 0;
+				}
+			}
+			.slide-in-right {
+				animation: slideInRight 200ms ease;
+			}
+			@keyframes slideInRight {
+				from {
+					transform: translateX(30px);
+					opacity: 0;
+				}
+				to {
+					transform: translateX(0);
+					opacity: 1;
+				}
+			}
+			.slide-out-right {
+				animation: slideOutRight 200ms ease;
+			}
+			@keyframes slideOutRight {
+				from {
+					transform: translateX(0);
+					opacity: 1;
+				}
+				to {
+					transform: translateX(30px);
+					opacity: 0;
+				}
+			}
+		`,
+	],
 })
 export class Settings implements OnInit {
 	private readonly route = inject(ActivatedRoute);
