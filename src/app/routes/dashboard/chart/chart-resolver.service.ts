@@ -1,8 +1,13 @@
 import { Injectable, inject } from "@angular/core";
 import { Resolve, Router, ActivatedRouteSnapshot } from "@angular/router";
+
+// Services
 import { ChartService } from "@/services/api/chart.service";
+
+// Models
 import { ChartModel, withLatestVersion } from "@/models/chart.model";
-import { AuthService } from "@/services/auth.service";
+
+// Zod
 import { ZodError } from "zod";
 
 @Injectable({
@@ -11,7 +16,6 @@ import { ZodError } from "zod";
 export class ChartResolver implements Resolve<ChartModel | null> {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
-	private authService = inject(AuthService);
 
 	async resolve(route: ActivatedRouteSnapshot): Promise<ChartModel | null> {
 		const chartId = route.paramMap.get("id");
@@ -41,7 +45,7 @@ export class ChartResolver implements Resolve<ChartModel | null> {
 				return null;
 			}
 
-			if (error.status === 404) {
+			if (error.status === 404 || error.status === 400) {
 				console.error("Chart not found");
 				this.router.navigate(["404"], {
 					state: { error: "Chart not found" },
