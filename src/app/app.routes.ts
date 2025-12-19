@@ -8,13 +8,13 @@ import {
 	isAuthenticatedGuard,
 	redirectIfAuthenticatedGuard,
 } from "./routes/auth/auth.guard";
-import { PublicLayoutComponent } from "./layouts/public-layout.component";
-import { DashboardLayoutComponent } from "./layouts/dashboard-layout.component";
+
+
 
 export const routes: Routes = [
 	{
 		path: "", // Public section
-		component: PublicLayoutComponent,
+		loadComponent: () => import('./layouts/public-layout.component').then(m => m.PublicLayoutComponent),
 		children: [
 			// { path: '', redirectTo: 'home', pathMatch: 'full' },
 			{
@@ -36,25 +36,25 @@ export const routes: Routes = [
 			{
 				path: "changelog",
 				loadComponent: () =>
-					import(
-						"./routes/public/changelog/changelog"
-					).then((m) => m.Changelog),
+					import("./routes/public/changelog/changelog").then(
+						(m) => m.Changelog,
+					),
 				title: "Changelog",
 			},
 			{
 				path: "privacy",
 				loadComponent: () =>
-					import(
-						"./routes/public/privacy/privacy"
-					).then((m) => m.PrivacyPolicy),
+					import("./routes/public/privacy/privacy").then(
+						(m) => m.PrivacyPolicy,
+					),
 				title: "Our Privacy Policy: Transparency for Our Community",
 			},
 			{
 				path: "terms",
 				loadComponent: () =>
-					import(
-						"./routes/public/terms/terms"
-					).then((m) => m.TermsOfService),
+					import("./routes/public/terms/terms").then(
+						(m) => m.TermsOfService,
+					),
 				title: "Our Terms of Service",
 			},
 			{
@@ -62,13 +62,20 @@ export const routes: Routes = [
 				loadComponent: () =>
 					import("./routes/public/link/link").then((m) => m.Link),
 			},
+			{
+				path: "profile/:username",
+				loadComponent: () =>
+					import("./routes/public/profile/profile").then(
+						(m) => m.Profile,
+					),
+			},
 			// ... other public routes
 		],
 	},
 
 	{
 		path: "dashboard", // Authenticated dashboard section
-		component: DashboardLayoutComponent,
+		loadComponent: () => import('./layouts/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
 		children: [
 			// { path: "", redirectTo: "overview", pathMatch: "full" },
 			{

@@ -64,8 +64,10 @@ export class StatusDisplayComponent implements OnInit {
 					this.status.set(status);
 				}
 			},
-			error: (error) => {
-				console.error("Error fetching status:", error);
+			error: () => {
+				// console.error("Error fetching status:", error);
+				console.warn("Could not fetch status, setting to OK by default.");
+				this.status.set(STATUS.OK);
 			},
 		});
 	}
