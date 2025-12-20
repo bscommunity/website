@@ -68,7 +68,7 @@
 	</header>
 
 	<section class="flex flex-col gap-6 w-full">
-		<nav mat-tab-nav-bar>
+		<nav mat-tab-nav-bar [tabPanel]="tabPanel">
 			@for (tab of tabs; track tab.value) {
 				<a
 					mat-tab-link
@@ -85,24 +85,33 @@
 			}
 		</nav>
 
-		<div class="relative">
-			@if (currentTab === "account") {
+		<mat-tab-nav-panel #tabPanel class="relative">
+			@if (currentTab === "charts") {
 				<app-tab-content-wrapper
 					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-left"
 					animate.leave="slide-out-left"
 				>
-					<p>teste2</p>
+					<div
+						class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
+					>
+						<p>teste</p>
+					</div>
 				</app-tab-content-wrapper>
-			} @else if (currentTab === "connections") {
+			} @else if (currentTab === "about") {
 				<app-tab-content-wrapper
 					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-right"
 					animate.leave="slide-out-right"
 				>
-					<p>teste</p>
+					<div
+						class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
+					>
+						<p>teste</p>
+					</div>
 				</app-tab-content-wrapper>
 			}
-		</div>
+		</mat-tab-nav-panel>
+		<!-- <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel> -->
 	</section>
 </main>
