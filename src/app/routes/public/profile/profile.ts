@@ -9,6 +9,7 @@ import { MatTabsModule } from "@angular/material/tabs";
 
 // Components
 import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab-content-wrapper.component";
+import { BadgeComponent } from "@/components/badge/badge.component";
 
 @Component({
 	selector: "app-profile",
@@ -19,6 +20,7 @@ import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab
 		MatTabsModule,
 		RouterLink,
 		TabContentWrapperComponent,
+		BadgeComponent,
 	],
 	templateUrl: "./profile.html",
 })
