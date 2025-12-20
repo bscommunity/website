@@ -37,16 +37,36 @@ export class Profile {
 	tabs: Tab[] = [
 		{
 			label: "History",
-			showLabel: false,
 			value: "history",
 			icon: "bar_chart",
 		},
 		{
 			label: "Charts",
-			showLabel: false,
 			value: "charts",
 			icon: "library_music",
 		},
 	];
 	currentTab = this.tabs[0].value;
+
+	desktopTabs: Tab[] = [
+		{
+			label: "Charts",
+			value: "charts",
+			icon: "music_note",
+			showLabel: true,
+		},
+		{
+			label: "Tour Passes",
+			value: "tour_passes",
+			icon: "music_video",
+			showLabel: true,
+		},
+		{
+			label: "Themes",
+			value: "themes",
+			icon: "palette",
+			showLabel: true,
+		},
+	];
+	currentDesktopTab = this.desktopTabs[0].value;
 }

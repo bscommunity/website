@@ -19,7 +19,7 @@
 					width="123"
 					height="123"
 					viewBox="0 0 123 123"
-					class="absolute bottom-4 left-4"
+					class="absolute bottom-4 left-4 md:left-8 md:bottom-8"
 				>
 					<defs>
 						<mask
@@ -99,9 +99,46 @@
 	</header>
 
 	<div class="flex flex-row items-center justify-between w-full gap-16">
-		<div class="hidden md:flex w-full">pc screen</div>
-		<section class="flex flex-col gap-6 w-full md:w-2/5">
+		<div class="hidden md:flex flex-col items-start justify-start w-full">
 			<app-tab-nav-bar
+				class="w-full"
+				[tabs]="desktopTabs"
+				[tabPanel]="desktopTabPanel"
+				[(currentTab)]="currentDesktopTab"
+			/>
+
+			<mat-tab-nav-panel #desktopTabPanel class="relative w-full">
+				@if (currentTab === desktopTabs[0].value) {
+					<app-tab-content-wrapper
+						class="absolute top-0 left-0"
+						animate.enter="slide-in-left"
+						animate.leave="slide-out-left"
+					>
+						<div
+							class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
+						>
+							<p>teste</p>
+						</div>
+					</app-tab-content-wrapper>
+				} @else if (currentTab === desktopTabs[1].value) {
+					<app-tab-content-wrapper
+						class="absolute top-0 left-0"
+						animate.enter="slide-in-right"
+						animate.leave="slide-out-right"
+					>
+						<div
+							class="flex flex-col items-start justify-start bg-red-500 w-full overflow-hidden"
+						>
+							<p>teste</p>
+						</div>
+					</app-tab-content-wrapper>
+				}
+			</mat-tab-nav-panel>
+		</div>
+		<section class="flex flex-col gap-6 w-full md:w-2/5">
+			<h3 class="hidden md:flex font-medium">Recent activity</h3>
+			<app-tab-nav-bar
+				class="flex md:hidden"
 				[tabs]="tabs"
 				[tabPanel]="tabPanel"
 				[(currentTab)]="currentTab"

@@ -16,9 +16,10 @@ export interface Tab {
 	selector: "app-tab-nav-bar",
 	imports: [MatTabsModule, MatIconModule, RouterLink],
 	template: `
-		<nav mat-tab-nav-bar [tabPanel]="tabPanel()">
+		<nav mat-tab-nav-bar [tabPanel]="tabPanel()" class="w-full">
 			@for (tab of tabs(); track tab.value) {
 				<a
+					class="transition-opacity duration-200"
 					mat-tab-link
 					[ariaLabel]="tab.label"
 					[attr.aria-current]="
@@ -28,18 +29,16 @@ export interface Tab {
 					[routerLink]="urlBased() ? [] : null"
 					[queryParams]="urlBased() ? { section: tab.value } : null"
 					(click)="setCurrentTab(tab.value)"
+					[class.opacity-100]="currentTab() === tab.value"
+					[class.opacity-50]="currentTab() !== tab.value"
 				>
 					@if (tab.icon) {
-						<mat-icon
-							class="align-middle mr-2 transition-opacity duration-200"
-							[class.opacity-100]="currentTab() === tab.value"
-							[class.opacity-50]="currentTab() !== tab.value"
-						>
+						<mat-icon class="align-middle">
 							{{ tab.icon }}
 						</mat-icon>
 					}
 					@if (tab.label && tab.showLabel) {
-						{{ tab.label }}
+						<span class="ml-4">{{ tab.label }}</span>
 					}
 				</a>
 			}
