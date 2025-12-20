@@ -32,6 +32,15 @@
 						height="123"
 						mask="url(#shape)"
 					/>
+					<!-- border: duplicate the path as a stroked outline -->
+					<path
+						d="M43.9723 6.48999C54.6283 -0.162617 68.1444 -0.162617 78.8004 6.48999C81.6017 8.23878 84.6738 9.51144 87.8912 10.2556C100.13 13.0865 109.686 22.6428 112.517 34.8816C113.261 38.099 114.534 41.1711 116.283 43.9724C122.935 54.6284 122.935 68.1445 116.283 78.8005C114.534 81.6018 113.261 84.6739 112.517 87.8914C109.686 100.13 100.13 109.686 87.8912 112.517C84.6738 113.262 81.6017 114.534 78.8004 116.283C68.1444 122.936 54.6283 122.936 43.9723 116.283C41.171 114.534 38.0989 113.262 34.8815 112.517C22.6427 109.686 13.0864 100.13 10.2555 87.8914C9.51132 84.6739 8.23866 81.6018 6.48987 78.8005C-0.162739 68.1445 -0.162739 54.6284 6.48987 43.9724C8.23866 41.1711 9.51132 38.099 10.2555 34.8816C13.0864 22.6428 22.6427 13.0865 34.8815 10.2556C38.0989 9.51144 41.171 8.23878 43.9723 6.48999Z"
+						fill="none"
+						stroke="#ffffff"
+						stroke-width="4"
+						stroke-linejoin="round"
+						vector-effect="non-scaling-stroke"
+					/>
 				</svg>
 			</div>
 			<div class="flex flex-col items-start justify-start p-9 gap-9">
@@ -70,23 +79,30 @@
 	<section class="flex flex-col gap-6 w-full">
 		<nav mat-tab-nav-bar [tabPanel]="tabPanel">
 			@for (tab of tabs; track tab.value) {
-				<a
+				<div
 					mat-tab-link
 					[attr.aria-current]="
 						currentTab === tab.value ? 'page' : null
 					"
 					[active]="currentTab === tab.value"
-					[routerLink]="[]"
-					[queryParams]="{ section: tab.value }"
 					(click)="currentTab = tab.value"
+					(keyup)="currentTab = tab.value"
+					tabindex="0"
+					[ariaLabel]="tab.label"
 				>
-					{{ tab.label }}
-				</a>
+					<mat-icon
+						class="align-middle mr-2 transition-opacity duration-200"
+						[class.opacity-100]="currentTab === tab.value"
+						[class.opacity-50]="currentTab !== tab.value"
+					>
+						{{ tab.icon }}
+					</mat-icon>
+				</div>
 			}
 		</nav>
 
 		<mat-tab-nav-panel #tabPanel class="relative">
-			@if (currentTab === "charts") {
+			@if (currentTab === tabs[0].value) {
 				<app-tab-content-wrapper
 					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-left"
@@ -98,20 +114,19 @@
 						<p>teste</p>
 					</div>
 				</app-tab-content-wrapper>
-			} @else if (currentTab === "about") {
+			} @else if (currentTab === tabs[1].value) {
 				<app-tab-content-wrapper
 					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-right"
 					animate.leave="slide-out-right"
 				>
 					<div
-						class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
+						class="flex flex-col items-start justify-start bg-red-500 w-full overflow-hidden"
 					>
 						<p>teste</p>
 					</div>
 				</app-tab-content-wrapper>
 			}
 		</mat-tab-nav-panel>
-		<!-- <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel> -->
 	</section>
 </main>

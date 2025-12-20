@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 
 // Material
@@ -22,21 +22,14 @@ import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab
 	],
 	templateUrl: "./profile.html",
 })
-export class Profile implements OnInit {
+export class Profile {
 	route: ActivatedRoute = inject(ActivatedRoute);
 
 	username: string = this.route.snapshot.params["username"];
 
 	tabs = [
-		{ label: "Charts", value: "charts" },
-		{ label: "About", value: "about" },
+		{ label: "History", value: "history", icon: "bar_chart" },
+		{ label: "Charts", value: "charts", icon: "library_music" },
 	];
 	currentTab = this.tabs[0].value;
-
-	ngOnInit(): void {
-		const section = this.route.snapshot.queryParamMap.get("section");
-		this.currentTab =
-			this.tabs.find((tab) => tab.value === section)?.value ||
-			this.tabs[0].value;
-	}
 }
