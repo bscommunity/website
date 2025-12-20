@@ -1,6 +1,5 @@
 import {
 	ChangeDetectionStrategy,
-	ChangeDetectorRef,
 	Component,
 	computed,
 	inject,
@@ -70,7 +69,6 @@ export class AddContributorDialogComponent {
 	private authService = inject(AuthService);
 	private userService = inject(UserService);
 	private contributorService = inject(ContributorService);
-	private cdr = inject(ChangeDetectorRef);
 
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<AddContributorDialogComponent>);
@@ -110,7 +108,7 @@ export class AddContributorDialogComponent {
 		// If the input is too short, don't query the server
 		if (value.length < 2) {
 			this.queryContributors = "start";
-			this.cdr.detectChanges();
+			// TODO: Manually trigger change detection?
 			return;
 		}
 
@@ -123,7 +121,7 @@ export class AddContributorDialogComponent {
 
 		// Fetch the users
 		this.queryContributors = undefined;
-		this.cdr.detectChanges();
+		// TODO: Manually trigger change detection?
 
 		this.userService.searchUsers(value).subscribe({
 			next: (response) => {
@@ -139,13 +137,13 @@ export class AddContributorDialogComponent {
 						// The user is not already in the chart
 						!this.data.usersIds.includes(user.id),
 				);
-				this.cdr.detectChanges();
+				// TODO: Manually trigger change detection?
 			},
 			error: (error) => {
 				console.error("Error fetching users:", error);
 
 				this.queryContributors = null;
-				this.cdr.detectChanges();
+				// TODO: Manually trigger change detection?
 			},
 		});
 	}

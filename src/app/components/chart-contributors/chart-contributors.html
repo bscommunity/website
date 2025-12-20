@@ -86,9 +86,12 @@
 					[alt]="contributor.user.username"
 				></app-avatar>
 				<div class="contributor-info">
-					<p class="text-on-surface-variant text-sm font-medium m-0">
+					<a
+						class="text-on-surface-variant text-sm font-medium m-0 hover:underline max-md:underline"
+						[routerLink]="`/profile/${contributor.user.username}`"
+					>
 						&#64;{{ contributor.user.username }}
-					</p>
+					</a>
 					<p class="text-on-surface-variant text-xs m-0">
 						{{ getRolesString(contributor) }}
 					</p>

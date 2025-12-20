@@ -189,7 +189,7 @@ export class ChartService {
 			}
 		}
 
-		let params = new HttpParams();
+		let params = new HttpParams().set("count", "true");
 
 		if (filters?.query) {
 			params = params.set("query", filters.query);
@@ -690,7 +690,7 @@ export class ChartService {
 
 		const wantsDeluxe = Boolean(
 			filters.versions?.includes("Deluxe") ||
-				filters.categories?.includes("Deluxe"),
+			filters.categories?.includes("Deluxe"),
 		);
 		if (wantsDeluxe) {
 			const hasDeluxe = chart.versions?.some(

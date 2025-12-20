@@ -11,7 +11,11 @@
     "serve:ssr:website": "node dist/website/server/server.mjs",
     "lint": "ng lint --fix",
     "format": "prettier \"src/**/*.{ts,html,scss,json,md}\" --write",
-    "postinstall": "npm run generate-env"
+    "postinstall": "npm run generate-env",
+    "colors:fallback": "node scripts/colors-fallback.js",
+    "colors:fallback:dark": "node scripts/colors-fallback.js --dark",
+    "colors:fallback:force": "node scripts/colors-fallback.js --force",
+    "colors:fallback:dark:force": "node scripts/colors-fallback.js --dark --force"
   },
   "private": true,
   "dependencies": {

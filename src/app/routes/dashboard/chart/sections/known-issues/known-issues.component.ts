@@ -1,5 +1,4 @@
 import {
-	ChangeDetectorRef,
 	Component,
 	inject,
 	signal,
@@ -46,7 +45,6 @@ export class KnownIssuesComponent {
 	readonly chartId = input.required<string>();
 	readonly issues = model.required<KnownIssueModel[]>();
 
-	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
@@ -122,7 +120,7 @@ export class KnownIssuesComponent {
 				},
 			]);
 
-			this.cdr.detectChanges();
+			// TODO: Manually trigger change detection?
 
 			// Reset input
 			this.newIssue = "";
@@ -139,6 +137,6 @@ export class KnownIssuesComponent {
 
 	removeIssueFromTable(issue: KnownIssueModel) {
 		this.issues.update((issues) => issues.filter((i) => i.id !== issue.id));
-		this.cdr.detectChanges();
+		// TODO: Manually trigger change detection?
 	}
 }

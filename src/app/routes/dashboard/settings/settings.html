@@ -26,15 +26,15 @@
 			}
 		</nav>
 
-		<div class="settings-container">
+		<div class="relative">
 			@if (currentTab === "account") {
-				<app-settings-wrapper
-					class="settings-tab"
+				<app-tab-content-wrapper
+					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-left"
 					animate.leave="slide-out-left"
 				>
 					<app-settings-card
-						class="w-full"
+						class="w-full mb-6"
 						title="Auto-private content"
 						description="Automatically set uploaded content to private by default"
 					>
@@ -65,10 +65,10 @@
 							</button>
 						</card-footer>
 					</app-settings-card>
-				</app-settings-wrapper>
+				</app-tab-content-wrapper>
 			} @else if (currentTab === "connections") {
-				<app-settings-wrapper
-					class="settings-tab"
+				<app-tab-content-wrapper
+					class="absolute top-0 left-0 flex flex-col w-full"
 					animate.enter="slide-in-right"
 					animate.leave="slide-out-right"
 				>
@@ -111,7 +111,7 @@
 							}
 						</card-content>
 					</app-settings-card>
-				</app-settings-wrapper>
+				</app-tab-content-wrapper>
 			}
 		</div>
 	</div>

@@ -14,10 +14,11 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 // Models
 import { ContributorModel } from "@/models/contributor.model";
 import { getContributorRoleLabel } from "@/models/enums/role.enum";
+import { RouterLink } from "@angular/router";
 
 @Component({
 	selector: "app-chart-contributors",
-	imports: [MatIconModule, AvatarComponent],
+	imports: [MatIconModule, AvatarComponent, RouterLink],
 	templateUrl: "./chart-contributors.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
