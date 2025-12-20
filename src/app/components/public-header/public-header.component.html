@@ -1,5 +1,5 @@
 <nav
-	class="flex flex-row flex-wrap items-center justify-between w-full gap-6 data-[state=open]:bg-surface-container border-transparent data-[state=open]:border-b-outline-variant border-b px-wrapper transition-colors group z-30 relative h-24 md:h-28"
+	class="flex flex-row items-center justify-between w-full gap-6 data-[state=open]:bg-surface-container border-transparent data-[state=open]:border-b-outline-variant border-b px-wrapper transition-colors group z-30 relative h-24 md:h-28"
 	[attr.data-state]="isMobileMenuOpen === true ? 'open' : 'closed'"
 >
 	<div class="flex flex-row items-center justify-start gap-16">
@@ -43,6 +43,7 @@
 			href="https://discord.gg/C5yCfnTAKz"
 			target="_blank"
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
+			rel="noopener noreferrer"
 		>
 			<mat-icon
 				svgIcon="discord"
@@ -55,6 +56,7 @@
 			href="https://github.com/bscommunity"
 			target="_blank"
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
+			rel="noopener noreferrer"
 		>
 			<mat-icon
 				svgIcon="github"
@@ -81,7 +83,7 @@
 			</mat-icon>
 		</button>
 		<div
-			class="relative hidden text-on-surface md:flex"
+			class="relative hidden text-on-surface lg:flex"
 			routerLinkActive="hidden!"
 		>
 			<a class="hidden" routerLink="/workshop">placeholder</a>

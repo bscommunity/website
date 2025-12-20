@@ -1,10 +1,4 @@
-import {
-	Component,
-	CUSTOM_ELEMENTS_SCHEMA,
-	inject,
-	OnInit,
-} from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from "@angular/core";
 
 import { RouterModule } from "@angular/router";
 
@@ -18,10 +12,14 @@ import { MatDialog } from "@angular/material/dialog";
 // Components
 import { SettingsCardComponent } from "./subcomponents/card.component";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
+import { TabContentWrapperComponent } from "@/components/tabs/tab-content-wrapper.component";
+import {
+	type Tab,
+	TabNavBarComponent,
+} from "@/components/tabs/tab-nav-bar.component";
 
 // Services
 import { OAuthService } from "@/services/oauth.service";
-import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab-content-wrapper.component";
 
 @Component({
 	selector: "app-settings",
@@ -34,29 +32,22 @@ import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab
 		MatIconModule,
 		SettingsCardComponent,
 		TabContentWrapperComponent,
+		TabNavBarComponent,
 	],
 	templateUrl: "./settings.html",
 })
-export class Settings implements OnInit {
-	private readonly route = inject(ActivatedRoute);
+export class Settings {
 	private readonly dialog = inject(MatDialog);
 	private readonly oAuthService = inject(OAuthService);
 
-	tabs = [
-		{ label: "Account", value: "account" },
-		{ label: "Connections", value: "connections" },
+	tabs: Tab[] = [
+		{ label: "Account", showLabel: true, value: "account" },
+		{ label: "Connections", showLabel: true, value: "connections" },
 	];
 	currentTab = this.tabs[0].value;
 
 	oAuthUrl = this.oAuthService.getGoogleOAuthUrl();
 	hasDriveScope = this.oAuthService.hasDriveScopeSignal;
-
-	ngOnInit(): void {
-		const section = this.route.snapshot.queryParamMap.get("section");
-		this.currentTab =
-			this.tabs.find((tab) => tab.value === section)?.value ||
-			this.tabs[0].value;
-	}
 
 	deleteAccount() {
 		// Logic to delete the account

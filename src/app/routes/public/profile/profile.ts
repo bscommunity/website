@@ -8,8 +8,12 @@ import { MatRippleModule } from "@angular/material/core";
 import { MatTabsModule } from "@angular/material/tabs";
 
 // Components
-import { TabContentWrapperComponent } from "@/components/tab-content-wrapper/tab-content-wrapper.component";
+import { TabContentWrapperComponent } from "@/components/tabs/tab-content-wrapper.component";
 import { BadgeComponent } from "@/components/badge/badge.component";
+import {
+	type Tab,
+	TabNavBarComponent,
+} from "@/components/tabs/tab-nav-bar.component";
 
 @Component({
 	selector: "app-profile",
@@ -21,6 +25,7 @@ import { BadgeComponent } from "@/components/badge/badge.component";
 		RouterLink,
 		TabContentWrapperComponent,
 		BadgeComponent,
+		TabNavBarComponent,
 	],
 	templateUrl: "./profile.html",
 })
@@ -29,9 +34,19 @@ export class Profile {
 
 	username: string = this.route.snapshot.params["username"];
 
-	tabs = [
-		{ label: "History", value: "history", icon: "bar_chart" },
-		{ label: "Charts", value: "charts", icon: "library_music" },
+	tabs: Tab[] = [
+		{
+			label: "History",
+			showLabel: false,
+			value: "history",
+			icon: "bar_chart",
+		},
+		{
+			label: "Charts",
+			showLabel: false,
+			value: "charts",
+			icon: "library_music",
+		},
 	];
 	currentTab = this.tabs[0].value;
 }

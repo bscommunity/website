@@ -101,34 +101,16 @@
 	<div class="flex flex-row items-center justify-between w-full gap-16">
 		<div class="hidden md:flex w-full">pc screen</div>
 		<section class="flex flex-col gap-6 w-full md:w-2/5">
-			<nav mat-tab-nav-bar [tabPanel]="tabPanel">
-				@for (tab of tabs; track tab.value) {
-					<div
-						mat-tab-link
-						[attr.aria-current]="
-							currentTab === tab.value ? 'page' : null
-						"
-						[active]="currentTab === tab.value"
-						(click)="currentTab = tab.value"
-						(keyup)="currentTab = tab.value"
-						tabindex="0"
-						[ariaLabel]="tab.label"
-					>
-						<mat-icon
-							class="align-middle mr-2 transition-opacity duration-200"
-							[class.opacity-100]="currentTab === tab.value"
-							[class.opacity-50]="currentTab !== tab.value"
-						>
-							{{ tab.icon }}
-						</mat-icon>
-					</div>
-				}
-			</nav>
+			<app-tab-nav-bar
+				[tabs]="tabs"
+				[tabPanel]="tabPanel"
+				[(currentTab)]="currentTab"
+			/>
 
 			<mat-tab-nav-panel #tabPanel class="relative">
 				@if (currentTab === tabs[0].value) {
 					<app-tab-content-wrapper
-						class="absolute top-0 left-0 flex flex-col w-full"
+						class="absolute top-0 left-0"
 						animate.enter="slide-in-left"
 						animate.leave="slide-out-left"
 					>
@@ -140,7 +122,7 @@
 					</app-tab-content-wrapper>
 				} @else if (currentTab === tabs[1].value) {
 					<app-tab-content-wrapper
-						class="absolute top-0 left-0 flex flex-col w-full"
+						class="absolute top-0 left-0"
 						animate.enter="slide-in-right"
 						animate.leave="slide-out-right"
 					>
