@@ -14,6 +14,7 @@ import {
 	type Tab,
 	TabNavBarComponent,
 } from "@/components/tabs/tab-nav-bar.component";
+import { TabPanelHeightDirective } from "@/components/tabs/tab-panel-height.directive";
 import {
 	HistoryItem,
 	UserHistoryComponent,
@@ -89,6 +90,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		MatTabsModule,
 		RouterLink,
 		TabContentWrapperComponent,
+		TabPanelHeightDirective,
 		BadgeComponent,
 		TabNavBarComponent,
 		UserHistoryComponent,

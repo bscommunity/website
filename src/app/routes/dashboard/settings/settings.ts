@@ -17,6 +17,7 @@ import {
 	type Tab,
 	TabNavBarComponent,
 } from "@/components/tabs/tab-nav-bar.component";
+import { TabPanelHeightDirective } from "@/components/tabs/tab-panel-height.directive";
 
 // Services
 import { OAuthService } from "@/services/oauth.service";
@@ -32,6 +33,7 @@ import { OAuthService } from "@/services/oauth.service";
 		MatIconModule,
 		SettingsCardComponent,
 		TabContentWrapperComponent,
+		TabPanelHeightDirective,
 		TabNavBarComponent,
 	],
 	templateUrl: "./settings.html",

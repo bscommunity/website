@@ -16,10 +16,10 @@
 			[urlBased]="true"
 		/>
 
-		<mat-tab-nav-panel #tabPanel class="relative">
+		<mat-tab-nav-panel #tabPanel appTabPanelHeight class="relative">
 			@if (currentTab === "account") {
 				<app-tab-content-wrapper
-					class="absolute top-0 left-0 flex flex-col w-full"
+					class="flex flex-col w-full"
 					animate.enter="slide-in-left"
 					animate.leave="slide-out-left"
 				>
@@ -58,7 +58,7 @@
 				</app-tab-content-wrapper>
 			} @else if (currentTab === "connections") {
 				<app-tab-content-wrapper
-					class="absolute top-0 left-0 flex flex-col w-full"
+					class="flex flex-col w-full"
 					animate.enter="slide-in-right"
 					animate.leave="slide-out-right"
 				>

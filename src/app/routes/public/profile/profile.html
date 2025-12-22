@@ -151,7 +151,11 @@
 				[(currentTab)]="currentTab"
 			/>
 
-			<mat-tab-nav-panel #tabPanel class="relative flex-1">
+			<mat-tab-nav-panel
+				#tabPanel
+				appTabPanelHeight
+				class="relative flex-1"
+			>
 				@if (currentTab === mobileTabs[0].value) {
 					<app-tab-content-wrapper
 						class="w-full h-full flex"
