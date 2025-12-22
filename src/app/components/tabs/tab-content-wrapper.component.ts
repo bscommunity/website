@@ -1,6 +1,4 @@
-import { Component, HostBinding, HostListener } from "@angular/core";
-
-const LEAVE_ANIMATIONS = new Set(["slideOutLeft", "slideOutRight", "fadeOut"]);
+import { Component } from "@angular/core";
 
 @Component({
 	selector: "app-tab-content-wrapper",
@@ -11,17 +9,6 @@ const LEAVE_ANIMATIONS = new Set(["slideOutLeft", "slideOutRight", "fadeOut"]);
 	`,
 	styles: [
 		`
-			:host {
-				display: block;
-				width: 100%;
-			}
-
-			:host(.tab-content-wrapper--leaving) {
-				position: absolute;
-				inset: 0;
-				pointer-events: none;
-			}
-
 			:host.slide-in-left {
 				animation: slideInLeft 200ms ease;
 			}
@@ -110,33 +97,4 @@ const LEAVE_ANIMATIONS = new Set(["slideOutLeft", "slideOutRight", "fadeOut"]);
 		`,
 	],
 })
-export class TabContentWrapperComponent {
-	@HostBinding("class.tab-content-wrapper")
-	readonly hostClass = true;
-
-	@HostBinding("class.tab-content-wrapper--leaving")
-	isLeaving = false;
-
-	@HostListener("animationstart", ["$event"])
-	onAnimationStart(event: AnimationEvent) {
-		if (event.target !== event.currentTarget) {
-			return;
-		}
-
-		if (LEAVE_ANIMATIONS.has(event.animationName)) {
-			this.isLeaving = true;
-		}
-	}
-
-	@HostListener("animationend", ["$event"])
-	@HostListener("animationcancel", ["$event"])
-	onAnimationDone(event: AnimationEvent) {
-		if (event.target !== event.currentTarget) {
-			return;
-		}
-
-		if (LEAVE_ANIMATIONS.has(event.animationName)) {
-			this.isLeaving = false;
-		}
-	}
-}
+export class TabContentWrapperComponent {}
