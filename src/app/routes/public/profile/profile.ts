@@ -24,7 +24,7 @@ import { SAMPLE_CHART_1 } from "@/lib/fake";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
-const MOBILE_TABS: Tab[] = [
+const MOBILE_TABS: Tab<HistoryItem>[] = [
 	{
 		label: "History",
 		value: "history",
@@ -37,26 +37,46 @@ const MOBILE_TABS: Tab[] = [
 	},
 ];
 
-const DESKTOP_TABS: Tab[] = [
+const charts: HistoryItem[] = [
+	{
+		data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
+		date: new Date("2024-06-01"),
+	},
+	{
+		data: [SAMPLE_CHART_1],
+		date: new Date("2024-06-01"),
+	},
+];
+const tourPasses: HistoryItem[] = [
+	{
+		data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
+		date: new Date("2024-06-01"),
+	},
+];
+
+const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	{
 		label: "Charts",
 		value: "charts",
 		icon: "music_note",
 		showLabel: true,
+		items: charts,
 	},
 	{
 		label: "Tour Passes",
 		value: "tour_passes",
 		icon: "music_video",
 		showLabel: true,
-		disabled: true,
+		items: tourPasses,
+		// disabled: true,
 	},
 	{
 		label: "Themes",
 		value: "themes",
 		icon: "palette",
 		showLabel: true,
-		disabled: true,
+		items: [],
+		// disabled: true,
 	},
 ];
 
@@ -88,14 +108,5 @@ export class Profile {
 
 	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
 
-	charts: HistoryItem[] = [
-		{
-			data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
-			date: new Date("2024-06-01"),
-		},
-		{
-			data: [SAMPLE_CHART_1],
-			date: new Date("2024-06-01"),
-		},
-	];
+	themes: HistoryItem[] = [];
 }

@@ -1,6 +1,8 @@
-<ul class="flex flex-col items-start justify-start">
+<ul class="flex flex-col items-start justify-start w-full">
 	@for (item of items; track $index) {
-		<li class="flex flex-row items-stretch justify-between w-full">
+		<li
+			class="flex flex-row items-stretch justify-between w-full last:flex-1"
+		>
 			<!-- Deco -->
 			<div class="flex flex-col items-center mr-4">
 				<div
@@ -9,9 +11,12 @@
 				<div class="w-1 flex-1 bg-on-secondary-container"></div>
 			</div>
 			<!-- Items -->
-			<ul class="flex flex-col items-center justify-center gap-3 pb-4">
+			<ul
+				class="flex flex-col items-center justify-start gap-3 pb-4 w-full"
+			>
 				@for (chart of item.data; track $index) {
 					<app-chart-preview
+						class="w-full"
 						[chart]="chart"
 						[showContributors]="true"
 					/>

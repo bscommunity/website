@@ -5,12 +5,13 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatTabNavPanel, MatTabsModule } from "@angular/material/tabs";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 
-export interface Tab {
+export interface Tab<T> {
 	label: string;
 	value: string;
 	icon?: string;
 	showLabel?: boolean;
 	disabled?: boolean;
+	items?: T[];
 }
 
 @Component({
@@ -56,7 +57,7 @@ export class TabNavBarComponent implements OnInit {
 	tabPanel = input<MatTabNavPanel | undefined>();
 	urlBased = input<boolean | string>(false);
 
-	tabs = input<Tab[]>();
+	tabs = input<Tab<unknown>[]>();
 
 	currentTab = model<string>("");
 

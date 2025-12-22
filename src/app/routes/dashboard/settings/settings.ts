@@ -40,7 +40,7 @@ export class Settings {
 	private readonly dialog = inject(MatDialog);
 	private readonly oAuthService = inject(OAuthService);
 
-	tabs: Tab[] = [
+	tabs: Tab<null>[] = [
 		{ label: "Account", showLabel: true, value: "account" },
 		{ label: "Connections", showLabel: true, value: "connections" },
 	];
