@@ -6,6 +6,7 @@
 			<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
 			Return to workshop
 		</button>
+		<!-- Profile Card -->
 		<div
 			class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
 		>
@@ -63,10 +64,10 @@
 							<app-badge icon="editor_choice" label="Verified" />
 						</li>
 						<li>
-							<app-badge icon="deblur" label="High Quality" />
-						</li>
-						<li>
-							<app-badge icon="music_note" label="+25 charts" />
+							<app-badge
+								icon="music_note"
+								label="Original Artist"
+							/>
 						</li>
 					</ul>
 				</span>
@@ -77,7 +78,7 @@
 						>
 						Follow
 					</button>
-					<button
+					<!-- <button
 						class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
 						matRipple
 						matRippleColor="rgba(63, 30, 104, 0.1)"
@@ -92,13 +93,13 @@
 						aria-label="Report"
 					>
 						<mat-icon class="align-middle" inline>flag</mat-icon>
-					</button>
+					</button> -->
 				</div>
 			</div>
 		</div>
 	</header>
 
-	<div class="flex flex-row items-center justify-between w-full gap-16">
+	<div class="flex flex-row items-start justify-between w-full gap-16">
 		<div class="hidden md:flex flex-col items-start justify-start w-full">
 			<app-tab-nav-bar
 				class="w-full"
@@ -108,29 +109,32 @@
 			/>
 
 			<mat-tab-nav-panel #desktopTabPanel class="relative w-full">
-				@if (currentTab === desktopTabs[0].value) {
+				@if (currentDesktopTab === desktopTabs[0].value) {
 					<app-tab-content-wrapper
-						class="absolute top-0 left-0"
+						class="w-full"
 						animate.enter="slide-in-left"
 						animate.leave="slide-out-left"
 					>
-						<div
-							class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
+						<ul
+							class="flex flex-col items-start justify-start w-full bg-red-500 overflow-hidden mt-6"
 						>
-							<p>teste</p>
-						</div>
-					</app-tab-content-wrapper>
-				} @else if (currentTab === desktopTabs[1].value) {
-					<app-tab-content-wrapper
-						class="absolute top-0 left-0"
-						animate.enter="slide-in-right"
-						animate.leave="slide-out-right"
-					>
-						<div
-							class="flex flex-col items-start justify-start bg-red-500 w-full overflow-hidden"
-						>
-							<p>teste</p>
-						</div>
+							@for (item of charts; track $index) {
+								<li
+									class="w-full mb-6 last:mb-0 gap-4 flex flex-col"
+								>
+									<h6>
+										{{
+											convertDateTimeToHumanReadable(
+												item.date.toString()
+											)
+										}}
+									</h6>
+									@for (chart of item.data; track $index) {
+										<app-chart-preview [chart]="chart" />
+									}
+								</li>
+							}
+						</ul>
 					</app-tab-content-wrapper>
 				}
 			</mat-tab-nav-panel>
@@ -139,27 +143,23 @@
 			<h3 class="hidden md:flex font-medium">Recent activity</h3>
 			<app-tab-nav-bar
 				class="flex md:hidden"
-				[tabs]="tabs"
+				[tabs]="mobileTabs"
 				[tabPanel]="tabPanel"
 				[(currentTab)]="currentTab"
 			/>
 
 			<mat-tab-nav-panel #tabPanel class="relative">
-				@if (currentTab === tabs[0].value) {
+				@if (currentTab === mobileTabs[0].value) {
 					<app-tab-content-wrapper
-						class="absolute top-0 left-0"
+						class="w-full"
 						animate.enter="slide-in-left"
 						animate.leave="slide-out-left"
 					>
-						<div
-							class="flex flex-col items-start justify-start bg-red-500 overflow-hidden"
-						>
-							<p>teste</p>
-						</div>
+						<app-user-history />
 					</app-tab-content-wrapper>
-				} @else if (currentTab === tabs[1].value) {
+				} @else if (currentTab === mobileTabs[1].value) {
 					<app-tab-content-wrapper
-						class="absolute top-0 left-0"
+						class="w-full"
 						animate.enter="slide-in-right"
 						animate.leave="slide-out-right"
 					>

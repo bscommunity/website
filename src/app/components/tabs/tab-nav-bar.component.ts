@@ -7,9 +7,10 @@ import { ActivatedRoute, RouterLink } from "@angular/router";
 
 export interface Tab {
 	label: string;
-	showLabel?: boolean;
 	value: string;
 	icon?: string;
+	showLabel?: boolean;
+	disabled?: boolean;
 }
 
 @Component({
@@ -30,7 +31,11 @@ export interface Tab {
 					[queryParams]="urlBased() ? { section: tab.value } : null"
 					(click)="setCurrentTab(tab.value)"
 					[class.opacity-100]="currentTab() === tab.value"
-					[class.opacity-50]="currentTab() !== tab.value"
+					[class.opacity-50]="
+						currentTab() !== tab.value || tab.disabled
+					"
+					[class.pointer-events-none]="tab.disabled"
+					[class.cursor-not-allowed]="tab.disabled"
 				>
 					@if (tab.icon) {
 						<mat-icon class="align-middle">

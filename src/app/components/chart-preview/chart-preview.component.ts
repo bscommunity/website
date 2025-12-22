@@ -1,5 +1,5 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, inject, Input, input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 // Material
@@ -40,7 +40,8 @@ export enum Tendency {
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
-	@Input() chart!: ChartModel;
+	chart = input.required<ChartModel>();
+	size = input<"small" | "medium" | "large">("medium");
 
 	private _snackBar = inject(MatSnackBar);
 
@@ -64,7 +65,7 @@ export class ChartPreviewComponent {
 
 	onShare() {
 		// Generate shareable link
-		const url = `${window.location.origin}/link/chart/${this.chart.contentId}`;
+		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
 
 		// Copy to clipboard
 		navigator.clipboard.writeText(url);

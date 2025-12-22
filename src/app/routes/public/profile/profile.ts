@@ -14,6 +14,51 @@ import {
 	type Tab,
 	TabNavBarComponent,
 } from "@/components/tabs/tab-nav-bar.component";
+import {
+	HistoryItem,
+	UserHistoryComponent,
+} from "@/components/history/history.component";
+
+// Lib
+import { SAMPLE_CHART_1 } from "@/lib/fake";
+import { convertDateTimeToHumanReadable } from "@/lib/time";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+
+const MOBILE_TABS: Tab[] = [
+	{
+		label: "History",
+		value: "history",
+		icon: "bar_chart",
+	},
+	{
+		label: "Charts",
+		value: "charts",
+		icon: "library_music",
+	},
+];
+
+const DESKTOP_TABS: Tab[] = [
+	{
+		label: "Charts",
+		value: "charts",
+		icon: "music_note",
+		showLabel: true,
+	},
+	{
+		label: "Tour Passes",
+		value: "tour_passes",
+		icon: "music_video",
+		showLabel: true,
+		disabled: true,
+	},
+	{
+		label: "Themes",
+		value: "themes",
+		icon: "palette",
+		showLabel: true,
+		disabled: true,
+	},
+];
 
 @Component({
 	selector: "app-profile",
@@ -26,47 +71,31 @@ import {
 		TabContentWrapperComponent,
 		BadgeComponent,
 		TabNavBarComponent,
+		UserHistoryComponent,
+		ChartPreviewComponent,
 	],
 	templateUrl: "./profile.html",
 })
 export class Profile {
 	route: ActivatedRoute = inject(ActivatedRoute);
-
 	username: string = this.route.snapshot.params["username"];
 
-	tabs: Tab[] = [
-		{
-			label: "History",
-			value: "history",
-			icon: "bar_chart",
-		},
-		{
-			label: "Charts",
-			value: "charts",
-			icon: "library_music",
-		},
-	];
-	currentTab = this.tabs[0].value;
+	mobileTabs = MOBILE_TABS;
+	desktopTabs = DESKTOP_TABS;
 
-	desktopTabs: Tab[] = [
+	currentTab = MOBILE_TABS[0].value;
+	currentDesktopTab = DESKTOP_TABS[0].value;
+
+	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
+
+	charts: HistoryItem[] = [
 		{
-			label: "Charts",
-			value: "charts",
-			icon: "music_note",
-			showLabel: true,
+			data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
+			date: new Date("2024-06-01"),
 		},
 		{
-			label: "Tour Passes",
-			value: "tour_passes",
-			icon: "music_video",
-			showLabel: true,
-		},
-		{
-			label: "Themes",
-			value: "themes",
-			icon: "palette",
-			showLabel: true,
+			data: [SAMPLE_CHART_1],
+			date: new Date("2024-06-01"),
 		},
 	];
-	currentDesktopTab = this.desktopTabs[0].value;
 }
