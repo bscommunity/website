@@ -19,6 +19,12 @@ export const Chart = z.object({
 	isFeatured: z.boolean().default(false),
 	isPublic: z.boolean().default(true),
 
+	downloadsSum: z.number().min(0).default(0),
+	latestPublishedAt: z.string().optional().nullable(),
+
+	isFavorited: z.boolean().optional().nullable(),
+	isLiked: z.boolean().optional().nullable(),
+
 	// Relations
 	latestVersion: Version,
 	versions: Version.array().min(1),
@@ -47,6 +53,10 @@ export const CreateChart = Chart.omit({
 	contributors: true,
 	contentId: true,
 	latestVersion: true,
+	downloadsSum: true,
+	latestPublishedAt: true,
+	isFavorited: true,
+	isLiked: true,
 })
 	.merge(
 		// First version properties
@@ -68,5 +78,9 @@ export const MutateChartSchema = Chart.omit({
 	versions: true,
 	contributors: true,
 	latestVersion: true,
+	downloadsSum: true,
+	latestPublishedAt: true,
+	isFavorited: true,
+	isLiked: true,
 }).partial();
 export type MutateChartModel = z.infer<typeof MutateChartSchema>;

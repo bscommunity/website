@@ -39,9 +39,10 @@ export const initialChartFormData: ChartFormData = {
 };
 
 @Injectable({ providedIn: "root" })
-export class ChartPublishHandler
-	implements PublishHandler<CreateChartModel, ChartModel>
-{
+export class ChartPublishHandler implements PublishHandler<
+	CreateChartModel,
+	ChartModel
+> {
 	private chartService = inject(ChartService);
 	private cacheService = inject(CacheService);
 

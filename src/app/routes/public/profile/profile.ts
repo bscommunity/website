@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 
 // Material
@@ -6,6 +6,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTabsModule } from "@angular/material/tabs";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
 import { TabContentWrapperComponent } from "@/components/tabs/tab-content-wrapper.component";
@@ -18,11 +19,14 @@ import {
 	HistoryItem,
 	UserHistoryComponent,
 } from "@/components/history/history.component";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
 // Lib
-import { SAMPLE_CHART_1 } from "@/lib/fake";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
-import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+
+// Models & Services
+import { UserProfileResponseModel } from "@/models/user.model";
+import { UserService } from "@/services/api/user.service";
 
 const MOBILE_TABS: Tab<HistoryItem>[] = [
 	{
@@ -37,38 +41,19 @@ const MOBILE_TABS: Tab<HistoryItem>[] = [
 	},
 ];
 
-const charts: HistoryItem[] = [
-	{
-		data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
-		date: new Date("2024-06-01"),
-	},
-	{
-		data: [SAMPLE_CHART_1],
-		date: new Date("2024-06-01"),
-	},
-];
-const tourPasses: HistoryItem[] = [
-	{
-		data: [SAMPLE_CHART_1, SAMPLE_CHART_1],
-		date: new Date("2024-06-01"),
-	},
-];
-
 const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	{
 		label: "Charts",
 		value: "charts",
 		icon: "music_note",
 		showLabel: true,
-		items: charts,
 	},
 	{
 		label: "Tour Passes",
 		value: "tour_passes",
 		icon: "music_video",
 		showLabel: true,
-		items: tourPasses,
-		// disabled: true,
+		disabled: true,
 	},
 	{
 		label: "Themes",
@@ -76,7 +61,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		icon: "palette",
 		showLabel: true,
 		items: [],
-		// disabled: true,
+		disabled: true,
 	},
 ];
 
@@ -87,6 +72,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		MatButtonModule,
 		MatRippleModule,
 		MatTabsModule,
+		MatProgressSpinnerModule,
 		RouterLink,
 		TabContentWrapperComponent,
 		BadgeComponent,
@@ -96,9 +82,16 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	],
 	templateUrl: "./profile.html",
 })
-export class Profile {
+export class Profile implements OnInit {
+	private readonly userService = inject(UserService);
+
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username: string = this.route.snapshot.params["username"];
+	profile = signal<UserProfileResponseModel | undefined | null>(undefined);
+
+	groupedCharts = signal<HistoryItem[] | undefined | null>([]);
+	// groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
+	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
 
 	mobileTabs = MOBILE_TABS;
 	desktopTabs = DESKTOP_TABS;
@@ -109,4 +102,36 @@ export class Profile {
 	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
 
 	themes: HistoryItem[] = [];
+
+	ngOnInit(): void {
+		// Fetch user data based on username
+		this.userService.getUserByUsername(this.username).subscribe({
+			next: (data) => {
+				console.log("Fetched user data:", data);
+				this.profile.set(data);
+				this.groupedCharts.set(
+					data.charts.reduce((acc, chart) => {
+						let group = acc.find(
+							(g) =>
+								g.date.toDateString() ===
+								chart.latestPublishedAt,
+						);
+						if (!group) {
+							group = {
+								date: new Date(chart.latestPublishedAt || 0),
+								data: [],
+							};
+							acc.push(group);
+						}
+						group.data.push(chart);
+						return acc;
+					}, [] as HistoryItem[]),
+				);
+			},
+			error: (err) => {
+				this.profile.set(null);
+				console.error("Error fetching user data:", err);
+			},
+		});
+	}
 }

@@ -12,6 +12,10 @@ export const SAMPLE_CHART_1: ChartModel = {
 	genre: Genre.ROCK,
 	trackPreviewUrl:
 		"https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/eb/dc/2e/ebdc2e0d-61c4-1318-3490-d916eb03a30f/mzaf_284666455123040979.plus.aac.p.m4a",
+	downloadsSum: 1234,
+	isFavorited: true,
+	isLiked: false,
+	latestPublishedAt: "2025-08-31T00:00",
 	versions: [
 		{
 			id: "1411705646486786158",

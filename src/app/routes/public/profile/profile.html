@@ -1,84 +1,117 @@
 <main
-	class="flex flex-col items-start justify-start gap-wrapper md:gap-12 w-full px-wrapper pt-wrapper md:pt-12 text-base font-normal leading-5"
+	class="flex flex-col items-start justify-start gap-wrapper md:gap-12 w-full px-wrapper min-h-screen pt-wrapper md:pt-12 text-base font-normal leading-5"
 >
-	<header class="flex flex-col items-start justify-start gap-6 w-full">
-		<button mat-stroked-button routerLink="/workshop">
-			<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
-			Return to workshop
-		</button>
-		<!-- Profile Card -->
-		<div
-			class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
-		>
-			<div class="flex flex-col w-full relative">
-				<img
-					src="https://i.imgur.com/UNrwI2K.jpeg"
-					alt="Profile banner"
-					class="w-full h-64 object-cover rounded-3xl"
-				/>
-				<svg
-					width="123"
-					height="123"
-					viewBox="0 0 123 123"
-					class="absolute bottom-4 left-4 md:left-8 md:bottom-8"
-				>
-					<defs>
-						<mask
-							id="avatar-shape"
-							maskContentUnits="userSpaceOnUse"
-						>
-							<use
-								href="/assets/icons/avatar-mask.svg#avatar-border"
-								fill="white"
-							/>
-						</mask>
-					</defs>
-					<image
-						href="https://i.imgur.com/5Hsj4tJ.jpeg"
+	@if (profile() === undefined) {
+		<!-- Loading state -->
+		<div class="flex flex-col items-center justify-center w-full py-24">
+			<mat-progress-spinner
+				mode="indeterminate"
+				diameter="48"
+			></mat-progress-spinner>
+			<p class="mt-4 text-lg">Loading profile...</p>
+		</div>
+	} @else if (profile() === null) {
+		<!-- Error state -->
+		<div class="flex flex-col items-center justify-center w-full py-24">
+			<mat-icon class="text-6xl text-error">error_outline</mat-icon>
+			<p class="mt-4 text-lg text-center">
+				Profile not found. Please check the username and try again.
+			</p>
+			<button mat-stroked-button class="mt-6" routerLink="/workshop">
+				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				Return to workshop
+			</button>
+		</div>
+	} @else {
+		<header class="flex flex-col items-start justify-start gap-6 w-full">
+			<button mat-stroked-button routerLink="/workshop">
+				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				Return to workshop
+			</button>
+			<!-- Profile Card -->
+			<div
+				class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
+			>
+				<div class="flex flex-col w-full relative">
+					<img
+						[src]="
+							profile()!.user.imageUrl ||
+							'/assets/images/default-banner.jpg'
+						"
+						[alt]="'Banner image for ' + profile()!.user.username"
+						class="w-full h-64 object-cover rounded-3xl"
+					/>
+					<svg
 						width="123"
 						height="123"
-						mask="url(#avatar-shape)"
-					/>
-					<use
-						href="/assets/icons/avatar-mask.svg#avatar-border"
-						fill="none"
-						class="stroke-secondary"
-						stroke-width="4"
-						stroke-linejoin="round"
-						vector-effect="non-scaling-stroke"
-					/>
-				</svg>
-			</div>
-			<div
-				class="flex flex-row flex-wrap md:justify-between w-full items-start justify-start p-9 gap-9"
-			>
-				<span
-					class="flex flex-row flex-wrap items-center justify-start gap-4 md:gap-6"
-				>
-					<h1 class="text-2xl font-medium">@{{ this.username }}</h1>
-					<!-- badges will come here -->
-					<ul
-						class="flex flex-row flex-wrap items-center justify-start gap-3"
+						viewBox="0 0 123 123"
+						class="absolute bottom-4 left-4 md:left-8 md:bottom-8"
 					>
-						<li>
-							<app-badge icon="editor_choice" label="Verified" />
-						</li>
-						<li>
-							<app-badge
-								icon="music_note"
-								label="Original Artist"
-							/>
-						</li>
-					</ul>
-				</span>
-				<div class="flex items-center justify-start gap-4">
-					<button mat-flat-button>
-						<mat-icon class="align-middle mr-2"
-							>stars_filled</mat-icon
+						<defs>
+							<mask
+								id="avatar-shape"
+								maskContentUnits="userSpaceOnUse"
+							>
+								<use
+									href="/assets/icons/avatar-mask.svg#avatar-border"
+									fill="white"
+								/>
+							</mask>
+						</defs>
+						<image
+							[attr.xlink:href]="
+								profile()!.user.imageUrl ||
+								'/assets/images/default-avatar.png'
+							"
+							width="123"
+							height="123"
+							mask="url(#avatar-shape)"
+						/>
+						<use
+							href="/assets/icons/avatar-mask.svg#avatar-border"
+							fill="none"
+							class="stroke-secondary"
+							stroke-width="4"
+							stroke-linejoin="round"
+							vector-effect="non-scaling-stroke"
+						/>
+					</svg>
+				</div>
+				<div
+					class="flex flex-row flex-wrap md:justify-between w-full items-start justify-start p-9 gap-9"
+				>
+					<span
+						class="flex flex-row flex-wrap items-center justify-start gap-4 md:gap-6"
+					>
+						<h1 class="text-2xl font-medium">
+							@{{ this.username }}
+						</h1>
+						<!-- badges will come here -->
+						<ul
+							class="flex flex-row flex-wrap items-center justify-start gap-3"
 						>
-						Follow
-					</button>
-					<!-- <button
+							<li>
+								<app-badge
+									icon="editor_choice"
+									label="Verified"
+								/>
+							</li>
+							<li>
+								<app-badge
+									icon="music_note"
+									label="Original Artist"
+								/>
+							</li>
+						</ul>
+					</span>
+					<div class="flex items-center justify-start gap-4">
+						<button mat-flat-button>
+							<mat-icon class="align-middle mr-2"
+								>stars_filled</mat-icon
+							>
+							Follow
+						</button>
+						<!-- <button
 						class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
 						matRipple
 						matRippleColor="rgba(63, 30, 104, 0.1)"
@@ -94,86 +127,132 @@
 					>
 						<mat-icon class="align-middle" inline>flag</mat-icon>
 					</button> -->
+					</div>
 				</div>
 			</div>
-		</div>
-	</header>
+		</header>
 
-	<div class="flex flex-row items-stretch justify-between w-full gap-16">
-		<mat-tab-group dynamicHeight class="hidden! md:flex! w-full md:w-2/3">
-			@for (tab of desktopTabs; track tab.value) {
-				<mat-tab [disabled]="tab.disabled">
-					<ng-template mat-tab-label>
-						@if (tab.icon) {
-							<mat-icon class="align-middle">{{
-								tab.icon
-							}}</mat-icon>
-						}
-						@if (tab.label && tab.showLabel) {
-							<span class="ml-4">{{ tab.label }}</span>
-						}
-					</ng-template>
-					<section
-						class="flex flex-col items-center justify-start w-full"
-					>
-						<ul
-							class="flex flex-col items-start justify-start w-full overflow-hidden mt-6"
-						>
-							@for (item of tab.items; track $index) {
-								<li
-									class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
-								>
-									<h6>
-										{{
-											convertDateTimeToHumanReadable(
-												item.date.toString()
-											)
-										}}
-									</h6>
-									@for (chart of item.data; track $index) {
-										<app-chart-preview [chart]="chart" />
-									}
-								</li>
+		<div class="flex flex-row items-stretch justify-between w-full gap-16">
+			<mat-tab-group
+				dynamicHeight
+				class="hidden! md:flex! w-full md:w-2/3"
+			>
+				@for (tab of desktopTabs; track tab.value) {
+					<mat-tab [disabled]="tab.disabled">
+						<ng-template mat-tab-label>
+							@if (tab.icon) {
+								<mat-icon class="align-middle">{{
+									tab.icon
+								}}</mat-icon>
 							}
-						</ul>
-					</section>
-				</mat-tab>
-			}
-		</mat-tab-group>
-		<section
-			class="flex flex-col gap-6 w-full md:w-1/3 flex-1 items-stretch"
-		>
-			<h3 class="hidden md:flex font-medium">Recent activity</h3>
-			<app-tab-nav-bar
-				class="flex md:hidden"
-				[tabs]="mobileTabs"
-				[tabPanel]="tabPanel"
-				[(currentTab)]="currentTab"
-			/>
-
-			<mat-tab-nav-panel #tabPanel class="relative flex-1">
-				@if (currentTab === mobileTabs[0].value) {
-					<app-tab-content-wrapper
-						class="w-full h-full flex"
-						animate.enter="slide-in-left"
-						animate.leave="slide-out-left"
-					>
-						<app-user-history class="flex flex-1 w-full" />
-					</app-tab-content-wrapper>
-				} @else if (currentTab === mobileTabs[1].value) {
-					<app-tab-content-wrapper
-						class="w-full h-full flex"
-						animate.enter="slide-in-right"
-						animate.leave="slide-out-right"
-					>
-						<div
-							class="flex flex-col items-start justify-start bg-red-500 w-full overflow-hidden"
+							@if (tab.label && tab.showLabel) {
+								<span class="ml-4">{{ tab.label }}</span>
+							}
+						</ng-template>
+						<section
+							class="flex flex-col items-center justify-start w-full"
 						>
-							<p>teste</p>
-						</div>
-					</app-tab-content-wrapper>
+							@if (groupedCharts()) {
+								<ul
+									class="flex flex-col items-start justify-start w-full overflow-hidden mt-6"
+								>
+									@for (
+										item of groupedCharts();
+										track $index
+									) {
+										<li
+											class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
+										>
+											<h6>
+												{{
+													convertDateTimeToHumanReadable(
+														item.date.toString()
+													)
+												}}
+											</h6>
+											@for (
+												chart of item.data;
+												track $index
+											) {
+												<app-chart-preview
+													[chart]="chart"
+												/>
+											}
+										</li>
+									}
+								</ul>
+							} @else if (groupedCharts() === null) {
+								<p class="mt-6 text-lg">
+									Failed to load recent activity. Please try
+									again later.
+								</p>
+							} @else {
+								<p class="mt-6 text-lg">
+									No recent activity to show.
+								</p>
+							}
+						</section>
+					</mat-tab>
 				}
-			</mat-tab-nav-panel>
-		</section>
-	</div>
+			</mat-tab-group>
+			<section
+				class="flex flex-col gap-6 w-full md:w-1/3 flex-1 items-stretch"
+			>
+				<h3 class="hidden md:flex font-medium">Recent activity</h3>
+				<app-tab-nav-bar
+					class="flex md:hidden"
+					[tabs]="mobileTabs"
+					[tabPanel]="tabPanel"
+					[(currentTab)]="currentTab"
+				/>
+
+				<mat-tab-nav-panel #tabPanel class="relative flex-1">
+					@if (currentTab === mobileTabs[0].value) {
+						<app-tab-content-wrapper
+							class="w-full h-full flex absolute"
+							animate.enter="slide-in-left"
+							animate.leave="slide-out-left"
+						>
+							<app-user-history class="flex flex-1 w-full" />
+						</app-tab-content-wrapper>
+					} @else if (currentTab === mobileTabs[1].value) {
+						<app-tab-content-wrapper
+							class="w-full h-full flex absolute"
+							animate.enter="slide-in-right"
+							animate.leave="slide-out-right"
+						>
+							<ul
+								class="flex flex-col items-start justify-start w-full overflow-hidden"
+							>
+								@for (
+									item of desktopTabs[0].items;
+									track $index
+								) {
+									<li
+										class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
+									>
+										<h6>
+											{{
+												convertDateTimeToHumanReadable(
+													item.date.toString()
+												)
+											}}
+										</h6>
+										@for (
+											chart of item.data;
+											track $index
+										) {
+											<app-chart-preview
+												[chart]="chart"
+											/>
+										}
+									</li>
+								}
+							</ul>
+						</app-tab-content-wrapper>
+					}
+				</mat-tab-nav-panel>
+			</section>
+		</div>
+	}
 </main>
