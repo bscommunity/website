@@ -23,8 +23,8 @@ export class StorageService {
 		if (!this.isBrowser) return;
 
 		const storage = useSession
-			? this.getLocalStorage()
-			: this.getSessionStorage();
+			? this.getSessionStorage()
+			: this.getLocalStorage();
 		storage?.setItem(key, value);
 	}
 

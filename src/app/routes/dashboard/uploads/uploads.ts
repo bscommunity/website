@@ -133,13 +133,13 @@ export class Uploads implements OnInit, OnDestroy {
 			this.sortOptions[0];
 
 		// Carregamento inicial
-		this.fetchCharts(false);
+		this.fetchCharts();
 
 		// Recarregar quando filtros mudarem
 		this.filterService.filterChanges$
 			.pipe(takeUntil(this.destroy$))
 			.subscribe(() => {
-				this.fetchCharts(false);
+				this.fetchCharts();
 			});
 
 		// Sincronizar erros

@@ -12,6 +12,7 @@ export interface Tab<T> {
 	showLabel?: boolean;
 	disabled?: boolean;
 	items?: T[];
+	tooltip?: string;
 }
 
 @Component({

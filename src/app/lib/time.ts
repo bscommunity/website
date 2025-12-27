@@ -5,42 +5,61 @@ export function transformDuration(value: number): string {
 }
 
 // eg. 2 weeks ago, 1 day ago, 3 hours ago, 5 minutes ago
-export function convertDateTimeToHumanReadable(value: string): string {
-	const date = new Date(value.endsWith("Z") ? value : value + "Z");
-	const now = new Date();
-	const diff = now.getTime() - date.getTime();
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-	if (diff < 1) {
-		return "just now";
+export function convertDateTimeToHumanReadable(value: string | Date): string {
+	const date =
+		value instanceof Date
+			? new Date(value)
+			: new Date(value.endsWith("Z") ? value : `${value}Z`);
+
+	if (Number.isNaN(date.getTime())) {
+		return "Unknown date";
 	}
 
-	const seconds = Math.floor(diff / 1000);
-	const minutes = Math.floor(seconds / 60);
-	const hours = Math.floor(minutes / 60);
-	const days = Math.floor(hours / 24);
-	const weeks = Math.floor(days / 7);
-	const months = Math.floor(weeks / 4);
-	const years = Math.floor(months / 12);
+	const today = new Date();
+	const startOfToday = new Date(
+		today.getFullYear(),
+		today.getMonth(),
+		today.getDate(),
+	);
+	const startOfDate = new Date(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+	);
 
-	if (years > 0) {
-		return years === 1 ? "1 year ago" : `${years} years ago`;
+	const diffMs = startOfToday.getTime() - startOfDate.getTime();
+	const diffDays = Math.max(0, Math.floor(diffMs / MS_PER_DAY));
+
+	if (diffDays === 0) {
+		return "Today";
 	}
-	if (months > 0) {
-		return months === 1 ? "1 month ago" : `${months} months ago`;
+	if (diffDays === 1) {
+		return "Yesterday";
 	}
-	if (weeks > 0) {
+	if (diffDays < 7) {
+		return `${diffDays} days ago`;
+	}
+
+	const weeks = Math.floor(diffDays / 7);
+	if (weeks < 4) {
 		return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
 	}
-	if (days > 0) {
-		return days === 1 ? "1 day ago" : `${days} days ago`;
+
+	const months =
+		startOfToday.getFullYear() * 12 +
+		startOfToday.getMonth() -
+		(startOfDate.getFullYear() * 12 + startOfDate.getMonth());
+	if (months === 1) {
+		return "1 month ago";
 	}
-	if (hours > 0) {
-		return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+	if (months < 12) {
+		return `${months} months ago`;
 	}
-	if (minutes > 0) {
-		return minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
-	}
-	return seconds === 1 ? "1 second ago" : `${seconds} seconds ago`;
+
+	const years = Math.floor(months / 12);
+	return years === 1 ? "1 year ago" : `${years} years ago`;
 }
 
 export function convertStringToMonth(value: string): string {

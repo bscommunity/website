@@ -112,21 +112,21 @@
 							Follow
 						</button>
 						<!-- <button
-						class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
-						matRipple
-						matRippleColor="rgba(63, 30, 104, 0.1)"
-						aria-label="Share"
-					>
-						<mat-icon class="align-middle" inline>share</mat-icon>
-					</button>
-					<button
-						class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
-						matRipple
-						matRippleColor="rgba(63, 30, 104, 0.1)"
-						aria-label="Report"
-					>
-						<mat-icon class="align-middle" inline>flag</mat-icon>
-					</button> -->
+class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
+matRipple
+matRippleColor="rgba(63, 30, 104, 0.1)"
+aria-label="Share"
+>
+<mat-icon class="align-middle" inline>share</mat-icon>
+</button>
+<button
+class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
+matRipple
+matRippleColor="rgba(63, 30, 104, 0.1)"
+aria-label="Report"
+>
+<mat-icon class="align-middle" inline>flag</mat-icon>
+</button> -->
 					</div>
 				</div>
 			</div>
@@ -164,11 +164,7 @@
 											class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
 										>
 											<h6>
-												{{
-													convertDateTimeToHumanReadable(
-														item.date.toString()
-													)
-												}}
+												{{ item.date.toDateString() }}
 											</h6>
 											@for (
 												chart of item.data;
@@ -206,6 +202,50 @@
 					[(currentTab)]="currentTab"
 				/>
 
+				<ng-template #activityContent>
+					@if (userActivity() === undefined) {
+						<div
+							class="flex items-center justify-center w-full py-8"
+						>
+							<mat-progress-spinner
+								mode="indeterminate"
+								diameter="36"
+							></mat-progress-spinner>
+						</div>
+					} @else if (userActivity() === null) {
+						<div
+							class="flex flex-col items-center justify-center w-full py-8 gap-4"
+						>
+							<mat-icon class="text-4xl text-error"
+								>error_outline</mat-icon
+							>
+							<p
+								class="text-sm text-on-surface-variant text-center"
+							>
+								Failed to load recent activity.
+							</p>
+						</div>
+					} @else if (userActivity()!.length === 0) {
+						<div
+							class="flex flex-col items-center justify-center w-full py-8 gap-4"
+						>
+							<mat-icon class="text-4xl text-on-surface-variant"
+								>history</mat-icon
+							>
+							<p
+								class="text-sm text-on-surface-variant text-center"
+							>
+								No recent activity yet.
+							</p>
+						</div>
+					} @else {
+						<app-user-history
+							class="flex flex-1 w-full"
+							[items]="userActivity()!"
+						/>
+					}
+				</ng-template>
+
 				<mat-tab-nav-panel #tabPanel class="relative flex-1">
 					@if (currentTab === mobileTabs[0].value) {
 						<app-tab-content-wrapper
@@ -213,7 +253,9 @@
 							animate.enter="slide-in-left"
 							animate.leave="slide-out-left"
 						>
-							<app-user-history class="flex flex-1 w-full" />
+							<ng-container
+								*ngTemplateOutlet="activityContent"
+							></ng-container>
 						</app-tab-content-wrapper>
 					} @else if (currentTab === mobileTabs[1].value) {
 						<app-tab-content-wrapper
@@ -231,10 +273,15 @@
 									<li
 										class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
 									>
-										<h6>
+										<h6
+											[matTooltip]="
+												formatGroupDate(item.date)
+											"
+											matTooltipPosition="above"
+										>
 											{{
 												convertDateTimeToHumanReadable(
-													item.date.toString()
+													item.date
 												)
 											}}
 										</h6>

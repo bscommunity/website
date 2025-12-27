@@ -226,6 +226,7 @@ export class ChartService {
 
 		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(
 			tap((fetchedCharts) => {
+				console.log("Fetched charts from API:", fetchedCharts);
 				if (!isPaginated) {
 					if (
 						cacheScope === "public" &&
@@ -285,6 +286,7 @@ export class ChartService {
 		}
 
 		const response = await firstValueFrom(this.fetchChartFromRemote(id));
+		console.log("Fetched chart from API:", response);
 
 		const parsedChart = Chart.parse(response);
 
