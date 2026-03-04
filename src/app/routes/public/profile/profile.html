@@ -104,7 +104,28 @@
 							</li>
 						</ul>
 					</span>
-					@if (shouldShowActionButtons) {
+					@if (isOwner) {
+						<div
+							class="flex flex-row items-center justify-end gap-9"
+						>
+							<span
+								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+							>
+								<strong>{{
+									profile()!.user.followersCount
+								}}</strong>
+								followers
+							</span>
+							<span
+								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+							>
+								<strong>{{
+									profile()!.user.followingCount
+								}}</strong>
+								following
+							</span>
+						</div>
+					} @else {
 						<div class="flex items-center justify-start gap-4">
 							<button
 								[matButton]="
@@ -147,27 +168,6 @@
 								>
 							</button> -->
 						</div>
-					} @else {
-						<div
-							class="flex flex-row items-center justify-end gap-9"
-						>
-							<span
-								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
-							>
-								<strong>{{
-									profile()!.user.followersCount
-								}}</strong>
-								followers
-							</span>
-							<span
-								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
-							>
-								<strong>{{
-									profile()!.user.followingCount
-								}}</strong>
-								following
-							</span>
-						</div>
 					}
 				</div>
 			</div>
@@ -193,123 +193,12 @@
 						<section
 							class="flex flex-col items-center justify-start w-full"
 						>
-							@if (isChartsLoading()) {
-								<div
-									class="flex items-center justify-center w-full py-10"
-								>
-									<mat-progress-spinner
-										mode="indeterminate"
-										diameter="36"
-									></mat-progress-spinner>
-								</div>
-							} @else if (
-								groupedCharts() && groupedCharts()!.length > 0
-							) {
-								<ul
-									class="flex flex-col items-start justify-start w-full overflow-hidden mt-6 gap-8"
-								>
-									@for (
-										item of groupedCharts();
-										track $index
-									) {
-										<li class="w-full gap-4 flex flex-col">
-											<h6 class="self-start">
-												<span
-													class="inline-block w-fit font-medium"
-													[matTooltip]="
-														formatGroupDate(
-															item.date
-														)
-													"
-													matTooltipPosition="right"
-												>
-													{{
-														convertDateTimeToHumanReadable(
-															item.date
-														)
-													}}
-												</span>
-											</h6>
-											<div
-												class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
-											>
-												@for (
-													chart of item.data;
-													track $index
-												) {
-													<app-chart-preview
-														[chart]="chart"
-														[showContributors]="
-															true
-														"
-														[showShareActions]="
-															true
-														"
-														(click)="
-															openChartDialog(
-																chart
-															)
-														"
-														(keydown.enter)="
-															openChartDialog(
-																chart
-															)
-														"
-														(keydown.space)="
-															openChartDialog(
-																chart
-															)
-														"
-													/>
-												}
-											</div>
-										</li>
-									}
-								</ul>
-
-								@if (totalChartPages > 1) {
-									<div
-										class="flex items-center justify-end w-full"
-									>
-										<mat-paginator
-											[length]="totalCharts()"
-											[hidePageSize]="true"
-											[pageSize]="chartsPageSize"
-											[pageIndex]="currentChartsPage()"
-											(page)="onChartsPageChange($event)"
-											[disabled]="isChartsLoading()"
-											aria-label="Select charts page"
-										></mat-paginator>
-									</div>
-								}
-							} @else if (groupedCharts() === null) {
-								<p class="mt-6 text-lg">
-									Failed to load charts. Please try again
-									later.
-								</p>
-							} @else {
-								<div
-									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mt-8 w-full"
-								>
-									<div
-										class="flex flex-col items-center justify-center gap-4"
-									>
-										<span class="text-6xl"
-											><mat-icon inline
-												>library_music</mat-icon
-											></span
-										>
-										<h1 class="text-2xl text-center">
-											No charts available
-										</h1>
-										<p class="max-w-[50%] text-center">
-											This user hasn't uploaded any charts
-											yet. Check back later or explore the
-											workshop!
-										</p>
-									</div>
-								</div>
-							}
+							<ng-container
+								*ngTemplateOutlet="
+									chartsSection;
+									context: { isDesktop: true }
+								"
+							></ng-container>
 						</section>
 					</mat-tab>
 				}
@@ -390,109 +279,12 @@
 						>
 							<div class="mobile-tab-collapse-inner">
 								<app-tab-content-wrapper class="w-full flex">
-									@if (isChartsLoading()) {
-										<div
-											class="flex items-center justify-center w-full py-10"
-										>
-											<mat-progress-spinner
-												mode="indeterminate"
-												diameter="36"
-											></mat-progress-spinner>
-										</div>
-									} @else if (
-										groupedCharts() &&
-										groupedCharts()!.length > 0
-									) {
-										<ul
-											class="flex flex-col items-start justify-start w-full overflow-hidden"
-										>
-											@for (
-												item of groupedCharts();
-												track $index
-											) {
-												<li
-													class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
-												>
-													<h6 class="self-start">
-														<span
-															class="inline-block w-fit font-medium"
-															[matTooltip]="
-																formatGroupDate(
-																	item.date
-																)
-															"
-															matTooltipPosition="above"
-														>
-															{{
-																convertDateTimeToHumanReadable(
-																	item.date
-																)
-															}}
-														</span>
-													</h6>
-													@for (
-														chart of item.data;
-														track $index
-													) {
-														<app-chart-preview
-															[chart]="chart"
-															(click)="
-																openChartDialog(
-																	chart
-																)
-															"
-															(keydown.enter)="
-																openChartDialog(
-																	chart
-																)
-															"
-															(keydown.space)="
-																openChartDialog(
-																	chart
-																)
-															"
-														/>
-													}
-												</li>
-											}
-										</ul>
-
-										@if (totalChartPages > 1) {
-											<div
-												class="flex items-center justify-end w-full"
-											>
-												<mat-paginator
-													[length]="totalCharts()"
-													[hidePageSize]="true"
-													[pageSize]="chartsPageSize"
-													[pageIndex]="
-														currentChartsPage()
-													"
-													(page)="
-														onChartsPageChange(
-															$event
-														)
-													"
-													[disabled]="
-														isChartsLoading()
-													"
-													aria-label="Select charts page"
-												></mat-paginator>
-											</div>
-										}
-									} @else if (groupedCharts() === null) {
-										<p
-											class="mt-6 text-base text-on-surface-variant"
-										>
-											Failed to load charts.
-										</p>
-									} @else {
-										<p
-											class="mt-6 text-base text-on-surface-variant"
-										>
-											No charts to show.
-										</p>
-									}
+									<ng-container
+										*ngTemplateOutlet="
+											chartsSection;
+											context: { isDesktop: false }
+										"
+									></ng-container>
 								</app-tab-content-wrapper>
 							</div>
 						</div>
@@ -500,5 +292,130 @@
 				</div>
 			</section>
 		</div>
+
+		<!-- Templates -->
+		<ng-template
+			#chartsList
+			let-groupedCharts="groupedCharts"
+			let-isDesktop="isDesktop"
+		>
+			<ul
+				class="flex flex-col items-start justify-start w-full overflow-hidden"
+				[class.mt-6]="isDesktop"
+				[class.gap-8]="isDesktop"
+			>
+				@for (item of groupedCharts; track $index) {
+					<li
+						class="w-full gap-4 flex flex-col"
+						[class]="!isDesktop ? 'mb-6 last:mb-12' : ''"
+					>
+						<h6 class="self-start">
+							<span
+								class="inline-block w-fit font-medium"
+								[matTooltip]="formatGroupDate(item.date)"
+								[matTooltipPosition]="
+									isDesktop ? 'right' : 'above'
+								"
+							>
+								{{ convertDateTimeToHumanReadable(item.date) }}
+							</span>
+						</h6>
+						@if (isDesktop) {
+							<div
+								class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
+							>
+								@for (chart of item.data; track $index) {
+									<app-chart-preview
+										[chart]="chart"
+										[showContributors]="true"
+										[showShareActions]="true"
+										(click)="openChartDialog(chart)"
+										(keydown.enter)="openChartDialog(chart)"
+										(keydown.space)="openChartDialog(chart)"
+									/>
+								}
+							</div>
+						} @else {
+							@for (chart of item.data; track $index) {
+								<app-chart-preview
+									[chart]="chart"
+									(click)="openChartDialog(chart)"
+									(keydown.enter)="openChartDialog(chart)"
+									(keydown.space)="openChartDialog(chart)"
+								/>
+							}
+						}
+					</li>
+				}
+			</ul>
+		</ng-template>
+
+		<ng-template #chartsSection let-isDesktop="isDesktop">
+			@if (isChartsLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedCharts() && groupedCharts()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						chartsList;
+						context: {
+							groupedCharts: groupedCharts(),
+							isDesktop: isDesktop,
+						}
+					"
+				></ng-container>
+				@if (totalChartPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalCharts()"
+							[hidePageSize]="true"
+							[pageSize]="chartsPageSize"
+							[pageIndex]="currentChartsPage()"
+							(page)="onChartsPageChange($event)"
+							[disabled]="isChartsLoading()"
+							aria-label="Select charts page"
+						></mat-paginator>
+					</div>
+				}
+			} @else if (groupedCharts() === null) {
+				<p
+					class="mt-6"
+					[class.text-lg]="isDesktop"
+					[class.text-base]="!isDesktop"
+					[class.text-on-surface-variant]="!isDesktop"
+				>
+					Failed to load charts. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
+				>
+					<div
+						class="flex flex-col items-center justify-center gap-4"
+					>
+						<span class="text-6xl"
+							><mat-icon inline>library_music</mat-icon></span
+						>
+						<h1 class="text-2xl text-center">
+							No charts available
+						</h1>
+						<p class="max-w-[70%] text-center">
+							@if (isOwner) {
+								You haven't uploaded any charts yet. <br />
+								Start creating and share your work with the
+								community!
+							} @else {
+								This user hasn't uploaded any charts yet. <br />
+								Check back later or explore the workshop!
+							}
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
 	}
 </main>

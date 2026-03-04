@@ -287,17 +287,13 @@ export class Profile implements OnInit {
 			});
 	}
 
-	get shouldShowActionButtons(): boolean {
-		return this.authService.isLoggedIn() && !this.isOwnProfile();
+	get isOwner(): boolean {
+		return this.authService.isLoggedIn() && this.isOwnProfile();
 	}
 
 	onFollowClick(): void {
 		const profile = this.profile();
-		if (
-			!profile ||
-			!this.shouldShowActionButtons ||
-			this.isFollowLoading()
-		) {
+		if (!profile || !this.isOwner || this.isFollowLoading()) {
 			return;
 		}
 
