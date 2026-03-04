@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, signal } from "@angular/core";
+import {
+	AfterViewInit,
+	Component,
+	ElementRef,
+	inject,
+	OnInit,
+	signal,
+	ViewChild,
+} from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
 import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
@@ -104,11 +112,13 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	templateUrl: "./profile.html",
 })
-export class Profile implements OnInit {
+export class Profile implements OnInit, AfterViewInit {
 	private readonly userService = inject(UserService);
 	private readonly authService = inject(AuthService);
 	private readonly snackBar = inject(MatSnackBar);
 	private readonly dialog = inject(MatDialog);
+
+	@ViewChild("tabPanelHost") tabPanelHost?: ElementRef<HTMLElement>;
 
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username: string = this.route.snapshot.params["username"];
@@ -132,7 +142,23 @@ export class Profile implements OnInit {
 	mobileTabs = MOBILE_TABS;
 	desktopTabs = DESKTOP_TABS;
 
-	currentTab = MOBILE_TABS[0].value;
+	private _currentTab = MOBILE_TABS[0].value;
+	get currentTab(): string {
+		return this._currentTab;
+	}
+	set currentTab(value: string) {
+		if (this._currentTab === value) {
+			return;
+		}
+
+		const previousHeight = this.getMobilePanelHeight();
+		this._currentTab = value;
+
+		requestAnimationFrame(() => {
+			const nextHeight = this.getMobilePanelHeight();
+			this.animateMobilePanelHeight(previousHeight, nextHeight);
+		});
+	}
 	currentDesktopTab = DESKTOP_TABS[0].value;
 
 	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
@@ -210,6 +236,14 @@ export class Profile implements OnInit {
 					console.error("Error fetching user data:", err);
 				},
 			});
+	}
+
+	ngAfterViewInit(): void {
+		const host = this.tabPanelHost?.nativeElement;
+		if (!host) {
+			return;
+		}
+		host.style.height = "auto";
 	}
 
 	get shouldShowActionButtons(): boolean {
@@ -328,6 +362,42 @@ export class Profile implements OnInit {
 		} catch {
 			return null;
 		}
+	}
+
+	private getMobilePanelHeight(): number {
+		const host = this.tabPanelHost?.nativeElement;
+		if (!host) {
+			return 0;
+		}
+		return host.getBoundingClientRect().height;
+	}
+
+	private animateMobilePanelHeight(from: number, to: number): void {
+		const host = this.tabPanelHost?.nativeElement;
+		if (!host) {
+			return;
+		}
+
+		if (from <= 0 || to <= 0 || Math.abs(from - to) < 1) {
+			host.style.height = "auto";
+			return;
+		}
+
+		host.style.height = `${from}px`;
+		host.style.overflow = "hidden";
+		host.style.transition = "height 220ms ease";
+
+		requestAnimationFrame(() => {
+			host.style.height = `${to}px`;
+		});
+
+		const cleanup = () => {
+			host.style.height = "auto";
+			host.style.transition = "";
+			host.style.overflow = "hidden";
+		};
+
+		host.addEventListener("transitionend", cleanup, { once: true });
 	}
 
 	private normalizeDate(value?: string | Date | null): Date | null {
