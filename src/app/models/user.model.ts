@@ -68,7 +68,6 @@ export const SimplifiedUser = User.omit({
 	discordId: true,
 	createdAt: true,
 	role: true,
-	isVerified: true,
 	verifiedAt: true,
 	badges: true,
 });

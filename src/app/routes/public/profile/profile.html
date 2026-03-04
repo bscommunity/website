@@ -93,18 +93,31 @@
 						<ul
 							class="flex flex-row flex-wrap items-center justify-start gap-3"
 						>
-							<li>
+							@if (profile()!.user.isVerified) {
+								<li>
+									<app-badge
+										icon="editor_choice"
+										label="Verified"
+									/>
+								</li>
+							}
+							<!-- <li>
 								<app-badge
-									icon="editor_choice"
-									label="Verified"
+									icon="history"
+									[label]="
+										'Active since ' +
+										convertDateTimeToHumanReadable(
+											profile()!.user.createdAt
+										)
+									"
 								/>
-							</li>
-							<li>
+							</li> -->
+							<!-- <li>
 								<app-badge
 									icon="music_note"
 									label="Original Artist"
 								/>
-							</li>
+							</li> -->
 						</ul>
 					</span>
 					@if (isOwner) {
@@ -398,16 +411,12 @@
 				<div
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
 				>
-					<div
-						class="flex flex-col items-center justify-center gap-4"
-					>
-						<span class="text-6xl"
+					<div class="flex flex-col items-center justify-center">
+						<span class="text-5xl"
 							><mat-icon inline>library_music</mat-icon></span
 						>
-						<h1 class="text-2xl text-center">
-							No charts available
-						</h1>
-						<p class="max-w-[70%] text-center">
+						<h1 class="text-xl text-center">No charts available</h1>
+						<p class="text-center px-8 mt-4">
 							This user hasn't uploaded any charts yet. <br />
 							Check back later or explore the workshop!
 						</p>

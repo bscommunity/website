@@ -8,6 +8,7 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ShareService } from "@/services/share.service";
 import { MatChipsModule } from "@angular/material/chips";
 
 // Types
@@ -149,6 +150,7 @@ export class ChartDialogComponent {
 	readonly closeDialog = () => this.dialogRef.close();
 
 	private _snackBar = inject(MatSnackBar);
+	private shareService = inject(ShareService);
 
 	get buttons() {
 		return [
@@ -211,17 +213,8 @@ export class ChartDialogComponent {
 	}
 
 	onShare() {
-		// Generate shareable link
 		const url = `${window.location.origin}/link/chart/${this.data.chart.contentId}`;
-
-		// Copy to clipboard
-		navigator.clipboard.writeText(url);
-
-		// Show snackbar
-		this._snackBar.open("Chart link copied to clipboard!", "Close", {
-			duration: 3000,
-		});
-
+		this.shareService.share(url);
 		this.dialogRef.close();
 	}
 

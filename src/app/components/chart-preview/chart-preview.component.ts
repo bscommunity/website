@@ -5,6 +5,7 @@ import { CommonModule } from "@angular/common";
 // Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ShareService } from "@/services/share.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -44,6 +45,7 @@ export class ChartPreviewComponent {
 	size = input<"small" | "medium" | "large">("medium");
 
 	private _snackBar = inject(MatSnackBar);
+	private shareService = inject(ShareService);
 
 	readonly contributorsNames = (chart: ChartModel) =>
 		chart.contributors
@@ -69,15 +71,7 @@ export class ChartPreviewComponent {
 			event.stopPropagation();
 		}
 
-		// Generate shareable link
 		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
-
-		// Copy to clipboard
-		navigator.clipboard.writeText(url);
-
-		// Show snackbar
-		this._snackBar.open("Chart link copied to clipboard!", "Close", {
-			duration: 3000,
-		});
+		this.shareService.share(url);
 	}
 }

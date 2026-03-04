@@ -47,6 +47,7 @@ import {
 } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
 import { PaginatorIntl } from "@/components/paginator/paginator-intl";
+import { ShareService } from "@/services/share.service";
 import { AuthService } from "@/services/auth.service";
 import { ProfileCacheService } from "@/services/profile-cache.service";
 
@@ -133,6 +134,7 @@ export class Profile implements OnInit, OnDestroy {
 	private readonly _snackBar = inject(MatSnackBar);
 	private readonly dialog = inject(MatDialog);
 	private readonly profileCacheService = inject(ProfileCacheService);
+	private readonly shareService = inject(ShareService);
 
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username = "";
@@ -446,17 +448,15 @@ export class Profile implements OnInit, OnDestroy {
 		});
 	}
 
-	onShare() {
-		// Generate shareable link
-		const url = `${window.location.origin}/link/profile/${this.profile()?.user.username}`;
+	onShare(): void {
+		const profile = this.profile();
+		if (!profile) {
+			return;
+		}
 
-		// Copy to clipboard
-		navigator.clipboard.writeText(url);
-
-		// Show snackbar
-		this._snackBar.open("Profile link copied to clipboard!", "Close", {
-			duration: 1000,
-		});
+		const url = `${window.location.origin}/link/profile/${profile.user.username}`;
+		const title = `${profile.user.username}'s Profile`;
+		this.shareService.share(url, title);
 	}
 
 	get totalChartPages(): number {

@@ -62,6 +62,8 @@ export const SAMPLE_CHART_1: ChartModel = {
 			user: {
 				id: "b27abf7e-6a1a-48f1-9b8f-02a96687a371",
 				username: "zkyant",
+				isVerified: true,
+				// createdAt: new Date("2024-01-15T10:00:00"),
 				isPublic: true,
 				followersCount: 10,
 				followingCount: 5,
