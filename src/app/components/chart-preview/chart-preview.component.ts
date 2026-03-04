@@ -63,7 +63,11 @@ export class ChartPreviewComponent {
 	tendencyUp = Tendency.Up;
 	tendencyDown = Tendency.Down; */
 
-	onShare() {
+	onShare(event: MouseEvent | undefined = undefined) {
+		if (event) {
+			event.stopPropagation();
+		}
+
 		// Generate shareable link
 		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
 
