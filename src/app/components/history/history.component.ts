@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 // Components
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
@@ -20,5 +20,6 @@ export interface HistoryItem {
 })
 export class UserHistoryComponent {
 	@Input() items: HistoryItem[] | null | undefined = undefined;
+	@Output() chartClick = new EventEmitter<ChartModel>();
 	readonly convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
 }

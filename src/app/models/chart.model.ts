@@ -24,7 +24,7 @@ export const Chart = z.object({
 
 	// Relations
 	latestVersion: Version,
-	versions: Version.array().default([]),
+	versions: Version.array().nullable().default(null),
 	contributors: z.array(Contributor).default([]),
 	trackUrls: z.array(StreamingLink).default([]),
 

@@ -499,7 +499,10 @@ export class Profile implements OnInit {
 		activity: ChartActivityItem[],
 		username: string,
 	): HistoryItem[] {
-		const timeline: HistoryItem[] = [];
+		const groups = new Map<
+			string,
+			{ date: Date; data: ChartModel[]; labels: string[] }
+		>();
 
 		for (const item of activity) {
 			const date = new Date(item.createdAt);
@@ -507,12 +510,31 @@ export class Profile implements OnInit {
 				continue;
 			}
 
-			const label = this.getActivityLabel(item.type, username);
+			const key = this.buildDateKey(date);
+			const existing = groups.get(key);
+			if (existing) {
+				existing.data.push(item.chart);
+				existing.labels.push(
+					this.getActivityLabel(item.type, username),
+				);
+			} else {
+				groups.set(key, {
+					date,
+					data: [item.chart],
+					labels: [this.getActivityLabel(item.type, username)],
+				});
+			}
+		}
 
+		const timeline: HistoryItem[] = [];
+		for (const group of groups.values()) {
 			timeline.push({
-				date,
-				data: [item.chart],
-				label,
+				date: group.date,
+				data: group.data,
+				label:
+					group.labels.length === 1
+						? group.labels[0]
+						: `${group.labels.length} activities`,
 			});
 		}
 

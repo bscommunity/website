@@ -254,6 +254,7 @@
 						<app-user-history
 							class="flex flex-1 w-full"
 							[items]="userActivity()!"
+							(chartClick)="openChartDialog($event)"
 						/>
 					}
 				</ng-template>
@@ -404,14 +405,8 @@
 							No charts available
 						</h1>
 						<p class="max-w-[70%] text-center">
-							@if (isOwner) {
-								You haven't uploaded any charts yet. <br />
-								Start creating and share your work with the
-								community!
-							} @else {
-								This user hasn't uploaded any charts yet. <br />
-								Check back later or explore the workshop!
-							}
+							This user hasn't uploaded any charts yet. <br />
+							Check back later or explore the workshop!
 						</p>
 					</div>
 				</div>

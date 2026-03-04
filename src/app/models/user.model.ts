@@ -43,14 +43,14 @@ export const User = z.object({
 	avatarUrl: z.string().optional().nullable(),
 	accentColor: z.number().int().optional().nullable(),
 	bio: z.string().optional().nullable(),
-	isPublic: z.boolean(),
+	isPublic: z.boolean().optional(),
 	role: z.enum(UserRole),
 	isVerified: z.boolean(),
 	verifiedAt: z.coerce.date().optional().nullable(),
 	discordId: z.string(),
 	createdAt: z.coerce.date(),
-	followersCount: z.number().int(),
-	followingCount: z.number().int(),
+	followersCount: z.number().int().nullable(),
+	followingCount: z.number().int().nullable(),
 	badges: z.array(z.any()).optional(), // Assuming Badge model, update if needed
 });
 
