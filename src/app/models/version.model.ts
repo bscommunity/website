@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Difficulty } from "./enums/difficulty.enum";
 
 // Models
-import { KnownIssue } from "./known-issue.model";
+import { Changelog } from "./changelog.model";
 
 export const Version = z.object({
 	id: z.string(),
@@ -18,10 +18,10 @@ export const Version = z.object({
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
 	bundleUrl: z.string(),
-	previewUrl: z.string().nullable().optional(),
-	downloadsAmount: z.number().optional().default(0),
-	knownIssues: KnownIssue.array().optional().default([]),
-	publishedAt: z.coerce.date(),
+	previewUrl: z.string().nullable(),
+	downloadsAmount: z.number().default(0),
+	changelog: Changelog.array().default([]),
+	createdAt: z.coerce.date(),
 });
 
 export type VersionModel = z.infer<typeof Version>;
@@ -31,8 +31,8 @@ export const CreateVersion = Version.omit({
 	chartId: true,
 	index: true,
 	downloadsAmount: true,
-	knownIssues: true,
-	publishedAt: true,
+	changelog: true,
+	createdAt: true,
 }).extend({
 	chartBundle: z.instanceof(File).optional(),
 });

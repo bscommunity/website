@@ -29,11 +29,17 @@
 	--color-secondary: var(--mat-sys-secondary, #b7c7e6);
 	--color-on-secondary: var(--mat-sys-on-secondary, #213149);
 	--color-secondary-container: var(--mat-sys-secondary-container, #384761);
-	--color-on-secondary-container: var(--mat-sys-on-secondary-container, #d5e3ff);
+	--color-on-secondary-container: var(
+		--mat-sys-on-secondary-container,
+		#d5e3ff
+	);
 	--color-tertiary: var(--mat-sys-tertiary, #f0b0fc);
 	--color-on-tertiary: var(--mat-sys-on-tertiary, #4c195b);
 	--color-tertiary-container: var(--mat-sys-tertiary-container, #653173);
-	--color-on-tertiary-container: var(--mat-sys-on-tertiary-container, #fcd7ff);
+	--color-on-tertiary-container: var(
+		--mat-sys-on-tertiary-container,
+		#fcd7ff
+	);
 	--color-background: var(--mat-sys-background, #131314);
 	--color-on-background: var(--mat-sys-on-background, #e5e2e1);
 	--color-surface: var(--mat-sys-surface, #131314);
@@ -41,9 +47,15 @@
 	--color-on-surface-variant: var(--mat-sys-on-surface-variant, #c6c6cb);
 	--color-surface-container: var(--mat-sys-surface-container, #201f20);
 	--color-on-surface-container: var(--mat-sys-on-surface-container);
-	--color-surface-container-low: var(--mat-sys-surface-container-low, #1c1b1c);
+	--color-surface-container-low: var(
+		--mat-sys-surface-container-low,
+		#1c1b1c
+	);
 	--color-on-surface-container-low: var(--mat-sys-on-surface-container-low);
-	--color-surface-container-high: var(--mat-sys-surface-container-high, #2a2a2a);
+	--color-surface-container-high: var(
+		--mat-sys-surface-container-high,
+		#2a2a2a
+	);
 	--color-inverse-on-surface: var(--mat-sys-inverse-on-surface, #313030);
 	--color-outline: var(--mat-sys-outline, #8f9095);
 	--color-outline-variant: var(--mat-sys-outline-variant, #45474b);
@@ -56,19 +68,15 @@
 	--color-info: oklch(0.5707 0.146 258.52);
 }
 
-html,
-body {
+html {
 	scroll-behavior: smooth;
-	height: 100%;
 }
 
 body {
 	margin: 0;
 	min-height: 100vh;
 	font-family: "Google Sans Flex", "Helvetica Neue", sans-serif;
-}
 
-body {
 	background: var(--mat-sys-background, #131314);
 	color: var(--mat-sys-on-surface, #e5e2e1);
 }
@@ -121,7 +129,6 @@ body {
 }
 
 @keyframes audioWave {
-
 	0%,
 	100% {
 		transform: scaleY(1);
@@ -137,7 +144,6 @@ body {
 }
 
 @layer base {
-
 	button:not(:disabled),
 	[role="button"]:not(:disabled) {
 		cursor: pointer;

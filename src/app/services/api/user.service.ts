@@ -3,7 +3,13 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 
 // Models
-import { UserModel, UserProfileResponseModel } from "@/models/user.model";
+import {
+	ItemsPageModel,
+	UserActivityItemModel,
+	UserModel,
+	UserProfileResponseModel,
+} from "@/models/user.model";
+import { ChartModel } from "@/models/chart.model";
 
 // Lib
 import { apiUrl } from "@/lib/api";
@@ -27,5 +33,37 @@ export class UserService {
 		return this.http.get<UserProfileResponseModel>(
 			`${this.apiUrl}/username/${username}`,
 		);
+	}
+
+	getUserCharts(
+		userId: string,
+		params: { limit?: number; offset?: number } = {},
+	): Observable<ItemsPageModel<ChartModel>> {
+		return this.http.get<ItemsPageModel<ChartModel>>(
+			`${this.apiUrl}/${userId}/charts`,
+			{ params },
+		);
+	}
+
+	getUserActivity(
+		userId: string,
+		params: { limit?: number; offset?: number } = {},
+	): Observable<UserActivityItemModel[]> {
+		return this.http.get<UserActivityItemModel[]>(
+			`${this.apiUrl}/${userId}/activity`,
+			{ params },
+		);
+	}
+
+	followUser(userId: string): Observable<string> {
+		return this.http.post(`${this.apiUrl}/${userId}/follow`, null, {
+			responseType: "text",
+		});
+	}
+
+	unfollowUser(userId: string): Observable<string> {
+		return this.http.delete(`${this.apiUrl}/${userId}/follow`, {
+			responseType: "text",
+		});
 	}
 }

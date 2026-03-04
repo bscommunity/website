@@ -16,7 +16,7 @@ import { apiUrl } from "../../lib/api";
 @Injectable({
 	providedIn: "root",
 })
-export class KnownIssueService {
+export class changelogervice {
 	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
 
@@ -44,20 +44,17 @@ export class KnownIssueService {
 	}
 
 	// Delete
-	async deleteKnownIssue(
-		chartId: string,
-		knownIssueId: string,
-	): Promise<boolean> {
-		console.log("Deleting known issue with ID:", knownIssueId);
+	async deleteKnownIssue(chartId: string, logId: string): Promise<boolean> {
+		console.log("Deleting known issue with ID:", logId);
 
 		try {
 			await firstValueFrom(
 				this.http.delete<KnownIssueModel>(
-					`${this.apiUrl}/${chartId}/issues/${knownIssueId}`,
+					`${this.apiUrl}/${chartId}/issues/${logId}`,
 				),
 			);
 
-			this.cacheService.removeIssue(chartId, knownIssueId);
+			this.cacheService.removeIssue(chartId, logId);
 
 			return true;
 		} catch (error) {

@@ -466,7 +466,7 @@ export class CacheService {
 		}
 
 		const versions = chart.versions || [];
-		versions[0]?.knownIssues.push(knownIssue);
+		versions[0]?.changelog.push(knownIssue);
 
 		this.storageService.setItem(
 			`chart_${id}`,
@@ -477,7 +477,7 @@ export class CacheService {
 		);
 	}
 
-	removeIssue(id: string, knownIssueId: string): void {
+	removeIssue(id: string, logId: string): void {
 		const chart = this.getChart(id);
 
 		if (!chart || !chart.versions) {
@@ -487,8 +487,8 @@ export class CacheService {
 		const updatedVersions = chart.versions.map((version) => {
 			return {
 				...version,
-				knownIssues: version.knownIssues.filter(
-					(issue) => issue.id !== knownIssueId,
+				changelog: version.changelog.filter(
+					(issue) => issue.id !== logId,
 				),
 			};
 		});

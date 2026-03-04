@@ -9,6 +9,25 @@ import { Component } from "@angular/core";
 	`,
 	styles: [
 		`
+			:host {
+				display: block;
+				width: 100%;
+			}
+
+			:host.slide-out-left,
+			:host.slide-out-right {
+				position: absolute;
+				inset: 0;
+				z-index: 0;
+			}
+
+			:host.slide-in-left,
+			:host.slide-in-right,
+			:host.fade-in {
+				position: relative;
+				z-index: 1;
+			}
+
 			:host.slide-in-left {
 				animation: slideInLeft 200ms ease;
 			}

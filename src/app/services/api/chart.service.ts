@@ -714,8 +714,8 @@ export class ChartService {
 			case SortOption.LAST_UPDATED:
 				charts.sort(
 					(a, b) =>
-						this.toTimestamp(b.latestVersion?.publishedAt) -
-						this.toTimestamp(a.latestVersion?.publishedAt),
+						this.toTimestamp(b.updatedAt) -
+						this.toTimestamp(a.updatedAt),
 				);
 				break;
 			case SortOption.MOST_DOWNLOADED:

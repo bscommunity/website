@@ -44,7 +44,7 @@ export function convertDateTimeToHumanReadable(value: string | Date): string {
 
 	const weeks = Math.floor(diffDays / 7);
 	if (weeks < 4) {
-		return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+		return weeks === 1 ? "Last week" : `${weeks} weeks ago`;
 	}
 
 	const months =
@@ -52,7 +52,7 @@ export function convertDateTimeToHumanReadable(value: string | Date): string {
 		startOfToday.getMonth() -
 		(startOfDate.getFullYear() * 12 + startOfDate.getMonth());
 	if (months === 1) {
-		return "1 month ago";
+		return "Last month";
 	}
 	if (months < 12) {
 		return `${months} months ago`;

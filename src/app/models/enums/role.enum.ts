@@ -8,6 +8,13 @@ export enum ContributorRole {
 	PREVIEW = "PREVIEW",
 }
 
+export enum UserRole {
+	USER = "USER",
+	ADMIN = "ADMIN",
+	MODERATOR = "MODERATOR",
+	// Add more as needed
+}
+
 export const getContributorRoleLabel = (role: ContributorRole): string => {
 	switch (role) {
 		case ContributorRole.AUTHOR:

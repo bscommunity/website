@@ -5,6 +5,9 @@
 	"eslint.validate": ["typescript", "html"],
 	"eslint.format.enable": true,
 	"[html]": {
-		"editor.defaultFormatter": "prettier.prettier-vscode"
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[tailwindcss]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

@@ -26,7 +26,7 @@ import { LargePanelComponent } from "@/components/panel/large-panel.component";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 
 // Models
-import { ChartModel, withLatestVersion } from "@/models/chart.model";
+import { ChartModel } from "@/models/chart.model";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
@@ -84,12 +84,12 @@ export class Uploads implements OnInit, OnDestroy {
 	filters = [];
 
 	set charts(value: ChartModel[] | undefined) {
-		const charts: ChartModel[] = value?.map(withLatestVersion) || [];
+		const charts: ChartModel[] = value || [];
 
 		const chartsByMonth: ChartsByMonth[] = [];
 		charts.forEach((chart) => {
-			const month = chart.latestVersion?.publishedAt
-				? new Date(chart.latestVersion.publishedAt)
+			const month = chart.latestVersion?.createdAt
+				? new Date(chart.latestVersion.createdAt)
 						.toISOString()
 						.slice(0, 7)
 				: "unknown";

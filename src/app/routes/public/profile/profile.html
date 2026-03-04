@@ -32,15 +32,18 @@
 			<div
 				class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
 			>
-				<div class="flex flex-col w-full relative">
-					<img
-						[src]="
-							profile()!.user.imageUrl ||
-							'/assets/images/default-banner.jpg'
-						"
-						[alt]="'Banner image for ' + profile()!.user.username"
-						class="w-full h-64 object-cover rounded-3xl"
-					/>
+				<div
+					class="flex flex-col w-full relative bg-surface-container-high min-h-64 rounded-t-3xl"
+				>
+					@if (profile()!.user.bannerUrl) {
+						<img
+							[src]="profile()!.user.bannerUrl"
+							[alt]="
+								'Banner image for ' + profile()!.user.username
+							"
+							class="object-cover"
+						/>
+					}
 					<svg
 						width="123"
 						height="123"
@@ -59,10 +62,7 @@
 							</mask>
 						</defs>
 						<image
-							[attr.xlink:href]="
-								profile()!.user.imageUrl ||
-								'/assets/images/default-avatar.png'
-							"
+							[attr.xlink:href]="profile()!.user.avatarUrl"
 							width="123"
 							height="123"
 							mask="url(#avatar-shape)"
@@ -104,14 +104,23 @@
 							</li>
 						</ul>
 					</span>
-					<div class="flex items-center justify-start gap-4">
-						<button mat-flat-button>
-							<mat-icon class="align-middle mr-2"
-								>stars_filled</mat-icon
+					@if (shouldShowActionButtons) {
+						<div class="flex items-center justify-start gap-4">
+							<button
+								mat-flat-button
+								(click)="onFollowClick()"
+								[disabled]="isFollowLoading()"
 							>
-							Follow
-						</button>
-						<!-- <button
+								<mat-icon class="align-middle mr-2">
+									{{
+										isFollowing()
+											? "person_remove"
+											: "person_add"
+									}}
+								</mat-icon>
+								{{ isFollowing() ? "Unfollow" : "Follow" }}
+							</button>
+							<!-- <button
 class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
 matRipple
 matRippleColor="rgba(63, 30, 104, 0.1)"
@@ -127,7 +136,8 @@ aria-label="Report"
 >
 <mat-icon class="align-middle" inline>flag</mat-icon>
 </button> -->
-					</div>
+						</div>
+					}
 				</div>
 			</div>
 		</header>
@@ -152,40 +162,94 @@ aria-label="Report"
 						<section
 							class="flex flex-col items-center justify-start w-full"
 						>
-							@if (groupedCharts()) {
+							@if (isChartsLoading()) {
+								<div
+									class="flex items-center justify-center w-full py-10"
+								>
+									<mat-progress-spinner
+										mode="indeterminate"
+										diameter="36"
+									></mat-progress-spinner>
+								</div>
+							} @else if (groupedCharts()) {
 								<ul
-									class="flex flex-col items-start justify-start w-full overflow-hidden mt-6"
+									class="flex flex-col items-start justify-start w-full overflow-hidden mt-6 gap-8"
 								>
 									@for (
 										item of groupedCharts();
 										track $index
 									) {
-										<li
-											class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
-										>
-											<h6>
-												{{ item.date.toDateString() }}
+										<li class="w-full gap-4 flex flex-col">
+											<h6 class="self-start">
+												<span
+													class="inline-block w-fit font-medium"
+													[matTooltip]="
+														formatGroupDate(
+															item.date
+														)
+													"
+													matTooltipPosition="right"
+												>
+													{{
+														convertDateTimeToHumanReadable(
+															item.date
+														)
+													}}
+												</span>
 											</h6>
-											@for (
-												chart of item.data;
-												track $index
-											) {
-												<app-chart-preview
-													[chart]="chart"
-												/>
-											}
+											<div
+												class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
+											>
+												@for (
+													chart of item.data;
+													track $index
+												) {
+													<app-chart-preview
+														[chart]="chart"
+														(click)="
+															openChartDialog(
+																chart
+															)
+														"
+														(keydown.enter)="
+															openChartDialog(
+																chart
+															)
+														"
+														(keydown.space)="
+															openChartDialog(
+																chart
+															)
+														"
+													/>
+												}
+											</div>
 										</li>
 									}
 								</ul>
+
+								@if (totalChartPages > 1) {
+									<div
+										class="flex items-center justify-end w-full"
+									>
+										<mat-paginator
+											[length]="totalCharts()"
+											[hidePageSize]="true"
+											[pageSize]="chartsPageSize"
+											[pageIndex]="currentChartsPage()"
+											(page)="onChartsPageChange($event)"
+											[disabled]="isChartsLoading()"
+											aria-label="Select charts page"
+										></mat-paginator>
+									</div>
+								}
 							} @else if (groupedCharts() === null) {
 								<p class="mt-6 text-lg">
-									Failed to load recent activity. Please try
-									again later.
+									Failed to load charts. Please try again
+									later.
 								</p>
 							} @else {
-								<p class="mt-6 text-lg">
-									No recent activity to show.
-								</p>
+								<p class="mt-6 text-lg">No charts to show.</p>
 							}
 						</section>
 					</mat-tab>
@@ -246,10 +310,13 @@ aria-label="Report"
 					}
 				</ng-template>
 
-				<mat-tab-nav-panel #tabPanel class="relative flex-1">
+				<mat-tab-nav-panel
+					#tabPanel
+					class="relative w-full overflow-hidden"
+				>
 					@if (currentTab === mobileTabs[0].value) {
 						<app-tab-content-wrapper
-							class="w-full h-full flex absolute"
+							class="w-full flex"
 							animate.enter="slide-in-left"
 							animate.leave="slide-out-left"
 						>
@@ -259,43 +326,96 @@ aria-label="Report"
 						</app-tab-content-wrapper>
 					} @else if (currentTab === mobileTabs[1].value) {
 						<app-tab-content-wrapper
-							class="w-full h-full flex absolute"
+							class="w-full flex"
 							animate.enter="slide-in-right"
 							animate.leave="slide-out-right"
 						>
-							<ul
-								class="flex flex-col items-start justify-start w-full overflow-hidden"
-							>
-								@for (
-									item of desktopTabs[0].items;
-									track $index
-								) {
-									<li
-										class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
-									>
-										<h6
-											[matTooltip]="
-												formatGroupDate(item.date)
-											"
-											matTooltipPosition="above"
+							@if (isChartsLoading()) {
+								<div
+									class="flex items-center justify-center w-full py-10"
+								>
+									<mat-progress-spinner
+										mode="indeterminate"
+										diameter="36"
+									></mat-progress-spinner>
+								</div>
+							} @else if (groupedCharts()) {
+								<ul
+									class="flex flex-col items-start justify-start w-full overflow-hidden"
+								>
+									@for (
+										item of groupedCharts();
+										track $index
+									) {
+										<li
+											class="w-full mb-6 last:mb-12 gap-4 flex flex-col"
 										>
-											{{
-												convertDateTimeToHumanReadable(
-													item.date
-												)
-											}}
-										</h6>
-										@for (
-											chart of item.data;
-											track $index
-										) {
-											<app-chart-preview
-												[chart]="chart"
-											/>
-										}
-									</li>
+											<h6 class="self-start">
+												<span
+													class="inline-block w-fit font-medium"
+													[matTooltip]="
+														formatGroupDate(
+															item.date
+														)
+													"
+													matTooltipPosition="above"
+												>
+													{{
+														convertDateTimeToHumanReadable(
+															item.date
+														)
+													}}
+												</span>
+											</h6>
+											@for (
+												chart of item.data;
+												track $index
+											) {
+												<app-chart-preview
+													[chart]="chart"
+													(click)="
+														openChartDialog(chart)
+													"
+													(keydown.enter)="
+														openChartDialog(chart)
+													"
+													(keydown.space)="
+														openChartDialog(chart)
+													"
+												/>
+											}
+										</li>
+									}
+								</ul>
+
+								@if (totalChartPages > 1) {
+									<div
+										class="flex items-center justify-end w-full"
+									>
+										<mat-paginator
+											[length]="totalCharts()"
+											[hidePageSize]="true"
+											[pageSize]="chartsPageSize"
+											[pageIndex]="currentChartsPage()"
+											(page)="onChartsPageChange($event)"
+											[disabled]="isChartsLoading()"
+											aria-label="Select charts page"
+										></mat-paginator>
+									</div>
 								}
-							</ul>
+							} @else if (groupedCharts() === null) {
+								<p
+									class="mt-6 text-base text-on-surface-variant"
+								>
+									Failed to load charts.
+								</p>
+							} @else {
+								<p
+									class="mt-6 text-base text-on-surface-variant"
+								>
+									No charts to show.
+								</p>
+							}
 						</app-tab-content-wrapper>
 					}
 				</mat-tab-nav-panel>

@@ -74,7 +74,7 @@ interface ChartDialogData {
 				<app-chart-video-preview
 					class="h-full w-full"
 					[audioPreviewUrl]="data.chart.trackPreviewUrl ?? null"
-					[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
+					[previewUrl]="data.chart.latestVersion?.previewUrl ?? null"
 				></app-chart-video-preview>
 			</div>
 			<ul class="flex flex-row flex-wrap items-start justify-start gap-2">
@@ -174,7 +174,7 @@ export class ChartDialogComponent {
 			},
 			{
 				icon: "calendar_today",
-				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.latestVersion.publishedAt.toString())}`,
+				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.updatedAt.toString())}`,
 				amount: null,
 			},
 		].filter((button) => button.amount === null || button.amount > 0);

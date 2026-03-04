@@ -34,10 +34,10 @@
 		<!-- Mobile "aside" -->
 		<app-aside [chart]="chart" class="flex w-full md:hidden"> </app-aside>
 		<app-chart-known-issues-section
-			#knownIssuesSection
+			#changelogSection
 			class="w-full"
 			[chartId]="chart.id"
-			[issues]="chart.latestVersion.knownIssues"
+			[issues]="chart.latestVersion.changelog"
 		></app-chart-known-issues-section>
 		<app-chart-contributors-section
 			#contributorsSection

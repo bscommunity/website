@@ -98,7 +98,7 @@ export class VersionsComponent {
 		{
 			columnDef: "publishedAt",
 			header: "Published At",
-			cell: (item: VersionModel) => `${item.publishedAt.toDateString()}`,
+			cell: (item: VersionModel) => `${item.createdAt.toDateString()}`,
 		},
 		{
 			columnDef: "downloads",

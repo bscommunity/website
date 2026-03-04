@@ -5,7 +5,7 @@ import { Resolve, Router, ActivatedRouteSnapshot } from "@angular/router";
 import { ChartService } from "@/services/api/chart.service";
 
 // Models
-import { ChartModel, withLatestVersion } from "@/models/chart.model";
+import { ChartModel } from "@/models/chart.model";
 
 // Zod
 import { ZodError } from "zod";
@@ -31,7 +31,7 @@ export class ChartResolver implements Resolve<ChartModel | null> {
 
 		try {
 			const chart = await this.chartService.getChartById(chartId);
-			return withLatestVersion(chart);
+			return chart;
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			console.error("Error fetching chart", error);

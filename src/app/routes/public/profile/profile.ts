@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
+import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -9,6 +10,13 @@ import { MatRippleModule } from "@angular/material/core";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatDialog } from "@angular/material/dialog";
+import {
+	MatPaginatorIntl,
+	MatPaginatorModule,
+	PageEvent,
+} from "@angular/material/paginator";
 
 // Components
 import { TabContentWrapperComponent } from "@/components/tabs/tab-content-wrapper.component";
@@ -22,14 +30,20 @@ import {
 	UserHistoryComponent,
 } from "@/components/history/history.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
 
 // Lib
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
-import { UserProfileResponseModel } from "@/models/user.model";
+import {
+	UserActivityItemModel,
+	UserProfileResponseModel,
+} from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
+import { PaginatorIntl } from "@/components/paginator/paginator-intl";
+import { AuthService } from "@/services/auth.service";
 
 const MOBILE_TABS: Tab<HistoryItem>[] = [
 	{
@@ -77,6 +91,8 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		MatTabsModule,
 		MatProgressSpinnerModule,
 		MatTooltipModule,
+		MatSnackBarModule,
+		MatPaginatorModule,
 		NgTemplateOutlet,
 		RouterLink,
 		TabContentWrapperComponent,
@@ -85,10 +101,14 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		UserHistoryComponent,
 		ChartPreviewComponent,
 	],
+	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	templateUrl: "./profile.html",
 })
 export class Profile implements OnInit {
 	private readonly userService = inject(UserService);
+	private readonly authService = inject(AuthService);
+	private readonly snackBar = inject(MatSnackBar);
+	private readonly dialog = inject(MatDialog);
 
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username: string = this.route.snapshot.params["username"];
@@ -96,6 +116,16 @@ export class Profile implements OnInit {
 
 	groupedCharts = signal<HistoryItem[] | undefined | null>(undefined);
 	userActivity = signal<HistoryItem[] | undefined | null>(undefined);
+	isChartsLoading = signal(false);
+	isFollowLoading = signal(false);
+	isFollowing = signal(false);
+	isOwnProfile = signal(false);
+
+	totalCharts = signal(0);
+	chartsPageSize = 20;
+	currentChartsPage = signal(0);
+
+	private readonly chartsCache = new Map<number, ChartModel[]>();
 	// groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
 	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
 
@@ -121,20 +151,183 @@ export class Profile implements OnInit {
 	themes: HistoryItem[] = [];
 
 	ngOnInit(): void {
-		// Fetch user data based on username
-		this.userService.getUserByUsername(this.username).subscribe({
-			next: (data) => {
-				this.profile.set(data);
-				this.groupedCharts.set(this.groupChartsByDate(data.charts));
-				this.userActivity.set(this.buildActivityTimeline(data));
-			},
-			error: (err) => {
-				this.profile.set(null);
-				this.groupedCharts.set(null);
-				this.userActivity.set(null);
-				console.error("Error fetching user data:", err);
-			},
+		this.isChartsLoading.set(true);
+		this.userService
+			.getUserByUsername(this.username)
+			.pipe(
+				switchMap((profile) => {
+					this.profile.set(profile);
+					this.isFollowing.set(Boolean(profile.isFollowing));
+					this.isOwnProfile.set(
+						this.getAuthenticatedUserId() === profile.user.id,
+					);
+					this.currentChartsPage.set(0);
+					this.chartsCache.clear();
+					return forkJoin({
+						chartsPage: this.userService.getUserCharts(
+							profile.user.id,
+							{
+								limit: 20,
+								offset: 0,
+							},
+						),
+						activity: this.userService
+							.getUserActivity(profile.user.id, {
+								limit: 20,
+								offset: 0,
+							})
+							.pipe(catchError(() => of([]))),
+					});
+				}),
+			)
+			.subscribe({
+				next: ({ chartsPage, activity }) => {
+					const initialCharts = chartsPage.items ?? [];
+					this.chartsCache.set(0, initialCharts);
+					this.totalCharts.set(
+						chartsPage.counts?.charts ?? initialCharts.length,
+					);
+					this.applyChartGroups(initialCharts);
+
+					const profile = this.profile();
+					this.userActivity.set(
+						this.buildActivityTimelineFromApi(
+							activity,
+							profile?.user.username ?? this.username,
+						),
+					);
+					this.isChartsLoading.set(false);
+				},
+				error: (err) => {
+					this.profile.set(null);
+					this.groupedCharts.set(null);
+					this.userActivity.set(null);
+					this.isChartsLoading.set(false);
+					this.totalCharts.set(0);
+					this.currentChartsPage.set(0);
+					this.isFollowing.set(false);
+					this.isOwnProfile.set(false);
+					console.error("Error fetching user data:", err);
+				},
+			});
+	}
+
+	get shouldShowActionButtons(): boolean {
+		return this.authService.isLoggedIn() && !this.isOwnProfile();
+	}
+
+	onFollowClick(): void {
+		const profile = this.profile();
+		if (
+			!profile ||
+			!this.shouldShowActionButtons ||
+			this.isFollowLoading()
+		) {
+			return;
+		}
+
+		this.isFollowLoading.set(true);
+		const request$ = this.isFollowing()
+			? this.userService.unfollowUser(profile.user.id)
+			: this.userService.followUser(profile.user.id);
+
+		request$
+			.pipe(finalize(() => this.isFollowLoading.set(false)))
+			.subscribe({
+				next: () => {
+					const wasFollowing = this.isFollowing();
+					this.isFollowing.set(!wasFollowing);
+					this.snackBar.open(
+						wasFollowing
+							? `You unfollowed @${profile.user.username}`
+							: `You are now following @${profile.user.username}`,
+						"Close",
+						{ duration: 3500 },
+					);
+				},
+				error: (error) => {
+					console.error("Failed to toggle follow state:", error);
+					this.snackBar.open(
+						"Could not update follow status. Please try again.",
+						"Close",
+						{ duration: 4000 },
+					);
+				},
+			});
+	}
+
+	onChartsPageChange(event: PageEvent): void {
+		const pageIndex = event.pageIndex;
+		this.currentChartsPage.set(pageIndex);
+
+		const cached = this.chartsCache.get(pageIndex);
+		if (cached) {
+			this.applyChartGroups(cached);
+			return;
+		}
+
+		const profile = this.profile();
+		if (!profile) {
+			return;
+		}
+
+		this.isChartsLoading.set(true);
+		this.userService
+			.getUserCharts(profile.user.id, {
+				limit: this.chartsPageSize,
+				offset: pageIndex * this.chartsPageSize,
+			})
+			.subscribe({
+				next: (chartsPage) => {
+					const charts = chartsPage.items ?? [];
+					this.chartsCache.set(pageIndex, charts);
+					if (pageIndex === 0) {
+						this.totalCharts.set(
+							chartsPage.counts?.charts ?? charts.length,
+						);
+					}
+					this.applyChartGroups(charts);
+					this.isChartsLoading.set(false);
+				},
+				error: () => {
+					this.groupedCharts.set(null);
+					this.isChartsLoading.set(false);
+				},
+			});
+	}
+
+	openChartDialog(chart: ChartModel): void {
+		this.dialog.open(ChartDialogComponent, {
+			data: { chart },
+			width: "575px",
+			maxHeight: "85vh",
 		});
+	}
+
+	get totalChartPages(): number {
+		const total = this.totalCharts();
+		return total > 0 ? Math.ceil(total / this.chartsPageSize) : 0;
+	}
+
+	private applyChartGroups(charts: ChartModel[]): void {
+		const groupedCharts = this.groupChartsByDate(charts);
+		this.groupedCharts.set(groupedCharts);
+		this.desktopTabs[0] = {
+			...this.desktopTabs[0],
+			items: groupedCharts,
+		};
+	}
+
+	private getAuthenticatedUserId(): string | null {
+		if (!this.authService.isLoggedIn()) {
+			return null;
+		}
+
+		try {
+			return this.authService.user.id;
+		} catch {
+			return null;
+		}
 	}
 
 	private normalizeDate(value?: string | Date | null): Date | null {
@@ -150,10 +343,7 @@ export class Profile implements OnInit {
 	}
 
 	private getChartDate(chart: ChartModel): Date | null {
-		return (
-			this.normalizeDate(chart.latestPublishedAt) ??
-			this.normalizeDate(chart.latestVersion?.publishedAt)
-		);
+		return this.normalizeDate(chart.updatedAt);
 	}
 
 	private buildDateKey(date: Date): string {
@@ -184,53 +374,55 @@ export class Profile implements OnInit {
 		);
 	}
 
-	private buildActivityTimeline(
-		profile: UserProfileResponseModel,
+	private getActivityDate(activity: UserActivityItemModel): Date | null {
+		return (
+			this.normalizeDate(activity.createdAt ?? null) ??
+			this.normalizeDate(activity.date ?? null) ??
+			this.normalizeDate(activity.occurredAt ?? null)
+		);
+	}
+
+	private getActivityCharts(activity: UserActivityItemModel): ChartModel[] {
+		const rawItems = activity.items ?? activity.charts ?? activity.data;
+		if (!Array.isArray(rawItems)) {
+			return [];
+		}
+
+		return rawItems.filter(
+			(item): item is ChartModel =>
+				typeof item === "object" &&
+				item !== null &&
+				"id" in item &&
+				"track" in item &&
+				"artist" in item,
+		);
+	}
+
+	private buildActivityTimelineFromApi(
+		activity: UserActivityItemModel[],
+		username: string,
 	): HistoryItem[] {
-		const groups = new Map<
-			string,
-			HistoryItem & { action: "liked" | "bookmarked" }
-		>();
+		const timeline: HistoryItem[] = [];
 
-		const addChartsToGroups = (
-			charts: ChartModel[] | undefined,
-			action: "liked" | "bookmarked",
-		) => {
-			charts?.forEach((chart) => {
-				const date = this.getChartDate(chart);
-				if (!date) {
-					return;
-				}
-				const key = `${action}-${this.buildDateKey(date)}`;
-				const existing = groups.get(key);
-				if (existing) {
-					if (date.getTime() > existing.date.getTime()) {
-						existing.date = date;
-					}
-					existing.data.push(chart);
-					return;
-				}
-				groups.set(key, {
-					date,
-					data: [chart],
-					action,
-					label: "",
-				});
+		for (const item of activity) {
+			const date = this.getActivityDate(item);
+			if (!date) {
+				continue;
+			}
+
+			const data = this.getActivityCharts(item);
+			const action = item.action ?? item.type ?? "updated";
+			const countLabel = data.length === 1 ? "chart" : "charts";
+
+			timeline.push({
+				date,
+				data,
+				label:
+					item.label ??
+					`@${username} ${action.toLowerCase()} ${data.length} ${countLabel}`,
 			});
-		};
+		}
 
-		addChartsToGroups(profile.likes, "liked");
-		addChartsToGroups(profile.bookmarks, "bookmarked");
-
-		return Array.from(groups.values())
-			.map((group) => {
-				const countLabel = group.data.length === 1 ? "chart" : "charts";
-				return {
-					date: group.date,
-					data: group.data,
-					label: `@${profile.user.username} ${group.action} ${group.data.length} ${countLabel}`,
-				};
-			})
-			.sort((a, b) => b.date.getTime() - a.date.getTime());
+		return timeline.sort((a, b) => b.date.getTime() - a.date.getTime());
 	}
 }

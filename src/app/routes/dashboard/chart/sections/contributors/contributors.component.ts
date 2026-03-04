@@ -114,8 +114,8 @@ export class ContributorsComponent {
 			columnDef: "name",
 			header: "Name",
 			cell: (item: ContributorModel) =>
-				item.user.imageUrl
-					? `<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.imageUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`
+				item.user.avatarUrl
+					? `<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.avatarUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`
 					: `
 					<span class="flex items-center justify-center gap-3 select-none pointer-events-none"><div
 						class="rounded-full w-5 h-5 flex items-center justify-center bg-primary-container"
