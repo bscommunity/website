@@ -23,6 +23,13 @@ export interface ChartActivityItem extends ActivityItemResponse {
 	chart: ChartModel;
 }
 
+export interface UserActivityItem extends ActivityItemResponse {
+	chart?: ChartModel | null;
+	user?: SimplifiedUserModel | null;
+	followedUser?: SimplifiedUserModel | null;
+	targetUser?: SimplifiedUserModel | null;
+}
+
 export interface ContentCountsModel {
 	charts?: number;
 	tourPasses?: number;

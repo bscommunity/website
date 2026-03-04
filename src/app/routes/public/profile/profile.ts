@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, signal } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
 import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
+import { Subscription } from "rxjs";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -26,6 +27,7 @@ import {
 	TabNavBarComponent,
 } from "@/components/tabs/tab-nav-bar.component";
 import {
+	type HistoryActivityEntry,
 	HistoryItem,
 	UserHistoryComponent,
 } from "@/components/history/history.component";
@@ -38,7 +40,9 @@ import { convertDateTimeToHumanReadable } from "@/lib/time";
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
 import {
-	ChartActivityItem,
+	ActivityType,
+	type SimplifiedUserModel,
+	UserActivityItem,
 	UserProfileResponseModel,
 } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
@@ -123,7 +127,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	],
 	templateUrl: "./profile.html",
 })
-export class Profile implements OnInit {
+export class Profile implements OnInit, OnDestroy {
 	private readonly userService = inject(UserService);
 	private readonly authService = inject(AuthService);
 	private readonly _snackBar = inject(MatSnackBar);
@@ -131,7 +135,7 @@ export class Profile implements OnInit {
 	private readonly profileCacheService = inject(ProfileCacheService);
 
 	route: ActivatedRoute = inject(ActivatedRoute);
-	username: string = this.route.snapshot.params["username"];
+	username = "";
 	profile = signal<UserProfileResponseModel | undefined | null>(undefined);
 
 	groupedCharts = signal<HistoryItem[] | undefined | null>(undefined);
@@ -146,6 +150,7 @@ export class Profile implements OnInit {
 	currentChartsPage = signal(0);
 
 	private readonly chartsCache = new Map<number, ChartModel[]>();
+	private routeParamSubscription?: Subscription;
 	// groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
 	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
 
@@ -171,12 +176,31 @@ export class Profile implements OnInit {
 	themes: HistoryItem[] = [];
 
 	ngOnInit(): void {
+		this.routeParamSubscription = this.route.paramMap.subscribe(
+			(params) => {
+				const username = params.get("username")?.trim();
+				if (!username || username === this.username) {
+					return;
+				}
+
+				this.username = username;
+				this.scrollToTop();
+				this.loadProfile(username);
+			},
+		);
+	}
+
+	ngOnDestroy(): void {
+		this.routeParamSubscription?.unsubscribe();
+	}
+
+	private loadProfile(username: string): void {
+		this.resetProfileState();
+
 		this.isChartsLoading.set(true);
 
 		// Check for cached profile data
-		const cachedProfile = this.profileCacheService.getProfile(
-			this.username,
-		);
+		const cachedProfile = this.profileCacheService.getProfile(username);
 		if (cachedProfile) {
 			this.profile.set(cachedProfile.profile);
 			this.isFollowing.set(cachedProfile.isFollowing);
@@ -184,7 +208,7 @@ export class Profile implements OnInit {
 
 			// Load cached charts for page 0
 			const cachedCharts = this.profileCacheService.getCharts(
-				this.username,
+				username,
 				0,
 			);
 			if (cachedCharts) {
@@ -194,9 +218,8 @@ export class Profile implements OnInit {
 			}
 
 			// Load cached activity
-			const cachedActivity = this.profileCacheService.getActivity(
-				this.username,
-			);
+			const cachedActivity =
+				this.profileCacheService.getActivity(username);
 			if (cachedActivity) {
 				this.userActivity.set(cachedActivity);
 			}
@@ -207,7 +230,7 @@ export class Profile implements OnInit {
 
 		// Fetch from API if not cached or cache invalid
 		this.userService
-			.getUserByUsername(this.username)
+			.getUserByUsername(username)
 			.pipe(
 				switchMap((profile) => {
 					this.profile.set(profile);
@@ -216,10 +239,9 @@ export class Profile implements OnInit {
 						this.getAuthenticatedUserId() === profile.user.id,
 					);
 					this.currentChartsPage.set(0);
-					this.chartsCache.clear();
 
 					// Cache the profile data
-					this.profileCacheService.setProfile(this.username, {
+					this.profileCacheService.setProfile(username, {
 						profile,
 						isFollowing: Boolean(profile.isFollowing),
 						isOwnProfile:
@@ -253,7 +275,7 @@ export class Profile implements OnInit {
 					this.applyChartGroups(initialCharts);
 
 					// Cache charts
-					this.profileCacheService.setCharts(this.username, 0, {
+					this.profileCacheService.setCharts(username, 0, {
 						charts: initialCharts,
 						total: this.totalCharts(),
 					});
@@ -261,13 +283,13 @@ export class Profile implements OnInit {
 					const profile = this.profile();
 					const activityTimeline = this.buildActivityTimelineFromApi(
 						activity,
-						profile?.user.username ?? this.username,
+						profile?.user.username ?? username,
 					);
 					this.userActivity.set(activityTimeline);
 
 					// Cache activity
 					this.profileCacheService.setActivity(
-						this.username,
+						username,
 						activityTimeline,
 					);
 
@@ -287,13 +309,33 @@ export class Profile implements OnInit {
 			});
 	}
 
+	private resetProfileState(): void {
+		this.profile.set(undefined);
+		this.groupedCharts.set(undefined);
+		this.userActivity.set(undefined);
+		this.isChartsLoading.set(true);
+		this.totalCharts.set(0);
+		this.currentChartsPage.set(0);
+		this.isFollowing.set(false);
+		this.isOwnProfile.set(false);
+		this.chartsCache.clear();
+	}
+
+	private scrollToTop(): void {
+		if (typeof window === "undefined") {
+			return;
+		}
+
+		window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+	}
+
 	get isOwner(): boolean {
 		return this.authService.isLoggedIn() && this.isOwnProfile();
 	}
 
 	onFollowClick(): void {
 		const profile = this.profile();
-		if (!profile || !this.isOwner || this.isFollowLoading()) {
+		if (!profile || this.isOwner || this.isFollowLoading()) {
 			return;
 		}
 
@@ -487,21 +529,50 @@ export class Profile implements OnInit {
 		);
 	}
 
-	private getActivityLabel(type: string, username: string): string {
-		const action = type
-			.toLowerCase()
-			.replace("_chart", "")
-			.replace("_", " ");
-		return `@${username} ${action} a chart`;
+	private getActivityTargetUser(
+		item: UserActivityItem,
+	): SimplifiedUserModel | undefined {
+		return item.followedUser ?? item.targetUser ?? item.user ?? undefined;
+	}
+
+	private getSummaryPart(type: ActivityType, count: number): string {
+		switch (type) {
+			case ActivityType.CREATED_CHART:
+				return `created ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.LIKED_CHART:
+				return `liked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.BOOKMARKED_CHART:
+				return `bookmarked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.FOLLOWED_USER:
+				return `followed ${count} user${count > 1 ? "s" : ""}`;
+		}
+	}
+
+	private joinSummaryParts(parts: string[]): string {
+		if (parts.length === 0) {
+			return "had activity";
+		}
+		if (parts.length === 1) {
+			return parts[0];
+		}
+		if (parts.length === 2) {
+			return `${parts[0]} and ${parts[1]}`;
+		}
+		return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 	}
 
 	private buildActivityTimelineFromApi(
-		activity: ChartActivityItem[],
+		activity: UserActivityItem[],
 		username: string,
 	): HistoryItem[] {
 		const groups = new Map<
 			string,
-			{ date: Date; data: ChartModel[]; labels: string[] }
+			{
+				date: Date;
+				data: ChartModel[];
+				types: ActivityType[];
+				activities: HistoryActivityEntry[];
+			}
 		>();
 
 		for (const item of activity) {
@@ -510,31 +581,65 @@ export class Profile implements OnInit {
 				continue;
 			}
 
+			const chart = item.chart ?? undefined;
+			const user = this.getActivityTargetUser(item);
+			const activityType = item.type;
+			const historyEntry: HistoryActivityEntry = {
+				type: activityType,
+				chart,
+				user,
+			};
+
 			const key = this.buildDateKey(date);
 			const existing = groups.get(key);
 			if (existing) {
-				existing.data.push(item.chart);
-				existing.labels.push(
-					this.getActivityLabel(item.type, username),
-				);
-			} else {
-				groups.set(key, {
-					date,
-					data: [item.chart],
-					labels: [this.getActivityLabel(item.type, username)],
-				});
+				if (chart) {
+					existing.data.push(chart);
+				}
+				existing.types.push(activityType);
+				existing.activities.push(historyEntry);
+				if (date.getTime() > existing.date.getTime()) {
+					existing.date = date;
+				}
+				continue;
 			}
+
+			groups.set(key, {
+				date,
+				data: chart ? [chart] : [],
+				types: [activityType],
+				activities: [historyEntry],
+			});
 		}
 
 		const timeline: HistoryItem[] = [];
 		for (const group of groups.values()) {
+			const typeCounts = new Map<ActivityType, number>();
+			for (const type of group.types) {
+				typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+			}
+
+			const orderedTypes: ActivityType[] = [
+				ActivityType.CREATED_CHART,
+				ActivityType.LIKED_CHART,
+				ActivityType.BOOKMARKED_CHART,
+				ActivityType.FOLLOWED_USER,
+			];
+
+			const parts = orderedTypes
+				.filter((type) => typeCounts.has(type))
+				.map((type) =>
+					this.getSummaryPart(type, typeCounts.get(type)!),
+				);
+
+			const uniqueTypes = Array.from(typeCounts.keys());
 			timeline.push({
 				date: group.date,
 				data: group.data,
-				label:
-					group.labels.length === 1
-						? group.labels[0]
-						: `${group.labels.length} activities`,
+				activities: group.activities,
+				label: `@${username} ${this.joinSummaryParts(parts)}`,
+				actionType:
+					uniqueTypes.length === 1 ? uniqueTypes[0] : undefined,
 			});
 		}
 

@@ -89,7 +89,7 @@
 					<a
 						class="text-on-surface-variant text-sm font-medium m-0 hover:underline max-md:underline"
 						[routerLink]="`/profile/${contributor.user.username}`"
-						(click)="onClose()"
+						(click)="onContributorNavigate()"
 					>
 						&#64;{{ contributor.user.username }}
 					</a>

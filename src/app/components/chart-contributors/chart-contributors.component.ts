@@ -1,6 +1,7 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	inject,
 	input,
 	signal,
 } from "@angular/core";
@@ -14,7 +15,8 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 // Models
 import { ContributorModel } from "@/models/contributor.model";
 import { getContributorRoleLabel } from "@/models/enums/role.enum";
-import { RouterLink } from "@angular/router";
+import { NavigationEnd, Router, RouterLink } from "@angular/router";
+import { filter, take } from "rxjs";
 
 @Component({
 	selector: "app-chart-contributors",
@@ -23,9 +25,22 @@ import { RouterLink } from "@angular/router";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartContributorsComponent {
+	private readonly router = inject(Router);
+
 	contributors = input.required<ContributorModel[]>();
 	onClose = input.required<() => void>();
 	isExpanded = signal(false);
+
+	onContributorNavigate(): void {
+		this.router.events
+			.pipe(
+				filter((event) => event instanceof NavigationEnd),
+				take(1),
+			)
+			.subscribe(() => {
+				this.onClose()();
+			});
+	}
 
 	getRolesString(contributor: ContributorModel): string {
 		return contributor.roles

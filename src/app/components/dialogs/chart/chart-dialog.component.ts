@@ -61,7 +61,7 @@ interface ChartDialogData {
 			) {
 				<app-chart-contributors
 					[contributors]="data.chart.contributors"
-					[onClose]="onClose"
+					[onClose]="closeDialog"
 				></app-chart-contributors>
 			}
 			<div
@@ -146,6 +146,7 @@ interface ChartDialogData {
 export class ChartDialogComponent {
 	dialogRef = inject<MatDialogRef<ChartDialogComponent>>(MatDialogRef);
 	data = inject<ChartDialogData>(MAT_DIALOG_DATA);
+	readonly closeDialog = () => this.dialogRef.close();
 
 	private _snackBar = inject(MatSnackBar);
 

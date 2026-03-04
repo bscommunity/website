@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 // Models
 import {
 	ItemsPageModel,
-	ChartActivityItem,
+	UserActivityItem,
 	UserModel,
 	UserProfileResponseModel,
 } from "@/models/user.model";
@@ -48,8 +48,8 @@ export class UserService {
 	getUserActivity(
 		userId: string,
 		params: { limit?: number; offset?: number } = {},
-	): Observable<ChartActivityItem[]> {
-		return this.http.get<ChartActivityItem[]>(
+	): Observable<UserActivityItem[]> {
+		return this.http.get<UserActivityItem[]>(
 			`${this.apiUrl}/${userId}/activity`,
 			{ params },
 		);

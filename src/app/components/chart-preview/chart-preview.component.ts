@@ -54,6 +54,7 @@ export class ChartPreviewComponent {
 	showVisibility = input<boolean>(false);
 	showContributors = input<boolean>(false);
 	showShareActions = input<boolean>(false);
+	actionIcon = input<string | null>(null);
 
 	readonly routerLink = input<string | string[] | UrlTree | null | undefined>(
 		null,

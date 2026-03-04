@@ -61,12 +61,15 @@
 								/>
 							</mask>
 						</defs>
-						<image
-							[attr.xlink:href]="profile()!.user.avatarUrl"
-							width="123"
-							height="123"
-							mask="url(#avatar-shape)"
-						/>
+						@if (profile()!.user.avatarUrl) {
+							<image
+								[attr.href]="profile()!.user.avatarUrl"
+								[attr.xlink:href]="profile()!.user.avatarUrl"
+								width="123"
+								height="123"
+								mask="url(#avatar-shape)"
+							/>
+						}
 						<use
 							href="/assets/icons/avatar-mask.svg#avatar-border"
 							fill="none"
