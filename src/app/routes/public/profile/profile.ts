@@ -44,6 +44,7 @@ import {
 import { UserService } from "@/services/api/user.service";
 import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 import { AuthService } from "@/services/auth.service";
+import { ProfileCacheService } from "@/services/profile-cache.service";
 
 const MOBILE_TABS: Tab<HistoryItem>[] = [
 	{
@@ -127,6 +128,7 @@ export class Profile implements OnInit {
 	private readonly authService = inject(AuthService);
 	private readonly snackBar = inject(MatSnackBar);
 	private readonly dialog = inject(MatDialog);
+	private readonly profileCacheService = inject(ProfileCacheService);
 
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username: string = this.route.snapshot.params["username"];
@@ -170,6 +172,40 @@ export class Profile implements OnInit {
 
 	ngOnInit(): void {
 		this.isChartsLoading.set(true);
+
+		// Check for cached profile data
+		const cachedProfile = this.profileCacheService.getProfile(
+			this.username,
+		);
+		if (cachedProfile) {
+			this.profile.set(cachedProfile.profile);
+			this.isFollowing.set(cachedProfile.isFollowing);
+			this.isOwnProfile.set(cachedProfile.isOwnProfile);
+
+			// Load cached charts for page 0
+			const cachedCharts = this.profileCacheService.getCharts(
+				this.username,
+				0,
+			);
+			if (cachedCharts) {
+				this.chartsCache.set(0, cachedCharts.charts);
+				this.totalCharts.set(cachedCharts.total);
+				this.applyChartGroups(cachedCharts.charts);
+			}
+
+			// Load cached activity
+			const cachedActivity = this.profileCacheService.getActivity(
+				this.username,
+			);
+			if (cachedActivity) {
+				this.userActivity.set(cachedActivity);
+			}
+
+			this.isChartsLoading.set(false);
+			return;
+		}
+
+		// Fetch from API if not cached or cache invalid
 		this.userService
 			.getUserByUsername(this.username)
 			.pipe(
@@ -181,6 +217,15 @@ export class Profile implements OnInit {
 					);
 					this.currentChartsPage.set(0);
 					this.chartsCache.clear();
+
+					// Cache the profile data
+					this.profileCacheService.setProfile(this.username, {
+						profile,
+						isFollowing: Boolean(profile.isFollowing),
+						isOwnProfile:
+							this.getAuthenticatedUserId() === profile.user.id,
+					});
+
 					return forkJoin({
 						chartsPage: this.userService.getUserCharts(
 							profile.user.id,
@@ -207,13 +252,25 @@ export class Profile implements OnInit {
 					);
 					this.applyChartGroups(initialCharts);
 
+					// Cache charts
+					this.profileCacheService.setCharts(this.username, 0, {
+						charts: initialCharts,
+						total: this.totalCharts(),
+					});
+
 					const profile = this.profile();
-					this.userActivity.set(
-						this.buildActivityTimelineFromApi(
-							activity,
-							profile?.user.username ?? this.username,
-						),
+					const activityTimeline = this.buildActivityTimelineFromApi(
+						activity,
+						profile?.user.username ?? this.username,
 					);
+					this.userActivity.set(activityTimeline);
+
+					// Cache activity
+					this.profileCacheService.setActivity(
+						this.username,
+						activityTimeline,
+					);
+
 					this.isChartsLoading.set(false);
 				},
 				error: (err) => {
@@ -262,6 +319,13 @@ export class Profile implements OnInit {
 						"Close",
 						{ duration: 3500 },
 					);
+
+					// Update cached profile data
+					this.profileCacheService.setProfile(this.username, {
+						profile,
+						isFollowing: this.isFollowing(),
+						isOwnProfile: this.isOwnProfile(),
+					});
 				},
 				error: (error) => {
 					console.error("Failed to toggle follow state:", error);
@@ -281,6 +345,17 @@ export class Profile implements OnInit {
 		const cached = this.chartsCache.get(pageIndex);
 		if (cached) {
 			this.applyChartGroups(cached);
+			return;
+		}
+
+		// Check sessionStorage cache
+		const sessionCached = this.profileCacheService.getCharts(
+			this.username,
+			pageIndex,
+		);
+		if (sessionCached) {
+			this.chartsCache.set(pageIndex, sessionCached.charts);
+			this.applyChartGroups(sessionCached.charts);
 			return;
 		}
 
@@ -305,6 +380,17 @@ export class Profile implements OnInit {
 						);
 					}
 					this.applyChartGroups(charts);
+
+					// Cache in sessionStorage
+					this.profileCacheService.setCharts(
+						this.username,
+						pageIndex,
+						{
+							charts,
+							total: this.totalCharts(),
+						},
+					);
+
 					this.isChartsLoading.set(false);
 				},
 				error: () => {

@@ -61,6 +61,7 @@ interface ChartDialogData {
 			) {
 				<app-chart-contributors
 					[contributors]="data.chart.contributors"
+					[onClose]="onClose"
 				></app-chart-contributors>
 			}
 			<div
@@ -74,7 +75,7 @@ interface ChartDialogData {
 				<app-chart-video-preview
 					class="h-full w-full"
 					[audioPreviewUrl]="data.chart.trackPreviewUrl ?? null"
-					[previewUrl]="data.chart.latestVersion?.previewUrl ?? null"
+					[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
 				></app-chart-video-preview>
 			</div>
 			<ul class="flex flex-row flex-wrap items-start justify-start gap-2">
@@ -220,6 +221,10 @@ export class ChartDialogComponent {
 			duration: 3000,
 		});
 
+		this.dialogRef.close();
+	}
+
+	onClose() {
 		this.dialogRef.close();
 	}
 }

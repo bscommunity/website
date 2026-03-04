@@ -24,6 +24,7 @@ import { RouterLink } from "@angular/router";
 })
 export class ChartContributorsComponent {
 	contributors = input.required<ContributorModel[]>();
+	onClose = input.required<() => void>();
 	isExpanded = signal(false);
 
 	getRolesString(contributor: ContributorModel): string {
