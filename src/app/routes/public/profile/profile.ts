@@ -38,7 +38,7 @@ import { convertDateTimeToHumanReadable } from "@/lib/time";
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
 import {
-	UserActivityItemModel,
+	ChartActivityItem,
 	UserProfileResponseModel,
 } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
@@ -126,7 +126,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 export class Profile implements OnInit {
 	private readonly userService = inject(UserService);
 	private readonly authService = inject(AuthService);
-	private readonly snackBar = inject(MatSnackBar);
+	private readonly _snackBar = inject(MatSnackBar);
 	private readonly dialog = inject(MatDialog);
 	private readonly profileCacheService = inject(ProfileCacheService);
 
@@ -312,7 +312,7 @@ export class Profile implements OnInit {
 				next: () => {
 					const wasFollowing = this.isFollowing();
 					this.isFollowing.set(!wasFollowing);
-					this.snackBar.open(
+					this._snackBar.open(
 						wasFollowing
 							? `You unfollowed @${profile.user.username}`
 							: `You are now following @${profile.user.username}`,
@@ -329,7 +329,7 @@ export class Profile implements OnInit {
 				},
 				error: (error) => {
 					console.error("Failed to toggle follow state:", error);
-					this.snackBar.open(
+					this._snackBar.open(
 						"Could not update follow status. Please try again.",
 						"Close",
 						{ duration: 4000 },
@@ -408,6 +408,19 @@ export class Profile implements OnInit {
 		});
 	}
 
+	onShare() {
+		// Generate shareable link
+		const url = `${window.location.origin}/link/profile/${this.profile()?.user.username}`;
+
+		// Copy to clipboard
+		navigator.clipboard.writeText(url);
+
+		// Show snackbar
+		this._snackBar.open("Profile link copied to clipboard!", "Close", {
+			duration: 1000,
+		});
+	}
+
 	get totalChartPages(): number {
 		const total = this.totalCharts();
 		return total > 0 ? Math.ceil(total / this.chartsPageSize) : 0;
@@ -478,52 +491,32 @@ export class Profile implements OnInit {
 		);
 	}
 
-	private getActivityDate(activity: UserActivityItemModel): Date | null {
-		return (
-			this.normalizeDate(activity.createdAt ?? null) ??
-			this.normalizeDate(activity.date ?? null) ??
-			this.normalizeDate(activity.occurredAt ?? null)
-		);
-	}
-
-	private getActivityCharts(activity: UserActivityItemModel): ChartModel[] {
-		const rawItems = activity.items ?? activity.charts ?? activity.data;
-		if (!Array.isArray(rawItems)) {
-			return [];
-		}
-
-		return rawItems.filter(
-			(item): item is ChartModel =>
-				typeof item === "object" &&
-				item !== null &&
-				"id" in item &&
-				"track" in item &&
-				"artist" in item,
-		);
+	private getActivityLabel(type: string, username: string): string {
+		const action = type
+			.toLowerCase()
+			.replace("_chart", "")
+			.replace("_", " ");
+		return `@${username} ${action} a chart`;
 	}
 
 	private buildActivityTimelineFromApi(
-		activity: UserActivityItemModel[],
+		activity: ChartActivityItem[],
 		username: string,
 	): HistoryItem[] {
 		const timeline: HistoryItem[] = [];
 
 		for (const item of activity) {
-			const date = this.getActivityDate(item);
-			if (!date) {
+			const date = new Date(item.createdAt);
+			if (Number.isNaN(date.getTime())) {
 				continue;
 			}
 
-			const data = this.getActivityCharts(item);
-			const action = item.action ?? item.type ?? "updated";
-			const countLabel = data.length === 1 ? "chart" : "charts";
+			const label = this.getActivityLabel(item.type, username);
 
 			timeline.push({
 				date,
-				data,
-				label:
-					item.label ??
-					`@${username} ${action.toLowerCase()} ${data.length} ${countLabel}`,
+				data: [item.chart],
+				label,
 			});
 		}
 

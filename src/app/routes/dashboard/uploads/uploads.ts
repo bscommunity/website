@@ -166,6 +166,7 @@ export class Uploads implements OnInit, OnDestroy {
 				isDashboard: true,
 				disableCache,
 				storage: "persistent",
+				myCharts: true,
 			})
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({

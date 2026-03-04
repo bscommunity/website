@@ -63,6 +63,8 @@ export const SAMPLE_CHART_1: ChartModel = {
 				id: "b27abf7e-6a1a-48f1-9b8f-02a96687a371",
 				username: "zkyant",
 				isPublic: true,
+				followersCount: 10,
+				followingCount: 5,
 				avatarUrl:
 					"https://cdn.discordapp.com/avatars/598634405778554890/b2e144548221ef78c8300922c2c46447.png",
 			},

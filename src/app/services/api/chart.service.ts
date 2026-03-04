@@ -118,6 +118,8 @@ export class ChartService {
 			isDashboard?: boolean;
 			disableCache?: boolean;
 			storage?: STORAGE;
+			count?: boolean;
+			myCharts?: boolean;
 		},
 	): Observable<ChartsResponse> {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
@@ -222,6 +224,12 @@ export class ChartService {
 			params = params.set("offset", options.offset.toString());
 		if (options?.isDashboard) {
 			params = params.set("isDashboard", "true");
+		}
+		if (options?.count) {
+			params = params.set("count", "true");
+		}
+		if (options?.myCharts) {
+			params = params.set("myCharts", "true");
 		}
 
 		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(

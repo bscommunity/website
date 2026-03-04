@@ -33,7 +33,7 @@
 				class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
 			>
 				<div
-					class="flex flex-col w-full relative bg-surface-container-high min-h-64 rounded-t-3xl"
+					class="flex flex-col w-full relative bg-surface-container-high min-h-64 rounded-3xl"
 				>
 					@if (profile()!.user.bannerUrl) {
 						<img
@@ -78,7 +78,7 @@
 					</svg>
 				</div>
 				<div
-					class="flex flex-row flex-wrap md:justify-between w-full items-start justify-start p-9 gap-9"
+					class="flex flex-row flex-wrap md:justify-between w-full items-center justify-start p-9 gap-9"
 				>
 					<span
 						class="flex flex-row flex-wrap items-center justify-start gap-4 md:gap-6"
@@ -107,7 +107,9 @@
 					@if (shouldShowActionButtons) {
 						<div class="flex items-center justify-start gap-4">
 							<button
-								mat-flat-button
+								[matButton]="
+									isFollowing() ? 'outlined' : 'filled'
+								"
 								(click)="onFollowClick()"
 								[disabled]="isFollowLoading()"
 							>
@@ -120,22 +122,51 @@
 								</mat-icon>
 								{{ isFollowing() ? "Unfollow" : "Follow" }}
 							</button>
+							<button
+								class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
+								matRipple
+								matRippleColor="rgba(63, 30, 104, 0.1)"
+								aria-label="Share"
+								(click)="onShare()"
+							>
+								<mat-icon class="align-middle" inline
+									>share</mat-icon
+								>
+							</button>
 							<!-- <button
-class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
-matRipple
-matRippleColor="rgba(63, 30, 104, 0.1)"
-aria-label="Share"
->
-<mat-icon class="align-middle" inline>share</mat-icon>
-</button>
-<button
-class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
-matRipple
-matRippleColor="rgba(63, 30, 104, 0.1)"
-aria-label="Report"
->
-<mat-icon class="align-middle" inline>flag</mat-icon>
-</button> -->
+								class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
+								matRipple
+								disabled
+								matTooltip="Not implemented yet :/"
+								matTooltipPosition="above"
+								matRippleColor="rgba(63, 30, 104, 0.1)"
+								aria-label="Report"
+							>
+								<mat-icon class="align-middle" inline
+									>flag</mat-icon
+								>
+							</button> -->
+						</div>
+					} @else {
+						<div
+							class="flex flex-row items-center justify-end gap-9"
+						>
+							<span
+								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+							>
+								<strong>{{
+									profile()!.user.followersCount
+								}}</strong>
+								followers
+							</span>
+							<span
+								class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+							>
+								<strong>{{
+									profile()!.user.followingCount
+								}}</strong>
+								following
+							</span>
 						</div>
 					}
 				</div>
@@ -171,7 +202,9 @@ aria-label="Report"
 										diameter="36"
 									></mat-progress-spinner>
 								</div>
-							} @else if (groupedCharts()) {
+							} @else if (
+								groupedCharts() && groupedCharts()!.length > 0
+							) {
 								<ul
 									class="flex flex-col items-start justify-start w-full overflow-hidden mt-6 gap-8"
 								>
@@ -255,7 +288,27 @@ aria-label="Report"
 									later.
 								</p>
 							} @else {
-								<p class="mt-6 text-lg">No charts to show.</p>
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mt-8 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<span class="text-6xl"
+											><mat-icon inline
+												>library_music</mat-icon
+											></span
+										>
+										<h1 class="text-2xl text-center">
+											No charts available
+										</h1>
+										<p class="max-w-[50%] text-center">
+											This user hasn't uploaded any charts
+											yet. Check back later or explore the
+											workshop!
+										</p>
+									</div>
+								</div>
 							}
 						</section>
 					</mat-tab>
@@ -346,7 +399,10 @@ aria-label="Report"
 												diameter="36"
 											></mat-progress-spinner>
 										</div>
-									} @else if (groupedCharts()) {
+									} @else if (
+										groupedCharts() &&
+										groupedCharts()!.length > 0
+									) {
 										<ul
 											class="flex flex-col items-start justify-start w-full overflow-hidden"
 										>

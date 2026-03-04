@@ -138,6 +138,7 @@
 						[hidePageSize]="true"
 						[pageSize]="pageSize"
 						[pageIndex]="currentPage - 1"
+						[showFirstLastButtons]="true"
 						(page)="onPageChange($event)"
 						[disabled]="isLoading$ | async"
 						aria-label="Select page"

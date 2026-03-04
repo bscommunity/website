@@ -5,10 +5,7 @@ import { StorageService } from "./storage.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import {
-	UserProfileResponseModel,
-	UserActivityItemModel,
-} from "@/models/user.model";
+import { UserProfileResponseModel } from "@/models/user.model";
 import { HistoryItem } from "@/components/history/history.component";
 
 interface ProfileCacheData {
@@ -94,7 +91,11 @@ export class ProfileCacheService {
 		);
 		if (!cached) return null;
 		try {
-			return JSON.parse(cached);
+			const parsed: HistoryItem[] = JSON.parse(cached);
+			return parsed.map((item) => ({
+				...item,
+				date: new Date(item.date),
+			}));
 		} catch (e) {
 			console.warn("Failed to parse cached activity data:", e);
 			return null;
