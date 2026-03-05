@@ -8,6 +8,7 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ShareService } from "@/services/share.service";
 import { MatChipsModule } from "@angular/material/chips";
 
 // Types
@@ -61,6 +62,7 @@ interface ChartDialogData {
 			) {
 				<app-chart-contributors
 					[contributors]="data.chart.contributors"
+					[onClose]="closeDialog"
 				></app-chart-contributors>
 			}
 			<div
@@ -145,8 +147,10 @@ interface ChartDialogData {
 export class ChartDialogComponent {
 	dialogRef = inject<MatDialogRef<ChartDialogComponent>>(MatDialogRef);
 	data = inject<ChartDialogData>(MAT_DIALOG_DATA);
+	readonly closeDialog = () => this.dialogRef.close();
 
 	private _snackBar = inject(MatSnackBar);
+	private shareService = inject(ShareService);
 
 	get buttons() {
 		return [
@@ -174,7 +178,7 @@ export class ChartDialogComponent {
 			},
 			{
 				icon: "calendar_today",
-				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.latestVersion.publishedAt.toString())}`,
+				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.updatedAt.toString())}`,
 				amount: null,
 			},
 		].filter((button) => button.amount === null || button.amount > 0);
@@ -209,17 +213,12 @@ export class ChartDialogComponent {
 	}
 
 	onShare() {
-		// Generate shareable link
 		const url = `${window.location.origin}/link/chart/${this.data.chart.contentId}`;
+		this.shareService.share(url);
+		this.dialogRef.close();
+	}
 
-		// Copy to clipboard
-		navigator.clipboard.writeText(url);
-
-		// Show snackbar
-		this._snackBar.open("Chart link copied to clipboard!", "Close", {
-			duration: 3000,
-		});
-
+	onClose() {
 		this.dialogRef.close();
 	}
 }

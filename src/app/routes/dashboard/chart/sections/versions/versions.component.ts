@@ -84,7 +84,7 @@ export class VersionsComponent {
 			if (table && versions.length > 0) {
 				// The table data is automatically updated through the [data]="versions()" binding
 				// We just need to trigger change detection
-				this.cdr.detectChanges();
+				// TODO: Manually trigger change detection?
 			}
 		});
 	}
@@ -98,7 +98,7 @@ export class VersionsComponent {
 		{
 			columnDef: "publishedAt",
 			header: "Published At",
-			cell: (item: VersionModel) => `${item.publishedAt.toDateString()}`,
+			cell: (item: VersionModel) => `${item.createdAt.toDateString()}`,
 		},
 		{
 			columnDef: "downloads",
@@ -251,7 +251,7 @@ export class VersionsComponent {
 	addVersionToTable(version: VersionModel) {
 		this.versionTable().addData(version);
 		this.openSnackBar("Version added with success!", "Close");
-		this.cdr.detectChanges();
+		// TODO: Manually trigger change detection?
 	}
 
 	removeVersionFromTable(version: VersionModel) {
@@ -267,7 +267,7 @@ export class VersionsComponent {
 			),
 		);
 
-		this.cdr.detectChanges();
+		// TODO: Manually trigger change detection?
 		this.openSnackBar("Version removed with success!", "Close");
 	}
 }

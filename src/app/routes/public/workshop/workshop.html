@@ -48,7 +48,7 @@
 			>
 				@for (placeholder of placeholders; track $index) {
 					<div
-						class="animate-pulse bg-surface-container-low rounded-2xl h-[122px] w-full"
+						class="animate-pulse bg-surface-container-low rounded-2xl h-30.5 w-full"
 					></div>
 				}
 			</ul>
@@ -138,6 +138,7 @@
 						[hidePageSize]="true"
 						[pageSize]="pageSize"
 						[pageIndex]="currentPage - 1"
+						[showFirstLastButtons]="true"
 						(page)="onPageChange($event)"
 						[disabled]="isLoading$ | async"
 						aria-label="Select page"

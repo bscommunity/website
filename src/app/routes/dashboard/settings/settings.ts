@@ -1,10 +1,4 @@
-import {
-	Component,
-	CUSTOM_ELEMENTS_SCHEMA,
-	inject,
-	OnInit,
-} from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from "@angular/core";
 
 import { RouterModule } from "@angular/router";
 
@@ -16,9 +10,13 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatDialog } from "@angular/material/dialog";
 
 // Components
-import { SettingsWrapperComponent } from "./subcomponents/wrapper.component";
 import { SettingsCardComponent } from "./subcomponents/card.component";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
+import { TabContentWrapperComponent } from "@/components/tabs/tab-content-wrapper.component";
+import {
+	type Tab,
+	TabNavBarComponent,
+} from "@/components/tabs/tab-nav-bar.component";
 
 // Services
 import { OAuthService } from "@/services/oauth.service";
@@ -32,96 +30,24 @@ import { OAuthService } from "@/services/oauth.service";
 		MatButtonModule,
 		MatSlideToggleModule,
 		MatIconModule,
-		SettingsWrapperComponent,
 		SettingsCardComponent,
+		TabContentWrapperComponent,
+		TabNavBarComponent,
 	],
 	templateUrl: "./settings.html",
-	styles: [
-		`
-			.settings-container {
-				position: relative;
-			}
-			.settings-tab {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-			}
-			.slide-in-left {
-				animation: slideInLeft 200ms ease;
-			}
-			@keyframes slideInLeft {
-				from {
-					transform: translateX(-30px);
-					opacity: 0;
-				}
-				to {
-					transform: translateX(0);
-					opacity: 1;
-				}
-			}
-			.slide-out-left {
-				animation: slideOutLeft 200ms ease;
-			}
-			@keyframes slideOutLeft {
-				from {
-					transform: translateX(0);
-					opacity: 1;
-				}
-				to {
-					transform: translateX(-30px);
-					opacity: 0;
-				}
-			}
-			.slide-in-right {
-				animation: slideInRight 200ms ease;
-			}
-			@keyframes slideInRight {
-				from {
-					transform: translateX(30px);
-					opacity: 0;
-				}
-				to {
-					transform: translateX(0);
-					opacity: 1;
-				}
-			}
-			.slide-out-right {
-				animation: slideOutRight 200ms ease;
-			}
-			@keyframes slideOutRight {
-				from {
-					transform: translateX(0);
-					opacity: 1;
-				}
-				to {
-					transform: translateX(30px);
-					opacity: 0;
-				}
-			}
-		`,
-	],
 })
-export class Settings implements OnInit {
-	private readonly route = inject(ActivatedRoute);
+export class Settings {
 	private readonly dialog = inject(MatDialog);
 	private readonly oAuthService = inject(OAuthService);
 
-	tabs = [
-		{ label: "Account", value: "account" },
-		{ label: "Connections", value: "connections" },
+	tabs: Tab<null>[] = [
+		{ label: "Account", showLabel: true, value: "account" },
+		{ label: "Connections", showLabel: true, value: "connections" },
 	];
 	currentTab = this.tabs[0].value;
 
 	oAuthUrl = this.oAuthService.getGoogleOAuthUrl();
 	hasDriveScope = this.oAuthService.hasDriveScopeSignal;
-
-	ngOnInit(): void {
-		const section = this.route.snapshot.queryParamMap.get("section");
-		this.currentTab =
-			this.tabs.find((tab) => tab.value === section)?.value ||
-			this.tabs[0].value;
-	}
 
 	deleteAccount() {
 		// Logic to delete the account

@@ -166,10 +166,6 @@ export class AuthService {
 	}
 
 	async checkAuthStatus(): Promise<boolean> {
-		if (!isPlatformBrowser(this.platformId)) {
-			return false;
-		}
-
 		try {
 			const hasToken = !!this.cookieService.get(this.TOKEN_NAME);
 			const hasRefreshToken = !!this.cookieService.get(

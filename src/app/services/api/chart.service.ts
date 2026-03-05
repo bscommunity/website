@@ -118,6 +118,8 @@ export class ChartService {
 			isDashboard?: boolean;
 			disableCache?: boolean;
 			storage?: STORAGE;
+			count?: boolean;
+			myCharts?: boolean;
 		},
 	): Observable<ChartsResponse> {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
@@ -189,7 +191,7 @@ export class ChartService {
 			}
 		}
 
-		let params = new HttpParams();
+		let params = new HttpParams().set("count", "true");
 
 		if (filters?.query) {
 			params = params.set("query", filters.query);
@@ -223,9 +225,16 @@ export class ChartService {
 		if (options?.isDashboard) {
 			params = params.set("isDashboard", "true");
 		}
+		if (options?.count) {
+			params = params.set("count", "true");
+		}
+		if (options?.myCharts) {
+			params = params.set("myCharts", "true");
+		}
 
 		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(
 			tap((fetchedCharts) => {
+				console.log("Fetched charts from API:", fetchedCharts);
 				if (!isPaginated) {
 					if (
 						cacheScope === "public" &&
@@ -285,6 +294,7 @@ export class ChartService {
 		}
 
 		const response = await firstValueFrom(this.fetchChartFromRemote(id));
+		console.log("Fetched chart from API:", response);
 
 		const parsedChart = Chart.parse(response);
 
@@ -690,7 +700,7 @@ export class ChartService {
 
 		const wantsDeluxe = Boolean(
 			filters.versions?.includes("Deluxe") ||
-				filters.categories?.includes("Deluxe"),
+			filters.categories?.includes("Deluxe"),
 		);
 		if (wantsDeluxe) {
 			const hasDeluxe = chart.versions?.some(
@@ -712,8 +722,8 @@ export class ChartService {
 			case SortOption.LAST_UPDATED:
 				charts.sort(
 					(a, b) =>
-						this.toTimestamp(b.latestVersion?.publishedAt) -
-						this.toTimestamp(a.latestVersion?.publishedAt),
+						this.toTimestamp(b.updatedAt) -
+						this.toTimestamp(a.updatedAt),
 				);
 				break;
 			case SortOption.MOST_DOWNLOADED:

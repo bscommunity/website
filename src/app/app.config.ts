@@ -1,6 +1,7 @@
 import {
 	type ApplicationConfig,
 	provideZonelessChangeDetection,
+	provideBrowserGlobalErrorListeners
 } from "@angular/core";
 import {
 	provideRouter,
@@ -30,6 +31,7 @@ export const appConfig: ApplicationConfig = {
 	providers: [
 		MatIconRegistry, // MatIconRegistry config
 		provideZonelessChangeDetection(),
+		provideBrowserGlobalErrorListeners(),
 		provideClientHydration(withEventReplay()),
 		provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 		provideRouter(

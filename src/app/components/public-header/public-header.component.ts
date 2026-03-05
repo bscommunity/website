@@ -4,7 +4,6 @@ import {
 	ElementRef,
 	HostListener,
 	inject,
-	ChangeDetectorRef,
 } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { Router } from "@angular/router";
@@ -47,7 +46,6 @@ export class PublicHeaderComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
 	private workshopFilterService = inject(FilterService);
-	private cdr = inject(ChangeDetectorRef);
 
 	private document = inject(DOCUMENT);
 
@@ -120,22 +118,18 @@ export class PublicHeaderComponent {
 	onSearch(value: string): void {
 		if (value.length < 2) {
 			this.queryCharts = "start";
-			this.cdr.detectChanges();
 			return;
 		}
 
 		this.queryCharts = undefined;
-		this.cdr.detectChanges();
 
 		this.chartService.getSuggestions(value).subscribe({
 			next: (charts) => {
 				this.queryCharts = charts;
-				this.cdr.detectChanges();
 			},
 			error: (error) => {
 				console.error("Error fetching charts:", error);
 				this.queryCharts = null;
-				this.cdr.detectChanges();
 			},
 		});
 	}

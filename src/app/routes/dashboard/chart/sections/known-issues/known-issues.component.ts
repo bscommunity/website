@@ -1,11 +1,4 @@
-import {
-	ChangeDetectorRef,
-	Component,
-	inject,
-	signal,
-	input,
-	model,
-} from "@angular/core";
+import { Component, inject, signal, input, model } from "@angular/core";
 
 // Material
 import { CommonModule } from "@angular/common";
@@ -22,7 +15,7 @@ import { ChartSectionComponent } from "../../subcomponents/chart-section.compone
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 
 // Services
-import { KnownIssueService } from "@/services/api/known-issue.service";
+import { changelogervice } from "@/services/api/known-issue.service";
 
 // Types
 import { KnownIssueModel } from "@/models/known-issue.model";
@@ -42,15 +35,14 @@ import { KnownIssueModel } from "@/models/known-issue.model";
 	],
 	templateUrl: "./known-issues.component.html",
 })
-export class KnownIssuesComponent {
+export class changelogComponent {
 	readonly chartId = input.required<string>();
 	readonly issues = model.required<KnownIssueModel[]>();
 
-	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
-	readonly knownIssueService = inject(KnownIssueService);
+	readonly changelogervice = inject(changelogervice);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -60,7 +52,7 @@ export class KnownIssuesComponent {
 		console.log("Removing issue", issue);
 
 		const operation = async () => {
-			const result = await this.knownIssueService.deleteKnownIssue(
+			const result = await this.changelogervice.deleteKnownIssue(
 				this.chartId(),
 				issue.id,
 			);
@@ -102,12 +94,9 @@ export class KnownIssuesComponent {
 
 		try {
 			// Send issue to the server
-			const result = await this.knownIssueService.addIssue(
-				this.chartId(),
-				{
-					description: this.newIssue,
-				},
-			);
+			const result = await this.changelogervice.addIssue(this.chartId(), {
+				description: this.newIssue,
+			});
 
 			if (!result) {
 				throw new Error("An error occurred");
@@ -122,7 +111,7 @@ export class KnownIssuesComponent {
 				},
 			]);
 
-			this.cdr.detectChanges();
+			// TODO: Manually trigger change detection?
 
 			// Reset input
 			this.newIssue = "";
@@ -139,6 +128,6 @@ export class KnownIssuesComponent {
 
 	removeIssueFromTable(issue: KnownIssueModel) {
 		this.issues.update((issues) => issues.filter((i) => i.id !== issue.id));
-		this.cdr.detectChanges();
+		// TODO: Manually trigger change detection?
 	}
 }

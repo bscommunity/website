@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from "@angular/core";
 import { MatRippleModule } from "@angular/material/core";
 import { MatIconModule } from "@angular/material/icon";
 import {
@@ -10,6 +10,7 @@ import {
 @Component({
 	selector: "app-mobile-menu-item",
 	imports: [RouterLink, MatIconModule, MatRippleModule, RouterLinkActive],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	template: `
 		@if (variant === "simple") {
 			<div
@@ -43,7 +44,7 @@ import {
 				matRipple
 				[routerLink]="link"
 				routerLinkActive="bg-surface-container text-primary"
-				[routerLinkActiveOptions]="$any(routerLinkActiveOptions || {})"
+				[routerLinkActiveOptions]="routerLinkActiveOptions || { exact: false }"
 				class="flex items-center justify-start gap-4 px-4 py-3 text-on-surface hover:text-primary hover:bg-surface-container rounded-md transition-colors w-full"
 				(click)="closeMenu.emit()"
 			>

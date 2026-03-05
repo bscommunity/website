@@ -33,7 +33,7 @@ export class ChangelogService {
 	}
 
 	private loadFromStorage() {
-		const stored = localStorage.getItem("allReleaseNotes");
+		/* const stored = localStorage.getItem("allReleaseNotes");
 		if (stored) {
 			try {
 				this.releaseNotes.set(JSON.parse(stored));
@@ -43,7 +43,7 @@ export class ChangelogService {
 					error,
 				);
 			}
-		}
+		} */
 	}
 
 	async fetchReleaseNotes() {
@@ -124,10 +124,10 @@ export class ChangelogService {
 				} as ReleaseNote;
 			});
 
-			localStorage.setItem(
+			/* localStorage.setItem(
 				"allReleaseNotes",
 				JSON.stringify(parsedReleases),
-			);
+			); */
 			this.releaseNotes.set(parsedReleases);
 		} catch (error) {
 			console.error("Error fetching release notes:", error);

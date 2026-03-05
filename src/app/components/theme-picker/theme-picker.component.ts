@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { AfterViewInit, Component, inject } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
 import {
@@ -16,7 +16,7 @@ import { StorageService } from "@/services/storage.service";
 	templateUrl: "./theme-picker.component.html",
 	styleUrl: "./theme-picker.component.scss",
 })
-export class ThemePickerComponent implements OnInit {
+export class ThemePickerComponent implements AfterViewInit {
 	private storageService = inject(StorageService);
 	private themeService = inject(ThemeService);
 
@@ -30,7 +30,7 @@ export class ThemePickerComponent implements OnInit {
 
 	theme: Option = this.themeOptions[0]; // Default selection
 
-	ngOnInit() {
+	ngAfterViewInit() {
 		this.theme =
 			this.themeOptions.find(
 				(option) =>

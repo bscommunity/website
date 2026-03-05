@@ -1,10 +1,11 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, inject, Input, input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ShareService } from "@/services/share.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -40,9 +41,11 @@ export enum Tendency {
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
-	@Input() chart!: ChartModel;
+	chart = input.required<ChartModel>();
+	size = input<"small" | "medium" | "large">("medium");
 
 	private _snackBar = inject(MatSnackBar);
+	private shareService = inject(ShareService);
 
 	readonly contributorsNames = (chart: ChartModel) =>
 		chart.contributors
@@ -53,6 +56,7 @@ export class ChartPreviewComponent {
 	showVisibility = input<boolean>(false);
 	showContributors = input<boolean>(false);
 	showShareActions = input<boolean>(false);
+	actionIcon = input<string | null>(null);
 
 	readonly routerLink = input<string | string[] | UrlTree | null | undefined>(
 		null,
@@ -62,16 +66,12 @@ export class ChartPreviewComponent {
 	tendencyUp = Tendency.Up;
 	tendencyDown = Tendency.Down; */
 
-	onShare() {
-		// Generate shareable link
-		const url = `${window.location.origin}/link/chart/${this.chart.contentId}`;
+	onShare(event: MouseEvent | undefined = undefined) {
+		if (event) {
+			event.stopPropagation();
+		}
 
-		// Copy to clipboard
-		navigator.clipboard.writeText(url);
-
-		// Show snackbar
-		this._snackBar.open("Chart link copied to clipboard!", "Close", {
-			duration: 3000,
-		});
+		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
+		this.shareService.share(url);
 	}
 }

@@ -2,7 +2,6 @@ import {
 	Component,
 	HostListener,
 	ElementRef,
-	ChangeDetectorRef,
 	Renderer2,
 	AfterViewInit,
 	PLATFORM_ID,
@@ -37,7 +36,6 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 	private platformId = inject(PLATFORM_ID);
 	private renderer = inject(Renderer2);
 	private elementRef = inject(ElementRef);
-	private cdr = inject(ChangeDetectorRef);
 
 	readonly dropdown = viewChild.required<ElementRef>("dropdown");
 
@@ -148,7 +146,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 		this.activeDescendantId = "";
 
 		this.dropdownOpen = false;
-		this.cdr.detectChanges(); // Manually trigger change detection
+		// TODO: Manually trigger change detection?
 	}
 
 	toggleDropdown() {
@@ -156,7 +154,7 @@ export class SelectComponent implements AfterViewInit, OnDestroy {
 
 		this.dropdownOpen = !this.dropdownOpen;
 
-		this.cdr.detectChanges(); // Trigger change detection
+		// TODO: Manually trigger change detection?
 
 		if (this.dropdownOpen) {
 			// Set highlighted index to the currently selected option

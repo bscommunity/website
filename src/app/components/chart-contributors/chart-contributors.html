@@ -19,7 +19,7 @@
 					) {
 						<li class="-ml-2.5 first:ml-0 list-none">
 							<app-avatar
-								[src]="contributor.user.imageUrl"
+								[src]="contributor.user.avatarUrl"
 								[alt]="contributor.user.username"
 								[class]="
 									'transition-transform duration-300 w-12 h-12'
@@ -82,13 +82,17 @@
 			<div class="flex items-center gap-4 mt-4">
 				<app-avatar
 					[class]="'w-12 h-12'"
-					[src]="contributor.user.imageUrl"
+					[src]="contributor.user.avatarUrl"
 					[alt]="contributor.user.username"
 				></app-avatar>
 				<div class="contributor-info">
-					<p class="text-on-surface-variant text-sm font-medium m-0">
+					<a
+						class="text-on-surface-variant text-sm font-medium m-0 hover:underline max-md:underline"
+						[routerLink]="`/profile/${contributor.user.username}`"
+						(click)="onContributorNavigate()"
+					>
 						&#64;{{ contributor.user.username }}
-					</p>
+					</a>
 					<p class="text-on-surface-variant text-xs m-0">
 						{{ getRolesString(contributor) }}
 					</p>

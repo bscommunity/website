@@ -3,5 +3,11 @@
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"eslint.validate": ["typescript", "html"],
-	"eslint.format.enable": true
+	"eslint.format.enable": true,
+	"[html]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[tailwindcss]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	}
 }

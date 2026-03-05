@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
-
 // Modules
 import { FormsModule } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
@@ -10,13 +9,13 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { AsideComponent } from "./subcomponents/aside/aside.component";
-import { KnownIssuesComponent } from "./sections/known-issues/known-issues.component";
+import { changelogComponent } from "./sections/known-issues/known-issues.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
 import { PageError } from "../../error/error";
 
 // Models
-import { ChartModel, withLatestVersion } from "@/models/chart.model";
+import { ChartModel } from "@/models/chart.model";
 import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Enums
@@ -28,17 +27,17 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 @Component({
 	selector: "app-chart",
 	imports: [
-    FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    AsideComponent,
-    KnownIssuesComponent,
-    ContributorsComponent,
-    DangerZoneComponent,
-    VersionsComponent,
-    PageError
-],
+		FormsModule,
+		MatButtonModule,
+		MatIconModule,
+		MatTooltipModule,
+		AsideComponent,
+		changelogComponent,
+		ContributorsComponent,
+		DangerZoneComponent,
+		VersionsComponent,
+		PageError,
+	],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
 	templateUrl: "./chart.html",
 })
@@ -46,7 +45,9 @@ export class Chart implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 
-	set chart(value: ChartModel) { this._chart = withLatestVersion(value) }
+	set chart(value: ChartModel) {
+		this._chart = value;
+	}
 
 	get chart(): ChartModel {
 		return this._chart;
@@ -57,7 +58,7 @@ export class Chart implements OnInit {
 	difficultyIcon: string | null = null;
 
 	ngOnInit(): void {
-		// Escuta mudanças nos parâmetros da rota para recarregar o chart
+		// Listen to route parameter changes to reload the chart
 		this.route.params.subscribe(() => {
 			// Access resolved data
 			this.chart = this.route.snapshot.data["chart"];
@@ -70,7 +71,7 @@ export class Chart implements OnInit {
 				});
 			}
 
-			if (this.chart) {
+			if (this.chart.latestVersion) {
 				this.difficultyIcon = getDifficultyIcon(
 					this.chart.latestVersion.difficulty,
 				);

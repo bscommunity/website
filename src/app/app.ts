@@ -1,5 +1,4 @@
 import {
-	ChangeDetectionStrategy,
 	Component,
 	OnInit,
 	Renderer2,
@@ -16,9 +15,8 @@ import { ThemeService } from "./services/theme.service";
 	selector: "app-root",
 	template: `<router-outlet />`,
 	imports: [MatIconModule, RouterOutlet],
-	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
 	private themeService = inject(ThemeService);
 	private renderer = inject(Renderer2);
 

@@ -1,19 +1,16 @@
-import { Injectable } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
+import { DOCUMENT, inject, Injectable, PLATFORM_ID } from "@angular/core";
 
 @Injectable({
 	providedIn: "root",
 })
 export class StorageService {
-	/**
-	 * Checks if the code is running in a browser environment.
-	 * Throws an error if `window` is undefined.
-	 * @throws {Error} If not running in a browser.
-	 */
-	private checkWindow(): void {
-		if (typeof window === "undefined") {
-			throw new Error("StorageService can only be used in a browser.");
-		}
-	}
+	private document = inject(DOCUMENT);
+	private PLATFORM_ID = inject(PLATFORM_ID);
+	private isBrowser = isPlatformBrowser(this.PLATFORM_ID);
+
+	private getLocalStorage = () => this.document.defaultView?.localStorage;
+	private getSessionStorage = () => this.document.defaultView?.sessionStorage;
 
 	/**
 	 * Stores a key-value pair in the specified storage.
@@ -23,11 +20,12 @@ export class StorageService {
 	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
 	 */
 	setItem(key: string, value: string, useSession = false): void {
-		this.checkWindow();
+		if (!this.isBrowser) return;
+
 		const storage = useSession
-			? window.sessionStorage
-			: window.localStorage;
-		storage.setItem(key, value);
+			? this.getSessionStorage()
+			: this.getLocalStorage();
+		storage?.setItem(key, value);
 	}
 
 	/**
@@ -38,11 +36,12 @@ export class StorageService {
 	 * @returns The value associated with the key, or null if not found.
 	 */
 	getItem(key: string, useSession = false): string | null {
-		this.checkWindow();
+		if (!this.isBrowser) return null;
+
 		const storage = useSession
-			? window.sessionStorage
-			: window.localStorage;
-		return storage.getItem(key);
+			? this.getSessionStorage()
+			: this.getLocalStorage();
+		return storage?.getItem(key) || null;
 	}
 
 	/**
@@ -52,11 +51,12 @@ export class StorageService {
 	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
 	 */
 	removeItem(key: string, useSession = false): void {
-		this.checkWindow();
+		if (!this.isBrowser) return;
+
 		const storage = useSession
-			? window.sessionStorage
-			: window.localStorage;
-		storage.removeItem(key);
+			? this.getSessionStorage()
+			: this.getLocalStorage();
+		storage?.removeItem(key);
 	}
 
 	/**
@@ -65,10 +65,11 @@ export class StorageService {
 	 * @param useSession - If true, clears sessionStorage; otherwise, clears localStorage. Defaults to false.
 	 */
 	clear(useSession = false): void {
-		this.checkWindow();
+		if (!this.isBrowser) return;
+
 		const storage = useSession
-			? window.sessionStorage
-			: window.localStorage;
-		storage.clear();
+			? this.getSessionStorage()
+			: this.getLocalStorage();
+		storage?.clear();
 	}
 }

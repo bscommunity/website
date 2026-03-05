@@ -147,13 +147,16 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				limit: this.pageSize,
 				offset,
 				storage: "session",
+				count: true,
 			})
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
 					console.log("Loaded charts:", response);
 					this.charts = response.first;
-					this.totalCharts = response.second;
+					if (response.second !== null) {
+						this.totalCharts = response.second;
+					}
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},

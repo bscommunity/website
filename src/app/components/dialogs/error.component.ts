@@ -17,7 +17,7 @@ import { PublishErrorData } from "@/services/publish/publish.service";
 	template: `
 		<h2 mat-dialog-title>Oh, oh.</h2>
 
-		<mat-dialog-content class="mat-typography !flex flex-col gap-2">
+		<mat-dialog-content class="mat-typography flex! flex-col gap-2">
 			<p class="mb-2">
 				@if (data.title) {
 					{{ data.title }}:{{ " " }}
@@ -27,21 +27,26 @@ import { PublishErrorData } from "@/services/publish/publish.service";
 				{{ data.message }}
 				<br />
 				Please try again or
-				<a class="underline" href="https://github.com/">check issues</a>
+				<a
+					class="underline"
+					href="https://github.com/bscommunity/website/issues"
+					>check issues</a
+				>
 				if the problem persists.
 			</p>
 			@if (data.error) {
 				<details>
 					<summary><strong>Error details</strong></summary>
-					<pre class="whitespace-pre-wrap break-words max-w-[75%]">{{
-						data.error
-					}}</pre>
+					<pre
+						class="whitespace-pre-wrap wrap-break-word max-w-[75%]"
+						>{{ data.error }}</pre
+					>
 				</details>
 			}
 		</mat-dialog-content>
 		<mat-dialog-actions align="center">
 			<button
-				class="!w-full !mb-2"
+				class="w-full! mb-2!"
 				mat-button
 				type="button"
 				(click)="onClose()"
