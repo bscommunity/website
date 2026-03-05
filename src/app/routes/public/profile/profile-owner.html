@@ -1,0 +1,375 @@
+<main
+	class="flex flex-col items-start justify-start gap-wrapper md:gap-12 w-full px-wrapper min-h-screen pt-wrapper md:pt-12 text-base font-normal leading-5"
+>
+	@if (profile() === undefined) {
+		<!-- Loading state -->
+		<div class="flex flex-col items-center justify-center w-full py-24">
+			<mat-progress-spinner
+				mode="indeterminate"
+				diameter="48"
+			></mat-progress-spinner>
+			<p class="mt-4 text-lg">Loading profile...</p>
+		</div>
+	} @else if (profile() === null) {
+		<!-- Error state -->
+		<div class="flex flex-col items-center justify-center w-full py-24">
+			<mat-icon class="text-6xl text-error">error_outline</mat-icon>
+			<p class="mt-4 text-lg text-center">
+				Something went wrong. Please try again later.
+			</p>
+			<button mat-stroked-button class="mt-6" routerLink="/workshop">
+				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				Return to workshop
+			</button>
+		</div>
+	} @else {
+		<header class="flex flex-col items-start justify-start gap-6 w-full">
+			<button mat-stroked-button routerLink="/workshop">
+				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				Return to workshop
+			</button>
+
+			<!-- Profile Card -->
+			<div
+				class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
+			>
+				<div
+					class="flex flex-col w-full relative bg-surface-container-high min-h-64 rounded-3xl"
+				>
+					@if (profile()!.user.bannerUrl) {
+						<img
+							[src]="profile()!.user.bannerUrl"
+							[alt]="
+								'Banner image for ' + profile()!.user.username
+							"
+							class="object-cover"
+						/>
+					}
+					<svg
+						width="123"
+						height="123"
+						viewBox="0 0 123 123"
+						class="absolute bottom-4 left-4 md:left-8 md:bottom-8"
+					>
+						<defs>
+							<mask
+								id="avatar-shape"
+								maskContentUnits="userSpaceOnUse"
+							>
+								<use
+									href="/assets/icons/avatar-mask.svg#avatar-border"
+									fill="white"
+								/>
+							</mask>
+						</defs>
+						@if (profile()!.user.avatarUrl) {
+							<image
+								[attr.href]="profile()!.user.avatarUrl"
+								[attr.xlink:href]="profile()!.user.avatarUrl"
+								width="123"
+								height="123"
+								mask="url(#avatar-shape)"
+							/>
+						}
+						<use
+							href="/assets/icons/avatar-mask.svg#avatar-border"
+							fill="none"
+							class="stroke-secondary"
+							stroke-width="4"
+							stroke-linejoin="round"
+							vector-effect="non-scaling-stroke"
+						/>
+					</svg>
+				</div>
+				<div
+					class="flex flex-row flex-wrap md:justify-between w-full items-center justify-start p-9 gap-9"
+				>
+					<span
+						class="flex flex-row flex-wrap items-center justify-start gap-4 md:gap-6"
+					>
+						<h1 class="text-2xl font-medium">
+							@{{ this.username }}
+						</h1>
+						<ul
+							class="flex flex-row flex-wrap items-center justify-start gap-3"
+						>
+							@if (profile()!.user.isVerified) {
+								<li>
+									<app-badge
+										icon="editor_choice"
+										label="Verified"
+									/>
+								</li>
+							}
+						</ul>
+					</span>
+					<div class="flex flex-row items-center justify-end gap-9">
+						<span
+							class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+						>
+							<strong>{{
+								profile()!.user.followersCount
+							}}</strong>
+							followers
+						</span>
+						<span
+							class="flex flex-row items-center justify-center gap-2 text-sm text-on-surface-variant"
+						>
+							<strong>{{
+								profile()!.user.followingCount
+							}}</strong>
+							following
+						</span>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Main content -->
+		<div class="flex flex-col md:flex-row items-start w-full gap-8 pb-12">
+			<!-- Desktop: vertical content-type filter sidebar -->
+			<aside
+				class="hidden md:flex flex-col gap-1 w-52 shrink-0 pt-14 sticky top-8"
+			>
+				<button
+					class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left transition-opacity duration-200 hover:bg-surface-container-highest"
+					[class.opacity-100]="currentContentType() === 'charts'"
+					[class.opacity-35]="currentContentType() !== 'charts'"
+					(click)="setContentType('charts')"
+				>
+					<span>Charts</span>
+					<span class="text-on-surface-variant tabular-nums">{{
+						totalCharts()
+					}}</span>
+				</button>
+				<button
+					disabled
+					class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left opacity-35 cursor-not-allowed"
+				>
+					<span>Tour Passes</span>
+					<span class="text-on-surface-variant tabular-nums">{{
+						totalTourPasses()
+					}}</span>
+				</button>
+				<button
+					disabled
+					class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left opacity-35 cursor-not-allowed"
+				>
+					<span>Themes</span>
+					<span class="text-on-surface-variant tabular-nums">{{
+						totalThemes()
+					}}</span>
+				</button>
+			</aside>
+
+			<!-- Tab area -->
+			<div class="flex flex-col flex-1 w-full min-w-0 gap-4">
+				<!-- Desktop tab nav bar: icon + label -->
+				<app-tab-nav-bar
+					class="hidden md:block"
+					[tabs]="desktopTabs"
+					[tabPanel]="ownerTabPanel"
+					[(currentTab)]="currentDesktopTab"
+				/>
+
+				<!-- Mobile tab nav bar: icon only -->
+				<app-tab-nav-bar
+					class="flex md:hidden"
+					[tabs]="ownerMobileTabs"
+					[tabPanel]="ownerTabPanel"
+					[(currentTab)]="currentDesktopTab"
+				/>
+
+				<!-- Mobile: content-type filter buttons -->
+				<div
+					class="flex md:hidden items-center justify-start w-full gap-4"
+				>
+					<button
+						mat-button
+						[class.active]="currentContentType() === 'charts'"
+						[class.opacity-100]="currentContentType() === 'charts'"
+						[class.opacity-50]="currentContentType() !== 'charts'"
+						(click)="setContentType('charts')"
+					>
+						Charts {{ totalCharts() }}
+					</button>
+					<button mat-button disabled class="opacity-50">
+						Tour Passes {{ totalTourPasses() }}
+					</button>
+					<button mat-button disabled class="opacity-50">
+						Themes {{ totalThemes() }}
+					</button>
+				</div>
+
+				<!-- Tab panels -->
+				<mat-tab-nav-panel #ownerTabPanel class="w-full">
+					<!-- Likes panel -->
+					<div
+						class="mobile-tab-collapse"
+						[class.open]="currentDesktopTab === 'likes'"
+					>
+						<div class="mobile-tab-collapse-inner">
+							<app-tab-content-wrapper class="w-full flex">
+								<ng-container
+									*ngTemplateOutlet="likesSection"
+								></ng-container>
+							</app-tab-content-wrapper>
+						</div>
+					</div>
+
+					<!-- Bookmarks panel -->
+					<div
+						class="mobile-tab-collapse"
+						[class.open]="currentDesktopTab === 'bookmarks'"
+					>
+						<div class="mobile-tab-collapse-inner">
+							<app-tab-content-wrapper class="w-full flex">
+								<ng-container
+									*ngTemplateOutlet="bookmarksSection"
+								></ng-container>
+							</app-tab-content-wrapper>
+						</div>
+					</div>
+				</mat-tab-nav-panel>
+			</div>
+		</div>
+
+		<!-- ── Templates ────────────────────────────────────────────── -->
+
+		<ng-template #chartsList let-groupedCharts="groupedCharts">
+			<ul
+				class="flex flex-col items-start justify-start w-full overflow-hidden mt-6 gap-8"
+			>
+				@for (item of groupedCharts; track $index) {
+					<li class="w-full gap-4 flex flex-col">
+						<h6 class="self-start">
+							<span
+								class="inline-block w-fit font-medium"
+								[matTooltip]="formatGroupDate(item.date)"
+								matTooltipPosition="right"
+							>
+								{{ convertDateTimeToHumanReadable(item.date) }}
+							</span>
+						</h6>
+						<div
+							class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"
+						>
+							@for (chart of item.data; track $index) {
+								<app-chart-preview
+									[chart]="chart"
+									[showContributors]="true"
+									[showShareActions]="true"
+									(click)="openChartDialog(chart)"
+									(keydown.enter)="openChartDialog(chart)"
+									(keydown.space)="openChartDialog(chart)"
+								/>
+							}
+						</div>
+					</li>
+				}
+			</ul>
+		</ng-template>
+
+		<ng-template #likesSection>
+			@if (isLikesLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedLikes() && groupedLikes()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						chartsList;
+						context: { groupedCharts: groupedLikes() }
+					"
+				></ng-container>
+				@if (totalLikesPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalLikes()"
+							[hidePageSize]="true"
+							[pageSize]="likesPageSize"
+							[pageIndex]="currentLikesPage()"
+							(page)="onLikesPageChange($event)"
+							[disabled]="isLikesLoading()"
+							aria-label="Select likes page"
+						></mat-paginator>
+					</div>
+				}
+			} @else if (groupedLikes() === null) {
+				<p class="mt-6 text-on-surface-variant">
+					Failed to load likes. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<span class="text-5xl"
+							><mat-icon inline>favorite</mat-icon></span
+						>
+						<h1 class="text-xl text-center">No liked charts</h1>
+						<p class="text-center px-8 mt-4">
+							You haven't liked any charts yet. <br />
+							Explore the workshop to find charts you love!
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
+
+		<ng-template #bookmarksSection>
+			@if (isBookmarksLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedBookmarks() && groupedBookmarks()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						chartsList;
+						context: { groupedCharts: groupedBookmarks() }
+					"
+				></ng-container>
+				@if (totalBookmarksPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalBookmarks()"
+							[hidePageSize]="true"
+							[pageSize]="bookmarksPageSize"
+							[pageIndex]="currentBookmarksPage()"
+							(page)="onBookmarksPageChange($event)"
+							[disabled]="isBookmarksLoading()"
+							aria-label="Select bookmarks page"
+						></mat-paginator>
+					</div>
+				}
+			} @else if (groupedBookmarks() === null) {
+				<p class="mt-6 text-on-surface-variant">
+					Failed to load bookmarks. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<span class="text-5xl"
+							><mat-icon inline>bookmark</mat-icon></span
+						>
+						<h1 class="text-xl text-center">
+							No bookmarked charts
+						</h1>
+						<p class="text-center px-8 mt-4">
+							You haven't bookmarked any charts yet. <br />
+							Save charts for later by bookmarking them!
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
+	}
+</main>

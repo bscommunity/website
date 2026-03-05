@@ -70,6 +70,7 @@
 
 html {
 	scroll-behavior: smooth;
+	z-index: -50;
 }
 
 body {
@@ -77,6 +78,7 @@ body {
 	min-height: 100vh;
 	font-family: "Google Sans Flex", "Helvetica Neue", sans-serif;
 
+	z-index: -50;
 	background: var(--mat-sys-background, #131314);
 	color: var(--mat-sys-on-surface, #e5e2e1);
 }

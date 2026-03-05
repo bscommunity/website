@@ -88,6 +88,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	sortOptions: Option[] = Object.values(SortOption).map((option) => ({
 		value: option,
 		label: getSortOptionLabel(option),
+		disabled: option === SortOption.WEEKLY_RANK,
 	}));
 
 	// Current data
