@@ -2,7 +2,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
 import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
-import { Observable, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
@@ -41,7 +41,6 @@ import { convertDateTimeToHumanReadable } from "@/lib/time";
 import { ChartModel } from "@/models/chart.model";
 import {
 	ActivityType,
-	ItemsPageModel,
 	type SimplifiedUserModel,
 	UserActivityItem,
 	UserProfileResponseModel,
@@ -65,19 +64,22 @@ const MOBILE_TABS: Tab<HistoryItem>[] = [
 	},
 ];
 
-const DESKTOP_TABS_BASE: Omit<Tab<HistoryItem>, "label">[] = [
+const DESKTOP_TABS: Tab<HistoryItem>[] = [
 	{
+		label: "Charts",
 		value: "charts",
 		icon: "music_note",
 		showLabel: true,
 	},
 	{
+		label: "Tour Passes",
 		value: "tour_passes",
 		icon: "music_video",
 		showLabel: true,
 		disabled: true,
 	},
 	{
+		label: "Themes",
 		value: "themes",
 		icon: "palette",
 		showLabel: true,
@@ -85,50 +87,6 @@ const DESKTOP_TABS_BASE: Omit<Tab<HistoryItem>, "label">[] = [
 		disabled: true,
 	},
 ];
-
-type ProfileContentType = "charts" | "likes" | "bookmarks";
-
-interface OwnerInitialLoadResult {
-	likesPage: ItemsPageModel<ChartModel>;
-	bookmarksPage: ItemsPageModel<ChartModel>;
-	activity: UserActivityItem[];
-}
-
-interface PublicInitialLoadResult {
-	chartsPage: ItemsPageModel<ChartModel>;
-	activity: UserActivityItem[];
-}
-
-interface OwnerCollectionPageConfig {
-	type: "likes" | "bookmarks";
-	pageIndex: number;
-	pageSize: number;
-	cacheMap: Map<number, ChartModel[]>;
-	cacheGetter: (
-		username: string,
-		page: number,
-	) => {
-		charts: ChartModel[];
-		total: number;
-		counts?: ItemsPageModel<ChartModel>["counts"];
-	} | null;
-	cacheSetter: (
-		username: string,
-		page: number,
-		data: {
-			charts: ChartModel[];
-			total: number;
-			counts?: ItemsPageModel<ChartModel>["counts"];
-		},
-	) => void;
-	request: (params: {
-		limit?: number;
-		offset?: number;
-	}) => ReturnType<UserService["getMyLikes"]>;
-	setLoading: (isLoading: boolean) => void;
-	setTotal: (value: number) => void;
-	setErrorState: () => void;
-}
 
 @Component({
 	selector: "app-profile",
@@ -166,10 +124,6 @@ interface OwnerCollectionPageConfig {
 			.mobile-tab-collapse-inner {
 				min-height: 0;
 			}
-
-			.active {
-				font-weight: 600;
-			}
 		`,
 	],
 	templateUrl: "./profile.html",
@@ -197,70 +151,18 @@ export class Profile implements OnInit, OnDestroy {
 	chartsPageSize = 20;
 	currentChartsPage = signal(0);
 
-	totalTourPasses = signal(0);
-	totalThemes = signal(0);
-
-	groupedLikes = signal<HistoryItem[] | undefined | null>(undefined);
-	isLikesLoading = signal(false);
-	totalLikes = signal(0);
-	likesPageSize = 20;
-	currentLikesPage = signal(0);
-
-	groupedBookmarks = signal<HistoryItem[] | undefined | null>(undefined);
-	isBookmarksLoading = signal(false);
-	totalBookmarks = signal(0);
-	bookmarksPageSize = 20;
-	currentBookmarksPage = signal(0);
-
 	private readonly chartsCache = new Map<number, ChartModel[]>();
-	private readonly likesCache = new Map<number, ChartModel[]>();
-	private readonly bookmarksCache = new Map<number, ChartModel[]>();
 	private routeParamSubscription?: Subscription;
 	// groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
 	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
 
 	mobileTabs = MOBILE_TABS;
-	desktopTabs: Tab<HistoryItem>[] = [];
+	desktopTabs = DESKTOP_TABS;
 
 	currentTab = MOBILE_TABS[0].value;
-	currentDesktopTab = "";
-
-	currentContentType = signal("charts");
+	currentDesktopTab = DESKTOP_TABS[0].value;
 
 	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
-
-	setDesktopTabs(): void {
-		if (this.isOwnProfile()) {
-			this.desktopTabs = [
-				{
-					value: "likes",
-					icon: "favorite",
-					showLabel: true,
-					label: `Likes (${this.totalLikes()})`,
-					items: this.groupedLikes() || [],
-				},
-				{
-					value: "bookmarks",
-					icon: "bookmark",
-					showLabel: true,
-					label: `Bookmarks (${this.totalBookmarks()})`,
-					items: this.groupedBookmarks() || [],
-				},
-			];
-			this.currentDesktopTab = "likes";
-		} else {
-			this.desktopTabs = DESKTOP_TABS_BASE.map((tab) => ({
-				...tab,
-				label:
-					tab.value === "charts"
-						? `Charts (${this.totalCharts()})`
-						: tab.value === "tour_passes"
-							? `Tour Passes (${this.totalTourPasses()})`
-							: `Themes (${this.totalThemes()})`,
-			}));
-			this.currentDesktopTab = "charts";
-		}
-	}
 
 	formatGroupDate(date: Date): string {
 		if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
@@ -297,243 +199,116 @@ export class Profile implements OnInit, OnDestroy {
 	private loadProfile(username: string): void {
 		this.resetProfileState();
 
-		if (this.hydrateFromCache(username)) {
-			this.finishInitialLoading();
-			return;
-		}
+		this.isChartsLoading.set(true);
 
-		this.fetchProfileFromApi(username);
-	}
-
-	private hydrateFromCache(username: string): boolean {
+		// Check for cached profile data
 		const cachedProfile = this.profileCacheService.getProfile(username);
-		if (!cachedProfile) {
-			return false;
-		}
+		if (cachedProfile) {
+			this.profile.set(cachedProfile.profile);
+			this.isFollowing.set(cachedProfile.isFollowing);
+			this.isOwnProfile.set(cachedProfile.isOwnProfile);
 
-		this.profile.set(cachedProfile.profile);
-		this.isFollowing.set(cachedProfile.isFollowing);
-		this.isOwnProfile.set(cachedProfile.isOwnProfile);
+			// Load cached charts for page 0
+			const cachedCharts = this.profileCacheService.getCharts(
+				username,
+				0,
+			);
+			if (cachedCharts) {
+				this.chartsCache.set(0, cachedCharts.charts);
+				this.totalCharts.set(cachedCharts.total);
+				this.applyChartGroups(cachedCharts.charts);
+			}
 
-		if (cachedProfile.isOwnProfile) {
-			this.hydrateOwnerCollectionsFromCache(username);
-		} else {
-			this.hydratePublicChartsFromCache(username);
-		}
+			// Load cached activity
+			const cachedActivity =
+				this.profileCacheService.getActivity(username);
+			if (cachedActivity) {
+				this.userActivity.set(cachedActivity);
+			}
 
-		const cachedActivity = this.profileCacheService.getActivity(username);
-		if (cachedActivity) {
-			this.userActivity.set(cachedActivity);
-		}
-
-		this.setDesktopTabs();
-		return true;
-	}
-
-	private hydrateOwnerCollectionsFromCache(username: string): void {
-		const cachedLikes = this.profileCacheService.getLikes(username, 0);
-		if (cachedLikes) {
-			this.likesCache.set(0, cachedLikes.charts);
-			this.totalLikes.set(cachedLikes.total);
-			this.applyChartGroups(cachedLikes.charts, "likes");
-		}
-
-		const cachedBookmarks = this.profileCacheService.getBookmarks(
-			username,
-			0,
-		);
-		if (cachedBookmarks) {
-			this.bookmarksCache.set(0, cachedBookmarks.charts);
-			this.totalBookmarks.set(cachedBookmarks.total);
-			this.applyChartGroups(cachedBookmarks.charts, "bookmarks");
-		}
-	}
-
-	private hydratePublicChartsFromCache(username: string): void {
-		const cachedCharts = this.profileCacheService.getCharts(username, 0);
-		if (!cachedCharts) {
+			this.isChartsLoading.set(false);
 			return;
 		}
 
-		this.chartsCache.set(0, cachedCharts.charts);
-		this.totalCharts.set(cachedCharts.total);
-		this.totalTourPasses.set(cachedCharts.counts?.tourPasses ?? 0);
-		this.totalThemes.set(cachedCharts.counts?.themes ?? 0);
-		this.applyChartGroups(cachedCharts.charts, "charts");
-	}
-
-	private fetchProfileFromApi(username: string): void {
+		// Fetch from API if not cached or cache invalid
 		this.userService
 			.getUserByUsername(username)
 			.pipe(
 				switchMap((profile) => {
-					const viewerId = this.getAuthenticatedUserId();
-					const isOwnProfile = viewerId === profile.user.id;
-
 					this.profile.set(profile);
 					this.isFollowing.set(Boolean(profile.isFollowing));
-					this.isOwnProfile.set(isOwnProfile);
+					this.isOwnProfile.set(
+						this.getAuthenticatedUserId() === profile.user.id,
+					);
 					this.currentChartsPage.set(0);
-					this.currentLikesPage.set(0);
-					this.currentBookmarksPage.set(0);
 
+					// Cache the profile data
 					this.profileCacheService.setProfile(username, {
 						profile,
 						isFollowing: Boolean(profile.isFollowing),
-						isOwnProfile,
+						isOwnProfile:
+							this.getAuthenticatedUserId() === profile.user.id,
 					});
 
-					return isOwnProfile
-						? this.loadOwnerData(profile.user.id)
-						: this.loadPublicData(profile.user.id);
+					return forkJoin({
+						chartsPage: this.userService.getUserCharts(
+							profile.user.id,
+							{
+								limit: 20,
+								offset: 0,
+							},
+						),
+						activity: this.userService
+							.getUserActivity(profile.user.id, {
+								limit: 20,
+								offset: 0,
+							})
+							.pipe(catchError(() => of([]))),
+					});
 				}),
 			)
 			.subscribe({
-				next: (result) => {
-					if (this.isOwnerLoadResult(result)) {
-						this.applyOwnerInitialData(username, result);
-					} else {
-						this.applyPublicInitialData(username, result);
-					}
+				next: ({ chartsPage, activity }) => {
+					const initialCharts = chartsPage.items ?? [];
+					this.chartsCache.set(0, initialCharts);
+					this.totalCharts.set(
+						chartsPage.counts?.charts ?? initialCharts.length,
+					);
+					this.applyChartGroups(initialCharts);
 
-					this.applyActivityAndCache(username, result.activity);
-					this.setDesktopTabs();
-					this.finishInitialLoading();
+					// Cache charts
+					this.profileCacheService.setCharts(username, 0, {
+						charts: initialCharts,
+						total: this.totalCharts(),
+					});
+
+					const profile = this.profile();
+					const activityTimeline = this.buildActivityTimelineFromApi(
+						activity,
+						profile?.user.username ?? username,
+					);
+					this.userActivity.set(activityTimeline);
+
+					// Cache activity
+					this.profileCacheService.setActivity(
+						username,
+						activityTimeline,
+					);
+
+					this.isChartsLoading.set(false);
 				},
 				error: (err) => {
-					this.handleProfileLoadError(err);
+					this.profile.set(null);
+					this.groupedCharts.set(null);
+					this.userActivity.set(null);
+					this.isChartsLoading.set(false);
+					this.totalCharts.set(0);
+					this.currentChartsPage.set(0);
+					this.isFollowing.set(false);
+					this.isOwnProfile.set(false);
+					console.error("Error fetching user data:", err);
 				},
 			});
-	}
-
-	private loadOwnerData(userId: string): Observable<OwnerInitialLoadResult> {
-		return forkJoin({
-			likesPage: this.userService.getMyLikes({
-				limit: this.likesPageSize,
-				offset: 0,
-			}),
-			bookmarksPage: this.userService.getMyBookmarks({
-				limit: this.bookmarksPageSize,
-				offset: 0,
-			}),
-			activity: this.userService
-				.getUserActivity(userId, {
-					limit: 20,
-					offset: 0,
-				})
-				.pipe(catchError(() => of([]))),
-		});
-	}
-
-	private loadPublicData(
-		userId: string,
-	): Observable<PublicInitialLoadResult> {
-		return forkJoin({
-			chartsPage: this.userService.getUserCharts(userId, {
-				limit: this.chartsPageSize,
-				offset: 0,
-			}),
-			activity: this.userService
-				.getUserActivity(userId, {
-					limit: 20,
-					offset: 0,
-				})
-				.pipe(catchError(() => of([]))),
-		});
-	}
-
-	private isOwnerLoadResult(
-		result: OwnerInitialLoadResult | PublicInitialLoadResult,
-	): result is OwnerInitialLoadResult {
-		return "likesPage" in result;
-	}
-
-	private applyOwnerInitialData(
-		username: string,
-		result: OwnerInitialLoadResult,
-	): void {
-		const likes = this.normalizeCollectionItems(
-			result.likesPage.items ?? [],
-		);
-		this.likesCache.set(0, likes);
-		this.totalLikes.set(result.likesPage.counts?.charts ?? likes.length);
-		this.applyChartGroups(likes, "likes");
-
-		const bookmarks = this.normalizeCollectionItems(
-			result.bookmarksPage.items ?? [],
-		);
-		this.bookmarksCache.set(0, bookmarks);
-		this.totalBookmarks.set(
-			result.bookmarksPage.counts?.charts ?? bookmarks.length,
-		);
-		this.applyChartGroups(bookmarks, "bookmarks");
-
-		this.profileCacheService.setLikes(username, 0, {
-			charts: likes,
-			total: this.totalLikes(),
-			counts: result.likesPage.counts,
-		});
-
-		this.profileCacheService.setBookmarks(username, 0, {
-			charts: bookmarks,
-			total: this.totalBookmarks(),
-			counts: result.bookmarksPage.counts,
-		});
-	}
-
-	private applyPublicInitialData(
-		username: string,
-		result: PublicInitialLoadResult,
-	): void {
-		const charts = result.chartsPage.items ?? [];
-		this.chartsCache.set(0, charts);
-		this.totalCharts.set(result.chartsPage.counts?.charts ?? charts.length);
-		this.totalTourPasses.set(result.chartsPage.counts?.tourPasses ?? 0);
-		this.totalThemes.set(result.chartsPage.counts?.themes ?? 0);
-		this.applyChartGroups(charts, "charts");
-
-		this.profileCacheService.setCharts(username, 0, {
-			charts,
-			total: this.totalCharts(),
-			counts: result.chartsPage.counts,
-		});
-	}
-
-	private applyActivityAndCache(
-		username: string,
-		activity: UserActivityItem[],
-	): void {
-		const profile = this.profile();
-		const activityTimeline = this.buildActivityTimelineFromApi(
-			activity,
-			profile?.user.username ?? username,
-		);
-		this.userActivity.set(activityTimeline);
-		this.profileCacheService.setActivity(username, activityTimeline);
-	}
-
-	private finishInitialLoading(): void {
-		this.isChartsLoading.set(false);
-		this.isLikesLoading.set(false);
-		this.isBookmarksLoading.set(false);
-	}
-
-	private handleProfileLoadError(err: unknown): void {
-		this.profile.set(null);
-		this.groupedCharts.set(null);
-		this.groupedLikes.set(null);
-		this.groupedBookmarks.set(null);
-		this.userActivity.set(null);
-		this.finishInitialLoading();
-		this.totalCharts.set(0);
-		this.currentChartsPage.set(0);
-		this.totalLikes.set(0);
-		this.currentLikesPage.set(0);
-		this.totalBookmarks.set(0);
-		this.currentBookmarksPage.set(0);
-		this.isFollowing.set(false);
-		this.isOwnProfile.set(false);
-		console.error("Error fetching user data:", err);
 	}
 
 	private resetProfileState(): void {
@@ -546,20 +321,6 @@ export class Profile implements OnInit, OnDestroy {
 		this.isFollowing.set(false);
 		this.isOwnProfile.set(false);
 		this.chartsCache.clear();
-		this.totalTourPasses.set(0);
-		this.totalThemes.set(0);
-
-		this.groupedLikes.set(undefined);
-		this.isLikesLoading.set(true);
-		this.totalLikes.set(0);
-		this.currentLikesPage.set(0);
-		this.likesCache.clear();
-
-		this.groupedBookmarks.set(undefined);
-		this.isBookmarksLoading.set(true);
-		this.totalBookmarks.set(0);
-		this.currentBookmarksPage.set(0);
-		this.bookmarksCache.clear();
 	}
 
 	private scrollToTop(): void {
@@ -572,10 +333,6 @@ export class Profile implements OnInit, OnDestroy {
 
 	get isOwner(): boolean {
 		return this.authService.isLoggedIn() && this.isOwnProfile();
-	}
-
-	get ownerMobileTabs(): Tab<HistoryItem>[] {
-		return this.desktopTabs.map((tab) => ({ ...tab, showLabel: false }));
 	}
 
 	onFollowClick(): void {
@@ -627,7 +384,7 @@ export class Profile implements OnInit, OnDestroy {
 
 		const cached = this.chartsCache.get(pageIndex);
 		if (cached) {
-			this.applyChartGroups(cached, "charts");
+			this.applyChartGroups(cached);
 			return;
 		}
 
@@ -638,13 +395,7 @@ export class Profile implements OnInit, OnDestroy {
 		);
 		if (sessionCached) {
 			this.chartsCache.set(pageIndex, sessionCached.charts);
-			this.totalTourPasses.set(
-				sessionCached.counts?.tourPasses ?? this.totalTourPasses(),
-			);
-			this.totalThemes.set(
-				sessionCached.counts?.themes ?? this.totalThemes(),
-			);
-			this.applyChartGroups(sessionCached.charts, "charts");
+			this.applyChartGroups(sessionCached.charts);
 			return;
 		}
 
@@ -667,15 +418,8 @@ export class Profile implements OnInit, OnDestroy {
 						this.totalCharts.set(
 							chartsPage.counts?.charts ?? charts.length,
 						);
-						this.setDesktopTabs();
 					}
-					this.totalTourPasses.set(
-						chartsPage.counts?.tourPasses ?? this.totalTourPasses(),
-					);
-					this.totalThemes.set(
-						chartsPage.counts?.themes ?? this.totalThemes(),
-					);
-					this.applyChartGroups(charts, "charts");
+					this.applyChartGroups(charts);
 
 					// Cache in sessionStorage
 					this.profileCacheService.setCharts(
@@ -684,7 +428,6 @@ export class Profile implements OnInit, OnDestroy {
 						{
 							charts,
 							total: this.totalCharts(),
-							counts: chartsPage.counts,
 						},
 					);
 
@@ -693,104 +436,6 @@ export class Profile implements OnInit, OnDestroy {
 				error: () => {
 					this.groupedCharts.set(null);
 					this.isChartsLoading.set(false);
-				},
-			});
-	}
-
-	onLikesPageChange(event: PageEvent): void {
-		const pageIndex = event.pageIndex;
-		this.currentLikesPage.set(pageIndex);
-		this.loadOwnerCollectionPage({
-			type: "likes",
-			pageIndex,
-			pageSize: this.likesPageSize,
-			cacheMap: this.likesCache,
-			cacheGetter: (username, page) =>
-				this.profileCacheService.getLikes(username, page),
-			cacheSetter: (username, page, data) =>
-				this.profileCacheService.setLikes(username, page, data),
-			request: (params) => this.userService.getMyLikes(params),
-			setLoading: (isLoading) => this.isLikesLoading.set(isLoading),
-			setTotal: (total) => this.totalLikes.set(total),
-			setErrorState: () => this.groupedLikes.set(null),
-		});
-	}
-
-	onBookmarksPageChange(event: PageEvent): void {
-		const pageIndex = event.pageIndex;
-		this.currentBookmarksPage.set(pageIndex);
-		this.loadOwnerCollectionPage({
-			type: "bookmarks",
-			pageIndex,
-			pageSize: this.bookmarksPageSize,
-			cacheMap: this.bookmarksCache,
-			cacheGetter: (username, page) =>
-				this.profileCacheService.getBookmarks(username, page),
-			cacheSetter: (username, page, data) =>
-				this.profileCacheService.setBookmarks(username, page, data),
-			request: (params) => this.userService.getMyBookmarks(params),
-			setLoading: (isLoading) => this.isBookmarksLoading.set(isLoading),
-			setTotal: (total) => this.totalBookmarks.set(total),
-			setErrorState: () => this.groupedBookmarks.set(null),
-		});
-	}
-
-	private loadOwnerCollectionPage(config: OwnerCollectionPageConfig): void {
-		const cached = config.cacheMap.get(config.pageIndex);
-		if (cached) {
-			this.applyChartGroups(cached, config.type);
-			return;
-		}
-
-		const sessionCached = config.cacheGetter(
-			this.username,
-			config.pageIndex,
-		);
-		if (sessionCached) {
-			const normalizedCached = this.normalizeCollectionItems(
-				sessionCached.charts,
-			);
-			config.cacheMap.set(config.pageIndex, normalizedCached);
-			this.applyChartGroups(normalizedCached, config.type);
-			return;
-		}
-
-		config.setLoading(true);
-		config
-			.request({
-				limit: config.pageSize,
-				offset: config.pageIndex * config.pageSize,
-			})
-			.subscribe({
-				next: (page) => {
-					const items = this.normalizeCollectionItems(
-						page.items ?? [],
-					);
-					config.cacheMap.set(config.pageIndex, items);
-					if (config.pageIndex === 0) {
-						config.setTotal(page.counts?.charts ?? items.length);
-						this.setDesktopTabs();
-					}
-					this.applyChartGroups(items, config.type);
-
-					config.cacheSetter(this.username, config.pageIndex, {
-						charts: items,
-						total:
-							config.pageIndex === 0
-								? (page.counts?.charts ?? items.length)
-								: config.cacheMap.size > 0
-									? config.type === "likes"
-										? this.totalLikes()
-										: this.totalBookmarks()
-									: items.length,
-						counts: page.counts,
-					});
-
-					config.setLoading(false);
-				},
-				error: () => {
-					config.setErrorState();
-					config.setLoading(false);
 				},
 			});
 	}
@@ -809,7 +454,7 @@ export class Profile implements OnInit, OnDestroy {
 			return;
 		}
 
-		const url = `${window.location.origin}/profile/${profile.user.username}`;
+		const url = `${window.location.origin}/link/profile/${profile.user.username}`;
 		const title = `${profile.user.username}'s Profile`;
 		this.shareService.share(url, title);
 	}
@@ -819,54 +464,13 @@ export class Profile implements OnInit, OnDestroy {
 		return total > 0 ? Math.ceil(total / this.chartsPageSize) : 0;
 	}
 
-	get totalLikesPages(): number {
-		const total = this.totalLikes();
-		return total > 0 ? Math.ceil(total / this.likesPageSize) : 0;
-	}
-
-	get totalBookmarksPages(): number {
-		const total = this.totalBookmarks();
-		return total > 0 ? Math.ceil(total / this.bookmarksPageSize) : 0;
-	}
-
-	setContentType(type: string): void {
-		this.currentContentType.set(type);
-		// Future implementation: filter content based on type
-	}
-
-	private applyChartGroups(
-		charts: ChartModel[],
-		type: ProfileContentType = "charts",
-	): void {
-		const groupedCharts = this.groupChartsByDate(charts, type);
-		if (type === "charts") {
-			this.groupedCharts.set(groupedCharts);
-			const chartsTabIndex = this.desktopTabs.findIndex(
-				(tab) => tab.value === "charts",
-			);
-			if (chartsTabIndex >= 0) {
-				this.desktopTabs[chartsTabIndex] = {
-					...this.desktopTabs[chartsTabIndex],
-					items: groupedCharts,
-				};
-			}
-		} else if (type === "likes") {
-			this.groupedLikes.set(groupedCharts);
-			const likesTab = this.desktopTabs.find(
-				(tab) => tab.value === "likes",
-			);
-			if (likesTab) {
-				likesTab.items = groupedCharts;
-			}
-		} else if (type === "bookmarks") {
-			this.groupedBookmarks.set(groupedCharts);
-			const bookmarksTab = this.desktopTabs.find(
-				(tab) => tab.value === "bookmarks",
-			);
-			if (bookmarksTab) {
-				bookmarksTab.items = groupedCharts;
-			}
-		}
+	private applyChartGroups(charts: ChartModel[]): void {
+		const groupedCharts = this.groupChartsByDate(charts);
+		this.groupedCharts.set(groupedCharts);
+		this.desktopTabs[0] = {
+			...this.desktopTabs[0],
+			items: groupedCharts,
+		};
 	}
 
 	private getAuthenticatedUserId(): string | null {
@@ -897,39 +501,13 @@ export class Profile implements OnInit, OnDestroy {
 		return this.normalizeDate(chart.updatedAt);
 	}
 
-	private getCollectionDate(
-		chart: ChartModel,
-		type: ProfileContentType,
-	): Date | null {
-		if (type === "likes") {
-			return (
-				this.normalizeDate(chart.likedAt) ||
-				this.normalizeDate(chart.updatedAt) ||
-				this.normalizeDate(chart.createdAt)
-			);
-		}
-
-		if (type === "bookmarks") {
-			return (
-				this.normalizeDate(chart.bookmarkedAt) ||
-				this.normalizeDate(chart.updatedAt) ||
-				this.normalizeDate(chart.createdAt)
-			);
-		}
-
-		return this.getChartDate(chart);
-	}
-
 	private buildDateKey(date: Date): string {
 		return date.toISOString().split("T")[0] ?? date.toISOString();
 	}
 
-	private groupChartsByDate(
-		charts: ChartModel[],
-		type: ProfileContentType,
-	): HistoryItem[] {
+	private groupChartsByDate(charts: ChartModel[]): HistoryItem[] {
 		const groups = charts.reduce((map, chart) => {
-			const date = this.getCollectionDate(chart, type);
+			const date = this.getChartDate(chart);
 			if (!date) {
 				return map;
 			}
@@ -948,53 +526,6 @@ export class Profile implements OnInit, OnDestroy {
 
 		return Array.from(groups.values()).sort(
 			(a, b) => b.date.getTime() - a.date.getTime(),
-		);
-	}
-
-	private normalizeCollectionItems(items: unknown[]): ChartModel[] {
-		return items
-			.map((item) => this.extractChartLikeItem(item))
-			.filter((item): item is ChartModel => item !== null);
-	}
-
-	private extractChartLikeItem(item: unknown): ChartModel | null {
-		if (!this.isRecord(item)) {
-			return null;
-		}
-
-		const direct = this.isChartLikeRecord(item) ? item : null;
-		if (direct) {
-			return direct as ChartModel;
-		}
-
-		const maybeChart = item["chart"];
-		if (this.isChartLikeRecord(maybeChart)) {
-			return maybeChart as ChartModel;
-		}
-
-		const maybeContent = item["content"];
-		if (this.isChartLikeRecord(maybeContent)) {
-			return maybeContent as ChartModel;
-		}
-
-		return null;
-	}
-
-	private isRecord(value: unknown): value is Record<string, unknown> {
-		return typeof value === "object" && value !== null;
-	}
-
-	private isChartLikeRecord(
-		value: unknown,
-	): value is Record<string, unknown> {
-		if (!this.isRecord(value)) {
-			return false;
-		}
-
-		return (
-			typeof value["id"] === "string" &&
-			typeof value["contentId"] === "string" &&
-			typeof value["coverUrl"] === "string"
 		);
 	}
 

@@ -5,10 +5,7 @@ import { StorageService } from "./storage.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import {
-	UserProfileResponseModel,
-	ContentCountsModel,
-} from "@/models/user.model";
+import { UserProfileResponseModel } from "@/models/user.model";
 import { HistoryItem } from "@/components/history/history.component";
 
 interface ProfileCacheData {
@@ -20,7 +17,6 @@ interface ProfileCacheData {
 interface ChartsCacheData {
 	charts: ChartModel[];
 	total: number;
-	counts?: ContentCountsModel | null;
 }
 
 @Injectable({
@@ -35,14 +31,6 @@ export class ProfileCacheService {
 
 	private getChartsCacheKey(username: string, page: number): string {
 		return `charts_${username}_${page}`;
-	}
-
-	private getLikesCacheKey(username: string, page: number): string {
-		return `likes_${username}_${page}`;
-	}
-
-	private getBookmarksCacheKey(username: string, page: number): string {
-		return `bookmarks_${username}_${page}`;
 	}
 
 	private getActivityCacheKey(username: string): string {
@@ -90,52 +78,6 @@ export class ProfileCacheService {
 	setCharts(username: string, page: number, data: ChartsCacheData): void {
 		this.storageService.setItem(
 			this.getChartsCacheKey(username, page),
-			JSON.stringify(data),
-			true,
-		);
-	}
-
-	// Likes caching
-	getLikes(username: string, page: number): ChartsCacheData | null {
-		const cached = this.storageService.getItem(
-			this.getLikesCacheKey(username, page),
-			true,
-		);
-		if (!cached) return null;
-		try {
-			return JSON.parse(cached);
-		} catch (e) {
-			console.warn("Failed to parse cached likes data:", e);
-			return null;
-		}
-	}
-
-	setLikes(username: string, page: number, data: ChartsCacheData): void {
-		this.storageService.setItem(
-			this.getLikesCacheKey(username, page),
-			JSON.stringify(data),
-			true,
-		);
-	}
-
-	// Bookmarks caching
-	getBookmarks(username: string, page: number): ChartsCacheData | null {
-		const cached = this.storageService.getItem(
-			this.getBookmarksCacheKey(username, page),
-			true,
-		);
-		if (!cached) return null;
-		try {
-			return JSON.parse(cached);
-		} catch (e) {
-			console.warn("Failed to parse cached bookmarks data:", e);
-			return null;
-		}
-	}
-
-	setBookmarks(username: string, page: number, data: ChartsCacheData): void {
-		this.storageService.setItem(
-			this.getBookmarksCacheKey(username, page),
 			JSON.stringify(data),
 			true,
 		);

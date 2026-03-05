@@ -23,7 +23,6 @@
 			</button>
 		</div>
 	} @else {
-		<!-- Shared: back button + profile card -->
 		<header class="flex flex-col items-start justify-start gap-6 w-full">
 			<button mat-stroked-button routerLink="/workshop">
 				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
@@ -102,6 +101,23 @@
 									/>
 								</li>
 							}
+							<!-- <li>
+								<app-badge
+									icon="history"
+									[label]="
+										'Active since ' +
+										convertDateTimeToHumanReadable(
+											profile()!.user.createdAt
+										)
+									"
+								/>
+							</li> -->
+							<!-- <li>
+								<app-badge
+									icon="music_note"
+									label="Original Artist"
+								/>
+							</li> -->
 						</ul>
 					</span>
 					@if (isOwner) {
@@ -154,117 +170,136 @@
 									>share</mat-icon
 								>
 							</button>
+							<!-- <button
+								class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
+								matRipple
+								disabled
+								matTooltip="Not implemented yet :/"
+								matTooltipPosition="above"
+								matRippleColor="rgba(63, 30, 104, 0.1)"
+								aria-label="Report"
+							>
+								<mat-icon class="align-middle" inline
+									>flag</mat-icon
+								>
+							</button> -->
 						</div>
 					}
 				</div>
 			</div>
 		</header>
 
-		<!-- ═══════════════════════════ OWNER LAYOUT ══════════════════════════ -->
-		@if (isOwner) {
-			<div
-				class="flex flex-col md:flex-row items-start w-full gap-8 pb-12"
+		<div class="flex flex-row items-stretch justify-between w-full gap-16">
+			<mat-tab-group
+				dynamicHeight
+				class="hidden! md:flex! w-full md:w-2/3 pb-12"
 			>
-				<!-- Desktop: vertical content-type filter sidebar -->
-				<aside
-					class="hidden md:flex flex-col gap-1 w-52 shrink-0 pt-14 sticky top-8"
-				>
-					<button
-						class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left transition-opacity duration-200 hover:bg-surface-container-highest"
-						[class.opacity-100]="currentContentType() === 'charts'"
-						[class.opacity-35]="currentContentType() !== 'charts'"
-						(click)="setContentType('charts')"
-					>
-						<span>Charts</span>
-						<span class="text-on-surface-variant tabular-nums">{{
-							totalCharts()
-						}}</span>
-					</button>
-					<button
-						disabled
-						class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left opacity-35 cursor-not-allowed"
-					>
-						<span>Tour Passes</span>
-						<span class="text-on-surface-variant tabular-nums">{{
-							totalTourPasses()
-						}}</span>
-					</button>
-					<button
-						disabled
-						class="flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium text-left opacity-35 cursor-not-allowed"
-					>
-						<span>Themes</span>
-						<span class="text-on-surface-variant tabular-nums">{{
-							totalThemes()
-						}}</span>
-					</button>
-				</aside>
-
-				<!-- Tab area -->
-				<div class="flex flex-col flex-1 w-full min-w-0 gap-4">
-					<!-- Desktop tab nav: icon + label -->
-					<app-tab-nav-bar
-						class="hidden md:block"
-						[tabs]="desktopTabs"
-						[tabPanel]="ownerTabPanel"
-						[(currentTab)]="currentDesktopTab"
-					/>
-					<!-- Mobile tab nav: icon only -->
-					<app-tab-nav-bar
-						class="flex md:hidden"
-						[tabs]="ownerMobileTabs"
-						[tabPanel]="ownerTabPanel"
-						[(currentTab)]="currentDesktopTab"
-					/>
-
-					<!-- Mobile: content-type filter buttons -->
-					<div
-						class="flex md:hidden items-center justify-start w-full gap-4"
-					>
-						<button
-							mat-button
-							[class.active]="currentContentType() === 'charts'"
-							[class.opacity-100]="
-								currentContentType() === 'charts'
-							"
-							[class.opacity-50]="
-								currentContentType() !== 'charts'
-							"
-							(click)="setContentType('charts')"
+				@for (tab of desktopTabs; track tab.value) {
+					<mat-tab [disabled]="tab.disabled">
+						<ng-template mat-tab-label>
+							@if (tab.icon) {
+								<mat-icon class="align-middle">{{
+									tab.icon
+								}}</mat-icon>
+							}
+							@if (tab.label && tab.showLabel) {
+								<span class="ml-4">{{ tab.label }}</span>
+							}
+						</ng-template>
+						<section
+							class="flex flex-col items-center justify-start w-full"
 						>
-							Charts {{ totalCharts() }}
-						</button>
-						<button mat-button disabled class="opacity-50">
-							Tour Passes {{ totalTourPasses() }}
-						</button>
-						<button mat-button disabled class="opacity-50">
-							Themes {{ totalThemes() }}
-						</button>
-					</div>
+							<ng-container
+								*ngTemplateOutlet="
+									chartsSection;
+									context: { isDesktop: true }
+								"
+							></ng-container>
+						</section>
+					</mat-tab>
+				}
+			</mat-tab-group>
+			<section
+				class="flex flex-col gap-6 w-full md:w-1/3 flex-1 items-stretch"
+			>
+				<h3 class="hidden md:flex font-medium">Recent activity</h3>
+				<app-tab-nav-bar
+					class="flex md:hidden"
+					[tabs]="mobileTabs"
+					[tabPanel]="tabPanel"
+					[(currentTab)]="currentTab"
+				/>
 
-					<!-- Tab panels -->
-					<mat-tab-nav-panel #ownerTabPanel class="w-full">
+				<ng-template #activityContent>
+					@if (userActivity() === undefined) {
+						<div
+							class="flex items-center justify-center w-full py-8"
+						>
+							<mat-progress-spinner
+								mode="indeterminate"
+								diameter="36"
+							></mat-progress-spinner>
+						</div>
+					} @else if (userActivity() === null) {
+						<div
+							class="flex flex-col items-center justify-center w-full py-8 gap-4"
+						>
+							<mat-icon class="text-4xl text-error"
+								>error_outline</mat-icon
+							>
+							<p
+								class="text-sm text-on-surface-variant text-center"
+							>
+								Failed to load recent activity.
+							</p>
+						</div>
+					} @else if (userActivity()!.length === 0) {
+						<div
+							class="flex flex-col items-center justify-center w-full py-8 gap-4"
+						>
+							<mat-icon class="text-4xl text-on-surface-variant"
+								>history</mat-icon
+							>
+							<p
+								class="text-sm text-on-surface-variant text-center"
+							>
+								No recent activity yet.
+							</p>
+						</div>
+					} @else {
+						<app-user-history
+							class="flex flex-1 w-full"
+							[items]="userActivity()!"
+							(chartClick)="openChartDialog($event)"
+						/>
+					}
+				</ng-template>
+
+				<div class="relative w-full overflow-hidden">
+					<mat-tab-nav-panel #tabPanel class="w-full">
 						<div
 							class="mobile-tab-collapse"
-							[class.open]="currentDesktopTab === 'likes'"
+							[class.open]="currentTab === mobileTabs[0].value"
 						>
 							<div class="mobile-tab-collapse-inner">
 								<app-tab-content-wrapper class="w-full flex">
 									<ng-container
-										*ngTemplateOutlet="ownerLikesSection"
+										*ngTemplateOutlet="activityContent"
 									></ng-container>
 								</app-tab-content-wrapper>
 							</div>
 						</div>
+
 						<div
 							class="mobile-tab-collapse"
-							[class.open]="currentDesktopTab === 'bookmarks'"
+							[class.open]="currentTab === mobileTabs[1].value"
 						>
 							<div class="mobile-tab-collapse-inner">
 								<app-tab-content-wrapper class="w-full flex">
 									<ng-container
 										*ngTemplateOutlet="
-											ownerBookmarksSection
+											chartsSection;
+											context: { isDesktop: false }
 										"
 									></ng-container>
 								</app-tab-content-wrapper>
@@ -272,30 +307,39 @@
 						</div>
 					</mat-tab-nav-panel>
 				</div>
-			</div>
+			</section>
+		</div>
 
-			<!-- Owner templates -->
-			<ng-template #ownerChartsList let-groupedCharts="groupedCharts">
-				<ul
-					class="flex flex-col items-start justify-start w-full overflow-hidden mt-6 gap-8"
-				>
-					@for (item of groupedCharts; track $index) {
-						<li class="w-full gap-4 flex flex-col">
-							<h6 class="self-start">
-								<span
-									class="inline-block w-fit font-medium"
-									[matTooltip]="formatGroupDate(item.date)"
-									matTooltipPosition="right"
-								>
-									{{
-										convertDateTimeToHumanReadable(
-											item.date
-										)
-									}}
-								</span>
-							</h6>
+		<!-- Templates -->
+		<ng-template
+			#chartsList
+			let-groupedCharts="groupedCharts"
+			let-isDesktop="isDesktop"
+		>
+			<ul
+				class="flex flex-col items-start justify-start w-full overflow-hidden"
+				[class.mt-6]="isDesktop"
+				[class.gap-8]="isDesktop"
+			>
+				@for (item of groupedCharts; track $index) {
+					<li
+						class="w-full gap-4 flex flex-col"
+						[class]="!isDesktop ? 'mb-6 last:mb-12' : ''"
+					>
+						<h6 class="self-start">
+							<span
+								class="inline-block w-fit font-medium"
+								[matTooltip]="formatGroupDate(item.date)"
+								[matTooltipPosition]="
+									isDesktop ? 'right' : 'above'
+								"
+							>
+								{{ convertDateTimeToHumanReadable(item.date) }}
+							</span>
+						</h6>
+						@if (isDesktop) {
 							<div
-								class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"
+								class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
 							>
 								@for (chart of item.data; track $index) {
 									<app-chart-preview
@@ -308,401 +352,77 @@
 									/>
 								}
 							</div>
-						</li>
-					}
-				</ul>
-			</ng-template>
-
-			<ng-template #ownerLikesSection>
-				@if (isLikesLoading()) {
-					<div class="flex items-center justify-center w-full py-10">
-						<mat-progress-spinner
-							mode="indeterminate"
-							diameter="36"
-						></mat-progress-spinner>
-					</div>
-				} @else if (groupedLikes() && groupedLikes()!.length > 0) {
-					<ng-container
-						*ngTemplateOutlet="
-							ownerChartsList;
-							context: { groupedCharts: groupedLikes() }
-						"
-					></ng-container>
-					@if (totalLikesPages > 1) {
-						<div class="flex items-center justify-end w-full">
-							<mat-paginator
-								[length]="totalLikes()"
-								[hidePageSize]="true"
-								[pageSize]="likesPageSize"
-								[pageIndex]="currentLikesPage()"
-								(page)="onLikesPageChange($event)"
-								[disabled]="isLikesLoading()"
-								aria-label="Select likes page"
-							></mat-paginator>
-						</div>
-					}
-				} @else if (groupedLikes() === null) {
-					<p class="mt-6 text-on-surface-variant">
-						Failed to load likes. Please try again later.
-					</p>
-				} @else {
-					<div
-						class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 my-8 w-full"
-					>
-						<div class="flex flex-col items-center justify-center">
-							<span class="text-5xl"
-								><mat-icon inline>favorite</mat-icon></span
-							>
-							<h1 class="text-xl text-center">No liked charts</h1>
-							<p class="text-center px-8 mt-4">
-								You haven't liked any charts yet. <br />
-								Explore the workshop to find charts you love!
-							</p>
-						</div>
-					</div>
-				}
-			</ng-template>
-
-			<ng-template #ownerBookmarksSection>
-				@if (isBookmarksLoading()) {
-					<div class="flex items-center justify-center w-full py-10">
-						<mat-progress-spinner
-							mode="indeterminate"
-							diameter="36"
-						></mat-progress-spinner>
-					</div>
-				} @else if (
-					groupedBookmarks() && groupedBookmarks()!.length > 0
-				) {
-					<ng-container
-						*ngTemplateOutlet="
-							ownerChartsList;
-							context: { groupedCharts: groupedBookmarks() }
-						"
-					></ng-container>
-					@if (totalBookmarksPages > 1) {
-						<div class="flex items-center justify-end w-full">
-							<mat-paginator
-								[length]="totalBookmarks()"
-								[hidePageSize]="true"
-								[pageSize]="bookmarksPageSize"
-								[pageIndex]="currentBookmarksPage()"
-								(page)="onBookmarksPageChange($event)"
-								[disabled]="isBookmarksLoading()"
-								aria-label="Select bookmarks page"
-							></mat-paginator>
-						</div>
-					}
-				} @else if (groupedBookmarks() === null) {
-					<p class="mt-6 text-on-surface-variant">
-						Failed to load bookmarks. Please try again later.
-					</p>
-				} @else {
-					<div
-						class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 my-8 w-full"
-					>
-						<div class="flex flex-col items-center justify-center">
-							<span class="text-5xl"
-								><mat-icon inline>bookmark</mat-icon></span
-							>
-							<h1 class="text-xl text-center">
-								No bookmarked charts
-							</h1>
-							<p class="text-center px-8 mt-4">
-								You haven't bookmarked any charts yet. <br />
-								Save charts for later by bookmarking them!
-							</p>
-						</div>
-					</div>
-				}
-			</ng-template>
-
-			<!-- ══════════════════════════ PUBLIC LAYOUT ══════════════════════════ -->
-		} @else {
-			<div
-				class="flex flex-row items-stretch justify-between w-full gap-16"
-			>
-				<mat-tab-group
-					dynamicHeight
-					class="hidden! md:flex! w-full md:w-2/3 pb-12"
-				>
-					@for (tab of desktopTabs; track tab.value) {
-						<mat-tab [disabled]="tab.disabled">
-							<ng-template mat-tab-label>
-								@if (tab.icon) {
-									<mat-icon class="align-middle">{{
-										tab.icon
-									}}</mat-icon>
-								}
-								@if (tab.label && tab.showLabel) {
-									<span class="ml-4">{{ tab.label }}</span>
-								}
-							</ng-template>
-							<section
-								class="flex flex-col items-center justify-start w-full"
-							>
-								@if (tab.value === "charts") {
-									<ng-container
-										*ngTemplateOutlet="
-											chartsSection;
-											context: { isDesktop: true }
-										"
-									></ng-container>
-								}
-							</section>
-						</mat-tab>
-					}
-				</mat-tab-group>
-				<section
-					class="flex flex-col gap-6 w-full md:w-1/3 flex-1 items-stretch"
-				>
-					<h3 class="hidden md:flex font-medium">Recent activity</h3>
-					<app-tab-nav-bar
-						class="flex md:hidden"
-						[tabs]="mobileTabs"
-						[tabPanel]="tabPanel"
-						[(currentTab)]="currentTab"
-					/>
-
-					<ng-template #activityContent>
-						@if (userActivity() === undefined) {
-							<div
-								class="flex items-center justify-center w-full py-8"
-							>
-								<mat-progress-spinner
-									mode="indeterminate"
-									diameter="36"
-								></mat-progress-spinner>
-							</div>
-						} @else if (userActivity() === null) {
-							<div
-								class="flex flex-col items-center justify-center w-full py-8 gap-4"
-							>
-								<mat-icon class="text-4xl text-error"
-									>error_outline</mat-icon
-								>
-								<p
-									class="text-sm text-on-surface-variant text-center"
-								>
-									Failed to load recent activity.
-								</p>
-							</div>
-						} @else if (userActivity()!.length === 0) {
-							<div
-								class="flex flex-col items-center justify-center w-full py-8 gap-4"
-							>
-								<mat-icon
-									class="text-4xl text-on-surface-variant"
-									>history</mat-icon
-								>
-								<p
-									class="text-sm text-on-surface-variant text-center"
-								>
-									No recent activity yet.
-								</p>
-							</div>
 						} @else {
-							<app-user-history
-								class="flex flex-1 w-full"
-								[items]="userActivity()!"
-								(chartClick)="openChartDialog($event)"
-							/>
+							@for (chart of item.data; track $index) {
+								<app-chart-preview
+									[chart]="chart"
+									(click)="openChartDialog(chart)"
+									(keydown.enter)="openChartDialog(chart)"
+									(keydown.space)="openChartDialog(chart)"
+								/>
+							}
 						}
-					</ng-template>
+					</li>
+				}
+			</ul>
+		</ng-template>
 
-					<div class="relative w-full overflow-hidden">
-						<mat-tab-nav-panel #tabPanel class="w-full">
-							<div
-								class="mobile-tab-collapse"
-								[class.open]="
-									currentTab === mobileTabs[0].value
-								"
-							>
-								<div class="mobile-tab-collapse-inner">
-									<app-tab-content-wrapper
-										class="w-full flex"
-									>
-										<ng-container
-											*ngTemplateOutlet="activityContent"
-										></ng-container>
-									</app-tab-content-wrapper>
-								</div>
-							</div>
-							<div
-								class="mobile-tab-collapse"
-								[class.open]="
-									currentTab === mobileTabs[1].value
-								"
-							>
-								<div class="mobile-tab-collapse-inner">
-									<app-tab-content-wrapper
-										class="w-full flex"
-									>
-										<ng-container
-											*ngTemplateOutlet="
-												chartsSection;
-												context: { isDesktop: false }
-											"
-										></ng-container>
-									</app-tab-content-wrapper>
-								</div>
-							</div>
-						</mat-tab-nav-panel>
+		<ng-template #chartsSection let-isDesktop="isDesktop">
+			@if (isChartsLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedCharts() && groupedCharts()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						chartsList;
+						context: {
+							groupedCharts: groupedCharts(),
+							isDesktop: isDesktop,
+						}
+					"
+				></ng-container>
+				@if (totalChartPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalCharts()"
+							[hidePageSize]="true"
+							[pageSize]="chartsPageSize"
+							[pageIndex]="currentChartsPage()"
+							(page)="onChartsPageChange($event)"
+							[disabled]="isChartsLoading()"
+							aria-label="Select charts page"
+						></mat-paginator>
 					</div>
-				</section>
-			</div>
-
-			<!-- Public templates -->
-			<ng-template
-				#chartsList
-				let-groupedCharts="groupedCharts"
-				let-isDesktop="isDesktop"
-			>
-				<ul
-					class="flex flex-col items-start justify-start w-full overflow-hidden"
-					[class.mt-6]="isDesktop"
-					[class.gap-8]="isDesktop"
+				}
+			} @else if (groupedCharts() === null) {
+				<p
+					class="mt-6"
+					[class.text-lg]="isDesktop"
+					[class.text-base]="!isDesktop"
+					[class.text-on-surface-variant]="!isDesktop"
 				>
-					@for (item of groupedCharts; track $index) {
-						<li
-							class="w-full gap-4 flex flex-col"
-							[class]="!isDesktop ? 'mb-6 last:mb-12' : ''"
+					Failed to load charts. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<span class="text-5xl"
+							><mat-icon inline>library_music</mat-icon></span
 						>
-							<h6 class="self-start">
-								<span
-									class="inline-block w-fit font-medium"
-									[matTooltip]="formatGroupDate(item.date)"
-									[matTooltipPosition]="
-										isDesktop ? 'right' : 'above'
-									"
-								>
-									{{
-										convertDateTimeToHumanReadable(
-											item.date
-										)
-									}}
-								</span>
-							</h6>
-							@if (isDesktop) {
-								<div
-									class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
-								>
-									@for (chart of item.data; track $index) {
-										<app-chart-preview
-											[chart]="chart"
-											[showContributors]="true"
-											[showShareActions]="true"
-											(click)="openChartDialog(chart)"
-											(keydown.enter)="
-												openChartDialog(chart)
-											"
-											(keydown.space)="
-												openChartDialog(chart)
-											"
-										/>
-									}
-								</div>
-							} @else {
-								@for (chart of item.data; track $index) {
-									<app-chart-preview
-										[chart]="chart"
-										(click)="openChartDialog(chart)"
-										(keydown.enter)="openChartDialog(chart)"
-										(keydown.space)="openChartDialog(chart)"
-									/>
-								}
-							}
-						</li>
-					}
-				</ul>
-			</ng-template>
-
-			<ng-template #chartsSection let-isDesktop="isDesktop">
-				@if (!isDesktop) {
-					<div
-						class="flex items-center justify-start w-full gap-4 mb-4"
-					>
-						<button
-							mat-button
-							[class.active]="currentContentType() === 'charts'"
-							(click)="setContentType('charts')"
-						>
-							Charts {{ totalCharts() }}
-						</button>
-						<button
-							mat-button
-							disabled
-							(click)="setContentType('tour_passes')"
-						>
-							Tour Passes {{ totalTourPasses() }}
-						</button>
-						<button
-							mat-button
-							disabled
-							(click)="setContentType('themes')"
-						>
-							Themes {{ totalThemes() }}
-						</button>
+						<h1 class="text-xl text-center">No charts available</h1>
+						<p class="text-center px-8 mt-4">
+							This user hasn't uploaded any charts yet. <br />
+							Check back later or explore the workshop!
+						</p>
 					</div>
-				}
-				@if (isChartsLoading()) {
-					<div class="flex items-center justify-center w-full py-10">
-						<mat-progress-spinner
-							mode="indeterminate"
-							diameter="36"
-						></mat-progress-spinner>
-					</div>
-				} @else if (groupedCharts() && groupedCharts()!.length > 0) {
-					<ng-container
-						*ngTemplateOutlet="
-							chartsList;
-							context: {
-								groupedCharts: groupedCharts(),
-								isDesktop: isDesktop,
-							}
-						"
-					></ng-container>
-					@if (totalChartPages > 1) {
-						<div class="flex items-center justify-end w-full">
-							<mat-paginator
-								[length]="totalCharts()"
-								[hidePageSize]="true"
-								[pageSize]="chartsPageSize"
-								[pageIndex]="currentChartsPage()"
-								(page)="onChartsPageChange($event)"
-								[disabled]="isChartsLoading()"
-								aria-label="Select charts page"
-							></mat-paginator>
-						</div>
-					}
-				} @else if (groupedCharts() === null) {
-					<p
-						class="mt-6"
-						[class.text-lg]="isDesktop"
-						[class.text-base]="!isDesktop"
-						[class.text-on-surface-variant]="!isDesktop"
-					>
-						Failed to load charts. Please try again later.
-					</p>
-				} @else {
-					<div
-						class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
-					>
-						<div class="flex flex-col items-center justify-center">
-							<span class="text-5xl"
-								><mat-icon inline>library_music</mat-icon></span
-							>
-							<h1 class="text-xl text-center">
-								No charts available
-							</h1>
-							<p class="text-center px-8 mt-4">
-								This user hasn't uploaded any charts yet. <br />
-								Check back later or explore the workshop!
-							</p>
-						</div>
-					</div>
-				}
-			</ng-template>
-		}
+				</div>
+			}
+		</ng-template>
 	}
 </main>

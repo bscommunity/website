@@ -21,7 +21,6 @@ export class UserService {
 	private http = inject(HttpClient);
 
 	private readonly apiUrl = `${apiUrl}/users`;
-	private readonly meApiUrl = `${apiUrl}/me`;
 
 	// Read
 	searchUsers(query: string): Observable<UserModel[]> {
@@ -53,33 +52,6 @@ export class UserService {
 		return this.http.get<UserActivityItem[]>(
 			`${this.apiUrl}/${userId}/activity`,
 			{ params },
-		);
-	}
-
-	// Me routes
-	getMyLikes(
-		params: { limit?: number; offset?: number } = {},
-	): Observable<ItemsPageModel<ChartModel>> {
-		const queryParams = {
-			...params,
-			types: "charts,CHARTS",
-		};
-		return this.http.get<ItemsPageModel<ChartModel>>(
-			`${this.meApiUrl}/likes`,
-			{ params: queryParams },
-		);
-	}
-
-	getMyBookmarks(
-		params: { limit?: number; offset?: number } = {},
-	): Observable<ItemsPageModel<ChartModel>> {
-		const queryParams = {
-			...params,
-			types: "charts,CHARTS",
-		};
-		return this.http.get<ItemsPageModel<ChartModel>>(
-			`${this.meApiUrl}/bookmarks`,
-			{ params: queryParams },
 		);
 	}
 
