@@ -17,16 +17,17 @@
 			<p class="mt-4 text-lg text-center">
 				Profile not found. Please check the username and try again.
 			</p>
-			<button mat-stroked-button class="mt-6" routerLink="/workshop">
+			<button mat-stroked-button class="mt-6" (click)="onReturn()">
 				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
-				Return to workshop
+				Return to {{ this.source }}
 			</button>
 		</div>
 	} @else {
 		<header class="flex flex-col items-start justify-start gap-6 w-full">
-			<button mat-stroked-button routerLink="/workshop">
+			<button mat-stroked-button (click)="onReturn()">
 				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
-				Return to workshop
+				Return to
+				{{ this.source }}
 			</button>
 			<!-- Profile Card -->
 			<div

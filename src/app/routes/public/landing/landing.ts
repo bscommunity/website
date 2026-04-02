@@ -38,23 +38,23 @@ export class LandingComponent {
 		this.isDebugMode = !this.isDebugMode;
 	}
 
-	get mobileReleaseText(): string | undefined {
-		if (this.isDebugMode) return undefined;
+	get mobileReleaseText(): string {
+		if (this.isDebugMode) return "...";
 		const tags = this.latestReleaseTags();
-		if (!tags) return undefined;
+		if (!tags) return "...";
 		return (
 			tags?.tags.find((t) => t.name.toLowerCase() === "mobile")
-				?.description || undefined
+				?.description || "..."
 		);
 	}
 
-	get desktopReleaseText(): string | undefined {
-		if (this.isDebugMode) return undefined;
+	get desktopReleaseText(): string {
+		if (this.isDebugMode) return "...";
 		const tags = this.latestReleaseTags();
-		if (!tags) return undefined;
+		if (!tags) return "...";
 		return (
 			tags?.tags.find((t) => t.name.toLowerCase() === "desktop")
-				?.description || undefined
+				?.description || "..."
 		);
 	}
 

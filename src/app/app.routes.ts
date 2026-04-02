@@ -9,12 +9,13 @@ import {
 	redirectIfAuthenticatedGuard,
 } from "./routes/auth/auth.guard";
 
-
-
 export const routes: Routes = [
 	{
 		path: "", // Public section
-		loadComponent: () => import('./layouts/public-layout.component').then(m => m.PublicLayoutComponent),
+		loadComponent: () =>
+			import("./layouts/public-layout.component").then(
+				(m) => m.PublicLayoutComponent,
+			),
 		children: [
 			// { path: '', redirectTo: 'home', pathMatch: 'full' },
 			{
@@ -75,10 +76,13 @@ export const routes: Routes = [
 
 	{
 		path: "dashboard", // Authenticated dashboard section
-		loadComponent: () => import('./layouts/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
+		loadComponent: () =>
+			import("./layouts/dashboard-layout.component").then(
+				(m) => m.DashboardLayoutComponent,
+			),
 		children: [
-			// { path: "", redirectTo: "overview", pathMatch: "full" },
-			{
+			{ path: "", redirectTo: "uploads", pathMatch: "full" },
+			/* {
 				path: "",
 				loadComponent: () =>
 					import("./routes/dashboard/overview/overview").then(
@@ -86,7 +90,7 @@ export const routes: Routes = [
 					),
 				canActivate: [isAuthenticatedGuard],
 				title: "Overview",
-			},
+			}, */
 			{
 				path: "uploads",
 				loadComponent: () =>
