@@ -1,14 +1,16 @@
 import { Component, OnInit, inject } from "@angular/core";
+import { MatIconModule } from "@angular/material/icon";
 
 // Components
 import { ReleaseTemplateComponent } from "@/components/release-template/release-template.component";
+import { PanelComponent } from "@/components/panel/panel.component";
 
 // Services
 import { ChangelogService } from "@/services/changelog.service";
 
 @Component({
 	selector: "app-release-notes",
-	imports: [ReleaseTemplateComponent],
+	imports: [ReleaseTemplateComponent, PanelComponent, MatIconModule],
 	templateUrl: "./changelog.html",
 })
 export class Changelog implements OnInit {
