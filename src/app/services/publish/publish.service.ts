@@ -54,12 +54,29 @@ export class PublishDialogService<
 	currentStep$ = this.currentStepSubject.asObservable();
 
 	private handler!: PublishHandler<TFormData, TSuccessData>;
+	private handlersByType: Record<string, PublishHandler<any, any>> | null =
+		null;
 	private formData!: TFormData;
 	private additionalData: Record<string, unknown> = {};
 
 	setHandler(handler: PublishHandler<TFormData, TSuccessData>) {
 		this.handler = handler;
 		this.formData = handler.getInitialFormData();
+	}
+
+	setHandlers(
+		handlers: Record<string, PublishHandler<any, any>>,
+		defaultType?: string,
+	) {
+		this.handlersByType = handlers;
+		if (defaultType && handlers[defaultType]) {
+			this.setHandler(
+				handlers[defaultType] as PublishHandler<
+					TFormData,
+					TSuccessData
+				>,
+			);
+		}
 	}
 
 	open() {
@@ -105,6 +122,13 @@ export class PublishDialogService<
 			} else if (result === "next") {
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
+				if (
+					result &&
+					typeof result === "object" &&
+					"contentType" in result
+				) {
+					this.switchHandler(String(result.contentType));
+				}
 				this.formData = { ...this.formData, ...result };
 				this.additionalData = result.additionalData || {};
 
@@ -156,7 +180,10 @@ export class PublishDialogService<
 		try {
 			const response = await this.handler.submit(this.formData);
 			loadingDialog.close();
-			this.dialog.open(PublishDialogSuccessComponent, {
+			const successComponent =
+				this.handler.getSuccessComponent?.() ||
+				PublishDialogSuccessComponent;
+			this.dialog.open(successComponent, {
 				hasBackdrop: true,
 				disableClose: true,
 				data: response,
@@ -183,5 +210,13 @@ export class PublishDialogService<
 		} finally {
 			this.reset();
 		}
+	}
+
+	private switchHandler(type: string) {
+		const nextHandler = this.handlersByType?.[type];
+		if (!nextHandler || nextHandler === this.handler) return;
+		this.handler = nextHandler as PublishHandler<TFormData, TSuccessData>;
+		this.formData = this.handler.getInitialFormData();
+		this.additionalData = {};
 	}
 }

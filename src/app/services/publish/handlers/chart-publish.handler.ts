@@ -5,6 +5,7 @@ import { PublishHandler } from "../publish-handler.interface";
 import { PublishTypeComponent } from "@/components/publish/type.component";
 import { PublishChartFlowComponent } from "@/components/publish/chart/flow.component";
 import { PublishChartSourceComponent } from "@/components/publish/chart/source.component";
+import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
 
 // Models
 import { Difficulty } from "@/models/enums/difficulty.enum";
@@ -58,8 +59,15 @@ export class ChartPublishHandler implements PublishHandler<
 		return { ...initialChartFormData };
 	}
 
+	getSuccessComponent(): Type<unknown> {
+		return PublishDialogSuccessComponent;
+	}
+
 	async submit(data: ChartFormData): Promise<ChartModel> {
-		const response = await this.chartService.createChart(data);
+		const { contentType, ...payload } = data as ChartFormData & {
+			contentType?: string;
+		};
+		const response = await this.chartService.createChart(payload);
 
 		if (!response)
 			throw new Error(

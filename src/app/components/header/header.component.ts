@@ -24,6 +24,7 @@ import type { UserModel } from "@/models/user.model";
 import { AuthService } from "@/services/auth.service";
 import { PublishDialogService } from "@/services/publish/publish.service";
 import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
+import { TourPassPublishHandler } from "@/services/publish/handlers/tourpass-publish.handler";
 
 @Component({
 	selector: "app-header",
@@ -42,6 +43,7 @@ import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.h
 export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
 	private chartPublishHandler = inject(ChartPublishHandler);
+	private tourPassPublishHandler = inject(TourPassPublishHandler);
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
@@ -58,7 +60,13 @@ export class HeaderComponent implements OnInit {
 			}
 		}); */
 
-		this.uploadDialog.setHandler(this.chartPublishHandler);
+		this.uploadDialog.setHandlers(
+			{
+				Chart: this.chartPublishHandler,
+				Tourpass: this.tourPassPublishHandler,
+			},
+			"Chart",
+		);
 	}
 
 	openWarning() {

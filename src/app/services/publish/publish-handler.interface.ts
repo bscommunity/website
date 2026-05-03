@@ -33,6 +33,12 @@ export interface PublishHandler<
 	submit(formData: TFormData): Promise<TSuccessData>;
 
 	/**
+	 * Optional success component override for the publish flow.
+	 * @returns A component type to render on success.
+	 */
+	getSuccessComponent?(): Type<unknown>;
+
+	/**
 	 * Optional custom validation for the form data.
 	 * @param formData - The data to validate.
 	 * @returns A string with an error message if validation fails, or null if validation passes.
