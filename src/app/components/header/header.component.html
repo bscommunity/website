@@ -21,6 +21,7 @@
 					mat-stroked-button
 					[routerLink]="['/dashboard']"
 					[routerLinkActiveOptions]="{ exact: true }"
+					disabled
 					routerLinkActive="!bg-primary !text-on-primary !border-primary"
 					>Overview
 				</a>
@@ -72,10 +73,9 @@
 			</button>
 			<mat-menu #menu="matMenu" xPosition="before" class="mt-2">
 				<button
-					disabled
-					disabledInteractive
 					mat-menu-item
-					(click)="openProfile()"
+					[routerLink]="['/profile/' + this.user?.username]"
+					[state]="{ source: 'dashboard' }"
 				>
 					<mat-icon>account_circle</mat-icon>
 					<span class="flex flex-col">

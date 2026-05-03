@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
-import { NgTemplateOutlet } from "@angular/common";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { Location, NgTemplateOutlet } from "@angular/common";
 import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
 import { Subscription } from "rxjs";
 
@@ -100,7 +100,6 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		MatSnackBarModule,
 		MatPaginatorModule,
 		NgTemplateOutlet,
-		RouterLink,
 		TabContentWrapperComponent,
 		BadgeComponent,
 		TabNavBarComponent,
@@ -139,6 +138,7 @@ export class Profile implements OnInit, OnDestroy {
 	route: ActivatedRoute = inject(ActivatedRoute);
 	username = "";
 	profile = signal<UserProfileResponseModel | undefined | null>(undefined);
+	source = history.state?.source ?? "workshop";
 
 	groupedCharts = signal<HistoryItem[] | undefined | null>(undefined);
 	userActivity = signal<HistoryItem[] | undefined | null>(undefined);
@@ -190,6 +190,9 @@ export class Profile implements OnInit, OnDestroy {
 				this.loadProfile(username);
 			},
 		);
+
+		console.log("history.state:", history.state);
+		console.log("source:", this.source);
 	}
 
 	ngOnDestroy(): void {
@@ -644,5 +647,9 @@ export class Profile implements OnInit, OnDestroy {
 		}
 
 		return timeline.sort((a, b) => b.date.getTime() - a.date.getTime());
+	}
+
+	onReturn(): void {
+		history.back();
 	}
 }

@@ -9,12 +9,13 @@ import {
 	redirectIfAuthenticatedGuard,
 } from "./routes/auth/auth.guard";
 
-
-
 export const routes: Routes = [
 	{
 		path: "", // Public section
-		loadComponent: () => import('./layouts/public-layout.component').then(m => m.PublicLayoutComponent),
+		loadComponent: () =>
+			import("./layouts/public-layout.component").then(
+				(m) => m.PublicLayoutComponent,
+			),
 		children: [
 			// { path: '', redirectTo: 'home', pathMatch: 'full' },
 			{
@@ -72,76 +73,80 @@ export const routes: Routes = [
 			// ... other public routes
 		],
 	},
+	{ path: "dashboard", redirectTo: "/changelog", pathMatch: "prefix" },
+	{ path: "auth", redirectTo: "/changelog", pathMatch: "prefix" },
+	// {
+	// 	path: "dashboard", // Authenticated dashboard section
+	// 	loadComponent: () =>
+	// 		import("./layouts/dashboard-layout.component").then(
+	// 			(m) => m.DashboardLayoutComponent,
+	// 		),
+	// 	children: [
+	// 		{ path: "", redirectTo: "uploads", pathMatch: "full" },
+	// 		/* {
+	// 			path: "",
+	// 			loadComponent: () =>
+	// 				import("./routes/dashboard/overview/overview").then(
+	// 					(m) => m.OverviewComponent,
+	// 				),
+	// 			canActivate: [isAuthenticatedGuard],
+	// 			title: "Overview",
+	// 		}, */
+	// 		{
+	// 			path: "uploads",
+	// 			loadComponent: () =>
+	// 				import("./routes/dashboard/uploads/uploads").then(
+	// 					(m) => m.Uploads,
+	// 				),
+	// 			canActivate: [isAuthenticatedGuard],
+	// 			title: "Uploads",
+	// 		},
+	// 		{
+	// 			path: "settings",
+	// 			loadComponent: () =>
+	// 				import("./routes/dashboard/settings/settings").then(
+	// 					(m) => m.Settings,
+	// 				),
+	// 			canActivate: [isAuthenticatedGuard],
+	// 			title: "Settings",
+	// 		},
+	// 		{
+	// 			path: "chart/:id",
+	// 			loadComponent: () =>
+	// 				import("./routes/dashboard/chart/chart").then(
+	// 					(m) => m.Chart,
+	// 				),
+	// 			resolve: { chart: ChartResolver },
+	// 			runGuardsAndResolvers: "always",
+	// 		},
+	// 		// ... other dashboard routes
+	// 	],
+	// },
 
-	{
-		path: "dashboard", // Authenticated dashboard section
-		loadComponent: () => import('./layouts/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
-		children: [
-			// { path: "", redirectTo: "overview", pathMatch: "full" },
-			{
-				path: "",
-				loadComponent: () =>
-					import("./routes/dashboard/overview/overview").then(
-						(m) => m.OverviewComponent,
-					),
-				canActivate: [isAuthenticatedGuard],
-				title: "Overview",
-			},
-			{
-				path: "uploads",
-				loadComponent: () =>
-					import("./routes/dashboard/uploads/uploads").then(
-						(m) => m.Uploads,
-					),
-				canActivate: [isAuthenticatedGuard],
-				title: "Uploads",
-			},
-			{
-				path: "settings",
-				loadComponent: () =>
-					import("./routes/dashboard/settings/settings").then(
-						(m) => m.Settings,
-					),
-				canActivate: [isAuthenticatedGuard],
-				title: "Settings",
-			},
-			{
-				path: "chart/:id",
-				loadComponent: () =>
-					import("./routes/dashboard/chart/chart").then(
-						(m) => m.Chart,
-					),
-				resolve: { chart: ChartResolver },
-				runGuardsAndResolvers: "always",
-			},
-			// ... other dashboard routes
-		],
-	},
-
-	{
-		path: "login",
-		loadComponent: () =>
-			import("./routes/auth/login/login").then((m) => m.Login),
-		canActivate: [redirectIfAuthenticatedGuard],
-		title: "Login",
-	},
-	{
-		path: "callback/google",
-		loadComponent: () =>
-			import("./routes/auth/callback/google").then(
-				(m) => m.GoogleOAuthCallback,
-			),
-		title: "Linking...",
-	},
-	{
-		path: "callback",
-		loadComponent: () =>
-			import("./routes/auth/callback/callback").then(
-				(m) => m.OAuthCallback,
-			),
-		canActivate: [redirectIfAuthenticatedGuard],
-		title: "Authenticating...",
-	},
+	// {
+	// 	path: "login",
+	// 	loadComponent: () =>
+	// 		import("./routes/auth/login/login").then((m) => m.Login),
+	// 	canActivate: [redirectIfAuthenticatedGuard],
+	// 	title: "Login",
+	// },
+	// {
+	// 	path: "callback/google",
+	// 	loadComponent: () =>
+	// 		import("./routes/auth/callback/google").then(
+	// 			(m) => m.GoogleOAuthCallback,
+	// 		),
+	// 	title: "Linking...",
+	// },
+	// {
+	// 	path: "callback",
+	// 	loadComponent: () =>
+	// 		import("./routes/auth/callback/callback").then(
+	// 			(m) => m.OAuthCallback,
+	// 		),
+	// 	canActivate: [redirectIfAuthenticatedGuard],
+	// 	title: "Authenticating...",
+	// },
 	{
 		path: "error",
 		loadComponent: () =>

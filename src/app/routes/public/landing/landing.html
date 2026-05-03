@@ -8,10 +8,10 @@
 	<div class="px-8 z-10">
 		<app-landing-tag
 			class="flex items-center justify-center"
-			[label]="releaseLabel"
-			[text]="desktopReleaseText"
-			[mobileText]="mobileReleaseText"
-			href="/changelog"
+			label="Notice"
+			text="bscm is currently in maintenance mode, check our Discord for updates"
+			mobileText="bscm is currently in maintenance mode"
+			href="https://discord.com/channels/951981656301006878/1420327929153589328/1500618452824756255"
 		/>
 	</div>
 
@@ -44,9 +44,12 @@
 				Download app
 			</div>
 		</a>
-		<button mat-stroked-button routerLink="/dashboard">
-			Open dashboard
-		</button>
+
+		<div matTooltip="Publishing is currently disabled due to maintenance">
+			<button mat-stroked-button routerLink="/dashboard" disabled>
+				Open dashboard
+			</button>
+		</div>
 	</div>
 
 	<div
