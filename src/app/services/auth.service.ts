@@ -6,7 +6,7 @@ import { Router } from "@angular/router";
 import { BehaviorSubject, firstValueFrom } from "rxjs";
 import { toSignal } from "@angular/core/rxjs-interop";
 
-import { environment } from "environments/environment";
+import { environment } from "@/environments/environment";
 import { apiUrl } from "@/lib/api";
 
 // Models

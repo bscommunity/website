@@ -28,9 +28,10 @@ export interface PublishHandler<
 	/**
 	 * Submit the form data for processing.
 	 * @param formData - The data to be submitted.
+	 * @param publishSessionId - Optional session ID for SSE progress events.
 	 * @returns A promise that resolves with the success data upon successful submission.
 	 */
-	submit(formData: TFormData): Promise<TSuccessData>;
+	submit(formData: TFormData, publishSessionId?: string): Promise<TSuccessData>;
 
 	/**
 	 * Optional success component override for the publish flow.

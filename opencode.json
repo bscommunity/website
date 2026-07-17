@@ -1,0 +1,9 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"references": {
+		"backend_service": {
+			"path": "../api",
+			"description": "Contains backend APIs and database schemas to use as context"
+		}
+	}
+}

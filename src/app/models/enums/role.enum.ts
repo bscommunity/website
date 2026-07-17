@@ -5,14 +5,13 @@ export enum ContributorRole {
 	REVISION = "REVISION",
 	EFFECTS = "EFFECTS",
 	SYNC = "SYNC",
-	PREVIEW = "PREVIEW",
+	GAMEPLAY = "GAMEPLAY",
 }
 
 export enum UserRole {
 	USER = "USER",
-	ADMIN = "ADMIN",
 	MODERATOR = "MODERATOR",
-	// Add more as needed
+	ADMIN = "ADMIN",
 }
 
 export const getContributorRoleLabel = (role: ContributorRole): string => {
@@ -29,8 +28,8 @@ export const getContributorRoleLabel = (role: ContributorRole): string => {
 			return "Effects";
 		case ContributorRole.SYNC:
 			return "Sync";
-		case ContributorRole.PREVIEW:
-			return "Preview";
+		case ContributorRole.GAMEPLAY:
+			return "Gameplay";
 		default:
 			return "Unknown Role";
 	}

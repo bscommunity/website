@@ -38,4 +38,15 @@ export class AsideComponent {
 	readonly chart = input.required<ChartModel>();
 
 	transformDuration = transformDuration;
+
+	async downloadBundle() {
+		try {
+			const url = await this.chartService.getBundleUrl(this.chart().id);
+			window.open(url, "_blank");
+		} catch {
+			this._snackBar.open("Failed to get download link", "Close", {
+				duration: 3000,
+			});
+		}
+	}
 }

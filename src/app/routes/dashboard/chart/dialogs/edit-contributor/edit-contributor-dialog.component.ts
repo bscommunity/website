@@ -66,14 +66,10 @@ export class EditContributorDialogComponent {
 	readonly isLoading = signal(false);
 
 	roles = signal(
-		new Map([[this.data.contributor.user.id, this.data.contributor.roles]]),
+		new Map([[this.data.contributor.user.id, [this.data.contributor.role]]]),
 	);
 	isEqual = computed(() =>
-		compareArrays(
-			this.data.contributor.roles,
-			this.roles().get(this.data.contributor.user.id) || [],
-			elementToKey,
-		),
+		this.data.contributor.role === (this.roles().get(this.data.contributor.user.id) || [])[0],
 	);
 
 	async onSubmit(): Promise<void> {
@@ -82,11 +78,12 @@ export class EditContributorDialogComponent {
 		try {
 			this.isLoading.update(() => true);
 
-			await this.contributorService.updateContributor(
-				this.data.chartId,
-				this.data.contributor.user.id,
-				this.roles().get(this.data.contributor.user.id) || [],
-			);
+		const role = (this.roles().get(this.data.contributor.user.id) || [])[0];
+		await this.contributorService.updateContributor(
+			this.data.chartId,
+			this.data.contributor.user.id,
+			role,
+		);
 
 			// Close the dialog
 			this.dialogRef.close();

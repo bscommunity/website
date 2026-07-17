@@ -1,7 +1,7 @@
-import { Injectable, signal, computed } from "@angular/core";
-import {
-	ReleaseNoteResponse,
+import { computed, Injectable, signal } from "@angular/core";
+import type {
 	ReleaseNote,
+	ReleaseNoteResponse,
 } from "@/components/release-template/release-template.component";
 
 export interface ReleaseTag {
@@ -17,7 +17,7 @@ export interface LatestReleaseTags {
 @Injectable({
 	providedIn: "root",
 })
-export class ChangelogService {
+export class ReleaseNoteService {
 	releaseNotes = signal<ReleaseNote[]>([]);
 	latestReleaseTags = computed(() => {
 		const notes = this.releaseNotes();
@@ -47,7 +47,6 @@ export class ChangelogService {
 	}
 
 	async fetchReleaseNotes() {
-		// If already loaded, skip
 		if (this.releaseNotes().length > 0) return;
 
 		try {
@@ -82,11 +81,8 @@ export class ChangelogService {
 					.filter((line) => line.trim().startsWith("- fix:"))
 					.map((line) => line.replace(/^- fix:\s*/, "").trim());
 
-				// Parse tags
 				const tags: ReleaseTag[] = [];
-				const tagsIndex = lines.findIndex(
-					(line) => line.trim() === "## Tags:",
-				);
+				const tagsIndex = lines.findIndex((line) => line.trim() === "## Tags:");
 				if (tagsIndex !== -1) {
 					const tagsLines = lines.slice(tagsIndex + 1);
 					let currentTag: ReleaseTag | null = null;
@@ -100,11 +96,7 @@ export class ChangelogService {
 								name: trimmed.replace("### ", ""),
 								description: "",
 							};
-						} else if (
-							currentTag &&
-							trimmed &&
-							!trimmed.startsWith("##")
-						) {
+						} else if (currentTag && trimmed && !trimmed.startsWith("##")) {
 							currentTag.description = trimmed;
 						}
 					}

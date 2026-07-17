@@ -189,7 +189,7 @@ export class AddContributorDialogComponent {
 				this.data.chartId,
 				this.poolUsers.map((user) => ({
 					userId: user.id,
-					roles: this.roles().get(user.id) || [],
+					role: (this.roles().get(user.id) || [])[0],
 				})),
 			);
 

@@ -1,25 +1,25 @@
-<app-chart-section class="w-full" title="Known Issues">
+<app-chart-section class="w-full" title="Changelog">
 	<ul
 		class="flex flex-col items-start justify-start w-full rounded-lg bg-surface-container border border-inverse-on-surface overflow-hidden"
 	>
-		@if (issues().length > 0) {
-			@for (issue of issues(); track $index) {
+		@if (entries().length > 0) {
+			@for (entry of entries(); track $index) {
 				<li
 					class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm"
 					[ngClass]="{
 						'border-b border-b-inverse-on-surface':
-							$index !== issues().length - 1,
+							$index !== entries().length - 1,
 					}"
 				>
-					<span>• {{ issue.description }}</span>
+					<span>• {{ entry.description }}</span>
 					<div class="flex flex-row items-center justify-end gap-2">
 						<button
 							mat-icon-button
-							matTooltip="Close issue"
+							matTooltip="Close entry"
 							matTooltipPosition="above"
 							matTooltipShowDelay="375"
 							matTooltipClass="!text-sm"
-							(click)="openRemoveIssueConfirmationDialog(issue)"
+							(click)="openRemoveEntryConfirmationDialog(entry)"
 						>
 							<span
 								class="text-lg align-middle flex items-center justify-center self-center leading-none select-none"
@@ -38,40 +38,40 @@
 					><mat-icon inline>airwave</mat-icon></span
 				>
 				<h1 class="text-base font-medium">
-					There are currently no known issues
+					There are currently no changelog entries
 				</h1>
 				<p class="text-sm text-center">
-					New added issues will be listed here
+					New entries will be listed here
 				</p>
 			</div>
 		}
-		@if (addIssueInputVisible()) {
+		@if (addEntryInputVisible()) {
 			<li
 				class="flex flex-row items-center justify-between w-full gap-2 font-normal px-4 py-2 text-sm border-t border-t-inverse-on-surface"
 			>
 				<span class="w-full animate-pulse">
 					•
 					<input
-						id="addIssue"
+						id="addEntry"
 						class="bg-transparent outline-none border-none w-3/4"
-						[(ngModel)]="newIssue"
-						(keydown.enter)="addIssue()"
+						[(ngModel)]="newEntry"
+						(keydown.enter)="addEntry()"
 						type="text"
-						placeholder="Describe the issue..."
+						placeholder="Describe the entry..."
 				/></span>
 				<div class="flex flex-row items-center justify-end gap-2">
 					<button
 						mat-raised-button
 						class="!bg-transparent"
 						[disabled]="isLoading"
-						(click)="cancelAddIssue()"
+						(click)="cancelAddEntry()"
 					>
 						Cancel
 					</button>
 					<button
 						mat-raised-button
 						[disabled]="isLoading"
-						(click)="addIssue()"
+						(click)="addEntry()"
 					>
 						@if (isLoading) {
 							<mat-progress-spinner
@@ -91,11 +91,11 @@
 			</li>
 		}
 	</ul>
-	@if (!addIssueInputVisible()) {
+	@if (!addEntryInputVisible()) {
 		<span class="flex items-center justify-end w-full">
-			<button mat-stroked-button (click)="addIssueInputVisible.set(true)">
+			<button mat-stroked-button (click)="addEntryInputVisible.set(true)">
 				<mat-icon>add_playlist</mat-icon>
-				Add new issue
+				Add new entry
 			</button>
 		</span>
 	}

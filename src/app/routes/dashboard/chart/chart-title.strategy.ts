@@ -20,7 +20,7 @@ export class ChartTitleStrategy extends TitleStrategy {
 				"chart"
 			] as ChartModel;
 			if (chart && chart.track) {
-				this.title.setTitle(chart.track);
+				this.title.setTitle(chart.track.title);
 			} else {
 				this.title.setTitle("Chart");
 			}

@@ -4,16 +4,16 @@ import { Component, OnInit, inject } from "@angular/core";
 import { ReleaseTemplateComponent } from "@/components/release-template/release-template.component";
 
 // Services
-import { ChangelogService } from "@/services/changelog.service";
+import { ReleaseNoteService } from "@/services/release-note.service";
 
 @Component({
 	selector: "app-release-notes",
 	imports: [ReleaseTemplateComponent],
-	templateUrl: "./changelog.html",
+	templateUrl: "./release-notes.html",
 })
-export class Changelog implements OnInit {
-	changelogService = inject(ChangelogService);
-	releaseNotes = this.changelogService.releaseNotes;
+export class ReleaseNotes implements OnInit {
+	releaseNoteService = inject(ReleaseNoteService);
+	releaseNotes = this.releaseNoteService.releaseNotes;
 
 	releaseEmojis = ["🎉", "🎉", "✨", "🚀", "🥳", "🥳", "🆕", "😎", "😎"];
 
@@ -25,6 +25,6 @@ export class Changelog implements OnInit {
 	}
 
 	ngOnInit() {
-		this.changelogService.fetchReleaseNotes();
+		this.releaseNoteService.fetchReleaseNotes();
 	}
 }

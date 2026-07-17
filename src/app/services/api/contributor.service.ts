@@ -46,14 +46,14 @@ export class ContributorService {
 	async updateContributor(
 		chartId: string,
 		userId: string,
-		roles: ContributorRole[],
+		role: ContributorRole,
 	): Promise<ContributorModel> {
 		console.log("Updating contributor with id:", userId);
 		const updatedContributor = await firstValueFrom(
 			this.http.put<ContributorModel>(
 				`${this.apiUrl}/${chartId}/contributors/${userId}`,
 				{
-					roles,
+					role,
 				},
 			),
 		);

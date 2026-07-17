@@ -1,27 +1,24 @@
+// CDK
+import {
+	CdkDrag,
+	type CdkDragDrop,
+	CdkDragHandle,
+	CdkDropList,
+	moveItemInArray,
+} from "@angular/cdk/drag-drop";
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-
+import { MatButtonModule } from "@angular/material/button";
 // Material
 import {
 	MAT_DIALOG_DATA,
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
-
-// CDK
-import {
-	CdkDrag,
-	CdkDropList,
-	CdkDragHandle,
-	CdkDragDrop,
-	moveItemInArray,
-} from "@angular/cdk/drag-drop";
-
-// Types
-import { type DialogData } from "@/services/publish/publish.service";
 import type { ChartModel } from "@/models/chart.model";
-import { type TourPassFormData } from "@/services/publish/handlers/tourpass-publish.handler";
+import type { TourPassFormData } from "@/services/publish/handlers/tourpass-publish.handler";
+// Types
+import type { DialogData } from "@/services/publish/publish.service";
 
 @Component({
 	selector: "app-publish-tourpass-reorder",
@@ -57,18 +54,18 @@ import { type TourPassFormData } from "@/services/publish/handlers/tourpass-publ
 								</div>
 								<div class="flex items-center gap-3 flex-1">
 									<img
-										[src]="chart.coverUrl"
+										[src]="chart.track.coverUrl"
 										alt="Cover"
 										class="w-12 h-12 rounded-md object-cover"
 									/>
 									<div class="flex flex-col">
 										<p class="font-medium">
-											{{ chart.track }}
+											{{ chart.track.title }}
 										</p>
 										<p
 											class="text-sm text-on-surface-variant"
 										>
-											{{ chart.artist }}
+											{{ chart.track.artist }}
 										</p>
 									</div>
 								</div>
@@ -113,9 +110,7 @@ export class PublishTourPassReorderComponent {
 		inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef);
 	data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
 
-	selectedCharts: ChartModel[] = [
-		...(this.data.formData.selectedCharts || []),
-	];
+	selectedCharts: ChartModel[] = [...(this.data.formData.selectedCharts || [])];
 
 	drop(event: CdkDragDrop<ChartModel[]>) {
 		moveItemInArray(

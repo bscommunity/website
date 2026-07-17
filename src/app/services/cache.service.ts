@@ -8,7 +8,7 @@ import { CookieService } from "./cookie.service";
 import { ChartModel } from "@/models/chart.model";
 import { ContributorModel } from "@/models/contributor.model";
 import { VersionModel } from "@/models/version.model";
-import { KnownIssueModel } from "@/models/known-issue.model";
+
 import { SortOption } from "@/models/enums/sort-option.enum";
 import { WorkshopFilters } from "./filter.service";
 
@@ -423,83 +423,25 @@ export class CacheService {
 			return;
 		}
 
-		const versions = chart.versions || [];
-
-		versions.push(version);
-
 		this.storageService.setItem(
 			`chart_${id}`,
 			JSON.stringify({
 				...chart,
-				versions,
+				latestVersion: version,
+				versionsCount: chart.versionsCount + 1,
 			}),
 		);
 	}
 
-	removeVersion(id: string, versionId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.versions) {
-			return;
-		}
-
-		const updatedVersions = chart.versions.filter(
-			(version) => version.id !== versionId,
-		);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions: updatedVersions,
-			}),
-		);
-	}
-
-	// Known Issues
-
-	addIssue(id: string, knownIssue: KnownIssueModel): void {
+	removeVersion(id: string, _versionId: string): void {
 		const chart = this.getChart(id);
 
 		if (!chart) {
 			return;
 		}
 
-		const versions = chart.versions || [];
-		versions[0]?.changelog.push(knownIssue);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions,
-			}),
-		);
-	}
-
-	removeIssue(id: string, logId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.versions) {
-			return;
-		}
-
-		const updatedVersions = chart.versions.map((version) => {
-			return {
-				...version,
-				changelog: version.changelog.filter(
-					(issue) => issue.id !== logId,
-				),
-			};
-		});
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions: updatedVersions,
-			}),
-		);
+		// Can't determine the new latestVersion without a re-fetch
+		this.removeChart(id);
 	}
 
 	clearCache(): void {

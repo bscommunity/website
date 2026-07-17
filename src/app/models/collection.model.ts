@@ -1,16 +1,25 @@
 import { z } from "zod";
-import { Chart } from "./chart.model";
+
+// Enums
+import { CollectionKind } from "./enums/collection-kind.enum";
+
+// Models
+import { SimplifiedUser } from "./user.model";
 
 export const Collection = z.object({
 	id: z.string(),
 	userId: z.string(),
+	kind: z.nativeEnum(CollectionKind),
 	name: z.string(),
+	slug: z.string().optional().nullable(),
 	isPublic: z.boolean(),
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
-	items: z.array(Chart),
 	coverUrl: z.string().optional().nullable(),
-	itemCount: z.number(),
+	chartCount: z.number().int(),
+	tourPassCount: z.number().int(),
+	themeCount: z.number().int(),
+	owner: SimplifiedUser.optional().nullable(),
 });
 
 export type CollectionModel = z.infer<typeof Collection>;

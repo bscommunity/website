@@ -1,23 +1,44 @@
-import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { firstValueFrom, Observable, of, shareReplay, tap } from "rxjs";
-
-// Services
-import { CacheService } from "../cache.service";
-import type { STORAGE } from "../cache.service";
-import { StorageService } from "../storage.service";
-import type { WorkshopFilters } from "../filter.service";
-
+import { Injectable, inject } from "@angular/core";
+import { firstValueFrom, type Observable, of, shareReplay, tap } from "rxjs";
+import { apiUrl } from "@/lib/api";
 // Models
 import {
 	Chart,
-	ChartModel,
-	CreateChartModel,
-	MutateChartModel,
+	type ChartModel,
+	type MutateChartModel,
 } from "@/models/chart.model";
-
-import { apiUrl } from "@/lib/api";
+// Enums
+import type { Difficulty } from "@/models/enums/difficulty.enum";
+import type { Genre } from "@/models/enums/genre.enum";
 import { SortOption } from "@/models/enums/sort-option.enum";
+import type { StreamingLinkModel } from "@/models/streaming-link.model";
+import type { STORAGE } from "../cache.service";
+// Services
+import { CacheService } from "../cache.service";
+import type { WorkshopFilters } from "../filter.service";
+import { StorageService } from "../storage.service";
+
+export interface CreateChartPayload {
+	artist: string;
+	track: string;
+	album: string | null;
+	trackUrls: StreamingLinkModel[];
+	previewUrl?: string | null;
+	trackPreviewUrl?: string | null;
+	coverUrl?: string | null;
+	genre?: Genre | null;
+	isExplicit: boolean;
+	duration: number;
+	notesAmount: number;
+	effectsAmount: number;
+	bpm?: number | null;
+	difficulty: Difficulty;
+	isDeluxe: boolean;
+	bundleUrl?: string;
+	fileSizeBytes?: number;
+	chartBundle?: File;
+}
 
 interface ChartsResponse {
 	first: ChartModel[];
@@ -69,7 +90,7 @@ export class ChartService {
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Create
-	async createChart(chart: CreateChartModel): Promise<ChartModel> {
+	async createChart(chart: CreateChartPayload, publishSessionId?: string): Promise<ChartModel> {
 		const formData = new FormData();
 
 		// Append the chart data as a JSON string under the "chart" key
@@ -81,8 +102,13 @@ export class ChartService {
 			formData.append("bundle", chartBundle);
 		}
 
+		const headers: Record<string, string> = {};
+		if (publishSessionId) {
+			headers["X-Publish-Session-Id"] = publishSessionId;
+		}
+
 		const createdChart = await firstValueFrom(
-			this.http.post<ChartModel>(this.apiUrl, formData),
+			this.http.post<ChartModel>(this.apiUrl, formData, { headers }),
 		);
 
 		this.cacheService.addChart(createdChart);
@@ -125,9 +151,7 @@ export class ChartService {
 		const isDefaultQuery = this.cacheService.isDefaultFilters(filters);
 		const isDashboardRequest = options?.isDashboard ?? false;
 		// Public (workshop) and private (dashboard) screens decide caching very differently.
-		const cacheScope: CacheScope = isDashboardRequest
-			? "private"
-			: "public";
+		const cacheScope: CacheScope = isDashboardRequest ? "private" : "public";
 		const scopeStrategy = CACHE_SCOPE_STRATEGIES[cacheScope];
 		const defaultStorage = scopeStrategy?.defaultStorage ?? "session";
 		// Callers can override storage, but otherwise we follow the scope strategy
@@ -139,9 +163,7 @@ export class ChartService {
 				: defaultStorage);
 		const baseCacheKey = this.generateCacheKey(filters);
 		const cacheKey =
-			cacheScope === "public"
-				? baseCacheKey
-				: `${baseCacheKey}_${cacheScope}`;
+			cacheScope === "public" ? baseCacheKey : `${baseCacheKey}_${cacheScope}`;
 		const canReadCache = !options?.disableCache;
 		const isPaginated = Boolean(options?.limit);
 		const pageKey =
@@ -167,10 +189,7 @@ export class ChartService {
 					});
 				}
 			} else {
-				const cachedPayload = this.getStoredChartsCache(
-					cacheKey,
-					storageType,
-				);
+				const cachedPayload = this.getStoredChartsCache(cacheKey, storageType);
 
 				if (cachedPayload) {
 					if (isPaginated && pageKey) {
@@ -218,8 +237,7 @@ export class ChartService {
 			params = params.set("sortBy", filters.sortBy);
 		}
 
-		if (options?.limit)
-			params = params.set("limit", options.limit.toString());
+		if (options?.limit) params = params.set("limit", options.limit.toString());
 		if (options?.offset)
 			params = params.set("offset", options.offset.toString());
 		if (options?.isDashboard) {
@@ -267,10 +285,7 @@ export class ChartService {
 				}
 
 				if (cacheScope === "public") {
-					this.cacheService.addCharts(
-						fetchedCharts.first,
-						storageType,
-					);
+					this.cacheService.addCharts(fetchedCharts.first, storageType);
 				}
 			}),
 			shareReplay({ bufferSize: 1, refCount: true }),
@@ -314,11 +329,15 @@ export class ChartService {
 		return this.http.get<ChartModel>(`${this.apiUrl}/${id}`);
 	}
 
+	async getBundleUrl(id: string): Promise<string> {
+		const response = await firstValueFrom(
+			this.http.get<{ url: string }>(`${this.apiUrl}/${id}/bundle`),
+		);
+		return response.url;
+	}
+
 	// Update
-	async updateChart(
-		id: string,
-		chart: MutateChartModel,
-	): Promise<ChartModel> {
+	async updateChart(id: string, chart: MutateChartModel): Promise<ChartModel> {
 		const updatedChart = await firstValueFrom(
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
@@ -415,8 +434,7 @@ export class ChartService {
 		filters?: WorkshopFilters,
 	): void {
 		const existing =
-			this.getStoredChartsCache(key, storage) ||
-			({} as CachedChartsPayload);
+			this.getStoredChartsCache(key, storage) || ({} as CachedChartsPayload);
 		const pages = existing.pages ? { ...existing.pages } : {};
 		pages[pageKey] = response.first;
 
@@ -456,9 +474,7 @@ export class ChartService {
 	): void {
 		this.mutateTrackedCaches(scope, (payload) => {
 			if (!this.chartMatchesFilters(chart, payload.filters)) {
-				const filtered = payload.first.filter(
-					(entry) => entry.id !== chart.id,
-				);
+				const filtered = payload.first.filter((entry) => entry.id !== chart.id);
 				if (filtered.length === payload.first.length) {
 					return payload;
 				}
@@ -543,10 +559,7 @@ export class ChartService {
 
 			const result = mutator(clonedPayload);
 			if (!result) {
-				this.storageService.removeItem(
-					entry.key,
-					entry.storage === "session",
-				);
+				this.storageService.removeItem(entry.key, entry.storage === "session");
 				return;
 			}
 
@@ -600,9 +613,7 @@ export class ChartService {
 		try {
 			const parsed = JSON.parse(stored);
 			if (Array.isArray(parsed)) {
-				return parsed.filter((entry) =>
-					this.isValidTrackedEntry(entry),
-				);
+				return parsed.filter((entry) => this.isValidTrackedEntry(entry));
 			}
 		} catch {
 			this.storageService.removeItem(indexKey);
@@ -627,9 +638,7 @@ export class ChartService {
 				}
 
 				const alreadyTracked = collection.some(
-					(saved) =>
-						saved.key === entry.key &&
-						saved.storage === entry.storage,
+					(saved) => saved.key === entry.key && saved.storage === entry.storage,
 				);
 				if (!alreadyTracked) {
 					collection.push(entry);
@@ -676,54 +685,44 @@ export class ChartService {
 
 		const normalizedQuery = filters.query?.trim().toLowerCase();
 		if (normalizedQuery) {
-			const haystack = `${chart.artist} ${chart.track}`.toLowerCase();
+			const haystack =
+				`${chart.track.artist} ${chart.track.title}`.toLowerCase();
 			if (!haystack.includes(normalizedQuery)) {
 				return false;
 			}
 		}
 
 		if (filters.genres?.length) {
-			if (!chart.genre || !filters.genres.includes(chart.genre)) {
+			if (!chart.track.genre || !filters.genres.includes(chart.track.genre)) {
 				return false;
 			}
 		}
 
 		if (filters.difficulties?.length) {
 			const difficultySet = new Set(filters.difficulties);
-			const matchesDifficulty = chart.versions?.some((version) =>
-				difficultySet.has(version.difficulty),
-			);
-			if (!matchesDifficulty) {
+			if (chart.difficulty == null || !difficultySet.has(chart.difficulty)) {
 				return false;
 			}
 		}
 
 		const wantsDeluxe = Boolean(
 			filters.versions?.includes("Deluxe") ||
-			filters.categories?.includes("Deluxe"),
+				filters.categories?.includes("Deluxe"),
 		);
-		if (wantsDeluxe) {
-			const hasDeluxe = chart.versions?.some(
-				(version) => version.isDeluxe,
-			);
-			if (!hasDeluxe) {
-				return false;
-			}
+		if (wantsDeluxe && !chart.isDeluxe) {
+			return false;
 		}
 
 		return true;
 	}
 
-	private sortChartsByOption(
-		charts: ChartModel[],
-		sortBy?: SortOption,
-	): void {
+	private sortChartsByOption(charts: ChartModel[], sortBy?: SortOption): void {
 		switch (sortBy) {
 			case SortOption.LAST_UPDATED:
 				charts.sort(
 					(a, b) =>
-						this.toTimestamp(b.updatedAt) -
-						this.toTimestamp(a.updatedAt),
+						this.toTimestamp(b.latestVersion?.createdAt) -
+						this.toTimestamp(a.latestVersion?.createdAt),
 				);
 				break;
 			case SortOption.MOST_DOWNLOADED:

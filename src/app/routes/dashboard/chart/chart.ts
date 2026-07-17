@@ -9,7 +9,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { AsideComponent } from "./subcomponents/aside/aside.component";
-import { changelogComponent } from "./sections/known-issues/known-issues.component";
+import { ChangelogComponent } from "./sections/changelog/changelog.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
 import { PageError } from "../../error/error";
@@ -32,7 +32,7 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 		MatIconModule,
 		MatTooltipModule,
 		AsideComponent,
-		changelogComponent,
+		ChangelogComponent,
 		ContributorsComponent,
 		DangerZoneComponent,
 		VersionsComponent,
@@ -64,16 +64,16 @@ export class Chart implements OnInit {
 			this.chart = this.route.snapshot.data["chart"];
 			console.warn("Chart data", this.chart);
 
-			if (!this.chart?.versions || !this.chart.contributors) {
+			if (!this.chart.contributors) {
 				console.error("Chart data is incomplete", this.chart);
 				this.router.navigate(["error"], {
 					state: { error: "Chart data is incomplete" },
 				});
 			}
 
-			if (this.chart.latestVersion) {
+			if (this.chart.difficulty) {
 				this.difficultyIcon = getDifficultyIcon(
-					this.chart.latestVersion.difficulty,
+					this.chart.difficulty,
 				);
 			}
 		});

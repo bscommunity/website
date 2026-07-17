@@ -223,7 +223,7 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 
 	get totalDurationLabel(): string {
 		const totalSeconds = this.selectedCharts.reduce((sum, chart) => {
-			const duration = chart.latestVersion?.duration || 0;
+			const duration = chart.track?.duration || 0;
 			return sum + duration;
 		}, 0);
 		return transformDuration(totalSeconds);
@@ -232,7 +232,7 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 	get estimatedDifficultyLabel(): string {
 		if (this.selectedCharts.length === 0) return "No difficulty yet";
 		const totalScore = this.selectedCharts.reduce((sum, chart) => {
-			const difficulty = chart.latestVersion?.difficulty;
+			const difficulty = chart.difficulty;
 			if (difficulty === "HARD") return sum + 2;
 			if (difficulty === "EXTREME") return sum + 3;
 			return sum + 1;
@@ -247,7 +247,7 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 		if (this.selectedCharts.length === 0) return "";
 		const counts = new Map<string, number>();
 		this.selectedCharts.forEach((chart) => {
-			const artist = chart.artist || "";
+			const artist = chart.track?.artist || "";
 			if (!artist) return;
 			counts.set(artist, (counts.get(artist) || 0) + 1);
 		});

@@ -126,10 +126,10 @@ export class ContributorsComponent {
 					</div> ${item.user.username}<span />`,
 		},
 		{
-			columnDef: "roles",
-			header: "Roles",
+			columnDef: "role",
+			header: "Role",
 			cell: (item: ContributorModel) =>
-				`${item.roles.map((role) => getContributorRoleLabel(role)).join(", ")}`,
+				`${getContributorRoleLabel(item.role)}`,
 		},
 	];
 
@@ -145,7 +145,7 @@ export class ContributorsComponent {
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
 			disabled: (_, item: ContributorModel) =>
-				item.roles.includes(ContributorRole.AUTHOR),
+				item.role === ContributorRole.AUTHOR,
 		},
 	];
 }

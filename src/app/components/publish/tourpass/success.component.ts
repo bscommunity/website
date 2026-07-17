@@ -18,11 +18,6 @@ import type { TourPassModel } from "@/models/tour-pass.model";
 		<mat-dialog-content class="mat-typography flex! flex-col gap-4">
 			<p>Your tour pass was submitted successfully.</p>
 			<div class="flex items-center gap-4">
-				<img
-					[src]="data.coverUrl"
-					alt="Cover"
-					class="w-16 h-16 rounded-lg object-cover"
-				/>
 				<div class="flex flex-col">
 					<p class="text-base font-semibold">{{ data.name }}</p>
 					@if (data.description) {

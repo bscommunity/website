@@ -43,9 +43,7 @@ export class ChartContributorsComponent {
 	}
 
 	getRolesString(contributor: ContributorModel): string {
-		return contributor.roles
-			.map((r) => getContributorRoleLabel(r))
-			.join(", ");
+		return getContributorRoleLabel(contributor.role);
 	}
 
 	getChartByString(): string {

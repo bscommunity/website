@@ -15,109 +15,103 @@ import { ChartSectionComponent } from "../../subcomponents/chart-section.compone
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 
 // Services
-import { changelogervice } from "@/services/api/known-issue.service";
+import { ChangelogService } from "@/services/api/changelog.service";
 
 // Types
-import { KnownIssueModel } from "@/models/known-issue.model";
+import { ChangelogModel } from "@/models/changelog.model";
 
 @Component({
-	selector: "app-chart-known-issues-section",
+	selector: "app-chart-changelog-section",
 	imports: [
-		// Modules
 		CommonModule,
 		MatIconModule,
 		MatTooltipModule,
 		MatButtonModule,
 		MatProgressSpinnerModule,
 		FormsModule,
-		// Components
 		ChartSectionComponent,
 	],
-	templateUrl: "./known-issues.component.html",
+	templateUrl: "./changelog.component.html",
 })
-export class changelogComponent {
+export class ChangelogComponent {
 	readonly chartId = input.required<string>();
-	readonly issues = model.required<KnownIssueModel[]>();
+	readonly entries = model.required<ChangelogModel[]>();
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
-	readonly changelogervice = inject(changelogervice);
+	readonly changelogService = inject(ChangelogService);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
 	}
 
-	openRemoveIssueConfirmationDialog(issue: KnownIssueModel): void {
-		console.log("Removing issue", issue);
+	openRemoveEntryConfirmationDialog(entry: ChangelogModel): void {
+		console.log("Removing changelog entry", entry);
 
 		const operation = async () => {
-			const result = await this.changelogervice.deleteKnownIssue(
+			const result = await this.changelogService.deleteEntry(
 				this.chartId(),
-				issue.id,
+				entry.id,
 			);
 
 			if (!result) {
 				throw new Error("An error occurred");
 			}
 
-			this.removeIssueFromTable(issue);
+			this.removeEntryFromTable(entry);
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
 			data: {
-				title: "Remove Issue",
+				title: "Remove Entry",
 				description:
-					"Are you sure you want to remove this issue? It will not appear as solved for other users.",
-				success: "Issue removed with success!",
+					"Are you sure you want to remove this changelog entry? It will not appear as solved for other users.",
+				success: "Entry removed with success!",
 				operation,
 			},
 		});
 	}
 
-	readonly addIssueInputVisible = signal(false);
+	readonly addEntryInputVisible = signal(false);
 	isLoading = false;
-	newIssue = "";
+	newEntry = "";
 
-	cancelAddIssue() {
-		this.addIssueInputVisible.set(false);
-		this.newIssue = "";
+	cancelAddEntry() {
+		this.addEntryInputVisible.set(false);
+		this.newEntry = "";
 	}
 
-	async addIssue() {
-		if (this.newIssue.length === 0) {
-			this.openSnackBar("Issue cannot be empty", "Close");
+	async addEntry() {
+		if (this.newEntry.length === 0) {
+			this.openSnackBar("Entry cannot be empty", "Close");
 			return;
 		}
 
 		this.isLoading = true;
 
 		try {
-			// Send issue to the server
-			const result = await this.changelogervice.addIssue(this.chartId(), {
-				description: this.newIssue,
+			const result = await this.changelogService.addEntry(this.chartId(), {
+				description: this.newEntry,
 			});
 
 			if (!result) {
 				throw new Error("An error occurred");
 			}
 
-			this.issues.update((issues) => [
-				...issues,
+			this.entries.update((entries) => [
+				...entries,
 				{
 					id: result.id,
-					description: this.newIssue,
+					description: this.newEntry,
 					createdAt: new Date(),
 				},
 			]);
 
-			// TODO: Manually trigger change detection?
+			this.newEntry = "";
+			this.addEntryInputVisible.set(false);
 
-			// Reset input
-			this.newIssue = "";
-			this.addIssueInputVisible.set(false);
-
-			this.openSnackBar("Issue added with success!", "Close");
+			this.openSnackBar("Entry added with success!", "Close");
 
 			this.isLoading = false;
 		} catch (error) {
@@ -126,8 +120,7 @@ export class changelogComponent {
 		}
 	}
 
-	removeIssueFromTable(issue: KnownIssueModel) {
-		this.issues.update((issues) => issues.filter((i) => i.id !== issue.id));
-		// TODO: Manually trigger change detection?
+	removeEntryFromTable(entry: ChangelogModel) {
+		this.entries.update((entries) => entries.filter((e) => e.id !== entry.id));
 	}
 }

@@ -39,12 +39,9 @@ import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
-import {
-	ActivityType,
-	type SimplifiedUserModel,
-	UserActivityItem,
-	UserProfileResponseModel,
-} from "@/models/user.model";
+import { type SimplifiedUserModel, UserProfileResponseModel } from "@/models/user.model";
+import { ActivityType } from "@/models/enums/activity-type.enum";
+import type { UserActivityItem } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
 import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 import { ShareService } from "@/services/share.service";
@@ -542,10 +539,22 @@ export class Profile implements OnInit, OnDestroy {
 		switch (type) {
 			case ActivityType.CREATED_CHART:
 				return `created ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.CREATED_TOUR_PASS:
+				return `created ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.CREATED_THEME:
+				return `created ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.LIKED_CHART:
 				return `liked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.LIKED_TOUR_PASS:
+				return `liked ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.LIKED_THEME:
+				return `liked ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.BOOKMARKED_CHART:
 				return `bookmarked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.BOOKMARKED_TOUR_PASS:
+				return `bookmarked ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.BOOKMARKED_THEME:
+				return `bookmarked ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.FOLLOWED_USER:
 				return `followed ${count} user${count > 1 ? "s" : ""}`;
 		}
@@ -624,8 +633,14 @@ export class Profile implements OnInit, OnDestroy {
 
 			const orderedTypes: ActivityType[] = [
 				ActivityType.CREATED_CHART,
+				ActivityType.CREATED_TOUR_PASS,
+				ActivityType.CREATED_THEME,
 				ActivityType.LIKED_CHART,
+				ActivityType.LIKED_TOUR_PASS,
+				ActivityType.LIKED_THEME,
 				ActivityType.BOOKMARKED_CHART,
+				ActivityType.BOOKMARKED_TOUR_PASS,
+				ActivityType.BOOKMARKED_THEME,
 				ActivityType.FOLLOWED_USER,
 			];
 

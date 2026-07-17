@@ -13,7 +13,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { LandingTagComponent } from "./subcomponents/tag.component";
 
 // Services
-import { ChangelogService } from "@/services/changelog.service";
+import { ReleaseNoteService } from "@/services/release-note.service";
 
 @Component({
 	selector: "app-landing",
@@ -29,8 +29,8 @@ import { ChangelogService } from "@/services/changelog.service";
 	templateUrl: "./landing.html",
 })
 export class LandingComponent {
-	changelogService = inject(ChangelogService);
-	latestReleaseTags = this.changelogService.latestReleaseTags;
+	releaseNoteService = inject(ReleaseNoteService);
+	latestReleaseTags = this.releaseNoteService.latestReleaseTags;
 
 	isDebugMode = false;
 

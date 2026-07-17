@@ -24,12 +24,11 @@ export class PageError {
 		console.log("Navigation extras", navigation?.extras);
 
 		if (navigation?.extras.state) {
-			const error = navigation.extras.state["userId"];
+			const error = navigation.extras.state["error"];
 
 			console.log("Error", error);
-			console.log("Error details", error.error.message);
 
-			this.error = error.error.message;
+			this.error = error;
 		}
 	}
 

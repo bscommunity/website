@@ -35,12 +35,12 @@ export const routes: Routes = [
 				title: "Workshop",
 			},
 			{
-				path: "changelog",
+				path: "release-notes",
 				loadComponent: () =>
-					import("./routes/public/changelog/changelog").then(
-						(m) => m.Changelog,
+					import("./routes/public/release-notes/release-notes").then(
+						(m) => m.ReleaseNotes,
 					),
-				title: "Changelog",
+				title: "Release Notes",
 			},
 			{
 				path: "privacy",

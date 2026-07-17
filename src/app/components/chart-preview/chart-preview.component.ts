@@ -17,6 +17,9 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 // Models
 import { ChartModel } from "@/models/chart.model";
 
+// Enums
+import { Visibility } from "@/models/enums/visibility.enum";
+
 // Libs
 import { transformDuration } from "@/lib/time";
 
@@ -62,6 +65,9 @@ export class ChartPreviewComponent {
 		null,
 	);
 
+	isNotPublic = (chart: ChartModel): boolean =>
+		chart.visibility !== Visibility.PUBLIC;
+
 	/* tendencyNeutral = Tendency.Neutral;
 	tendencyUp = Tendency.Up;
 	tendencyDown = Tendency.Down; */
@@ -71,7 +77,7 @@ export class ChartPreviewComponent {
 			event.stopPropagation();
 		}
 
-		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
+		const url = `${window.location.origin}/link/chart/${this.chart()?.id}`;
 		this.shareService.share(url);
 	}
 }

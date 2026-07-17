@@ -5,7 +5,8 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import { ActivityType, SimplifiedUserModel } from "@/models/user.model";
+import { SimplifiedUserModel } from "@/models/user.model";
+import { ActivityType } from "@/models/enums/activity-type.enum";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 export interface HistoryActivityEntry {
@@ -36,10 +37,16 @@ export class UserHistoryComponent {
 		if (!actionType) return null;
 		switch (actionType) {
 			case ActivityType.CREATED_CHART:
+			case ActivityType.CREATED_TOUR_PASS:
+			case ActivityType.CREATED_THEME:
 				return "add";
 			case ActivityType.LIKED_CHART:
+			case ActivityType.LIKED_TOUR_PASS:
+			case ActivityType.LIKED_THEME:
 				return "favorite";
 			case ActivityType.BOOKMARKED_CHART:
+			case ActivityType.BOOKMARKED_TOUR_PASS:
+			case ActivityType.BOOKMARKED_THEME:
 				return "bookmark";
 			case ActivityType.FOLLOWED_USER:
 				return "person_add";

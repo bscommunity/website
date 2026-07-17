@@ -14,6 +14,7 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Services
 import { AuthService } from "../auth.service";
+import { PublishEventService } from "./publish-event.service";
 
 // Types
 export interface DialogData<TFormData = Record<string, unknown>> {
@@ -46,6 +47,7 @@ export class PublishDialogService<
 	TSuccessData = unknown,
 > {
 	private authService = inject(AuthService);
+	private publishEventService = inject(PublishEventService);
 
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
@@ -172,13 +174,17 @@ export class PublishDialogService<
 			return;
 		}
 
+		const publishSessionId = crypto.randomUUID();
+		const progress$ = this.publishEventService.connect(publishSessionId);
+
 		// Open loading dialog
 		const loadingDialog = this.dialog.open(PublishDialogLoadingComponent, {
 			disableClose: true,
+			data: { progress$ },
 		});
 
 		try {
-			const response = await this.handler.submit(this.formData);
+			const response = await this.handler.submit(this.formData, publishSessionId);
 			loadingDialog.close();
 			const successComponent =
 				this.handler.getSuccessComponent?.() ||

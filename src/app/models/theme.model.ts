@@ -6,10 +6,9 @@ import { CatalogItemType } from "./enums/catalog-item-type.enum";
 import { Visibility } from "./enums/visibility.enum";
 
 // Models
-import { Chart } from "./chart.model";
 import { Contributor } from "./contributor.model";
 
-export const TourPass = z.object({
+export const Theme = z.object({
 	id: z.string(),
 	type: z.nativeEnum(CatalogItemType),
 	status: z.nativeEnum(CatalogItemStatus),
@@ -28,34 +27,10 @@ export const TourPass = z.object({
 	authorId: z.string().optional().nullable(),
 
 	name: z.string(),
-	description: z.string().optional().nullable(),
-	artist: z.string().optional().nullable(),
-	charts: z.array(Chart).default([]),
-	coverId: z.string().optional().nullable(),
+	replaces: z.string(),
+	displayArtUrl: z.string().optional().nullable(),
+	previewUrl: z.string().optional().nullable(),
+	coverUrl: z.string().optional().nullable(),
 });
 
-export type TourPassModel = z.infer<typeof TourPass>;
-
-export const CreateTourPass = TourPass.omit({
-	id: true,
-	type: true,
-	status: true,
-	visibility: true,
-	isFeatured: true,
-	downloadsSum: true,
-	contributors: true,
-	charts: true,
-	createdAt: true,
-	publishedAt: true,
-	updatedAt: true,
-	likedAt: true,
-	bookmarkedAt: true,
-	previewVideoId: true,
-	discordChannelId: true,
-	discordMessageId: true,
-	authorId: true,
-}).extend({
-	chartIds: z.array(z.string()).optional().nullable(),
-});
-
-export type CreateTourPassModel = z.infer<typeof CreateTourPass>;
+export type ThemeModel = z.infer<typeof Theme>;

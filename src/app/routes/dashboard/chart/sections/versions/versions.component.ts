@@ -31,7 +31,6 @@ import {
 	type CreateVersionModel,
 	type VersionModel,
 } from "@/models/version.model";
-import { CreateChartModel } from "@/models/chart.model";
 
 // Service
 import {
@@ -40,9 +39,6 @@ import {
 	initialChartFormData,
 } from "@/services/publish/handlers/chart-publish.handler";
 import { VersionService } from "@/services/api/version.service";
-
-// Types
-import { type DialogData } from "@/services/publish/publish.service";
 
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
@@ -91,9 +87,9 @@ export class VersionsComponent {
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
-			columnDef: "index",
+			columnDef: "versionCode",
 			header: "Version",
-			cell: (item: VersionModel) => `${item.index}`,
+			cell: (item: VersionModel) => `${item.versionCode}`,
 		},
 		{
 			columnDef: "publishedAt",
@@ -111,8 +107,8 @@ export class VersionsComponent {
 		{
 			description: "Download",
 			icon: "download",
-			href: (_, item) => item.bundleUrl,
-			disabled: () => false,
+			href: () => "",
+			disabled: () => true,
 		},
 		{
 			description: "Switch version",
@@ -139,7 +135,7 @@ export class VersionsComponent {
 				return (
 					versions.length === 0 ||
 					item.id !== versions[versions.length - 1].id ||
-					item.index <= 1
+					item.versionCode <= 1
 				);
 			},
 		},
@@ -160,7 +156,7 @@ export class VersionsComponent {
 					formData: { ...initialChartFormData },
 					inactive: [],
 					mode: "uploading",
-				} as DialogData<CreateChartModel>,
+				},
 			},
 		);
 
@@ -261,8 +257,8 @@ export class VersionsComponent {
 		this.versionTable().updateTableData((items) =>
 			items.map(
 				(item) =>
-					item.index > version.index
-						? { ...item, index: item.index - 1 }
+					item.versionCode > version.versionCode
+						? { ...item, versionCode: item.versionCode - 1 }
 						: item, // Keep other items unchanged
 			),
 		);
