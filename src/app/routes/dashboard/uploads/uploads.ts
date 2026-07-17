@@ -1,46 +1,48 @@
+import { AsyncPipe } from "@angular/common";
 import {
 	ChangeDetectorRef,
 	Component,
-	OnDestroy,
-	OnInit,
 	inject,
+	type OnDestroy,
+	type OnInit,
 } from "@angular/core";
-import { AsyncPipe } from "@angular/common";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
+import { MatButtonModule } from "@angular/material/button";
+import { MatDialog } from "@angular/material/dialog";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
-import { MatButtonModule } from "@angular/material/button";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+import { PublishDialogUploadingComponent } from "@/components/dialogs/uploading/uploading.component";
+import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.component";
+import { LargePanelComponent } from "@/components/panel/large-panel.component";
+import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 
 // Components
 import {
-	SelectComponent,
 	type Option,
+	SelectComponent,
 } from "@/components/select/select.component";
-import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
-import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
-import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.component";
-import { LargePanelComponent } from "@/components/panel/large-panel.component";
-import { ListSectionComponent } from "./subcomponents/list-section.component";
-
-// Models
-import { ChartModel } from "@/models/chart.model";
-
-// Services
-import { ChartService } from "@/services/api/chart.service";
-import { FilterService } from "@/services/filter.service";
-import type { WorkshopFilters } from "@/services/filter.service";
 
 // Utils
 import { convertStringToMonth } from "@/lib/time";
+
+// Models
+import type { ChartModel } from "@/models/chart.model";
 
 // Enums
 import {
 	getSortOptionLabel,
 	SortOption,
 } from "@/models/enums/sort-option.enum";
+
+// Services
+import { ChartService } from "@/services/api/chart.service";
+import type { WorkshopFilters } from "@/services/filter.service";
+import { FilterService } from "@/services/filter.service";
+import { ListSectionComponent } from "./subcomponents/list-section.component";
 
 interface ChartsByMonth {
 	name: string; // e.g., "2023-10"
@@ -205,5 +207,13 @@ export class Uploads implements OnInit, OnDestroy {
 
 	hasActiveFilters(): boolean {
 		return this.filterService.hasActiveFilters();
+	}
+
+	private dialog = inject(MatDialog);
+
+	openMock() {
+		this.dialog.open(PublishDialogUploadingComponent, {
+			width: "450px",
+		});
 	}
 }

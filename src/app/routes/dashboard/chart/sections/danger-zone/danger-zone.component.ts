@@ -4,19 +4,16 @@ import { Component, inject, input, output } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-
-// Components
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
-import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
-import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
-import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
-
-// Services
-import { ChartService } from "@/services/api/chart.service";
 import { RouterModule } from "@angular/router";
-
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 // Enums
 import { Visibility } from "@/models/enums/visibility.enum";
+// Services
+import { ChartService } from "@/services/api/chart.service";
+import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
+// Components
+import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
 
 const VISIBILITY_LABELS: Record<Visibility, string> = {
 	[Visibility.PUBLIC]: "Public",
@@ -26,8 +23,7 @@ const VISIBILITY_LABELS: Record<Visibility, string> = {
 
 const VISIBILITY_DESCRIPTIONS: Record<Visibility, string> = {
 	[Visibility.PUBLIC]: "This will make the chart visible to everyone.",
-	[Visibility.UNLISTED]:
-		"The chart will be accessible via direct link only.",
+	[Visibility.UNLISTED]: "The chart will be accessible via direct link only.",
 	[Visibility.PRIVATE]: "This will make the chart only visible to you.",
 };
 
@@ -68,6 +64,7 @@ export class DangerZoneComponent {
 				id: this.chartId(),
 				name: this.chartName(),
 			},
+			disableClose: true,
 		});
 	}
 
