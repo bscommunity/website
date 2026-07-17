@@ -1,5 +1,5 @@
 import { Injectable, inject } from "@angular/core";
-import { Observable, Subject, from, switchMap } from "rxjs";
+import { Observable, from, switchMap } from "rxjs";
 
 import { AuthService } from "../auth.service";
 import { apiUrl } from "@/lib/api";
@@ -70,7 +70,9 @@ export class PublishEventService {
 							let currentEvent = "";
 							let currentData = "";
 
-							for (const line of lines) {
+							for (const rawLine of lines) {
+								const line = rawLine.replace(/\r$/, "");
+
 								if (line.startsWith("event:")) {
 									currentEvent = line.slice(6).trim();
 								} else if (line.startsWith("data:")) {

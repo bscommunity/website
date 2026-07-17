@@ -1,5 +1,6 @@
 import {
 	ChangeDetectionStrategy,
+	ChangeDetectorRef,
 	Component,
 	DestroyRef,
 	inject,
@@ -39,6 +40,7 @@ export class PublishDialogLoadingComponent {
 	currentMessage = signal("Preparing your chart...");
 
 	private destroyRef = inject(DestroyRef);
+	private cdr = inject(ChangeDetectorRef);
 
 	constructor() {
 		const data = inject<{ progress$: Observable<PublishEvent> }>(MAT_DIALOG_DATA);
@@ -46,11 +48,16 @@ export class PublishDialogLoadingComponent {
 		data.progress$
 			?.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe({
-				next: (event) => this.currentMessage.set(event.message),
-				error: () =>
+				next: (event) => {
+					this.currentMessage.set(event.message);
+					this.cdr.markForCheck();
+				},
+				error: () => {
 					this.currentMessage.set(
 						"Something went wrong. Please try again.",
-					),
+					);
+					this.cdr.markForCheck();
+				},
 			});
 	}
 }
