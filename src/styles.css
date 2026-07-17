@@ -161,6 +161,17 @@ body {
 	}
 }
 
+@keyframes slideOutToTop {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+}
+
 .dot {
 	width: 5px;
 	height: 5px;
@@ -175,6 +186,10 @@ body {
 
 .animate-slide-fade {
 	animation: slideUpFade 300ms ease-out;
+}
+
+.animate-slide-out {
+	animation: slideOutToTop 400ms ease-in forwards;
 }
 
 @keyframes audioWave {

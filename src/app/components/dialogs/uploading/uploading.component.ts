@@ -75,7 +75,7 @@ export class PublishDialogUploadingComponent {
 					);
 					this.showMessage.set(true);
 					this.cdr.markForCheck();
-				}, 200);
+				}, 400);
 			},
 			error: () => {
 				this.showMessage.set(false);
@@ -86,7 +86,7 @@ export class PublishDialogUploadingComponent {
 					this.currentIcon.set("error");
 					this.showMessage.set(true);
 					this.cdr.markForCheck();
-				}, 200);
+				}, 400);
 			},
 		});
 	}
