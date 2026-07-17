@@ -6,12 +6,12 @@ import { BehaviorSubject } from "rxjs";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Components
-import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
 // Services
 import { AuthService } from "../auth.service";
 import { PublishEventService } from "./publish-event.service";
 import type { PublishHandler } from "./publish-handler.interface";
+import { PublishDialogUploadingComponent } from "@/components/dialogs/uploading/uploading.component";
 
 // Types
 export interface DialogData<TFormData = Record<string, unknown>> {
@@ -70,7 +70,10 @@ export class PublishDialogService<
 		this.handlersByType = handlers;
 		if (defaultType && handlers[defaultType]) {
 			this.setHandler(
-				handlers[defaultType] as PublishHandler<TFormData, TSuccessData>,
+				handlers[defaultType] as PublishHandler<
+					TFormData,
+					TSuccessData
+				>,
 			);
 		}
 	}
@@ -118,7 +121,11 @@ export class PublishDialogService<
 			} else if (result === "next") {
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
-				if (result && typeof result === "object" && "contentType" in result) {
+				if (
+					result &&
+					typeof result === "object" &&
+					"contentType" in result
+				) {
 					this.switchHandler(String(result.contentType));
 				}
 				this.formData = { ...this.formData, ...result };
@@ -168,11 +175,14 @@ export class PublishDialogService<
 		const progress$ = this.publishEventService.connect(publishSessionId);
 
 		// Open loading dialog
-		const loadingDialog = this.dialog.open(PublishDialogLoadingComponent, {
-			disableClose: true,
-			width: "425px",
-			data: { progress$ },
-		});
+		const loadingDialog = this.dialog.open(
+			PublishDialogUploadingComponent,
+			{
+				disableClose: true,
+				width: "450px",
+				data: { progress$ },
+			},
+		);
 
 		try {
 			const response = await this.handler.submit(
@@ -181,7 +191,8 @@ export class PublishDialogService<
 			);
 			loadingDialog.close();
 			const successComponent =
-				this.handler.getSuccessComponent?.() || PublishDialogSuccessComponent;
+				this.handler.getSuccessComponent?.() ||
+				PublishDialogSuccessComponent;
 			this.dialog.open(successComponent, {
 				hasBackdrop: true,
 				disableClose: true,
@@ -192,10 +203,12 @@ export class PublishDialogService<
 			const errorMessage =
 				(error && typeof error === "object" && "statusText" in error
 					? (error as { statusText?: string }).statusText
-					: undefined) || "There was an error while submitting the content.";
+					: undefined) ||
+				"There was an error while submitting the content.";
 			const errorDetail =
 				error && typeof error === "object" && "error" in error
-					? (error as { error?: { message?: unknown } }).error?.message || error
+					? (error as { error?: { message?: unknown } }).error
+							?.message || error
 					: error;
 			this.dialog.open(ErrorDialogComponent, {
 				data: {
