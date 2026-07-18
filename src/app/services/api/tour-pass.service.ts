@@ -19,9 +19,42 @@ export class TourPassService {
 
 	private readonly apiUrl = `${apiUrl}/tourpasses`;
 
-	async createTourPass(payload: CreateTourPassModel): Promise<TourPassModel> {
+	async createTourPass(
+		payload: CreateTourPassModel & { coverFile?: File | null },
+	): Promise<TourPassModel> {
+		const { coverFile, ...tourpassData } = payload;
+
+		const formData = new FormData();
+		formData.append("tourpass", JSON.stringify(tourpassData));
+
+		if (coverFile) {
+			formData.append("cover", coverFile);
+		}
+
 		return firstValueFrom(
-			this.http.post<TourPassModel>(this.apiUrl, payload),
+			this.http.post<TourPassModel>(this.apiUrl, formData),
 		);
+	}
+
+	async updateTourPass(
+		id: string,
+		payload: Partial<CreateTourPassModel> & { coverFile?: File | null },
+	): Promise<TourPassModel> {
+		const { coverFile, ...tourpassData } = payload;
+
+		const formData = new FormData();
+		formData.append("tourpass", JSON.stringify(tourpassData));
+
+		if (coverFile) {
+			formData.append("cover", coverFile);
+		}
+
+		return firstValueFrom(
+			this.http.put<TourPassModel>(`${this.apiUrl}/${id}`, formData),
+		);
+	}
+
+	async deleteTourPass(id: string): Promise<void> {
+		await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
 	}
 }

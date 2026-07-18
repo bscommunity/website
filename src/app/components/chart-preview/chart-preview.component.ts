@@ -1,10 +1,9 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, inject, input } from "@angular/core";
+import { Component, computed, inject, input, output } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 // Material
 import { MatIconModule } from "@angular/material/icon";
-import { MatSnackBar } from "@angular/material/snack-bar";
 import { ShareService } from "@/services/share.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
@@ -22,6 +21,7 @@ import { Visibility } from "@/models/enums/visibility.enum";
 
 // Libs
 import { transformDuration } from "@/lib/time";
+import { twMerge } from "tailwind-merge";
 
 export enum Tendency {
 	Up = "up",
@@ -45,9 +45,16 @@ export enum Tendency {
 })
 export class ChartPreviewComponent {
 	chart = input.required<ChartModel>();
-	size = input<"small" | "medium" | "large">("medium");
+	size = input<"small" | "default">("default");
+	class = input<string | null>(null);
 
-	private _snackBar = inject(MatSnackBar);
+	readonly hostClasses = computed(() =>
+		twMerge(
+			"flex flex-row items-start justify-center gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant/50 rounded-xl p-4 cursor-pointer group relative",
+			this.class(),
+		),
+	);
+
 	private shareService = inject(ShareService);
 
 	readonly contributorsNames = (chart: ChartModel) =>

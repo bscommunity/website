@@ -1,5 +1,5 @@
 <a
-	class="flex flex-row items-start justify-center gap-4 bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border border-outline-variant/50 rounded-xl p-4 cursor-pointer group relative"
+	[class]="hostClasses()"
 	[routerLink]="routerLink()"
 	title="{{ this.chart().track.title }} - {{ this.chart().track.artist }}"
 	tabindex="0"

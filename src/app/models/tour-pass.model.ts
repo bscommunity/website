@@ -8,6 +8,7 @@ import { Visibility } from "./enums/visibility.enum";
 // Models
 import { Chart } from "./chart.model";
 import { Contributor } from "./contributor.model";
+import { StreamingLink } from "./streaming-link.model";
 
 export const TourPass = z.object({
 	id: z.string(),
@@ -55,7 +56,10 @@ export const CreateTourPass = TourPass.omit({
 	discordMessageId: true,
 	authorId: true,
 }).extend({
+	coverUrl: z.string().optional().nullable(),
+	previewUrl: z.string().optional().nullable(),
 	chartIds: z.array(z.string()).optional().nullable(),
+	playlistUrls: z.array(StreamingLink).optional().nullable(),
 });
 
 export type CreateTourPassModel = z.infer<typeof CreateTourPass>;

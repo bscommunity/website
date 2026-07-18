@@ -61,17 +61,18 @@ export class TourPassPublishHandler
 		const {
 			contentType,
 			coverFile,
-			coverUrl,
 			trailerUrl,
 			selectedCharts,
-			...payload
+			...rest
 		} = data as TourPassFormData & { contentType?: string };
 
-		const submit = {
-			...payload,
+		const payload: CreateTourPassModel & { coverFile?: File | null } = {
+			...rest,
+			previewUrl: trailerUrl || null,
 			chartIds: selectedCharts?.map((chart) => chart.id) || [],
+			coverFile: coverFile ?? null,
 		};
 
-		return this.tourPassService.createTourPass(submit as CreateTourPassModel);
+		return this.tourPassService.createTourPass(payload);
 	}
 }

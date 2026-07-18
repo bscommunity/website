@@ -7,6 +7,7 @@ import {
 	moveItemInArray,
 } from "@angular/cdk/drag-drop";
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 // Material
 import {
@@ -96,6 +97,7 @@ import type { DialogData } from "@/services/publish/publish.service";
 		</form>
 	`,
 	imports: [
+		FormsModule,
 		MatDialogModule,
 		MatButtonModule,
 		MatIconModule,
