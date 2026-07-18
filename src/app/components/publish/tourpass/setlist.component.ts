@@ -55,28 +55,6 @@ const MAX_TOURPASS_CHARTS = 18;
 					[isLoading]="isLoading"
 				></app-searchbar>
 
-				<div class="flex flex-wrap items-center gap-6">
-					<div class="flex items-center gap-2">
-						<mat-icon inline>library_music</mat-icon>
-						<span>{{ selectedCharts.length }} selected</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<mat-icon inline>music_video</mat-icon>
-						<span>~{{ totalDurationLabel }}</span>
-					</div>
-					<div class="flex items-center gap-2">
-						<mat-icon inline>local_fire_department</mat-icon>
-						<span>{{ estimatedDifficultyLabel }}</span>
-					</div>
-				</div>
-
-				<app-panel [variant]="selectionError ? 'warning' : 'info'">
-					{{
-						selectionError ||
-							"A main artist and difficulty can be estimated based on your setlist"
-					}}
-				</app-panel>
-
 				@if (isLoading) {
 					<div class="flex items-center justify-center py-6">
 						<mat-progress-spinner
@@ -111,6 +89,28 @@ const MAX_TOURPASS_CHARTS = 18;
 						}
 					</ul>
 				}
+
+				<div class="flex flex-wrap items-end w-full justify-end gap-6">
+					<div class="flex items-center gap-2">
+						<mat-icon inline>library_music</mat-icon>
+						<span>{{ selectedCharts.length }} selected</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<mat-icon inline>music_video</mat-icon>
+						<span>~{{ totalDurationLabel }}</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<mat-icon inline>local_fire_department</mat-icon>
+						<span>{{ estimatedDifficultyLabel }}</span>
+					</div>
+				</div>
+
+				<app-panel [variant]="selectionError ? 'warning' : 'info'">
+					{{
+						selectionError ||
+							"A difficulty will be estimated based on the setlist"
+					}}
+				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
 				<button
