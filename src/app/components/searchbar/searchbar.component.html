@@ -1,10 +1,9 @@
 <div class="flex flex-1 relative">
-	<span class="text-xl">
-		<ng-glyph
-			name="search"
-			class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
-		/>
-	</span>
+	<ng-glyph
+		name="search"
+		size="20"
+		class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
+	/>
 	@if (enableSuggestions()) {
 		<input
 			#input

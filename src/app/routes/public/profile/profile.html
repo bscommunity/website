@@ -13,7 +13,7 @@
 	} @else if (profile() === null) {
 		<!-- Error state -->
 		<div class="flex flex-col items-center justify-center w-full py-24">
-			<ng-glyph name="error_outline" class="text-6xl text-error" />
+			<ng-glyph name="error_outline" size="60" class="text-error" />
 			<p class="mt-4 text-lg text-center">
 				Profile not found. Please check the username and try again.
 			</p>
@@ -236,7 +236,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<ng-glyph name="error_outline" class="text-4xl text-error" />
+							<ng-glyph name="error_outline" size="36" class="text-error" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -247,7 +247,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<ng-glyph name="history" class="text-4xl text-on-surface-variant" />
+							<ng-glyph name="history" size="36" class="text-on-surface-variant" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -399,9 +399,7 @@
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
 				>
 					<div class="flex flex-col items-center justify-center">
-						<span class="text-5xl"
-							><ng-glyph name="library_music" /></span
-						>
+						<ng-glyph name="library_music" size="48" />
 						<h1 class="text-xl text-center">No charts available</h1>
 						<p class="text-center px-8 mt-4">
 							This user hasn't uploaded any charts yet. <br />

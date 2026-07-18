@@ -83,10 +83,11 @@ interface ChartDialogData {
 					<li
 						class="flex items-center justify-center gap-2 pl-2 pr-3 py-1 rounded-lg border border-outline-variant"
 					>
-						<ng-glyph
-							[name]="button.icon"
-							class="text-base leading-none"
-						/>
+					<ng-glyph
+						[name]="button.icon"
+						size="16"
+						class="leading-none"
+					/>
 						<span class="mt-0.5 font-medium text-sm leading-none">
 							{{ button.data }}
 						</span>

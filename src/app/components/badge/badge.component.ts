@@ -17,7 +17,7 @@ import { NgGlyph } from "@ng-icons/core";
 			[matTooltip]="label()"
 			matTooltipPosition="above"
 		>
-			<ng-glyph [name]="icon()" class="text-base leading-none" />
+			<ng-glyph [name]="icon()" size="16" class="leading-none" />
 		</span>
 	`,
 })

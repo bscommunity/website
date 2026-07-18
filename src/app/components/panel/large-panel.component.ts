@@ -40,12 +40,12 @@ interface Button {
 				mat-flat-button
 				(click)="onClick()"
 			>
-			<ng-icon
-				name="discord"
-				class="max-w-5"
-				aria-hidden="false"
-				aria-label="Discord logo"
-			/>
+		<ng-icon
+			name="discord"
+			size="20"
+			aria-hidden="false"
+			aria-label="Discord logo"
+		/>
 				{{ button().label }}
 			</button>
 		</div>

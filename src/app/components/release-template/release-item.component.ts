@@ -13,11 +13,11 @@ import { NgGlyph } from "@ng-icons/core";
 			<div
 				class="inline-flex justify-start items-center gap-3 overflow-hidden"
 			>
-				<span
-					class="flex self-center text-inherit leading-none select-none text-lg"
-				>
-				<ng-glyph [name]="icon()!" />
-				</span>
+			<span
+				class="flex self-center text-inherit leading-none select-none"
+			>
+			<ng-glyph [name]="icon()!" size="18" />
+			</span>
 				<div
 					class="relative justify-center text-base font-medium leading-snug"
 				>

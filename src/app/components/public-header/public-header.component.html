@@ -1,153 +1,88 @@
-<nav
-	class="flex flex-row items-center justify-between w-full gap-6 data-[state=open]:bg-surface-container border-transparent data-[state=open]:border-b-outline-variant border-b px-wrapper transition-colors group z-30 relative h-24 md:h-28"
-	[attr.data-state]="isMobileMenuOpen === true ? 'open' : 'closed'"
->
+<nav class="flex flex-row items-center justify-between w-full gap-6 data-[state=open]:bg-surface-container border-transparent data-[state=open]:border-b-outline-variant border-b px-wrapper transition-colors group z-30 relative h-24 md:h-28"
+	[attr.data-state]="isMobileMenuOpen === true ? 'open' : 'closed'">
 	<div class="flex flex-row items-center justify-start gap-16">
-		<a
-			[routerLink]="['/']"
-			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
-		>
-			<ng-icon
-				name="logo"
-				class="w-8 h-8"
-				aria-hidden="false"
-				aria-label="Site logo"
-			></ng-icon>
+		<a [routerLink]="['/']"
+			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container">
+			<ng-icon name="logo" size="32" aria-hidden="false" aria-label="Site logo"></ng-icon>
 		</a>
 		<div class="flex-row items-center justify-start gap-9 hidden md:flex">
-			<a
-				[routerLink]="'/'"
-				[routerLinkActiveOptions]="{ exact: true }"
+			<a [routerLink]="'/'" [routerLinkActiveOptions]="{ exact: true }"
 				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
-				routerLinkActive="opacity-100"
-				>Home</a
-			>
-			<a
-				[routerLink]="'/workshop'"
+				routerLinkActive="opacity-100">Home</a>
+			<a [routerLink]="'/workshop'" class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
+				routerLinkActive="opacity-100">Workshop</a>
+			<a [routerLink]="'/release-notes'"
 				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
-				routerLinkActive="opacity-100"
-				>Workshop</a
-			>
-			<a
-				[routerLink]="'/release-notes'"
-				class="font-normal text-base opacity-50 hover:opacity-100 transition-opacity"
-				routerLinkActive="opacity-100"
-				>Changelog</a
-			>
+				routerLinkActive="opacity-100">Changelog</a>
 		</div>
 	</div>
 
 	<div class="flex flex-row items-center justify-end gap-4">
-		<a
-			href="https://discord.gg/C5yCfnTAKz"
-			target="_blank"
+		<a href="https://discord.gg/C5yCfnTAKz" target="_blank"
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
-			rel="noopener noreferrer"
-		>
-			<ng-icon
-				name="discord"
-				class="w-7 h-7 text-on-secondary-container transition-opacity"
-				aria-hidden="false"
-				aria-label="Discord link"
-			></ng-icon>
+			rel="noopener noreferrer">
+			<ng-icon name="discord" size="24" class="text-on-secondary-container transition-opacity" aria-hidden="false"
+				aria-label="Discord link"></ng-icon>
 		</a>
-		<a
-			href="https://github.com/bscommunity"
-			target="_blank"
+		<a href="https://github.com/bscommunity" target="_blank"
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
-			rel="noopener noreferrer"
-		>
-			<ng-icon
-				name="github"
-				class="w-7 h-7 text-on-secondary-container transition-opacity"
-				aria-hidden="false"
-				aria-label="GitHub link"
-			></ng-icon>
+			rel="noopener noreferrer">
+			<ng-icon name="github" size="24" class="text-on-secondary-container transition-opacity" aria-hidden="false"
+				aria-label="GitHub link"></ng-icon>
 		</a>
-		<button
-			matRipple
+		<button matRipple
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors items-center justify-center outline flex md:hidden"
-			(click)="toggleMobileMenu()"
-		>
-			<ng-glyph
-				class="w-7 h-7 text-on-secondary-container"
-				aria-hidden="false"
-				aria-label="Toggle menu"
-				[name]="isMobileMenuOpen ? 'close_small' : 'dehaze'"
-			/>
+			(click)="toggleMobileMenu()">
+			<ng-glyph size="28" class="text-on-secondary-container" aria-hidden="false" aria-label="Toggle menu"
+				[name]="isMobileMenuOpen ? 'close_small' : 'dehaze'" />
 		</button>
-		<div
-			class="relative hidden text-on-surface lg:flex"
-			routerLinkActive="hidden!"
-		>
+		<div class="relative hidden text-on-surface lg:flex" routerLinkActive="hidden!">
 			<a class="hidden" routerLink="/workshop">placeholder</a>
-			<ng-glyph
-				name="search"
-				class="absolute top-1/2 left-0 text-xl! -translate-y-1/2 ml-3 text-on-surface opacity-50 pointer-events-none"
-				aria-hidden="false"
-				aria-label="Search icon"
-			/>
-			<input
-				type="text"
-				placeholder="Search in workshop"
-				id="search-input"
-				#searchInput
-				(input)="onInput($event)"
+			<ng-glyph name="search" size="20"
+				class="absolute top-1/2 left-0 -translate-y-1/2 ml-3 text-on-surface opacity-50 pointer-events-none"
+				aria-hidden="false" aria-label="Search icon" />
+			<input type="text" placeholder="Search in workshop" id="search-input" #searchInput (input)="onInput($event)"
 				[matAutocomplete]="auto"
-				class="py-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high focus:bg-surface-container-high transition-colors text-on-surface outline focus:placeholder:opacity-0 focus:shadow-md focus:shadow-surface-container/30 duration-300 px-10 ring-offset-0 ring-0 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-0 ring-offset-surface-container"
-			/>
+				class="py-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high focus:bg-surface-container-high transition-colors text-on-surface outline focus:placeholder:opacity-0 focus:shadow-md focus:shadow-surface-container/30 duration-300 px-10 ring-offset-0 ring-0 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-0 ring-offset-surface-container" />
 			<div
-				class="px-2 py-1 text-xs font-medium bg-transparent outline-outline-variant rounded-xs transition-colors flex items-center justify-center outline absolute top-1/2 right-0 -translate-y-1/2 mr-3 select-none"
-			>
+				class="px-2 py-1 text-xs font-medium bg-transparent outline-outline-variant rounded-xs transition-colors flex items-center justify-center outline absolute top-1/2 right-0 -translate-y-1/2 mr-3 select-none">
 				F
 			</div>
 		</div>
-		<mat-autocomplete
-			#auto="matAutocomplete"
-			(optionSelected)="onOptionSelected()"
-		>
+		<mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected()">
 			@if (queryCharts === "start") {
-				<mat-option class="pointer-events-none select-none w-full">
-					<p class="text-center w-full">Start typing to search</p>
-				</mat-option>
+			<mat-option class="pointer-events-none select-none w-full">
+				<p class="text-center w-full">Start typing to search</p>
+			</mat-option>
 			} @else if (queryCharts === undefined) {
-				<mat-option class="pointer-events-none select-none w-full">
-					<span class="flex items-center justify-center w-full">
-						<mat-progress-spinner
-							mode="indeterminate"
-							diameter="24"
-						></mat-progress-spinner>
-					</span>
-				</mat-option>
+			<mat-option class="pointer-events-none select-none w-full">
+				<span class="flex items-center justify-center w-full">
+					<mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+				</span>
+			</mat-option>
 			} @else if (queryCharts === null) {
-				<mat-option class="pointer-events-none select-none w-full">
-					<p class="text-center w-full">
-						We found an error while fetching the data
-					</p>
-				</mat-option>
+			<mat-option class="pointer-events-none select-none w-full">
+				<p class="text-center w-full">
+					We found an error while fetching the data
+				</p>
+			</mat-option>
 			} @else if (queryCharts.length === 0) {
-				<mat-option
-					class="w-full flex items-center justify-center pointer-events-none select-none"
-				>
-					<p class="text-center w-full">No results found</p>
-				</mat-option>
+			<mat-option class="w-full flex items-center justify-center pointer-events-none select-none">
+				<p class="text-center w-full">No results found</p>
+			</mat-option>
 			} @else {
-				@for (chart of queryCharts; track $index) {
-					<mat-option [value]="chart">
-						<span
-							class="flex flex-row items-center justify-start gap-4"
-						>
-							{{ chart }}
-						</span>
-					</mat-option>
-				}
+			@for (chart of queryCharts; track $index) {
+			<mat-option [value]="chart">
+				<span class="flex flex-row items-center justify-start gap-4">
+					{{ chart }}
+				</span>
+			</mat-option>
+			}
 			}
 		</mat-autocomplete>
 	</div>
 	<app-mobile-menu
 		class="h-screen opacity-0 data-[state='open']:opacity-100 data-[state='closed']:pointer-events-none transition-opacity pointer-events-auto -z-50 fixed top-0 left-0 flex md:hidden"
-		[isOpen]="isMobileMenuOpen === true"
-		(closeMenu)="closeMobileMenu()"
-		[attr.data-state]="isMobileMenuOpen === true ? 'open' : 'closed'"
-	></app-mobile-menu>
+		[isOpen]="isMobileMenuOpen === true" (closeMenu)="closeMobileMenu()"
+		[attr.data-state]="isMobileMenuOpen === true ? 'open' : 'closed'"></app-mobile-menu>
 </nav>
