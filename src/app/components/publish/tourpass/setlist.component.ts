@@ -97,9 +97,9 @@ const MAX_TOURPASS_CHARTS = 18;
 								[variant]="
 									isSelected(chart) ? 'selected' : 'default'
 								"
+								[showItems]="[]"
 								[chart]="chart"
 								[routerLink]="null"
-								[showShareActions]="false"
 							>
 								<mat-checkbox
 									chartAction

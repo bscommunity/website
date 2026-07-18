@@ -7,8 +7,8 @@ export const chartCover = cva(
 	{
 		variants: {
 			size: {
-				sm: "w-16",
-				md: "w-22",
+				sm: "w-12",
+				md: "w-20",
 			},
 		},
 

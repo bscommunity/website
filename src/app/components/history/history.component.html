@@ -34,7 +34,7 @@
 							<app-chart-preview
 								class="w-full"
 								[chart]="entry.chart!"
-								[showContributors]="true"
+								[showItems]="['contributors']"
 								(click)="chartClick.emit(entry.chart!)"
 								(keydown.enter)="chartClick.emit(entry.chart!)"
 								(keydown.space)="chartClick.emit(entry.chart!)"

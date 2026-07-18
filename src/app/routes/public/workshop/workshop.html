@@ -122,8 +122,7 @@
 				@for (chart of charts; track chart.id) {
 					<app-chart-preview
 						[chart]="chart"
-						[showContributors]="true"
-						[showShareActions]="true"
+						[showItems]="['contributors', 'shareActions']"
 						(click)="openChartDialog(chart)"
 						(keydown.enter)="openChartDialog(chart)"
 						(keydown.space)="openChartDialog(chart)"

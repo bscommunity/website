@@ -27,7 +27,6 @@ import { ChartModel } from "@/models/chart.model";
 			<div class="relative w-full">
 				<app-chart-preview
 					class="pointer-events-none"
-					[showVisibility]="false"
 					[chart]="data"
 				></app-chart-preview>
 				<div

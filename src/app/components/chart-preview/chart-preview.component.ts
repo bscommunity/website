@@ -56,9 +56,7 @@ export class ChartPreviewComponent {
 			.join(", ");
 
 	transformDuration = transformDuration;
-	showVisibility = input<boolean>(false);
-	showContributors = input<boolean>(false);
-	showShareActions = input<boolean>(false);
+	showItems = input<('visibility' | 'contributors' | 'shareActions' | 'data')[]>(['data']);
 
 	readonly routerLink = input<string | string[] | UrlTree | null | undefined>(
 		null,
