@@ -35,11 +35,14 @@
 								class="w-full"
 								[chart]="entry.chart!"
 								[showContributors]="true"
-								[actionIcon]="getActionIcon(entry.type)"
 								(click)="chartClick.emit(entry.chart!)"
 								(keydown.enter)="chartClick.emit(entry.chart!)"
 								(keydown.space)="chartClick.emit(entry.chart!)"
-							/>
+							>
+								@if (getActionIcon(entry.type)) {
+									<mat-icon chartAction>{{ getActionIcon(entry.type) }}</mat-icon>
+								}
+							</app-chart-preview>
 						}
 					</ul>
 					@if (getUserActivities(item).length > 0) {

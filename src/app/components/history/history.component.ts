@@ -1,4 +1,14 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import {
+	ChangeDetectionStrategy,
+	Component,
+	Input,
+	Output,
+	EventEmitter,
+} from "@angular/core";
+import { CommonModule } from "@angular/common";
+
+// Material
+import { MatIconModule } from "@angular/material/icon";
 
 // Components
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
@@ -26,7 +36,8 @@ export interface HistoryItem {
 @Component({
 	selector: "app-user-history",
 	templateUrl: "./history.component.html",
-	imports: [ChartPreviewComponent],
+	imports: [CommonModule, MatIconModule, ChartPreviewComponent],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserHistoryComponent {
 	@Input() items: HistoryItem[] | null | undefined = undefined;

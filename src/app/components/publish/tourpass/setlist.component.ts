@@ -24,7 +24,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 // Components
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { PanelComponent } from "@/components/panel/panel.component";
-import { SmallChartPreviewComponent } from "@/components/small-chart-preview/small-chart-preview.component";
+import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
@@ -91,18 +91,23 @@ const MAX_TOURPASS_CHARTS = 18;
 				} @else {
 					<ul class="flex flex-col gap-4">
 						@for (chart of charts; track chart.id) {
-							<li class="flex items-center gap-4">
-								<app-small-chart-preview
-									class="flex-1 pointer-events-none"
-									[chart]="chart"
-									[routerLink]="null"
-									[showShareActions]="false"
-								></app-small-chart-preview>
+							<app-chart-preview
+								class="pointer-events-none"
+								size="sm"
+								[variant]="
+									isSelected(chart) ? 'selected' : 'default'
+								"
+								[chart]="chart"
+								[routerLink]="null"
+								[showShareActions]="false"
+							>
 								<mat-checkbox
+									chartAction
+									class="pointer-events-auto"
 									[checked]="isSelected(chart)"
 									(change)="toggleSelection(chart)"
 								></mat-checkbox>
-							</li>
+							</app-chart-preview>
 						}
 					</ul>
 				}
@@ -134,7 +139,7 @@ const MAX_TOURPASS_CHARTS = 18;
 		MatProgressSpinnerModule,
 		SearchbarComponent,
 		PanelComponent,
-		SmallChartPreviewComponent,
+		ChartPreviewComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
