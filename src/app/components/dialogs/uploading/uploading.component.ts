@@ -9,8 +9,8 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { MAT_DIALOG_DATA, MatDialogModule } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { NgGlyph } from "@ng-icons/core";
 import type { Observable } from "rxjs";
 import { interval, map } from "rxjs";
 import type { PublishEvent } from "@/services/publish/publish-event.service";
@@ -48,7 +48,7 @@ const STEP_ICONS: Record<string, string> = {
 @Component({
 	selector: "app-publish-dialog-uploading",
 	templateUrl: "./uploading.component.html",
-	imports: [MatDialogModule, MatIconModule, MatProgressSpinnerModule],
+	imports: [MatDialogModule, NgGlyph, MatProgressSpinnerModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishDialogUploadingComponent {

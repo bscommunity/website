@@ -3,8 +3,8 @@ import { Component, computed, inject, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { chartPreview } from "./chart-preview.variants";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
+// Ng Icons
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { ShareService } from "@/services/share.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
@@ -23,7 +23,8 @@ import { transformDuration } from "@/lib/time";
 @Component({
 	selector: "app-chart-preview",
 	imports: [
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		RouterLink,
 		AvatarComponent,
 		CommonModule,

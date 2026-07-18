@@ -20,7 +20,7 @@ import {
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import type { ChartModel } from "@/models/chart.model";
 import type { TourPassFormData } from "@/services/publish/handlers/tourpass-publish.handler";
 // Types
@@ -81,9 +81,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
                                             class="tp-reorder-handle"
                                             aria-label="Drag to reorder"
                                         >
-                                            <mat-icon inline
-                                                >drag_indicator</mat-icon
-                                            >
+                                            <ng-glyph name="drag_indicator" />
                                         </button>
                                     </div>
                                 </app-chart-preview>
@@ -236,7 +234,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 		FormsModule,
 		MatDialogModule,
 		MatButtonModule,
-		MatIconModule,
+		NgGlyph,
 		CdkDropList,
 		CdkDrag,
 		CdkDragHandle,

@@ -40,7 +40,7 @@
 								(keydown.space)="chartClick.emit(entry.chart!)"
 							>
 								@if (getActionIcon(entry.type)) {
-									<mat-icon chartAction>{{ getActionIcon(entry.type) }}</mat-icon>
+									<ng-glyph [name]="getActionIcon(entry.type)!" chartAction />
 								}
 							</app-chart-preview>
 						}

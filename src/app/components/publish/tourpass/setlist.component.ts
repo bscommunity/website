@@ -17,7 +17,7 @@ import {
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
@@ -92,15 +92,15 @@ const MAX_TOURPASS_CHARTS = 18;
 
 				<div class="flex flex-wrap items-end w-full justify-end gap-6">
 					<div class="flex items-center gap-2">
-						<mat-icon inline>library_music</mat-icon>
+						<ng-glyph name="library_music" />
 						<span>{{ selectedCharts.length }} selected</span>
 					</div>
 					<div class="flex items-center gap-2">
-						<mat-icon inline>music_video</mat-icon>
+						<ng-glyph name="music_video" />
 						<span>~{{ totalDurationLabel }}</span>
 					</div>
 					<div class="flex items-center gap-2">
-						<mat-icon inline>local_fire_department</mat-icon>
+						<ng-glyph name="local_fire_department" />
 						<span>{{ estimatedDifficultyLabel }}</span>
 					</div>
 				</div>
@@ -134,7 +134,7 @@ const MAX_TOURPASS_CHARTS = 18;
 		FormsModule,
 		MatDialogModule,
 		MatButtonModule,
-		MatIconModule,
+		NgGlyph,
 		MatCheckboxModule,
 		MatProgressSpinnerModule,
 		SearchbarComponent,

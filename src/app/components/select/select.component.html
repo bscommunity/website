@@ -16,14 +16,14 @@
 		@if (selectedOption()) {
 			<div class="flex items-center space-x-2">
 				@if (selectedOption()?.icon) {
-					<mat-icon inline>{{ selectedOption()?.icon }}</mat-icon>
+					<ng-glyph [name]="selectedOption()!.icon!" />
 				}
 				<span>{{ selectedOption()?.label }}</span>
 			</div>
 		} @else {
 			<span>Select an option</span>
 		}
-		<mat-icon class="ml-2">arrow_drop_down</mat-icon>
+		<ng-glyph name="arrow_drop_down" class="ml-2" />
 	</button>
 	<!-- Dropdown -->
 	@if (dropdownOpen) {
@@ -61,11 +61,11 @@
 					class="flex items-center space-x-2 px-4 py-3 text-left line-clamp-1 cursor-pointer"
 				>
 					@if (option.icon) {
-						<mat-icon inline>{{ option.icon }}</mat-icon>
+						<ng-glyph [name]="option.icon" />
 					}
 					<span>{{ option.label }}</span>
 					@if (selectedOption()?.value === option.value) {
-						<mat-icon inline class="ml-auto">check</mat-icon>
+						<ng-glyph name="check" class="ml-auto" />
 					}
 				</li>
 			}

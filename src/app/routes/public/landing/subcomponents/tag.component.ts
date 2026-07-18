@@ -1,9 +1,9 @@
 import { Component, input, signal, OnInit } from "@angular/core";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-landing-tag",
-	imports: [MatIconModule],
+	imports: [NgGlyph],
 	template: `
 		<a
 			[href]="href()"
@@ -36,10 +36,10 @@ import { MatIconModule } from "@angular/material/icon";
 					{{ mobileText() }}
 				</p>
 
-				<mat-icon
-					class="self-center transition-transform duration-300 group-hover:translate-x-0.5 min-w-6 mr-3!"
-					>keyboard_double_arrow_right</mat-icon
-				>
+				<ng-glyph
+					name="keyboard_double_arrow_right"
+					class="self-center transition-transform duration-300 group-hover:translate-x-0.5 mr-3!"
+				/>
 			}
 		</a>
 	`,

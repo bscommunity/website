@@ -1,8 +1,8 @@
 import { Component, computed, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
+// Ng Icons
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
 
@@ -20,7 +20,8 @@ import { chartCover } from "./chart-cover.variants";
 	selector: "app-chart-cover",
 	imports: [
 		CommonModule,
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		MatTooltipModule,
 		MatRippleModule,
 		DifficultyMarkComponent,

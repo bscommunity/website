@@ -6,7 +6,7 @@ import {
 } from "@angular/core";
 
 // Modules
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { AvatarComponent } from "@/components/avatar/avatar.component";
@@ -20,7 +20,7 @@ import { MatButtonModule } from "@angular/material/button";
 @Component({
 	selector: "app-contributor-item",
 	imports: [
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		ContributorTagsComponent,
 		AvatarComponent,

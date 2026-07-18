@@ -1,10 +1,10 @@
 import { Component, input } from "@angular/core";
 
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-aside-container",
-	imports: [MatIconModule],
+	imports: [NgGlyph],
 	template: `
 		<li
 			class="flex flex-row items-center justify-center gap-3 bg-surface-container border border-surface-container-high rounded px-5 py-2 w-full {{
@@ -13,9 +13,7 @@ import { MatIconModule } from "@angular/material/icon";
 		>
 			@if (icon()) {
 				<span
-					><mat-icon class="leading-none align-middle" inline>{{
-						icon()
-					}}</mat-icon></span
+					><ng-glyph [name]="icon()!" class="leading-none align-middle" /></span
 				>
 			}
 			<span>{{ info() }}</span>

@@ -47,6 +47,12 @@ importers:
       '@netlify/angular-runtime':
         specifier: ^4.0.0
         version: 4.0.0
+      '@ng-icons/core':
+        specifier: 34.0.0
+        version: 34.0.0(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(@angular/common@22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(@schematics/angular@22.0.3(chokidar@5.0.0))(rxjs@7.8.2)
+      '@ng-icons/material-symbols':
+        specifier: 34.0.0
+        version: 34.0.0(@ng-icons/core@34.0.0(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(@angular/common@22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(@schematics/angular@22.0.3(chokidar@5.0.0))(rxjs@7.8.2))
       '@zip.js/zip.js':
         specifier: ^2.8.26
         version: 2.8.26
@@ -1274,6 +1280,20 @@ packages:
   '@netlify/types@2.8.0':
     resolution: {integrity: sha512-8/g0Pt6y6wXj5Ia5eeYLiXhRfWeqZXGXpGFeCiiQdUOem+FPtXdA4+YdGxqzWc7D0AvptKSO01KGeeVWHSu8Kg==}
     engines: {node: ^18.14.0 || >=20}
+
+  '@ng-icons/core@34.0.0':
+    resolution: {integrity: sha512-SrL8dBApSKzXhihEGmiJ/tAj+wSvt6XmZJOAzUTVcgkuV0YuL1WCHVfAwXgQHVG5Te27JkjyXd2n76pNFMuekw==}
+    peerDependencies:
+      '@angular-devkit/schematics': '>=21.0.0'
+      '@angular/common': '>=21.0.0'
+      '@angular/core': '>=21.0.0'
+      '@schematics/angular': '>=21.0.0'
+      rxjs: ^6.5.3 || ^7.4.0
+
+  '@ng-icons/material-symbols@34.0.0':
+    resolution: {integrity: sha512-lwvc2J2Wpx/XP4yrm7RG3KEmB2xy6oIjqJBogRu0IO0kl5HOUbe+P74uyj1jIYabxjWl3miPofDKNNgXczJwvw==}
+    peerDependencies:
+      '@ng-icons/core': ^34.0.0
 
   '@npmcli/agent@4.0.2':
     resolution: {integrity: sha512-EUEuWAxnL07Sp5/iC/1X6Xj+XThUvnbei9zfRWZdEXa7lss9RTHMhAHBeg+MZ5To9s/gGaSI+UwZTPdYMvKSeg==}
@@ -4412,6 +4432,20 @@ snapshots:
       '@netlify/types': 2.8.0
 
   '@netlify/types@2.8.0': {}
+
+  '@ng-icons/core@34.0.0(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(@angular/common@22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(@schematics/angular@22.0.3(chokidar@5.0.0))(rxjs@7.8.2)':
+    dependencies:
+      '@angular-devkit/schematics': 22.0.3(chokidar@5.0.0)
+      '@angular/common': 22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/core': 22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2)
+      '@schematics/angular': 22.0.3(chokidar@5.0.0)
+      rxjs: 7.8.2
+      tslib: 2.8.1
+
+  '@ng-icons/material-symbols@34.0.0(@ng-icons/core@34.0.0(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(@angular/common@22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(@schematics/angular@22.0.3(chokidar@5.0.0))(rxjs@7.8.2))':
+    dependencies:
+      '@ng-icons/core': 34.0.0(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(@angular/common@22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(@schematics/angular@22.0.3(chokidar@5.0.0))(rxjs@7.8.2)
+      tslib: 2.8.1
 
   '@npmcli/agent@4.0.2':
     dependencies:

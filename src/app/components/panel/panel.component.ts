@@ -3,7 +3,9 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+
+// Icons
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-panel",
@@ -17,13 +19,13 @@ import { MatIconModule } from "@angular/material/icon";
 		>
 			@switch (variant()) {
 				@case ("info") {
-					<mat-icon>info</mat-icon>
+					<ng-glyph name="info" />
 				}
 				@case ("warning") {
-					<mat-icon>warning</mat-icon>
+					<ng-glyph name="warning" />
 				}
 				@default {
-					<mat-icon>info</mat-icon>
+					<ng-glyph name="info" />
 				}
 			}
 			<p class="text-sm flex-1">
@@ -31,7 +33,7 @@ import { MatIconModule } from "@angular/material/icon";
 			</p>
 		</div>
 	`,
-	imports: [MatIconModule, MatButtonModule, CommonModule],
+	imports: [NgGlyph, MatButtonModule, CommonModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PanelComponent {

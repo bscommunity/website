@@ -9,7 +9,7 @@ import {
 import { MatRadioModule } from "@angular/material/radio";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 // Components
@@ -49,7 +49,7 @@ interface Option {
 							<span
 								class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
 							>
-								<mat-icon>{{ option.icon }}</mat-icon>
+								<ng-glyph [name]="option.icon" />
 								{{ option.label }}
 							</span>
 						</mat-radio-button>
@@ -89,7 +89,7 @@ interface Option {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatIconModule,
+		NgGlyph,
 		MatRadioModule,
 		FormsModule,
 		ReactiveFormsModule,

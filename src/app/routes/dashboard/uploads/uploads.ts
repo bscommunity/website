@@ -9,8 +9,8 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog } from "@angular/material/dialog";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
+// Icons
+import { NgGlyph } from "@ng-icons/core";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
@@ -53,7 +53,7 @@ interface ChartsByMonth {
 	selector: "app-uploads",
 	imports: [
 		AsyncPipe,
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		SelectComponent,
 		FilterPanelComponent,

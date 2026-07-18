@@ -8,7 +8,7 @@ import {
 import { CommonModule } from "@angular/common";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
@@ -36,7 +36,7 @@ export interface HistoryItem {
 @Component({
 	selector: "app-user-history",
 	templateUrl: "./history.component.html",
-	imports: [CommonModule, MatIconModule, ChartPreviewComponent],
+	imports: [CommonModule, NgGlyph, ChartPreviewComponent],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserHistoryComponent {

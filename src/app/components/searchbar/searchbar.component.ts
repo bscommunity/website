@@ -14,7 +14,6 @@ import { Subject, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import {
 	MatAutocomplete,
@@ -24,6 +23,9 @@ import {
 } from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
+// Icons
+import { NgGlyph } from "@ng-icons/core";
+
 // Services
 import { ChartService } from "@/services/api/chart.service";
 
@@ -31,7 +33,7 @@ import { ChartService } from "@/services/api/chart.service";
 	selector: "app-searchbar",
 	templateUrl: "./searchbar.component.html",
 	imports: [
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		MatAutocompleteModule,
 		MatProgressSpinnerModule,

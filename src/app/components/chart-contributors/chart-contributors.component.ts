@@ -6,8 +6,8 @@ import {
 	signal,
 } from "@angular/core";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
+// Icons
+import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { AvatarComponent } from "@/components/avatar/avatar.component";
@@ -20,7 +20,7 @@ import { filter, take } from "rxjs";
 
 @Component({
 	selector: "app-chart-contributors",
-	imports: [MatIconModule, AvatarComponent, RouterLink],
+	imports: [NgGlyph, AvatarComponent, RouterLink],
 	templateUrl: "./chart-contributors.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })

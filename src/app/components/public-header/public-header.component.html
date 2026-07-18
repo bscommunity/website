@@ -7,13 +7,12 @@
 			[routerLink]="['/']"
 			class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-secondary-container"
 		>
-			<mat-icon
-				class="w-8! h-8!"
-				inline
-				svgIcon="logo"
+			<ng-icon
+				name="logo"
+				class="w-8 h-8"
 				aria-hidden="false"
 				aria-label="Site logo"
-			></mat-icon>
+			></ng-icon>
 		</a>
 		<div class="flex-row items-center justify-start gap-9 hidden md:flex">
 			<a
@@ -45,12 +44,12 @@
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
 			rel="noopener noreferrer"
 		>
-			<mat-icon
-				svgIcon="discord"
+			<ng-icon
+				name="discord"
 				class="w-7 h-7 text-on-secondary-container transition-opacity"
 				aria-hidden="false"
 				aria-label="Discord link"
-			></mat-icon>
+			></ng-icon>
 		</a>
 		<a
 			href="https://github.com/bscommunity"
@@ -58,43 +57,36 @@
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors hidden md:flex items-center justify-center outline"
 			rel="noopener noreferrer"
 		>
-			<mat-icon
-				svgIcon="github"
+			<ng-icon
+				name="github"
 				class="w-7 h-7 text-on-secondary-container transition-opacity"
 				aria-hidden="false"
 				aria-label="GitHub link"
-			></mat-icon>
+			></ng-icon>
 		</a>
 		<button
 			matRipple
 			class="p-2 bg-surface-container outline-outline-variant rounded-md hover:bg-surface-container-high transition-colors items-center justify-center outline flex md:hidden"
 			(click)="toggleMobileMenu()"
 		>
-			<mat-icon
+			<ng-glyph
 				class="w-7 h-7 text-on-secondary-container"
 				aria-hidden="false"
 				aria-label="Toggle menu"
-			>
-				@if (isMobileMenuOpen) {
-					close_small
-				} @else {
-					dehaze
-				}
-			</mat-icon>
+				[name]="isMobileMenuOpen ? 'close_small' : 'dehaze'"
+			/>
 		</button>
 		<div
 			class="relative hidden text-on-surface lg:flex"
 			routerLinkActive="hidden!"
 		>
 			<a class="hidden" routerLink="/workshop">placeholder</a>
-			<mat-icon
+			<ng-glyph
+				name="search"
 				class="absolute top-1/2 left-0 text-xl! -translate-y-1/2 ml-3 text-on-surface opacity-50 pointer-events-none"
 				aria-hidden="false"
-				inline=""
 				aria-label="Search icon"
-			>
-				search</mat-icon
-			>
+			/>
 			<input
 				type="text"
 				placeholder="Search in workshop"

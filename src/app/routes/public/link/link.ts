@@ -2,7 +2,7 @@ import { Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 
 // Components
@@ -12,7 +12,7 @@ import { LargePanelComponent } from "@/components/panel/large-panel.component";
 @Component({
 	selector: "app-link",
 	imports: [
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		QrCodeComponent,
 		LargePanelComponent,

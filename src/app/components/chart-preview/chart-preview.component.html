@@ -21,16 +21,15 @@
 				</p>
 				<span class="inline-flex gap-1 items-center justify-start">
 					@if (this.chart().isExplicit) {
-						<mat-icon class="filled-icon" inline>explicit</mat-icon>
+						<ng-glyph name="explicit" class="filled-icon" />
 					}
 					@if (this.chart().isDeluxe) {
-						<mat-icon
-							svgIcon="deluxe"
-							inline
-							class="w-6! h-6!"
+						<ng-icon
+							name="deluxe"
+							class="w-6 h-6"
 							aria-hidden="false"
 							aria-label="Deluxe icon"
-						></mat-icon>
+						/>
 					}
 				</span>
 			</div>
@@ -72,7 +71,7 @@
 				class="flex flex-row items-center justify-start h-full w-full gap-4"
 			>
 				<div class="flex flex-row items-center justify-start gap-2">
-					<mat-icon inline>timer</mat-icon>
+					<ng-glyph name="timer" />
 					<span class="line-clamp-1">{{
 						transformDuration(
 							this.chart().track.duration || 0
@@ -80,7 +79,7 @@
 					}}</span>
 				</div>
 				<div class="flex flex-row items-center justify-start gap-2">
-					<mat-icon inline>music_note</mat-icon>
+					<ng-glyph name="music_note" />
 					<span class="line-clamp-1"
 						>{{
 							this.chart().notesAmount
@@ -105,12 +104,7 @@
 				title="Share"
 				(click)="onShare($event)"
 			>
-				<mat-icon
-					inline="true"
-					class="text-xl! flex! items-center! justify-center!"
-				>
-					<span>share</span>
-				</mat-icon>
+				<ng-glyph name="share" class="text-xl flex items-center justify-center" />
 			</a>
 			<a
 				matRipple
@@ -124,7 +118,7 @@
 				title="Open in Discord"
 				(click)="$event.stopPropagation()"
 			>
-				<mat-icon svgIcon="discord" inline="true" />
+				<ng-icon name="discord" />
 			</a>
 		</div>
 	}

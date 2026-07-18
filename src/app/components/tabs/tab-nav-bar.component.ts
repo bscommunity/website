@@ -1,7 +1,7 @@
 import { Component, inject, input, model, OnInit } from "@angular/core";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatTabNavPanel, MatTabsModule } from "@angular/material/tabs";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 
@@ -17,7 +17,7 @@ export interface Tab<T> {
 
 @Component({
 	selector: "app-tab-nav-bar",
-	imports: [MatTabsModule, MatIconModule, RouterLink],
+	imports: [MatTabsModule, NgGlyph, RouterLink],
 	template: `
 		<nav mat-tab-nav-bar [tabPanel]="tabPanel()" class="w-full">
 			@for (tab of tabs(); track tab.value) {
@@ -40,9 +40,7 @@ export interface Tab<T> {
 					[class.cursor-not-allowed]="tab.disabled"
 				>
 					@if (tab.icon) {
-						<mat-icon class="align-middle">
-							{{ tab.icon }}
-						</mat-icon>
+					<ng-glyph [name]="tab.icon!" class="align-middle" />
 					}
 					@if (tab.label && tab.showLabel) {
 						<span class="ml-4">{{ tab.label }}</span>

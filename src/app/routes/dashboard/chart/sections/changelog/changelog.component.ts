@@ -2,7 +2,7 @@ import { Component, inject, signal, input, model } from "@angular/core";
 
 // Material
 import { CommonModule } from "@angular/common";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { FormsModule } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -24,7 +24,7 @@ import { ChangelogModel } from "@/models/changelog.model";
 	selector: "app-chart-changelog-section",
 	imports: [
 		CommonModule,
-		MatIconModule,
+		NgGlyph,
 		MatTooltipModule,
 		MatButtonModule,
 		MatProgressSpinnerModule,

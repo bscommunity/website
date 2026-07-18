@@ -13,19 +13,19 @@
 	} @else if (profile() === null) {
 		<!-- Error state -->
 		<div class="flex flex-col items-center justify-center w-full py-24">
-			<mat-icon class="text-6xl text-error">error_outline</mat-icon>
+			<ng-glyph name="error_outline" class="text-6xl text-error" />
 			<p class="mt-4 text-lg text-center">
 				Profile not found. Please check the username and try again.
 			</p>
 			<button mat-stroked-button class="mt-6" (click)="onReturn()">
-				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+			<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
 				Return to {{ this.source }}
-			</button>
-		</div>
-	} @else {
+		</button>
+	</div>
+} @else {
 		<header class="flex flex-col items-start justify-start gap-6 w-full">
 			<button mat-stroked-button (click)="onReturn()">
-				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
 				Return to
 				{{ this.source }}
 			</button>
@@ -151,13 +151,10 @@
 								(click)="onFollowClick()"
 								[disabled]="isFollowLoading()"
 							>
-								<mat-icon class="align-middle mr-2">
-									{{
-										isFollowing()
-											? "person_remove"
-											: "person_add"
-									}}
-								</mat-icon>
+								<ng-glyph
+									[name]="isFollowing() ? 'person_remove' : 'person_add'"
+									class="align-middle mr-2"
+								/>
 								{{ isFollowing() ? "Unfollow" : "Follow" }}
 							</button>
 							<button
@@ -167,9 +164,7 @@
 								aria-label="Share"
 								(click)="onShare()"
 							>
-								<mat-icon class="align-middle" inline
-									>share</mat-icon
-								>
+								<ng-glyph name="share" class="align-middle" />
 							</button>
 							<!-- <button
 								class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
@@ -180,9 +175,7 @@
 								matRippleColor="rgba(63, 30, 104, 0.1)"
 								aria-label="Report"
 							>
-								<mat-icon class="align-middle" inline
-									>flag</mat-icon
-								>
+								<ng-glyph name="flag" class="align-middle" />
 							</button> -->
 						</div>
 					}
@@ -199,9 +192,7 @@
 					<mat-tab [disabled]="tab.disabled">
 						<ng-template mat-tab-label>
 							@if (tab.icon) {
-								<mat-icon class="align-middle">{{
-									tab.icon
-								}}</mat-icon>
+								<ng-glyph [name]="tab.icon" class="align-middle" />
 							}
 							@if (tab.label && tab.showLabel) {
 								<span class="ml-4">{{ tab.label }}</span>
@@ -245,9 +236,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<mat-icon class="text-4xl text-error"
-								>error_outline</mat-icon
-							>
+							<ng-glyph name="error_outline" class="text-4xl text-error" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -258,9 +247,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<mat-icon class="text-4xl text-on-surface-variant"
-								>history</mat-icon
-							>
+							<ng-glyph name="history" class="text-4xl text-on-surface-variant" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -413,7 +400,7 @@
 				>
 					<div class="flex flex-col items-center justify-center">
 						<span class="text-5xl"
-							><mat-icon inline>library_music</mat-icon></span
+							><ng-glyph name="library_music" /></span
 						>
 						<h1 class="text-xl text-center">No charts available</h1>
 						<p class="text-center px-8 mt-4">

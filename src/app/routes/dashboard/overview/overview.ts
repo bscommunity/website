@@ -1,11 +1,11 @@
 import { Component } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-overview",
-	imports: [MatIconModule, MatButtonModule],
+	imports: [NgGlyph, MatButtonModule],
 	templateUrl: "./overview.html",
 })
 export class OverviewComponent {}

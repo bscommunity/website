@@ -23,7 +23,7 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
@@ -52,7 +52,7 @@ export interface DialogData {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		MatButtonModule,
-		MatIconModule,
+		NgGlyph,
 		MatDialogTitle,
 		MatDialogContent,
 		MatDialogActions,

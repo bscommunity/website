@@ -32,6 +32,8 @@
     "@angular/router": "^22.0.2",
     "@angular/ssr": "^22.0.3",
     "@netlify/angular-runtime": "^4.0.0",
+    "@ng-icons/core": "34.0.0",
+    "@ng-icons/material-symbols": "34.0.0",
     "@zip.js/zip.js": "^2.8.26",
     "class-variance-authority": "^0.7.1",
     "dotenv": "^17.4.2",

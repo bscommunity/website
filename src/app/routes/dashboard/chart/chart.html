@@ -20,16 +20,14 @@
 							/>
 						}
 						@if (chart.isExplicit) {
-							<mat-icon class="filled-icon" inline
-								>explicit</mat-icon
-							>
+					<ng-glyph name="explicit" class="filled-icon" />
 						}
 						@if (chart.isDeluxe) {
-							<mat-icon
-								svgIcon="deluxe"
-								class="!w-8 !h-8 relative"
+							<ng-icon
+								name="deluxe"
+								class="w-8 h-8 relative"
 								aria-label="Deluxe icon"
-							></mat-icon>
+							/>
 						}
 					</span>
 				</h1>

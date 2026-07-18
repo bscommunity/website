@@ -18,8 +18,8 @@ import { fromEvent, Subscription } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 
 import { CommonModule, isPlatformBrowser } from "@angular/common";
-import { MatIconModule } from "@angular/material/icon";
 import { MatRippleModule } from "@angular/material/core";
+import { NgGlyph } from "@ng-icons/core";
 
 export interface Option {
 	value: string;
@@ -29,7 +29,7 @@ export interface Option {
 
 @Component({
 	selector: "app-select",
-	imports: [CommonModule, MatIconModule, MatRippleModule],
+	imports: [CommonModule, NgGlyph, MatRippleModule],
 	templateUrl: "./select.component.html",
 })
 export class SelectComponent implements AfterViewInit, OnDestroy {

@@ -10,7 +10,7 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 // Material
 import { MatDialog } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 // Components
@@ -42,7 +42,7 @@ import {
 	selector: "app-chart-versions-section",
 	imports: [
 		// Modules
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		// Components
 		ChartSectionComponent,

@@ -12,8 +12,8 @@ import { ShareService } from "@/services/share.service";
 import { ChartService } from "@/services/api/chart.service";
 import { MatChipsModule } from "@angular/material/chips";
 
-// Types
-import { MatIcon } from "@angular/material/icon";
+// Icons
+import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { ChartContributorsComponent } from "@/components/chart-contributors/chart-contributors.component";
@@ -49,9 +49,7 @@ interface ChartDialogData {
 				matRipple
 				(click)="dialogRef.close()"
 			>
-				<mat-icon class=" text-on-surface/70 hover:text-on-surface">
-					close
-				</mat-icon>
+				<ng-glyph name="close" class="text-on-surface/70 hover:text-on-surface" />
 			</button>
 		</div>
 
@@ -85,14 +83,10 @@ interface ChartDialogData {
 					<li
 						class="flex items-center justify-center gap-2 pl-2 pr-3 py-1 rounded-lg border border-outline-variant"
 					>
-						<mat-icon
-							inline="true"
-							class="text-xl flex items-center justify-center"
-						>
-							<span class="text-base leading-none">{{
-								button.icon
-							}}</span>
-						</mat-icon>
+						<ng-glyph
+							[name]="button.icon"
+							class="text-base leading-none"
+						/>
 						<span class="mt-0.5 font-medium text-sm leading-none">
 							{{ button.data }}
 						</span>
@@ -110,7 +104,7 @@ interface ChartDialogData {
 				(click)="onShare()"
 				(keypress)="onShare()"
 			>
-				<mat-icon> share </mat-icon>
+				<ng-glyph name="share" />
 				Share
 			</a>
 			<a
@@ -137,7 +131,7 @@ interface ChartDialogData {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatIcon,
+		NgGlyph,
 		MatChipsModule,
 		ChartContributorsComponent,
 		ChartVideoPreviewComponent,

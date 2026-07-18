@@ -5,7 +5,7 @@ import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
 import { Subscription } from "rxjs";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTabsModule } from "@angular/material/tabs";
@@ -88,7 +88,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 @Component({
 	selector: "app-profile",
 	imports: [
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		MatRippleModule,
 		MatTabsModule,

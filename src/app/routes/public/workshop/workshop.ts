@@ -14,7 +14,7 @@ import { takeUntil } from "rxjs/operators";
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import {
 	MatPaginatorIntl,
@@ -55,7 +55,7 @@ import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 		MatButtonModule,
 		MatProgressSpinnerModule,
 		MatTooltipModule,
-		MatIconModule,
+		NgGlyph,
 		MatPaginatorModule,
 		FilterPanelComponent,
 		SearchbarComponent,

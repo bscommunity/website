@@ -10,7 +10,6 @@ import { Router } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
 import {
 	MAT_DIALOG_DATA,
 	MatDialogActions,
@@ -45,7 +44,6 @@ export interface DialogData {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		MatButtonModule,
-		MatIconModule,
 		MatDialogTitle,
 		MatDialogContent,
 		MatDialogActions,

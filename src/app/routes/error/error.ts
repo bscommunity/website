@@ -4,11 +4,11 @@ import { Component, inject } from "@angular/core";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-error",
-	imports: [MatIconModule, MatButtonModule],
+	imports: [NgGlyph, MatButtonModule],
 	templateUrl: "./error.html",
 })
 export class PageError {

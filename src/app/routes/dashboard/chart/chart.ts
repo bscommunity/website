@@ -3,7 +3,7 @@ import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
 // Modules
 import { FormsModule } from "@angular/forms";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
@@ -29,7 +29,8 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 	imports: [
 		FormsModule,
 		MatButtonModule,
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		MatTooltipModule,
 		AsideComponent,
 		ChangelogComponent,

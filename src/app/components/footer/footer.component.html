@@ -1,53 +1,20 @@
-<footer
-	class="flex flex-col items-center justify-start px-wrapper py-9 w-full bg-surface-container-low text-sm gap-9"
->
-	<div
-		class="flex flex-col md:flex-row items-start justify-between w-full gap-9"
-	>
+<footer class="flex flex-col items-center justify-start px-wrapper py-9 w-full bg-surface-container-low text-sm gap-9">
+	<div class="flex flex-col md:flex-row items-start justify-between w-full gap-9">
 		<!-- First Section -->
-		<div
-			class="flex flex-col items-start justify-start gap-4 shrink-0 grow-0"
-		>
+		<div class="flex flex-col items-start justify-start gap-4 shrink-0 grow-0">
 			<div class="flex flex-row items-center justify-start gap-6">
-				<a
-					href="#"
-					class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-surface h-8"
-				>
-					<mat-icon
-						class="w-8!"
-						inline
-						svgIcon="logo"
-						aria-hidden="false"
-						aria-label="Site logo"
-					></mat-icon>
+				<a href="#" class="flex flex-row items-center justify-start gap-2 md:gap-4 text-on-surface h-8">
+					<ng-icon name="logo" size="32" aria-hidden="false" aria-label="Site logo"></ng-icon>
 				</a>
 				<div class="w-0.5 rounded-full h-6 bg-on-surface"></div>
 				<div class="flex flex-row items-center justify-start gap-4">
-					<a
-						href="https://discord.gg/C5yCfnTAKz"
-						target="_blank"
-						class="h-8"
-					>
-						<mat-icon
-							svgIcon="discord"
-							inline="true"
-							class="text-on-surface"
-							aria-hidden="false"
-							aria-label="Discord logo"
-						></mat-icon>
+					<a href="https://discord.gg/C5yCfnTAKz" target="_blank" class="h-8">
+						<ng-icon name="discord" class="text-on-surface" aria-hidden="false"
+							aria-label="Discord logo"></ng-icon>
 					</a>
-					<a
-						href="https://github.com/bscommunity"
-						target="_blank"
-						class="h-8"
-					>
-						<mat-icon
-							svgIcon="github"
-							inline="true"
-							class="text-on-surface"
-							aria-hidden="false"
-							aria-label="GitHub logo"
-						></mat-icon>
+					<a href="https://github.com/bscommunity" target="_blank" class="h-8">
+						<ng-icon name="github" class="text-on-surface" aria-hidden="false"
+							aria-label="GitHub logo"></ng-icon>
 					</a>
 				</div>
 			</div>
@@ -58,24 +25,17 @@
 
 		<!-- Sections -->
 		<ul
-			class="grid-cols-2 grid w-full md:flex flex-row items-start justify-start md:justify-end gap-8 md:gap-16 order-1 md:order-2"
-		>
+			class="grid-cols-2 grid w-full md:flex flex-row items-start justify-start md:justify-end gap-8 md:gap-16 order-1 md:order-2">
 			<li class="flex flex-col items-start justify-start gap-6">
 				<h3 class="uppercase">Resources</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							href="https://discord.gg/C5yCfnTAKz"
-							>Guide</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors"
+							href="https://discord.gg/C5yCfnTAKz">Guide</a>
 					</li>
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							routerLink="/release-notes"
-							>Changelog</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors"
+							routerLink="/release-notes">Changelog</a>
 					</li>
 				</ul>
 			</li>
@@ -83,18 +43,12 @@
 				<h3 class="uppercase">Help</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							href="https://discord.gg/C5yCfnTAKz"
-							>Support</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors"
+							href="https://discord.gg/C5yCfnTAKz">Support</a>
 					</li>
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							href="https://bscm.gitbook.io/bscm/"
-							>Documentation</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors"
+							href="https://bscm.gitbook.io/bscm/">Documentation</a>
 					</li>
 				</ul>
 			</li>
@@ -102,32 +56,22 @@
 				<h3 class="uppercase">Legal</h3>
 				<ul class="flex flex-col items-start justify-start gap-5">
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							routerLink="/privacy"
-							>Privacy Policy</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors" routerLink="/privacy">Privacy
+							Policy</a>
 					</li>
 					<li>
-						<a
-							class="hover:text-on-surface-variant transition-colors"
-							routerLink="/terms"
-							>Terms of Service</a
-						>
+						<a class="hover:text-on-surface-variant transition-colors" routerLink="/terms">Terms of
+							Service</a>
 					</li>
 				</ul>
 			</li>
 		</ul>
 	</div>
-	<div
-		class="flex flex-row items-center justify-between gap-6 w-full mt-6 md:mt-0"
-	>
+	<div class="flex flex-row items-center justify-between gap-6 w-full mt-6 md:mt-0">
 		<!-- Status -->
 		<app-status-display></app-status-display>
 
-		<div
-			class="flex flex-col items-start justify-normal gap-9 order-2 md:order-1"
-		>
+		<div class="flex flex-col items-start justify-normal gap-9 order-2 md:order-1">
 			<div class="flex flex-row items-center justify-start gap-9">
 				<app-theme-picker></app-theme-picker>
 			</div>

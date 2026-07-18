@@ -9,7 +9,7 @@
 		</span>
 		@if (canRemove()) {
 			<button mat-icon-button (click)="remove.emit(user().id)">
-				<mat-icon>close</mat-icon>
+				<ng-glyph name="close" />
 			</button>
 		}
 	</div>

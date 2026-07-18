@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, input } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 // Material
-import { MatIcon } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 export interface TermsSection {
 	title: string;
@@ -12,7 +12,7 @@ export interface TermsSection {
 
 @Component({
 	selector: "app-terms-template",
-	imports: [RouterLink, MatIcon],
+	imports: [RouterLink, NgGlyph],
 	templateUrl: "./terms-template.component.html",
 	styleUrl: "./terms-template.component.css",
 	encapsulation: ViewEncapsulation.None,

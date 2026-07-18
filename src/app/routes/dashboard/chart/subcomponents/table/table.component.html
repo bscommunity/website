@@ -89,7 +89,7 @@
 						}
 						<ng-template #actionContent let-action>
 							<span class="text-base align-middle leading-none">
-								<mat-icon inline>{{ action.icon }}</mat-icon>
+								<ng-glyph [name]="action.icon" />
 							</span>
 						</ng-template>
 					</div>

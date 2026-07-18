@@ -4,7 +4,7 @@ import { RouterLink } from "@angular/router";
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 // Screens
 // import { WorkshopScreenComponent } from "./subcomponents/workshop-screen/workshop-screen.component";
@@ -20,7 +20,7 @@ import { ReleaseNoteService } from "@/services/release-note.service";
 	imports: [
 		MatButtonModule,
 		MatTooltipModule,
-		MatIconModule,
+		NgGlyph,
 		RouterLink,
 		LandingTagComponent,
 		// Screens

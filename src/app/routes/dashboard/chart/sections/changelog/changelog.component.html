@@ -24,7 +24,7 @@
 							<span
 								class="text-lg align-middle flex items-center justify-center self-center leading-none select-none"
 							>
-								<mat-icon inline>playlist_remove</mat-icon>
+								<ng-glyph name="playlist_remove" />
 							</span>
 						</button>
 					</div>
@@ -35,7 +35,7 @@
 				class="flex flex-col items-center justify-center gap-4 w-full py-9"
 			>
 				<span class="text-4xl"
-					><mat-icon inline>airwave</mat-icon></span
+					><ng-glyph name="airwave" /></span
 				>
 				<h1 class="text-base font-medium">
 					There are currently no changelog entries
@@ -82,7 +82,7 @@
 							<span
 								class="flex flex-row items-center justify-center gap-1"
 							>
-								<mat-icon>playlist_add</mat-icon>
+								<ng-glyph name="playlist_add" />
 								Add
 							</span>
 						}
@@ -94,7 +94,7 @@
 	@if (!addEntryInputVisible()) {
 		<span class="flex items-center justify-end w-full">
 			<button mat-stroked-button (click)="addEntryInputVisible.set(true)">
-				<mat-icon>add_playlist</mat-icon>
+				<ng-glyph name="add_playlist" />
 				Add new entry
 			</button>
 		</span>

@@ -8,7 +8,7 @@ import { Router } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 
 interface Button {
 	label: string;
@@ -25,7 +25,7 @@ interface Button {
 			<div
 				class="flex flex-row items-start md:items-center justify-start gap-6"
 			>
-				<mat-icon class="min-w-6"> help </mat-icon>
+				<ng-glyph name="help" class="min-w-6" />
 				<div class="flex flex-col items-start justify-start gap-1">
 					<b
 						><p>{{ title() }}</p></b
@@ -40,18 +40,17 @@ interface Button {
 				mat-flat-button
 				(click)="onClick()"
 			>
-				<mat-icon
-					class="max-w-5!"
-					svgIcon="discord"
-					inline="true"
-					aria-hidden="false"
-					aria-label="Discord logo"
-				></mat-icon>
+			<ng-icon
+				name="discord"
+				class="max-w-5"
+				aria-hidden="false"
+				aria-label="Discord logo"
+			/>
 				{{ button().label }}
 			</button>
 		</div>
 	`,
-	imports: [MatIconModule, MatButtonModule],
+	imports: [NgIcon, NgGlyph, MatButtonModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LargePanelComponent {

@@ -2,7 +2,7 @@ import { Component, inject, input, viewChild } from "@angular/core";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 
 //Components
@@ -32,7 +32,7 @@ import {
 	selector: "app-chart-contributors-section",
 	imports: [
 		// Modules
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		// Components
 		ChartSectionComponent,

@@ -1,11 +1,11 @@
 import { Component, input } from "@angular/core";
 
 // Components
-import { MatIcon } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 @Component({
 	selector: "app-release-template-item",
-	imports: [MatIcon],
+	imports: [NgGlyph],
 	template: `
 		<div
 			class="flex flex-col justify-center items-start gap-4 overflow-hidden"
@@ -16,9 +16,7 @@ import { MatIcon } from "@angular/material/icon";
 				<span
 					class="flex self-center text-inherit leading-none select-none text-lg"
 				>
-					<mat-icon inline>
-						{{ icon() }}
-					</mat-icon>
+				<ng-glyph [name]="icon()!" />
 				</span>
 				<div
 					class="relative justify-center text-base font-medium leading-snug"
