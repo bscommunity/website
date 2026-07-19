@@ -44,7 +44,6 @@ interface Option {
 							labelPosition="before"
 							class="m-1 w-full flex items-center justify-between rounded-sm border border-outline pr-5"
 							[value]="option.value"
-							[disabled]="i === 0"
 						>
 							<span
 								class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
@@ -55,17 +54,19 @@ interface Option {
 						</mat-radio-button>
 					}
 				</mat-radio-group>
-				<app-panel>
-					Please visit
-					<button (click)="dialogRef.close()">
-						<a
-							href="http://143.110.226.4:3001/encrypt"
-							target="_blank"
-							class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
-							>External's website</a
-						>
-					</button>
-					to create new chart bundles
+				<app-panel [variant]="form.get('chartFlow')?.value === 'new' ? 'warning' : 'info'">
+					@if (form.get('chartFlow')?.value === 'new') {
+						Please use
+							<a
+								href="http://143.110.226.4:3001/encrypt"
+								target="_blank"
+								class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+								(click)="dialogRef.close()"
+							>External's website</a>
+							to create a new bundle
+					} @else {
+						You can <span class="underline cursor-pointer">batch upload</span> multiple chart bundles at once
+					}
 				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
@@ -79,7 +80,7 @@ interface Option {
 				<button
 					type="submit"
 					mat-button
-					[disabled]="!form.get('chartFlow')?.value"
+					[disabled]="!form.get('chartFlow')?.value || form.get('chartFlow')?.value === 'new'"
 				>
 					Continue
 				</button>
@@ -103,7 +104,7 @@ export class PublishChartFlowComponent {
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
-		chartFlow: "",
+		chartFlow: "existing",
 	});
 
 	options: Option[] = [
@@ -114,7 +115,7 @@ export class PublishChartFlowComponent {
 			value: "existing",
 		},
 	];
-	selectedOption: Option | null = null;
+	selectedOption: Option | null = this.options[1];
 
 	test = 1;
 

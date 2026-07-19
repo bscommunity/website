@@ -43,6 +43,7 @@ import { ChartService } from "@/services/api/chart.service";
 import type { WorkshopFilters } from "@/services/filter.service";
 import { FilterService } from "@/services/filter.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
+import { PublishChartBatchComponent } from "@/components/publish/chart/batch.component";
 
 interface ChartsByMonth {
 	name: string; // e.g., "2023-10"
@@ -92,8 +93,8 @@ export class Uploads implements OnInit, OnDestroy {
 		charts.forEach((chart) => {
 			const month = chart.latestVersion?.createdAt
 				? new Date(chart.latestVersion.createdAt)
-						.toISOString()
-						.slice(0, 7)
+					.toISOString()
+					.slice(0, 7)
 				: "unknown";
 
 			let monthEntry = chartsByMonth.find(
@@ -214,6 +215,12 @@ export class Uploads implements OnInit, OnDestroy {
 	openMock() {
 		this.dialog.open(PublishDialogUploadingComponent, {
 			width: "450px",
+		});
+	}
+
+	openBatchMock() {
+		this.dialog.open(PublishChartBatchComponent, {
+			width: "600px",
 		});
 	}
 }
