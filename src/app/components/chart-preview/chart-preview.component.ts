@@ -38,7 +38,7 @@ import { transformDuration } from "@/lib/time";
 export class ChartPreviewComponent {
 	chart = input.required<ChartModel>();
 	size = input<"sm" | "md">("md");
-	variant = input<"default" | "selected">("default");
+	variant = input<"default" | "static" | "selected">("default");
 	fullWidth = input<boolean>(false);
 
 	classes = computed(() =>

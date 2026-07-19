@@ -2,13 +2,15 @@ import { cva } from "class-variance-authority";
 
 export const chartPreview = cva(
 	// Base classes
-	"flex flex-row items-center justify-center cursor-pointer group relative border",
+	"flex flex-row items-center justify-center group relative border",
 
 	{
 		variants: {
 			variant: {
 				default:
-					"bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border-outline-variant/50 text-on-surface",
+					"bg-surface-container hover:bg-surface-container-low transition-colors duration-75 border-outline-variant/50 text-on-surface cursor-pointer",
+
+				static: "bg-surface-container text-on-surface border-outline-variant/50",
 
 				selected: "bg-primary-container text-on-primary-container border-transparent",
 			},

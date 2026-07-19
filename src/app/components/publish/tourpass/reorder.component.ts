@@ -1,24 +1,24 @@
 // CDK
 import {
-	CdkDrag,
-	type CdkDragDrop,
-	CdkDragHandle,
-	CdkDropList,
-	moveItemInArray,
+    CdkDrag,
+    type CdkDragDrop,
+    CdkDragHandle,
+    CdkDropList,
+    moveItemInArray,
 } from "@angular/cdk/drag-drop";
 import {
-	ChangeDetectionStrategy,
-	Component,
-	inject,
-	ViewEncapsulation,
+    ChangeDetectionStrategy,
+    Component,
+    inject,
+    ViewEncapsulation,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 // Material
 import {
-	MAT_DIALOG_DATA,
-	MatDialogModule,
-	MatDialogRef,
+    MAT_DIALOG_DATA,
+    MatDialogModule,
+    MatDialogRef,
 } from "@angular/material/dialog";
 import { NgGlyph } from "@ng-icons/core";
 import type { ChartModel } from "@/models/chart.model";
@@ -29,14 +29,14 @@ import type { DialogData } from "@/services/publish/publish.service";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 
 @Component({
-	selector: "app-publish-tourpass-reorder",
-	// Needed because CDK teleports the drag preview/placeholder outside this
-	// component's DOM (into an overlay attached to <body>), so Angular's
-	// normal emulated style scoping can't reach it. We scope manually below
-	// instead by prefixing every rule with the "tp-reorder" classes, which
-	// CDK carries over onto the cloned preview element.
-	encapsulation: ViewEncapsulation.None,
-	template: `
+    selector: "app-publish-tourpass-reorder",
+    // Needed because CDK teleports the drag preview/placeholder outside this
+    // component's DOM (into an overlay attached to <body>), so Angular's
+    // normal emulated style scoping can't reach it. We scope manually below
+    // instead by prefixing every rule with the "tp-reorder" classes, which
+    // CDK carries over onto the cloned preview element.
+    encapsulation: ViewEncapsulation.None,
+    template: `
         <h2 mat-dialog-title>Reorder</h2>
         <form (ngSubmit)="onSubmit()">
             <mat-dialog-content class="mat-typography flex! flex-col gap-4">
@@ -65,6 +65,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
                                 <app-chart-preview
                                     [chart]="chart"
                                     size="sm"
+                                    variant="static"
 									[showItems]="[]"
                                     [fullWidth]="true"
                                 >
@@ -108,16 +109,16 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
             </mat-dialog-actions>
         </form>
     `,
-	styles: [
-		`
+    styles: [
+        `
         /* Every non-dragged item eases into its new slot instead of jumping */
         .tp-reorder-item {
-            transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+            transition: transform 50ms cubic-bezier(0, 0, 0.2, 1);
         }
 
         /* CDK adds this class to items animating back into place after drop */
         .tp-reorder-item.cdk-drag-animating {
-            transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
+            transition: transform 100ms cubic-bezier(0, 0, 0.2, 1);
         }
 
         /* The item actually being dragged shouldn't ease (it should track the pointer 1:1) */
@@ -131,12 +132,13 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
          * element's classes onto the preview node.
          */
         .tp-reorder-item.cdk-drag-preview {
-            box-sizing: border-box;
+            /* box-sizing: border-box;
             border-radius: 0.75rem;
             box-shadow:
                 0 12px 24px -6px rgba(0, 0, 0, 0.35),
                 0 4px 8px -2px rgba(0, 0, 0, 0.2);
-            transform: scale(1.03) rotate(1deg);
+            transform: scale(1.03) rotate(1deg); */
+            letter-spacing: 0.5px;
             opacity: 0.96;
             z-index: 1000;
         }
@@ -229,40 +231,40 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
             outline-offset: 2px;
         }
         `,
-	],
-	imports: [
-		FormsModule,
-		MatDialogModule,
-		MatButtonModule,
-		NgGlyph,
-		CdkDropList,
-		CdkDrag,
-		CdkDragHandle,
-		ChartPreviewComponent,
-	],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    ],
+    imports: [
+        FormsModule,
+        MatDialogModule,
+        MatButtonModule,
+        NgGlyph,
+        CdkDropList,
+        CdkDrag,
+        CdkDragHandle,
+        ChartPreviewComponent,
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishTourPassReorderComponent {
-	dialogRef =
-		inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef);
-	data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
+    dialogRef =
+        inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef);
+    data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
 
-	selectedCharts: ChartModel[] = [
-		...(this.data.formData.selectedCharts || []),
-	];
+    selectedCharts: ChartModel[] = [
+        ...(this.data.formData.selectedCharts || []),
+    ];
 
-	drop(event: CdkDragDrop<ChartModel[]>) {
-		moveItemInArray(
-			this.selectedCharts,
-			event.previousIndex,
-			event.currentIndex,
-		);
-	}
+    drop(event: CdkDragDrop<ChartModel[]>) {
+        moveItemInArray(
+            this.selectedCharts,
+            event.previousIndex,
+            event.currentIndex,
+        );
+    }
 
-	onSubmit() {
-		this.dialogRef.close({
-			chartIds: this.selectedCharts.map((chart) => chart.id),
-			selectedCharts: [...this.selectedCharts],
-		});
-	}
+    onSubmit() {
+        this.dialogRef.close({
+            chartIds: this.selectedCharts.map((chart) => chart.id),
+            selectedCharts: [...this.selectedCharts],
+        });
+    }
 }
