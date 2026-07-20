@@ -121,6 +121,11 @@ body {
 	gap: 0.5rem;
 }
 
+ng-glyph {
+	user-select: none;
+	pointer-events: none;
+}
+
 .icon-20 {
 	font-size: 20px;
 }

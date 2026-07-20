@@ -12,9 +12,6 @@ import { MatButtonModule } from "@angular/material/button";
 import { NgGlyph } from "@ng-icons/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-// Components
-import { PanelComponent } from "@/components/panel/panel.component";
-
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 
@@ -22,7 +19,7 @@ interface Bundle {
 	name: string;
 	duration: string;
 	notes: string;
-	status: "pending" | "uploading" | "success" | "error";
+	status: "ready" | "parsing" | "uploading" | "success" | "error";
 	errorMessage?: string;
 	files: File;
 }
@@ -58,20 +55,23 @@ interface Bundle {
 				>
 					@for (bundle of bundles; track $index) {
 						<li
-							class="flex items-center justify-between gap-4 px-4 py-3 border-surface-variant"
+							class="flex items-center justify-between gap-6 px-4 py-3 border-surface-variant"
 							[class.border-b]="!$last"
 						>
-							<div class="flex items-center justify-start gap-4">
+							<div
+								class="flex items-center justify-start gap-4 flex-1 min-w-0"
+							>
 								<ng-glyph
-									name="insert_drive_file"
+									name="folder_zip"
 									size="24"
-									class="text-primary"
+									class="text-primary shrink-0"
 								></ng-glyph>
 
-								<div class="flex flex-col">
-									<span class="font-medium">{{
-										bundle.name
-									}}</span>
+								<div class="flex flex-col min-w-0">
+									<span
+										class="font-medium overflow-hidden whitespace-nowrap text-ellipsis"
+										>{{ bundle.name }}</span
+									>
 									@if (bundle.status === "error") {
 										<span class="text-sm text-error">{{
 											bundle.errorMessage
@@ -85,6 +85,15 @@ interface Bundle {
 								</div>
 							</div>
 							<div class="flex items-center justify-center gap-2">
+								<div
+									class="bg-secondary-container rounded-full px-2.5 py-0.5 text-xs text-on-secondary-container"
+									[class.animate-pulse]="
+										bundle.status === 'parsing' ||
+										bundle.status === 'uploading'
+									"
+								>
+									{{ bundle.status }}
+								</div>
 								<button
 									mat-icon-button
 									type="button"
@@ -157,23 +166,23 @@ export class PublishChartBatchComponent {
 			name: "we_live_forever.zip",
 			duration: "5m30s",
 			notes: "325 notes",
-			status: "pending",
+			status: "ready",
 			files: new File([], "we_live_forever.zip"),
 		},
 		{
-			name: "the_unfathomable_puzzle.zip.zip",
+			name: "the_unfathomable_enormous_puzzle.zip",
 			duration: "4m10s",
 			notes: "510 notes",
-			status: "pending",
-			files: new File([], "the_unfathomable_puzzle.zip.zip"),
+			status: "parsing",
+			files: new File([], "the_unfathomable_enormous_puzzle.zip"),
 		},
 		{
-			name: "echoes_of_time.zip.zip.zip",
+			name: "echoes_of_time.zip",
 			duration: "1m10s",
 			notes: "583 notes",
 			status: "error",
 			errorMessage: "missing cover art",
-			files: new File([], "echoes_of_time.zip.zip.zip"),
+			files: new File([], "echoes_of_time.zip.zip"),
 		},
 	];
 
