@@ -1,4 +1,4 @@
-import { Component, inject, input, viewChild } from "@angular/core";
+import { Component, computed, inject, input, viewChild } from "@angular/core";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
@@ -23,10 +23,19 @@ import { ContributorService } from "@/services/api/contributor.service";
 
 // Models
 import { ContributorModel } from "@/models/contributor.model";
+import { SimplifiedUserModel } from "@/models/user.model";
 import {
 	ContributorRole,
 	getContributorRoleLabel,
 } from "@/models/enums/role.enum";
+
+interface GroupedContributor {
+	user: SimplifiedUserModel;
+	roles: ContributorRole[];
+	catalogItemId: string;
+	joinedAt: Date;
+	isOwner: boolean;
+}
 
 @Component({
 	selector: "app-chart-contributors-section",
@@ -49,9 +58,37 @@ export class ContributorsComponent {
 	readonly contributorService = inject(ContributorService);
 
 	readonly contributorTable =
-		viewChild.required<TableComponent<ContributorModel>>(
+		viewChild.required<TableComponent<GroupedContributor>>(
 			"contributorTable",
 		);
+
+	readonly groupedContributors = computed(() => {
+		const list = this.contributors();
+		if (!list) return [];
+
+		const userMap = new Map<string, GroupedContributor>();
+
+		for (const c of list) {
+			const existing = userMap.get(c.user.id);
+			if (existing) {
+				existing.roles.push(c.role);
+			} else {
+				userMap.set(c.user.id, {
+					user: c.user,
+					roles: [c.role],
+					catalogItemId: c.catalogItemId,
+					joinedAt: c.joinedAt,
+					isOwner: c.role === ContributorRole.AUTHOR,
+				});
+			}
+		}
+
+		return Array.from(userMap.values()).sort((a, b) => {
+			if (a.isOwner && !b.isOwner) return -1;
+			if (!a.isOwner && b.isOwner) return 1;
+			return a.user.username.localeCompare(b.user.username);
+		});
+	});
 
 	openAddContributorConfirmationDialog(): void {
 		const contributors = this.contributors();
@@ -67,13 +104,14 @@ export class ContributorsComponent {
 	}
 
 	openEditContributorConfirmationDialog(
-		index: number,
-		contributor: ContributorModel,
+		_: number,
+		contributor: GroupedContributor,
 	): void {
 		this.dialog.open(EditContributorDialogComponent, {
 			data: {
-				contributor,
 				chartId: this.chartId(),
+				user: contributor.user,
+				roles: contributor.roles,
 			},
 			width: "450px",
 		});
@@ -81,7 +119,7 @@ export class ContributorsComponent {
 
 	openRemoveContributorConfirmationDialog(
 		_: number,
-		contributor: ContributorModel,
+		contributor: GroupedContributor,
 	): void {
 		console.log("Removing contributor", contributor);
 
@@ -109,11 +147,11 @@ export class ContributorsComponent {
 		});
 	}
 
-	contributorsColumns: TableColumn<ContributorModel>[] = [
+	contributorsColumns: TableColumn<GroupedContributor>[] = [
 		{
 			columnDef: "name",
 			header: "Name",
-			cell: (item: ContributorModel) =>
+			cell: (item: GroupedContributor) =>
 				item.user.avatarUrl
 					? `<span class="flex items-center justify-center gap-3"><img class="rounded-full w-5 h-5" src="${item.user.avatarUrl}" alt="${item.user.username}" /> ${item.user.username}<span />`
 					: `
@@ -126,14 +164,14 @@ export class ContributorsComponent {
 					</div> ${item.user.username}<span />`,
 		},
 		{
-			columnDef: "role",
-			header: "Role",
-			cell: (item: ContributorModel) =>
-				`${getContributorRoleLabel(item.role)}`,
+			columnDef: "roles",
+			header: "Roles",
+			cell: (item: GroupedContributor) =>
+				item.roles.map((r) => getContributorRoleLabel(r)).join(", "),
 		},
 	];
 
-	contributorsActions: Action<ContributorModel>[] = [
+	contributorsActions: Action<GroupedContributor>[] = [
 		{
 			description: "Edit",
 			icon: "edit",
@@ -144,8 +182,7 @@ export class ContributorsComponent {
 			description: "Remove",
 			icon: "remove_circle_outline",
 			callback: this.openRemoveContributorConfirmationDialog.bind(this),
-			disabled: (_, item: ContributorModel) =>
-				item.role === ContributorRole.AUTHOR,
+			disabled: (_, item: GroupedContributor) => item.isOwner,
 		},
 	];
 }

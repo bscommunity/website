@@ -45,4 +45,12 @@ export interface PublishHandler<
 	 * @returns A string with an error message if validation fails, or null if validation passes.
 	 */
 	validate?(formData: TFormData): string | null;
+
+	/**
+	 * Optional hook called after successful submit and before the success dialog.
+	 * Use this to perform post-creation operations (e.g., adding contributors).
+	 * @param formData - The submitted form data.
+	 * @param response - The data returned by submit().
+	 */
+	onPostSubmit?(formData: TFormData, response: TSuccessData): Promise<void>;
 }

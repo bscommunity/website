@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, of, tap } from "rxjs";
 
 // Models
 import {
@@ -22,11 +22,18 @@ export class UserService {
 
 	private readonly apiUrl = `${apiUrl}/users`;
 
+	private readonly searchCache = new Map<string, UserModel[]>();
+
 	// Read
 	searchUsers(query: string): Observable<UserModel[]> {
+		const cached = this.searchCache.get(query);
+		if (cached) return of(cached);
+
 		return this.http.get<UserModel[]>(this.apiUrl, {
 			params: { search: query },
-		});
+		}).pipe(
+			tap((results) => this.searchCache.set(query, results)),
+		);
 	}
 
 	getUserByUsername(username: string): Observable<UserProfileResponseModel> {

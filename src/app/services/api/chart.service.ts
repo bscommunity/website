@@ -293,21 +293,6 @@ export class ChartService {
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
-		const cachedChart = this.cacheService.getChart(id);
-
-		if (cachedChart) {
-			// If we have a cached chart, we can return it immediately
-			try {
-				return Chart.parse(cachedChart);
-			} catch (error) {
-				console.error(
-					"Failed to parse cached chart, fetching from remote:",
-					error,
-				);
-				// Fall back to API fetch if parsing fails.
-			}
-		}
-
 		const response = await firstValueFrom(this.fetchChartFromRemote(id));
 		console.log("Fetched chart from API:", response);
 
@@ -342,7 +327,7 @@ export class ChartService {
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
 
-		this.cacheService.updateChart(updatedChart);
+		this.cacheService.updateChart(updatedChart.id, () => updatedChart);
 		this.updateScopedCachesWithChart("private", updatedChart);
 
 		return updatedChart;

@@ -7,15 +7,16 @@ import { Difficulty } from "./enums/difficulty.enum";
 import { Visibility } from "./enums/visibility.enum";
 
 // Models
+import { Changelog } from "./changelog.model";
 import { Contributor } from "./contributor.model";
 import { Track } from "./track.model";
 import { Version } from "./version.model";
 
 export const Chart = z.object({
 	id: z.string(),
-	type: z.nativeEnum(CatalogItemType).default(CatalogItemType.CHART),
-	status: z.nativeEnum(CatalogItemStatus),
-	visibility: z.nativeEnum(Visibility),
+	type: z.enum(CatalogItemType).default(CatalogItemType.CHART),
+	status: z.enum(CatalogItemStatus),
+	visibility: z.enum(Visibility),
 	isFeatured: z.boolean(),
 	downloadsSum: z.number().min(0).default(0),
 	contributors: z.array(Contributor).default([]),
@@ -31,11 +32,12 @@ export const Chart = z.object({
 
 	track: Track,
 	versionsCount: z.number().int(),
-	difficulty: z.nativeEnum(Difficulty),
+	difficulty: z.enum(Difficulty),
 	notesAmount: z.number().int(),
 	effectsAmount: z.number().int(),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
+	changelog: z.array(Changelog).default([]),
 	latestVersion: Version.nullable(),
 });
 
@@ -60,6 +62,7 @@ export const CreateChart = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
+	changelog: true,
 }).extend({
 	chartBundle: z.instanceof(File).optional(),
 });
@@ -82,5 +85,6 @@ export const MutateChartSchema = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
+	changelog: true,
 }).partial();
 export type MutateChartModel = z.infer<typeof MutateChartSchema>;

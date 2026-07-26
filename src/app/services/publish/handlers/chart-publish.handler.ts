@@ -4,6 +4,7 @@ import { PublishChartSourceComponent } from "@/components/publish/chart/source.c
 import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
 // Components
 import { PublishTypeComponent } from "@/components/publish/type.component";
+import { PublishContributorsComponent } from "@/components/publish/contributors/contributors.component";
 import type { ChartModel } from "@/models/chart.model";
 
 // Models
@@ -11,9 +12,11 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 import type { Genre } from "@/models/enums/genre.enum";
 // Enums
 import type { StreamingLinkModel } from "@/models/streaming-link.model";
+import type { SimplifiedContributorModel } from "@/models/contributor.model";
 
 // Services
 import { ChartService, type CreateChartPayload } from "@/services/api/chart.service";
+import { ContributorService } from "@/services/api/contributor.service";
 import { CacheService } from "@/services/cache.service";
 import type { PublishHandler } from "../publish-handler.interface";
 
@@ -33,6 +36,7 @@ export interface ChartFormData {
 	effectsAmount: number;
 	genre: Genre | null;
 	duration: number;
+	contributors?: SimplifiedContributorModel[];
 }
 
 export const initialChartFormData: ChartFormData = {
@@ -58,6 +62,7 @@ export class ChartPublishHandler
 	implements PublishHandler<ChartFormData, ChartModel>
 {
 	private chartService = inject(ChartService);
+	private contributorService = inject(ContributorService);
 	private cacheService = inject(CacheService);
 
 	getStepComponents(): Type<unknown>[] {
@@ -65,6 +70,7 @@ export class ChartPublishHandler
 			PublishTypeComponent,
 			PublishChartFlowComponent,
 			PublishChartSourceComponent,
+			PublishContributorsComponent,
 		];
 	}
 
@@ -128,5 +134,16 @@ export class ChartPublishHandler
 		this.cacheService.addChart(response);
 
 		return response;
+	}
+
+	async onPostSubmit(data: ChartFormData, response: ChartModel): Promise<void> {
+		if (!data.contributors?.length) return;
+
+		await this.contributorService.addContributors(
+			response.id,
+			data.contributors,
+		);
+
+		console.log("Contributors added successfully to chart:", response.id);
 	}
 }

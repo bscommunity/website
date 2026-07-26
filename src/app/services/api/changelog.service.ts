@@ -4,34 +4,51 @@ import { firstValueFrom } from "rxjs";
 
 // Models
 import type {
-	CreateChangelogModel,
 	ChangelogModel,
+	CreateChangelogModel,
+	CreateChangelogResponseModel,
 } from "@/models/changelog.model";
 
 import { apiUrl } from "../../lib/api";
+import { CacheService } from "../cache.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class ChangelogService {
 	private http = inject(HttpClient);
+	private cacheService = inject(CacheService);
 
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	async addEntry(
 		chartId: string,
 		entry: CreateChangelogModel,
-	): Promise<ChangelogModel> {
-		console.log(
-			`Adding a new changelog entry to chart with id ${chartId}`,
-		);
+	): Promise<CreateChangelogResponseModel> {
+		console.log(`Adding a new changelog entry to chart with id ${chartId}`);
 
-		return await firstValueFrom(
-			this.http.post<ChangelogModel>(
+		const response = await firstValueFrom(
+			this.http.post<CreateChangelogResponseModel>(
 				`${this.apiUrl}/${chartId}/issues`,
 				entry,
 			),
 		);
+
+		this.cacheService.updateChart(chartId, (chart) => {
+			return {
+				...chart,
+				changelog: [
+					...chart.changelog,
+					{
+						id: response.id,
+						description: entry.description,
+						createdAt: new Date(),
+					},
+				],
+			};
+		});
+
+		return response;
 	}
 
 	async deleteEntry(chartId: string, logId: string): Promise<boolean> {
@@ -43,6 +60,15 @@ export class ChangelogService {
 					`${this.apiUrl}/${chartId}/issues/${logId}`,
 				),
 			);
+
+			this.cacheService.updateChart(chartId, (chart) => {
+				return {
+					...chart,
+					changelog: chart.changelog.filter(
+						(entry) => entry.id !== logId,
+					),
+				};
+			});
 
 			return true;
 		} catch (error) {

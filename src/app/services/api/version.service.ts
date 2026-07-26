@@ -44,7 +44,11 @@ export class VersionService {
 			),
 		);
 
-		this.cacheService.addVersion(chartId, response);
+		this.cacheService.updateChart(chartId, (chart) => ({
+			...chart,
+			latestVersion: response,
+			versionsCount: chart.versionsCount + 1,
+		}));
 
 		return response;
 	}
@@ -60,7 +64,7 @@ export class VersionService {
 				),
 			);
 
-			this.cacheService.removeVersion(chartId, versionId);
+			this.cacheService.removeChart(chartId);
 
 			return true;
 		} catch (error) {

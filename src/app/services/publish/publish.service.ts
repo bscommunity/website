@@ -129,7 +129,9 @@ export class PublishDialogService<
 					this.switchHandler(String(result.contentType));
 				}
 				this.formData = { ...this.formData, ...result };
-				this.additionalData = result.additionalData || {};
+				if (result.additionalData) {
+					this.additionalData = { ...this.additionalData, ...result.additionalData };
+				}
 
 				this.moveToStep(this.currentStepSubject.value + 1);
 			}
@@ -189,6 +191,12 @@ export class PublishDialogService<
 				this.formData,
 				publishSessionId,
 			);
+
+			// Post-submit hook (e.g., adding contributors)
+			if (this.handler.onPostSubmit) {
+				await this.handler.onPostSubmit(this.formData, response);
+			}
+
 			loadingDialog.close();
 			const successComponent =
 				this.handler.getSuccessComponent?.() ||

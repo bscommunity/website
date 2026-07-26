@@ -1,11 +1,10 @@
-<!-- Roles selector -->
-<mat-chip-set aria-label="Enter reactive form keywords">
-	@for (role of baseRoles; track role) {
+<mat-chip-set aria-label="Select contributor roles">
+	@for (role of availableRoles(); track role) {
 		<mat-chip-option
 			[selected]="isRoleSelected(role)"
 			(selectionChange)="toggleRole($event, role)"
 		>
-			{{ role }}
+			{{ getRoleLabel(role) }}
 		</mat-chip-option>
 	}
 </mat-chip-set>

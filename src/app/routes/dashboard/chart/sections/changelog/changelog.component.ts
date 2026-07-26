@@ -91,18 +91,18 @@ export class ChangelogComponent {
 		this.isLoading = true;
 
 		try {
-			const result = await this.changelogService.addEntry(this.chartId(), {
+			const entry = await this.changelogService.addEntry(this.chartId(), {
 				description: this.newEntry,
 			});
 
-			if (!result) {
+			if (!entry.id) {
 				throw new Error("An error occurred");
 			}
 
 			this.entries.update((entries) => [
 				...entries,
 				{
-					id: result.id,
+					id: entry.id,
 					description: this.newEntry,
 					createdAt: new Date(),
 				},
@@ -121,6 +121,8 @@ export class ChangelogComponent {
 	}
 
 	removeEntryFromTable(entry: ChangelogModel) {
-		this.entries.update((entries) => entries.filter((e) => e.id !== entry.id));
+		this.entries.update((entries) =>
+			entries.filter((e) => e.id !== entry.id),
+		);
 	}
 }

@@ -65,6 +65,8 @@ export class SearchbarComponent implements OnInit, OnDestroy {
 		this.searchSubscription = this.searchSubject
 			.pipe(debounceTime(this.debounceDuration()))
 			.subscribe((value) => {
+				this.onSearch()(value);
+
 				if (this.enableSuggestions()) {
 					this.querySuggestions.set("loading");
 					this.chartService.getSuggestions(value).subscribe({

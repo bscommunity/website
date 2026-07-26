@@ -6,6 +6,8 @@ export enum ContributorRole {
 	EFFECTS = "EFFECTS",
 	SYNC = "SYNC",
 	GAMEPLAY = "GAMEPLAY",
+	ART = "ART",
+	TEXTURES = "TEXTURES",
 }
 
 export enum UserRole {
@@ -13,6 +15,20 @@ export enum UserRole {
 	MODERATOR = "MODERATOR",
 	ADMIN = "ADMIN",
 }
+
+export const CHART_CONTRIBUTOR_ROLES: ContributorRole[] = [
+	ContributorRole.CHART,
+	ContributorRole.AUDIO,
+	ContributorRole.REVISION,
+	ContributorRole.EFFECTS,
+	ContributorRole.SYNC,
+	ContributorRole.GAMEPLAY,
+];
+
+export const THEME_CONTRIBUTOR_ROLES: ContributorRole[] = [
+	ContributorRole.ART,
+	ContributorRole.TEXTURES,
+];
 
 export const getContributorRoleLabel = (role: ContributorRole): string => {
 	switch (role) {
@@ -30,6 +46,10 @@ export const getContributorRoleLabel = (role: ContributorRole): string => {
 			return "Sync";
 		case ContributorRole.GAMEPLAY:
 			return "Gameplay";
+		case ContributorRole.ART:
+			return "Art";
+		case ContributorRole.TEXTURES:
+			return "Textures";
 		default:
 			return "Unknown Role";
 	}

@@ -2,7 +2,7 @@
 	<app-table #contributorTable
 		class="w-full"
 		[columns]="contributorsColumns"
-		[data]="contributors() ?? []"
+		[data]="groupedContributors()"
 		[actions]="contributorsActions"
 	 />
 	<span class="flex items-center justify-end w-full">

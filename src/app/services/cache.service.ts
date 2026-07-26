@@ -6,8 +6,6 @@ import { CookieService } from "./cookie.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
-import { ContributorModel } from "@/models/contributor.model";
-import { VersionModel } from "@/models/version.model";
 
 import { SortOption } from "@/models/enums/sort-option.enum";
 import { WorkshopFilters } from "./filter.service";
@@ -273,7 +271,7 @@ export class CacheService {
 		const cacheKey = `chart_${chart.id}`;
 
 		if (localStorage.getItem(cacheKey) !== null) {
-			return this.updateChart(chart);
+			return this.updateChart(chart.id, () => chart);
 		}
 
 		this.storageService.setItem(
@@ -314,7 +312,7 @@ export class CacheService {
 						: MAX_CACHED_CHARTS_SESSION,
 				);
 			} else {
-				this.updateChart(chart, storage);
+				this.updateChart(chart.id, () => chart, storage);
 			}
 		});
 	}
@@ -328,17 +326,20 @@ export class CacheService {
 	}
 
 	updateChart(
-		updatedChart: ChartModel,
+		id: string,
+		updater: (chart: CachedChart) => ChartModel,
 		storage: STORAGE = "persistent",
 	): void {
-		const chart = this.getChart(updatedChart.id);
+		const chart = this.getChart(id, storage);
 
 		if (!chart) {
 			return;
 		}
 
+		const updatedChart = updater(chart);
+
 		this.storageService.setItem(
-			`chart_${updatedChart.id}`,
+			`chart_${id}`,
 			JSON.stringify({
 				...updatedChart,
 				lastAccessed: new Date().toISOString(),
@@ -346,102 +347,7 @@ export class CacheService {
 			storage === "session",
 		);
 
-		console.log(`Chart ${updatedChart.id} updated in cache.`);
-		/* console.log(
-			`Chart ${updatedChart.id} updated in cache:`,
-			this.getChart(updatedChart.id),
-		); */
-	}
-
-	// Contributors
-
-	updateChartContributors(
-		id: string,
-		newContributors: ContributorModel[],
-	): void {
-		const chart = this.getChart(id);
-		if (!chart) {
-			return;
-		}
-
-		// Get the current list of contributors, if any
-		const currentContributors = chart.contributors || [];
-
-		// Merge contributors: update existing ones and add any new ones
-		const mergedContributors = currentContributors.map((contributor) => {
-			const updated = newContributors.find(
-				(newC) => newC.user.id === contributor.user.id,
-			);
-			return updated ? updated : contributor;
-		});
-
-		newContributors.forEach((newContributor) => {
-			if (
-				!currentContributors.some(
-					(c) => c.user.id === newContributor.user.id,
-				)
-			) {
-				mergedContributors.push(newContributor);
-			}
-		});
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				contributors: mergedContributors,
-			}),
-		);
-	}
-
-	deleteChartContributor(id: string, contributorId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.contributors) {
-			return;
-		}
-
-		const updatedContributors = chart.contributors?.filter(
-			(contributor) => contributor.user.id !== contributorId,
-		);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				contributors: updatedContributors,
-			}),
-		);
-	}
-
-	// Versions
-
-	addVersion(id: string, version: VersionModel): void {
-		const chart = this.getChart(id);
-
-		if (!chart) {
-			return;
-		}
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				latestVersion: version,
-				versionsCount: chart.versionsCount + 1,
-			}),
-		);
-	}
-
-	removeVersion(id: string, _versionId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart) {
-			return;
-		}
-
-		// Can't determine the new latestVersion without a re-fetch
-		this.removeChart(id);
+		console.log(`Chart ${id} updated in cache.`);
 	}
 
 	clearCache(): void {

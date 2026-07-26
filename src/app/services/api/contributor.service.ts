@@ -21,7 +21,7 @@ export class ContributorService {
 	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
 
-	private readonly apiUrl = `${apiUrl}/charts`;
+	private readonly apiUrl = `${apiUrl}/contributors/chart`;
 
 	// Add
 	async addContributors(
@@ -31,14 +31,24 @@ export class ContributorService {
 		console.log(`Adding ${contributors.length} contributors to ${chartId}`);
 		const response = await firstValueFrom(
 			this.http.post<ContributorModel[]>(
-				`${this.apiUrl}/${chartId}/contributors`,
+				`${this.apiUrl}/${chartId}`,
 				{
 					contributors: contributors,
 				},
 			),
 		);
 
-		this.cacheService.updateChartContributors(chartId, response);
+		this.cacheService.updateChart(chartId, (chart) => {
+			const currentContributors = chart.contributors || [];
+			const updatedUserIds = new Set(response.map((c) => c.user.id));
+			const filtered = currentContributors.filter(
+				(c) => !updatedUserIds.has(c.user.id),
+			);
+			return {
+				...chart,
+				contributors: [...filtered, ...response],
+			};
+		});
 		console.log("Contributors added successfully!", response);
 	}
 
@@ -46,36 +56,59 @@ export class ContributorService {
 	async updateContributor(
 		chartId: string,
 		userId: string,
-		role: ContributorRole,
-	): Promise<ContributorModel> {
-		console.log("Updating contributor with id:", userId);
-		const updatedContributor = await firstValueFrom(
-			this.http.put<ContributorModel>(
-				`${this.apiUrl}/${chartId}/contributors/${userId}`,
+		roles: ContributorRole[],
+	): Promise<ContributorModel[]> {
+		console.log("Updating contributor roles for user:", userId);
+		const updatedContributors = await firstValueFrom(
+			this.http.put<ContributorModel[]>(
+				`${this.apiUrl}/${chartId}/${userId}`,
 				{
-					role,
+					roles,
 				},
 			),
 		);
 
-		this.cacheService.updateChartContributors(chartId, [
-			updatedContributor,
-		]);
-		return updatedContributor;
+		this.cacheService.updateChart(chartId, (chart) => {
+			const currentContributors = chart.contributors || [];
+			const updatedUserIds = new Set(updatedContributors.map((c) => c.user.id));
+			const filtered = currentContributors.filter(
+				(c) => !updatedUserIds.has(c.user.id),
+			);
+			return {
+				...chart,
+				contributors: [...filtered, ...updatedContributors],
+			};
+		});
+		return updatedContributors;
 	}
 
 	// Delete
-	async deleteContributor(chartId: string, id: string): Promise<boolean> {
-		console.log("Deleting contributor with ID:", id);
+	async deleteContributor(
+		chartId: string,
+		id: string,
+		role?: ContributorRole,
+	): Promise<boolean> {
+		console.log("Removing contributor:", id, role ?? "(all roles)");
 
 		try {
 			await firstValueFrom(
 				this.http.delete<ContributorModel>(
-					`${this.apiUrl}/${chartId}/contributors/${id}`,
+					`${this.apiUrl}/${chartId}/${id}`,
+					{
+						params: role ? { role } : {},
+					},
 				),
 			);
 
-			this.cacheService.deleteChartContributor(chartId, id);
+			this.cacheService.updateChart(chartId, (chart) => ({
+				...chart,
+				contributors: (chart.contributors || []).filter(
+					(contributor) =>
+						role
+							? !(contributor.user.id === id && contributor.role === role)
+							: contributor.user.id !== id,
+				),
+			}));
 
 			return true;
 		} catch (error) {
