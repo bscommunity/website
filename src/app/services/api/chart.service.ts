@@ -293,13 +293,24 @@ export class ChartService {
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
+		const cachedChart = this.cacheService.getChart(id);
+
+		if (cachedChart) {
+			try {
+				return Chart.parse(cachedChart);
+			} catch (error) {
+				console.error(
+					"Failed to parse cached chart, fetching from remote:",
+					error,
+				);
+			}
+		}
+
 		const response = await firstValueFrom(this.fetchChartFromRemote(id));
 		console.log("Fetched chart from API:", response);
 
 		const parsedChart = Chart.parse(response);
 
-		// We need to add, since we don't know if it's already cached
-		// The user may just pasted the URL in the browser
 		this.cacheService.addChart(parsedChart);
 		return parsedChart;
 	}
