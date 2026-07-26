@@ -1,59 +1,78 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-
 import {
-	FormBuilder,
-	FormGroup,
-	FormsModule,
-	ReactiveFormsModule,
-} from "@angular/forms";
-import { MatRadioModule } from "@angular/material/radio";
-import { MatDialogModule } from "@angular/material/dialog";
+	ChangeDetectionStrategy,
+	ChangeDetectorRef,
+	Component,
+	ElementRef,
+	ViewChild,
+	inject,
+	type OnDestroy,
+} from "@angular/core";
+
+import { MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { NgGlyph } from "@ng-icons/core";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { Subject, takeUntil } from "rxjs";
 
-// Types
-import { type DialogData } from "@/services/publish/publish.service";
-
-interface Bundle {
-	name: string;
-	duration: string;
-	notes: string;
-	status: "ready" | "parsing" | "uploading" | "success" | "error";
-	errorMessage?: string;
-	files: File;
-}
+import {
+	BatchUploadQueueService,
+	type Bundle,
+} from "@/services/publish/batch-upload-queue.service";
 
 @Component({
 	selector: "app-publish-chart-batch",
 	template: `
 		<h2 mat-dialog-title>Batch upload</h2>
-		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography">
-				<p class="mb-4">Drop multiple chart bundles at once</p>
-				<div
-					class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed border-surface-variant rounded-lg cursor-pointer hover:bg-primary/10 transition-colors"
-				>
-					<ng-glyph
-						name="file_upload"
-						size="32"
-						class="text-primary mb-2"
-					></ng-glyph>
-					<span>
-						Drag and drop .zip bundles here or
-						<button
-							class="underline text-primary"
-							(click)="selectFiles()"
-						>
-							select files
-						</button>
-					</span>
-				</div>
+		<mat-dialog-content class="mat-typography">
+			<p class="mb-4">
+				Drop multiple chart bundles at once
+				<span class="text-outline">
+					({{ queue.bundlesCount }}/{{ queue.maxBundles }})
+				</span>
+			</p>
 
+			<div
+				class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed border-surface-variant rounded-lg cursor-pointer hover:bg-primary/10 transition-colors"
+				(dragover.prevent)="onDragOver($event)"
+				(dragleave.prevent)="onDragLeave($event)"
+				(drop.prevent)="onDrop($event)"
+				#dropZone
+			>
+				<ng-glyph
+					name="file_upload"
+					size="32"
+					class="text-primary mb-2"
+				></ng-glyph>
+				<span>
+					Drag and drop .zip bundles here or
+					<button
+						class="underline text-primary"
+						type="button"
+						(click)="selectFiles()"
+					>
+						select files
+					</button>
+				</span>
+				@if (queue.bundlesCount >= queue.maxBundles) {
+					<span class="text-sm text-outline mt-1">
+						Maximum of {{ queue.maxBundles }} bundles reached
+					</span>
+				}
+			</div>
+
+			<input
+				#fileInput
+				type="file"
+				accept=".zip"
+				multiple
+				class="hidden"
+				(change)="onFileSelected($event)"
+			/>
+
+			@if (bundles.length > 0) {
 				<ul
 					class="mt-4 border border-surface-variant rounded-lg overflow-hidden"
 				>
-					@for (bundle of bundles; track $index) {
+					@for (bundle of bundles; track bundle.id) {
 						<li
 							class="flex items-center justify-between gap-6 px-4 py-3 border-surface-variant"
 							[class.border-b]="!$last"
@@ -64,7 +83,11 @@ interface Bundle {
 								<ng-glyph
 									name="folder_zip"
 									size="24"
-									class="text-primary shrink-0"
+									[class.text-primary]="bundle.status === 'ready'"
+									[class.text-on-secondary-container]="bundle.status === 'uploading'"
+									[class.text-success]="bundle.status === 'success'"
+									[class.text-error]="bundle.status === 'error'"
+									class="shrink-0"
 								></ng-glyph>
 
 								<div class="flex flex-col min-w-0">
@@ -76,10 +99,9 @@ interface Bundle {
 										<span class="text-sm text-error">{{
 											bundle.errorMessage
 										}}</span>
-									} @else {
-										<span class="text-sm text-outline">
-											{{ bundle.duration }} •
-											{{ bundle.notes }}
+									} @else if (bundle.status === "success") {
+										<span class="text-sm text-success">
+											Uploaded successfully
 										</span>
 									}
 								</div>
@@ -87,117 +109,170 @@ interface Bundle {
 							<div class="flex items-center justify-center gap-2">
 								<div
 									class="bg-secondary-container rounded-full px-2.5 py-0.5 text-xs text-on-secondary-container"
-									[class.animate-pulse]="
-										bundle.status === 'parsing' ||
-										bundle.status === 'uploading'
-									"
+									[class.animate-pulse]="bundle.status === 'uploading'"
+									[class.bg-success-container]="bundle.status === 'success'"
+									[class.bg-error-container]="bundle.status === 'error'"
 								>
 									{{ bundle.status }}
 								</div>
-								<button
-									mat-icon-button
-									type="button"
-									aria-label="Edit file"
-								>
-									<ng-glyph
-										name="edit"
-										size="20"
-										class="text-on-surface-variant"
-									></ng-glyph>
-								</button>
-								<button
-									mat-icon-button
-									type="button"
-									aria-label="Remove file"
-								>
-									<ng-glyph
-										name="close"
-										size="20"
-										class="text-on-surface-variant"
-									></ng-glyph>
-								</button>
+								@if (bundle.status === "ready") {
+									<button
+										mat-icon-button
+										type="button"
+										aria-label="Remove file"
+										(click)="removeBundle(bundle.id)"
+									>
+										<ng-glyph
+											name="close"
+											size="20"
+											class="text-on-surface-variant"
+										></ng-glyph>
+									</button>
+								}
 							</div>
 						</li>
 					}
 				</ul>
-			</mat-dialog-content>
-			<mat-dialog-actions align="end">
+			}
+
+			@if (completedCount > 0 && !isUploading) {
+				<div class="mt-4 text-sm text-outline text-center">
+					{{ successCount }} uploaded
+					@if (errorCount > 0) {
+						, {{ errorCount }} failed
+					}
+				</div>
+			}
+		</mat-dialog-content>
+		<mat-dialog-actions align="end">
+			<button
+				type="button"
+				mat-button
+				(click)="onCancel()"
+			>
+				@if (isUploading) {
+					Cancel uploads
+				} @else {
+					Close
+				}
+			</button>
+			@if (!isUploading && !isCompleted) {
 				<button
 					type="button"
-					mat-button
-					(click)="dialogRef.close('back')"
-				>
-					Cancel
-				</button>
-				<button
-					type="submit"
 					mat-flat-button
-					[disabled]="
-						!form.get('chartFlow')?.value ||
-						form.get('chartFlow')?.value === 'new'
-					"
+					[disabled]="readyCount === 0"
+					(click)="onSubmit()"
 				>
-					Upload all (3)
+					Upload all ({{ readyCount }})
 				</button>
-			</mat-dialog-actions>
-		</form>
+			}
+		</mat-dialog-actions>
 	`,
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
 		NgGlyph,
-		MatRadioModule,
-		FormsModule,
-		ReactiveFormsModule,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishChartBatchComponent {
-	private fb = inject(FormBuilder);
+export class PublishChartBatchComponent implements OnDestroy {
+	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
+	@ViewChild("dropZone") dropZone!: ElementRef<HTMLDivElement>;
+
+	queue = inject(BatchUploadQueueService);
 	dialogRef = inject<MatDialogRef<PublishChartBatchComponent>>(MatDialogRef);
-	data = inject<DialogData>(MAT_DIALOG_DATA);
+	private cdr = inject(ChangeDetectorRef);
+	private destroy$ = new Subject<void>();
 
-	form: FormGroup = this.fb.group({
-		chartFlow: "existing",
-	});
+	bundles: Bundle[] = [];
 
-	bundles: Bundle[] = [
-		{
-			name: "we_live_forever.zip",
-			duration: "5m30s",
-			notes: "325 notes",
-			status: "ready",
-			files: new File([], "we_live_forever.zip"),
-		},
-		{
-			name: "the_unfathomable_enormous_puzzle.zip",
-			duration: "4m10s",
-			notes: "510 notes",
-			status: "parsing",
-			files: new File([], "the_unfathomable_enormous_puzzle.zip"),
-		},
-		{
-			name: "echoes_of_time.zip",
-			duration: "1m10s",
-			notes: "583 notes",
-			status: "error",
-			errorMessage: "missing cover art",
-			files: new File([], "echoes_of_time.zip.zip"),
-		},
-	];
-
-	selectFiles() {
-		// Logic to open file selector and handle file selection
+	get readyCount(): number {
+		return this.bundles.filter((b) => b.status === "ready").length;
 	}
 
-	onSubmit() {
-		if (this.form.valid) {
-			this.dialogRef.close({
-				data: this.form.value,
-				additionalData: {
-					mode: "uploading",
-				},
+	get isUploading(): boolean {
+		return this.bundles.some((b) => b.status === "uploading");
+	}
+
+	get isCompleted(): boolean {
+		return (
+			this.bundles.length > 0 &&
+			this.bundles.every((b) => b.status === "success" || b.status === "error")
+		);
+	}
+
+	get completedCount(): number {
+		return this.bundles.filter(
+			(b) => b.status === "success" || b.status === "error",
+		).length;
+	}
+
+	get successCount(): number {
+		return this.bundles.filter((b) => b.status === "success").length;
+	}
+
+	get errorCount(): number {
+		return this.bundles.filter((b) => b.status === "error").length;
+	}
+
+	constructor() {
+		this.queue.bundles$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((bundles) => {
+				this.bundles = bundles;
+				this.cdr.markForCheck();
 			});
+	}
+
+	ngOnDestroy(): void {
+		this.queue.cancelAll();
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
+
+	selectFiles(): void {
+		this.fileInput.nativeElement.click();
+	}
+
+	onFileSelected(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		if (input.files) {
+			this.queue.addFiles(Array.from(input.files));
+			input.value = "";
 		}
+	}
+
+	onDragOver(event: Event): void {
+		event.preventDefault();
+		this.dropZone.nativeElement.classList.add("bg-primary/10");
+	}
+
+	onDragLeave(event: Event): void {
+		event.preventDefault();
+		this.dropZone.nativeElement.classList.remove("bg-primary/10");
+	}
+
+	onDrop(event: Event): void {
+		event.preventDefault();
+		this.dropZone.nativeElement.classList.remove("bg-primary/10");
+
+		const dragEvent = event as DragEvent;
+		const files = dragEvent.dataTransfer?.files;
+		if (files) {
+			this.queue.addFiles(Array.from(files));
+		}
+	}
+
+	removeBundle(id: string): void {
+		this.queue.removeBundle(id);
+	}
+
+	onSubmit(): void {
+		this.queue.enqueue();
+	}
+
+	onCancel(): void {
+		this.queue.cancelAll();
+		this.dialogRef.close();
 	}
 }

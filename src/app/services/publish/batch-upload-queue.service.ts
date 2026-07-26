@@ -1,0 +1,160 @@
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { BehaviorSubject, type Subscription } from "rxjs";
+
+import { ChartService, type CreateChartPayload } from "../api/chart.service";
+import { Difficulty } from "@/models/enums/difficulty.enum";
+import type { ChartModel } from "@/models/chart.model";
+
+export interface Bundle {
+	id: string;
+	name: string;
+	file: File;
+	status: "ready" | "uploading" | "success" | "error";
+	errorMessage?: string;
+	result?: ChartModel;
+}
+
+const MAX_CONCURRENT = 3;
+const MAX_BUNDLES = 15;
+
+@Injectable({ providedIn: "root" })
+export class BatchUploadQueueService {
+	private chartService = inject(ChartService);
+	private http = inject(HttpClient);
+
+	private bundles: Bundle[] = [];
+	private activeCount = 0;
+	private subscriptions = new Map<string, Subscription>();
+
+	private bundlesSubject = new BehaviorSubject<Bundle[]>([]);
+	bundles$ = this.bundlesSubject.asObservable();
+
+	get bundlesCount(): number {
+		return this.bundles.length;
+	}
+
+	get maxBundles(): number {
+		return MAX_BUNDLES;
+	}
+
+	constructor() {
+		if (typeof window !== "undefined") {
+			window.addEventListener("beforeunload", this.onBeforeUnload);
+		}
+	}
+
+	addFiles(files: File[]): Bundle[] {
+		const availableSlots = MAX_BUNDLES - this.bundles.length;
+		const filesToAdd = Array.from(files)
+			.filter((f) => f.name.endsWith(".zip"))
+			.slice(0, availableSlots);
+
+		const newBundles: Bundle[] = filesToAdd.map((file) => ({
+			id: crypto.randomUUID(),
+			name: file.name,
+			file,
+			status: "ready" as const,
+		}));
+
+		this.bundles = [...this.bundles, ...newBundles];
+		this.emit();
+		return newBundles;
+	}
+
+	removeBundle(id: string): void {
+		const sub = this.subscriptions.get(id);
+		if (sub) {
+			sub.unsubscribe();
+			this.subscriptions.delete(id);
+		}
+
+		this.bundles = this.bundles.filter((b) => b.id !== id);
+		this.emit();
+	}
+
+	enqueue(): void {
+		this.processNext();
+	}
+
+	cancelAll(): void {
+		this.subscriptions.forEach((sub) => sub.unsubscribe());
+		this.subscriptions.clear();
+		this.bundles = [];
+		this.activeCount = 0;
+		this.emit();
+	}
+
+	private processNext(): void {
+		while (this.activeCount < MAX_CONCURRENT) {
+			const next = this.bundles.find((b) => b.status === "ready");
+			if (!next) break;
+			this.activeCount++;
+			this.uploadBundle(next);
+		}
+	}
+
+	private uploadBundle(bundle: Bundle): void {
+		this.updateBundle(bundle.id, { status: "uploading" });
+
+		const payload: CreateChartPayload = {
+			artist: "",
+			track: bundle.name.replace(/\.zip$/i, ""),
+			album: null,
+			trackUrls: [],
+			isExplicit: false,
+			duration: 0,
+			notesAmount: 0,
+			effectsAmount: 0,
+			difficulty: Difficulty.NORMAL,
+			isDeluxe: false,
+			chartBundle: bundle.file,
+		};
+
+		const sessionId = crypto.randomUUID();
+		const { formData, headers } = this.chartService.buildChartData(payload, sessionId);
+
+		const sub = this.http
+			.post<ChartModel>(this.chartService.apiUrlRef, formData, { headers })
+			.subscribe({
+				next: (result) => {
+					this.chartService.addChartToCache(result);
+					this.updateBundle(bundle.id, { status: "success", result });
+				},
+				error: (error: unknown) => {
+					const message =
+						(error && typeof error === "object" && "statusText" in error
+							? (error as { statusText?: string }).statusText
+							: undefined) ||
+						(error instanceof Error ? error.message : "Upload failed");
+
+					this.updateBundle(bundle.id, {
+						status: "error",
+						errorMessage: message,
+					});
+				},
+				complete: () => {
+					this.subscriptions.delete(bundle.id);
+					this.activeCount--;
+					this.processNext();
+				},
+			});
+
+		this.subscriptions.set(bundle.id, sub);
+	}
+
+	private updateBundle(id: string, changes: Partial<Bundle>): void {
+		this.bundles = this.bundles.map((b) =>
+			b.id === id ? { ...b, ...changes } : b,
+		);
+		this.emit();
+	}
+
+	private emit(): void {
+		this.bundlesSubject.next([...this.bundles]);
+	}
+
+	private onBeforeUnload = (): void => {
+		this.cancelAll();
+	};
+}

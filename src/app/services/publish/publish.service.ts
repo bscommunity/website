@@ -7,6 +7,7 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Components
 import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
+import { PublishChartBatchComponent } from "@/components/publish/chart/batch.component";
 // Services
 import { AuthService } from "../auth.service";
 import { PublishEventService } from "./publish-event.service";
@@ -34,7 +35,8 @@ export type PublishProgressData =
 			additionalData?: Record<string, unknown>;
 	  }
 	| "back"
-	| "next";
+	| "next"
+	| "batch";
 
 @Injectable({
 	providedIn: "root",
@@ -113,6 +115,16 @@ export class PublishDialogService<
 		dialogRef.afterClosed().subscribe((result: PublishProgressData) => {
 			if (!result) {
 				// Dialog was closed without action
+				return;
+			}
+
+			if (result === "batch") {
+				this.dialog.closeAll();
+				this.dialog.open(PublishChartBatchComponent, {
+					width: "600px",
+					disableClose: true,
+				});
+				this.reset();
 				return;
 			}
 

@@ -65,7 +65,11 @@ interface Option {
 							>External's website</a>
 							to create a new bundle
 					} @else {
-						You can <span class="underline cursor-pointer">batch upload</span> multiple chart bundles at once
+						You can <button
+							type="button"
+							class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+							(click)="dialogRef.close('batch')"
+						>batch upload</button> multiple chart bundles at once
 					}
 				</app-panel>
 			</mat-dialog-content>

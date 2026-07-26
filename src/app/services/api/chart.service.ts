@@ -117,6 +117,32 @@ export class ChartService {
 		return createdChart;
 	}
 
+	buildChartData(chart: CreateChartPayload, publishSessionId?: string): { formData: FormData; headers: Record<string, string> } {
+		const formData = new FormData();
+		const { chartBundle, ...chartData } = chart;
+		formData.append("chart", JSON.stringify(chartData));
+
+		if (chartBundle) {
+			formData.append("bundle", chartBundle);
+		}
+
+		const headers: Record<string, string> = {};
+		if (publishSessionId) {
+			headers["X-Publish-Session-Id"] = publishSessionId;
+		}
+
+		return { formData, headers };
+	}
+
+	get apiUrlRef(): string {
+		return this.apiUrl;
+	}
+
+	addChartToCache(chart: ChartModel): void {
+		this.cacheService.addChart(chart);
+		this.updateScopedCachesWithChart("private", chart);
+	}
+
 	/**
 	 * Generates a cache key based on filters for sessionStorage
 	 */
