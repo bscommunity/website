@@ -5,6 +5,8 @@ import {
 	OnDestroy,
 	OnInit,
 	inject,
+	input,
+	output,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Subject } from "rxjs";
@@ -116,7 +118,7 @@ const MAX_TOURPASS_CHARTS = 18;
 				<button
 					mat-button
 					type="button"
-					(click)="dialogRef.close('back')"
+					(click)="isInlineMode ? backClicked.emit() : dialogRef!.close('back')"
 				>
 					Back
 				</button>
@@ -149,8 +151,17 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
 	dialogRef =
-		inject<MatDialogRef<PublishTourPassSetlistComponent>>(MatDialogRef);
-	data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
+		inject<MatDialogRef<PublishTourPassSetlistComponent>>(MatDialogRef, { optional: true });
+	data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA, { optional: true });
+
+	// Inline mode inputs/outputs (used when not in a dialog)
+	readonly initialCharts = input<ChartModel[]>([]);
+	readonly setlistChanged = output<ChartModel[]>();
+	readonly backClicked = output<void>();
+
+	get isInlineMode(): boolean {
+		return !this.data;
+	}
 
 	charts: ChartModel[] = [];
 	selectedCharts: ChartModel[] = [];
@@ -158,7 +169,9 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 	selectionError = "";
 
 	ngOnInit() {
-		const initialSelection = this.data.formData.selectedCharts || [];
+		const initialSelection = this.isInlineMode
+			? this.initialCharts()
+			: (this.data!.formData.selectedCharts || []);
 		this.selectedCharts = [...initialSelection];
 		this.fetchCharts();
 	}
@@ -275,11 +288,16 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 			return;
 		}
 
+		if (this.isInlineMode) {
+			this.setlistChanged.emit([...this.selectedCharts]);
+			return;
+		}
+
 		const estimatedArtist = this.getEstimatedArtist();
-		this.dialogRef.close({
+		this.dialogRef!.close({
 			chartIds: this.selectedCharts.map((chart) => chart.id),
 			selectedCharts: [...this.selectedCharts],
-			artist: this.data.formData.artist || estimatedArtist,
+			artist: this.data!.formData.artist || estimatedArtist,
 		});
 	}
 }

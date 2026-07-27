@@ -2,6 +2,7 @@ import type { Routes } from "@angular/router";
 
 // Resolvers
 import { ChartResolver } from "./routes/dashboard/chart/chart-resolver.service";
+import { TourPassResolver } from "./routes/dashboard/tourpass/tourpass-resolver.service";
 
 // Guards
 import {
@@ -109,16 +110,25 @@ export const routes: Routes = [
 				canActivate: [isAuthenticatedGuard],
 				title: "Settings",
 			},
-			{
-				path: "chart/:id",
-				loadComponent: () =>
-					import("./routes/dashboard/chart/chart").then(
-						(m) => m.Chart,
-					),
-				resolve: { chart: ChartResolver },
-				runGuardsAndResolvers: "always",
-			},
-			// ... other dashboard routes
+		{
+			path: "chart/:id",
+			loadComponent: () =>
+				import("./routes/dashboard/chart/chart").then(
+					(m) => m.Chart,
+				),
+			resolve: { chart: ChartResolver },
+			runGuardsAndResolvers: "always",
+		},
+		{
+			path: "tourpass/:id",
+			loadComponent: () =>
+				import("./routes/dashboard/tourpass/tourpass").then(
+					(m) => m.TourPass,
+				),
+			resolve: { tourpass: TourPassResolver },
+			runGuardsAndResolvers: "always",
+		},
+		// ... other dashboard routes
 		],
 	},
 

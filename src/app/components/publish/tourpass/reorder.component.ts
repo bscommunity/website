@@ -10,6 +10,8 @@ import {
     ChangeDetectionStrategy,
     Component,
     inject,
+    input,
+    output,
     ViewEncapsulation,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -95,7 +97,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
                 <button
                     mat-button
                     type="button"
-                    (click)="dialogRef.close('back')"
+                    (click)="isInlineMode ? backClicked.emit() : dialogRef!.close('back')"
                 >
                     Back
                 </button>
@@ -246,11 +248,20 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 })
 export class PublishTourPassReorderComponent {
     dialogRef =
-        inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef);
-    data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
+        inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef, { optional: true });
+    data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA, { optional: true });
+
+    // Inline mode inputs/outputs (used when not in a dialog)
+    readonly initialCharts = input<ChartModel[]>([]);
+    readonly reordered = output<string[]>();
+    readonly backClicked = output<void>();
+
+    get isInlineMode(): boolean {
+        return !this.data;
+    }
 
     selectedCharts: ChartModel[] = [
-        ...(this.data.formData.selectedCharts || []),
+        ...(this.isInlineMode ? this.initialCharts() : (this.data!.formData.selectedCharts || [])),
     ];
 
     drop(event: CdkDragDrop<ChartModel[]>) {
@@ -262,7 +273,12 @@ export class PublishTourPassReorderComponent {
     }
 
     onSubmit() {
-        this.dialogRef.close({
+        if (this.isInlineMode) {
+            this.reordered.emit(this.selectedCharts.map((chart) => chart.id));
+            return;
+        }
+
+        this.dialogRef!.close({
             chartIds: this.selectedCharts.map((chart) => chart.id),
             selectedCharts: [...this.selectedCharts],
         });

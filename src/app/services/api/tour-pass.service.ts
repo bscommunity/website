@@ -19,6 +19,12 @@ export class TourPassService {
 
 	private readonly apiUrl = `${apiUrl}/tourpasses`;
 
+	async getTourPassById(id: string): Promise<TourPassModel> {
+		return firstValueFrom(
+			this.http.get<TourPassModel>(`${this.apiUrl}/${id}`),
+		);
+	}
+
 	async createTourPass(
 		payload: CreateTourPassModel & { coverFile?: File | null },
 	): Promise<TourPassModel> {

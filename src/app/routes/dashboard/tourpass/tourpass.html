@@ -1,0 +1,73 @@
+@if (tourpass) {
+	<main
+		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
+	>
+		<!-- Desktop aside -->
+		<app-aside
+			[tourpass]="tourpass"
+			(tourPassUpdated)="onTourPassUpdated($event)"
+			class="hidden md:flex md:sticky md:top-8"
+		></app-aside>
+
+		<div
+			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
+		>
+			<!-- Cover art (full width) -->
+			<div class="w-full relative overflow-hidden rounded-xl">
+				<img
+					class="w-full aspect-[3/1] object-cover"
+					[src]="tourpass.coverUrl"
+					[alt]="tourpass.name"
+				/>
+			</div>
+
+			<!-- Name / description + Featured badge -->
+			<div
+				class="flex flex-row items-start justify-between w-full gap-4"
+			>
+				<div class="flex flex-col items-start justify-start gap-2">
+					<h1 class="font-medium text-5xl leading-tight">
+						{{ tourpass.name }}
+					</h1>
+					@if (tourpass.description) {
+						<p class="text-lg text-on-surface-variant">
+							{{ tourpass.description }}
+						</p>
+					}
+				</div>
+				<div
+					class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container text-sm font-medium whitespace-nowrap"
+				>
+					<ng-glyph name="star" />
+					<span>Featured on Editor's Choice</span>
+				</div>
+			</div>
+
+			<!-- Mobile aside -->
+			<app-aside
+				[tourpass]="tourpass"
+				(tourPassUpdated)="onTourPassUpdated($event)"
+				class="flex w-full md:hidden"
+			></app-aside>
+
+			<!-- Tracks section -->
+			<app-tourpass-tracks-section
+				class="w-full"
+				[tourPassId]="tourpass.id"
+				[charts]="tourpass.charts"
+				(chartsChanged)="tourpass.charts = $event"
+			></app-tourpass-tracks-section>
+
+			<!-- Danger Zone -->
+			<app-tourpass-danger-zone-section
+				class="w-full"
+				[tourPassId]="tourpass.id"
+				[tourPassName]="tourpass.name"
+			></app-tourpass-danger-zone-section>
+		</div>
+	</main>
+} @else {
+	<app-error
+		class="flex items-center justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14"
+	/>
+}
