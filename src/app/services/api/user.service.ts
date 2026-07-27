@@ -72,6 +72,9 @@ export class UserService {
 			types?: string;
 			query?: string;
 			sortBy?: string;
+			genres?: string;
+			difficulties?: string;
+			versions?: string;
 			limit?: number;
 			offset?: number;
 			disableCache?: boolean;
@@ -81,6 +84,9 @@ export class UserService {
 		if (params.types) httpParams["types"] = params.types;
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
+		if (params.genres) httpParams["genres"] = params.genres;
+		if (params.difficulties) httpParams["difficulties"] = params.difficulties;
+		if (params.versions) httpParams["versions"] = params.versions;
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 
@@ -111,6 +117,9 @@ export class UserService {
 			params["types"] || "all",
 			params["query"] || "",
 			params["sortBy"] || "",
+			params["genres"] || "",
+			params["difficulties"] || "",
+			params["versions"] || "",
 			params["limit"] || 20,
 		];
 		return `uploads_${parts.join("|")}`;

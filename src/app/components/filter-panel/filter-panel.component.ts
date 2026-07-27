@@ -69,17 +69,17 @@ export class FilterPanelComponent {
 
 	readonly showGenres = computed(() => {
 		const cats = this.filtersSignal().categories;
-		return cats.length === 0 || cats.includes("Charts");
+		return cats.includes("Charts");
 	});
 
 	readonly showDifficulties = computed(() => {
 		const cats = this.filtersSignal().categories;
-		return cats.length === 0 || cats.includes("Charts") || cats.includes("Tourpasses");
+		return cats.includes("Charts") || cats.includes("Tourpasses");
 	});
 
 	readonly showVersions = computed(() => {
 		const cats = this.filtersSignal().categories;
-		return cats.length === 0 || cats.includes("Charts") || cats.includes("Tourpasses");
+		return cats.includes("Charts") || cats.includes("Tourpasses");
 	});
 
 	readonly difficulties = computed(() =>
@@ -139,8 +139,8 @@ export class FilterPanelComponent {
 
 		// Clear filters that no longer apply to the selected categories
 		const categories = this.filterService.getFilters().categories;
-		const hasCharts = categories.length === 0 || categories.includes("Charts");
-		const hasChartsOrTourPasses = categories.length === 0 || categories.includes("Charts") || categories.includes("Tourpasses");
+		const hasCharts = categories.includes("Charts");
+		const hasChartsOrTourPasses = categories.includes("Charts") || categories.includes("Tourpasses");
 
 		if (!hasCharts) {
 			this.filterService.setFilterArray("genres", []);

@@ -3,13 +3,13 @@ import type { ChartModel } from "@/models/chart.model";
 import type { TourPassModel } from "@/models/tour-pass.model";
 import type { ThemeModel } from "@/models/theme.model";
 
-export interface ContentByMonth {
-	name: string; // e.g., "2023-10"
-	items: CatalogItemModel[];
+export interface ContentByMonth<T extends CatalogItemModel = CatalogItemModel> {
+	name: string;
+	items: T[];
 }
 
-export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
-	const map = new Map<string, CatalogItemModel[]>();
+function groupItems<T extends CatalogItemModel>(items: T[]): ContentByMonth<T>[] {
+	const map = new Map<string, T[]>();
 
 	for (const item of items) {
 		const dateSource = item.updatedAt ?? item.createdAt;
@@ -26,6 +26,14 @@ export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
 	return Array.from(map.entries())
 		.sort(([a], [b]) => b.localeCompare(a))
 		.map(([name, items]) => ({ name, items }));
+}
+
+export function groupByMonth(items: ChartModel[]): ContentByMonth<ChartModel>[];
+export function groupByMonth(items: TourPassModel[]): ContentByMonth<TourPassModel>[];
+export function groupByMonth(items: ThemeModel[]): ContentByMonth<ThemeModel>[];
+export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[];
+export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
+	return groupItems(items);
 }
 
 export function isChart(item: CatalogItemModel): item is ChartModel {

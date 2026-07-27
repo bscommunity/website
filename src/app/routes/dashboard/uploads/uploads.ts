@@ -7,6 +7,7 @@ import {
 	type OnInit,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
+import { RouterModule } from "@angular/router";
 
 // Icons
 import { NgGlyph } from "@ng-icons/core";
@@ -37,6 +38,9 @@ import {
 
 // Models
 import type { CatalogItemModel } from "@/models/catalog-item.model";
+import type { ChartModel } from "@/models/chart.model";
+import type { TourPassModel } from "@/models/tour-pass.model";
+import type { ThemeModel } from "@/models/theme.model";
 
 // Enums
 import {
@@ -58,6 +62,7 @@ import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass
 		AsyncPipe,
 		NgGlyph,
 		MatButtonModule,
+		RouterModule,
 		SelectComponent,
 		FilterPanelComponent,
 		ListSectionComponent,
@@ -93,7 +98,9 @@ export class Uploads implements OnInit, OnDestroy {
 	filters = [];
 
 	// Unified content
-	contentByMonth: ContentByMonth[] = [];
+	chartsByMonth: ContentByMonth<ChartModel>[] = [];
+	tourPassesByMonth: ContentByMonth<TourPassModel>[] = [];
+	themesByMonth: ContentByMonth<ThemeModel>[] = [];
 	totalCount = 0;
 	currentOffset = 0;
 	private readonly pageSize = 20;
@@ -112,6 +119,11 @@ export class Uploads implements OnInit, OnDestroy {
 		this.sortBy =
 			this.sortOptions.find((o) => o.value === initialSort) ||
 			this.sortOptions[0];
+
+		// Ensure uploads starts with no category filter (show all types)
+		if (initialFilters.categories.length > 0) {
+			this.filterService.setFilterArray("categories", []);
+		}
 
 		this.fetchContent();
 
@@ -145,6 +157,9 @@ export class Uploads implements OnInit, OnDestroy {
 				types,
 				query: filters.query || undefined,
 				sortBy: filters.sortBy || undefined,
+				genres: filters.genres?.length ? filters.genres.join(",") : undefined,
+				difficulties: filters.difficulties?.length ? filters.difficulties.join(",") : undefined,
+				versions: filters.versions?.length ? filters.versions.join(",") : undefined,
 				limit: this.pageSize,
 				offset: append ? this.currentOffset : 0,
 				disableCache,
@@ -154,16 +169,28 @@ export class Uploads implements OnInit, OnDestroy {
 				next: (response) => {
 					const items = response.items || [];
 
+					const charts = items.filter(isChart);
+					const tourPasses = items.filter(isTourPass);
+					const themes = items.filter(isTheme);
+
 					if (append) {
-						// Append new items to existing grouped content
-						const newGrouped = groupByMonth(items);
-						this.contentByMonth = this.mergeGroupedContent(
-							this.contentByMonth,
-							newGrouped,
+						this.chartsByMonth = this.mergeGroupedContent(
+							this.chartsByMonth,
+							groupByMonth(charts),
+						);
+						this.tourPassesByMonth = this.mergeGroupedContent(
+							this.tourPassesByMonth,
+							groupByMonth(tourPasses),
+						);
+						this.themesByMonth = this.mergeGroupedContent(
+							this.themesByMonth,
+							groupByMonth(themes),
 						);
 						this.currentOffset += items.length;
 					} else {
-						this.contentByMonth = groupByMonth(items);
+						this.chartsByMonth = groupByMonth(charts);
+						this.tourPassesByMonth = groupByMonth(tourPasses);
+						this.themesByMonth = groupByMonth(themes);
 						this.currentOffset = items.length;
 					}
 
@@ -196,11 +223,11 @@ export class Uploads implements OnInit, OnDestroy {
 		}
 	}
 
-	private mergeGroupedContent(
-		existing: ContentByMonth[],
-		newItems: ContentByMonth[],
-	): ContentByMonth[] {
-		const merged = new Map<string, CatalogItemModel[]>();
+	private mergeGroupedContent<T extends CatalogItemModel>(
+		existing: ContentByMonth<T>[],
+		newItems: ContentByMonth<T>[],
+	): ContentByMonth<T>[] {
+		const merged = new Map<string, T[]>();
 
 		// Add existing items
 		for (const group of existing) {
@@ -235,6 +262,14 @@ export class Uploads implements OnInit, OnDestroy {
 	refresh(disableCache = false) {
 		this.currentOffset = 0;
 		this.fetchContent(disableCache);
+	}
+
+	get hasAnyContent(): boolean {
+		return (
+			this.chartsByMonth.length > 0 ||
+			this.tourPassesByMonth.length > 0 ||
+			this.themesByMonth.length > 0
+		);
 	}
 
 	hasActiveFilters(): boolean {
