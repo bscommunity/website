@@ -6,9 +6,9 @@ import { Component, input } from "@angular/core";
 	template: `
 		<div class="flex flex-col items-start justify-start gap-4 w-full">
 			<h5 class="mat-headline-small text-2xl">{{ title() }}</h5>
-			<ul class="flex flex-col md:grid md:grid-cols-2 w-full gap-6">
+			<div class="flex flex-wrap gap-4 w-full">
 				<ng-content></ng-content>
-			</ul>
+			</div>
 		</div>
 	`,
 })

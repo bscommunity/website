@@ -230,11 +230,12 @@ export class FilterService {
 	 */
 	hasActiveFilters(): boolean {
 		const filters = this.filtersSubject.value;
+		const defaultFilters = this.getDefaultFilters();
 		return !!(
 			filters.query ||
 			filters.genres.length ||
 			filters.difficulties.length ||
-			filters.categories.length ||
+			JSON.stringify(filters.categories) !== JSON.stringify(defaultFilters.categories) ||
 			filters.versions.length
 		);
 	}

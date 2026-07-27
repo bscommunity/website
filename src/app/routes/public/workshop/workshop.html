@@ -73,8 +73,8 @@
 						</p>
 						<button
 							mat-stroked-button
-							(click)="refreshCharts()"
-							(keypress)="refreshCharts()"
+							(click)="refreshContent()"
+							(keypress)="refreshContent()"
 							aria-label="Refresh charts"
 						>
 							<ng-glyph name="refresh" class="mx-2!" />
@@ -84,8 +84,8 @@
 					</div>
 				</div>
 			</div>
-		} @else if (hasActiveFilters() && charts?.length === 0) {
-			<!-- No charts found after filtering -->
+		} @else if (hasActiveFilters() && charts?.length === 0 && tourPasses.length === 0) {
+			<!-- No items found after filtering -->
 			<div
 				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 			>
@@ -110,34 +110,55 @@
 				</button>
 			</div>
 		} @else {
-			<ul
-				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
-			>
-				@for (chart of charts; track chart.id) {
-					<app-chart-preview
-						[chart]="chart"
-						[showItems]="['contributors', 'shareActions']"
-						(click)="openChartDialog(chart)"
-						(keydown.enter)="openChartDialog(chart)"
-						(keydown.space)="openChartDialog(chart)"
-					></app-chart-preview>
+			<div>
+				<!-- Tour Passes Section -->
+				@if (tourPasses.length > 0) {
+					<div class="flex flex-col items-start justify-start gap-4 w-full mb-6">
+						<h5 class="mat-headline-small text-2xl">Tour Passes</h5>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full">
+							@for (tourpass of tourPasses; track tourpass.id) {
+								<app-tourpass-preview
+									[tourpass]="tourpass"
+									(showItems)="['shareActions']"
+									(click)="openTourPassDialog(tourpass)"
+									(keydown.enter)="openTourPassDialog(tourpass)"
+									(keydown.space)="openTourPassDialog(tourpass)"
+								></app-tourpass-preview>
+							}
+						</div>
+					</div>
 				}
-			</ul>
 
-			@if (totalPages > 1) {
-				<div class="flex items-center justify-end w-full">
-					<mat-paginator
-						[length]="totalCharts"
-						[hidePageSize]="true"
-						[pageSize]="pageSize"
-						[pageIndex]="currentPage - 1"
-						[showFirstLastButtons]="true"
-						(page)="onPageChange($event)"
-						[disabled]="isLoading$ | async"
-						aria-label="Select page"
-					></mat-paginator>
-				</div>
-			}
+				<!-- Charts Section -->
+				@if (charts && charts.length > 0) {
+					<div class="flex flex-col items-start justify-start gap-4 w-full">
+						<h5 class="mat-headline-small text-2xl">Charts</h5>
+						<ul
+							class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
+						>
+							@for (chart of charts; track chart.id) {
+								<app-chart-preview
+									[chart]="chart"
+									[showItems]="['contributors', 'shareActions']"
+									(click)="openChartDialog(chart)"
+									(keydown.enter)="openChartDialog(chart)"
+									(keydown.space)="openChartDialog(chart)"
+								></app-chart-preview>
+							}
+						</ul>
+					</div>
+				}
+
+				<!-- Loading indicator for infinite scroll -->
+				@if ((isLoading$ | async) && charts) {
+					<div class="flex items-center justify-center w-full py-4">
+						<mat-progress-spinner
+							diameter="24"
+							mode="indeterminate"
+						></mat-progress-spinner>
+					</div>
+				}
+			</div>
 		}
 	</div>
 </main>

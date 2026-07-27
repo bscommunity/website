@@ -6,6 +6,7 @@ import {
 	OnDestroy,
 	ViewChild,
 	AfterViewInit,
+	HostListener,
 } from "@angular/core";
 import { AsyncPipe } from "@angular/common";
 import { Subject } from "rxjs";
@@ -16,15 +17,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { NgGlyph } from "@ng-icons/core";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import {
-	MatPaginatorIntl,
-	MatPaginatorModule,
-	PageEvent,
-} from "@angular/material/paginator";
 import { MatDialog } from "@angular/material/dialog";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { UserService } from "@/services/api/user.service";
 import { FilterService } from "@/services/filter.service";
 import type { WorkshopFilters } from "@/services/filter.service";
 
@@ -34,19 +31,19 @@ import { FilterPanelComponent } from "@/components/filter-panel/filter-panel.com
 import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { PanelComponent } from "@/components/panel/panel.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
+import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
 
 // Dialogs
 import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
+import { TourPassDialogComponent } from "@/components/dialogs/tourpass/tourpass-dialog.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
+import { TourPassModel } from "@/models/tour-pass.model";
 import {
 	getSortOptionLabel,
 	SortOption,
 } from "@/models/enums/sort-option.enum";
-
-// Intl
-import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 
 @Component({
 	selector: "app-workshop",
@@ -56,18 +53,18 @@ import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 		MatProgressSpinnerModule,
 		MatTooltipModule,
 		NgGlyph,
-		MatPaginatorModule,
 		FilterPanelComponent,
 		SearchbarComponent,
 		SelectComponent,
 		PanelComponent,
 		ChartPreviewComponent,
+		TourpassPreviewComponent,
 	],
-	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	templateUrl: "./workshop.html",
 })
 export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	private chartService = inject(ChartService);
+	private userService = inject(UserService);
 	private filterService = inject(FilterService);
 	private cdr = inject(ChangeDetectorRef);
 	private dialog = inject(MatDialog);
@@ -92,21 +89,22 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 
 	// Current data
 	charts: ChartModel[] | undefined = undefined;
-	totalCharts = 0;
+	tourPasses: TourPassModel[] = [];
+	totalItems = 0;
 	currentPage = 1;
 	pageSize = 20;
 	placeholders = Array(20);
 
 	ngOnInit(): void {
 		// Initial load (immediate, no debounce)
-		this.loadChartsWithFilters(this.filterService.getFilters());
+		this.loadWithFilters(this.filterService.getFilters());
 
-		// Subscribe to filter changes and reload charts
+		// Subscribe to filter changes and reload
 		this.filterService.filterChanges$
 			.pipe(takeUntil(this.destroy$))
 			.subscribe((filters) => {
-				this.currentPage = 1; // Reset to first page on filter change
-				this.loadChartsWithFilters(filters);
+				this.currentPage = 1;
+				this.loadWithFilters(filters);
 			});
 
 		// Subscribe to clear search events
@@ -115,12 +113,6 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 			.subscribe(() => {
 				this.searchbar.clearSearch();
 			});
-
-		// DEBUG LOGGING
-		/* this.isLoading$.subscribe((value) => {
-			console.log("isLoading:", value);
-		});
-		console.log("Charts", this.charts); */
 	}
 
 	ngOnDestroy(): void {
@@ -133,15 +125,21 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	/**
-	 * Load charts based on provided filters
+	 * Load content based on provided filters
 	 */
-	private loadChartsWithFilters(filters: WorkshopFilters): void {
-		this.charts = undefined;
+	private loadWithFilters(filters: WorkshopFilters, append = false): void {
+		if (!append) {
+			this.charts = undefined;
+			this.tourPasses = [];
+		}
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
 
-		const offset = (this.currentPage - 1) * this.pageSize;
+		const offset = append
+			? (this.currentPage - 1) * this.pageSize
+			: 0;
 
+		// Load charts
 		this.chartService
 			.getCharts(filters, {
 				limit: this.pageSize,
@@ -152,10 +150,13 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
-					console.log("Loaded charts:", response);
-					this.charts = response.first;
+					if (append) {
+						this.charts = [...(this.charts || []), ...response.first];
+					} else {
+						this.charts = response.first;
+					}
 					if (response.second !== null) {
-						this.totalCharts = response.second;
+						this.totalItems = response.second;
 					}
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
@@ -171,20 +172,44 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 					this.cdr.markForCheck();
 				},
 			});
+
+		// Load tour passes
+		this.userService
+			.getPublicTourPasses({
+				limit: this.pageSize,
+				offset,
+				count: true,
+			})
+			.pipe(takeUntil(this.destroy$))
+			.subscribe({
+				next: (response) => {
+					if (append) {
+						this.tourPasses = [...this.tourPasses, ...response[0]];
+					} else {
+						this.tourPasses = response[0];
+					}
+					if (response[1] !== null) {
+						this.totalItems = Math.max(this.totalItems, response[1]);
+					}
+					this.cdr.markForCheck();
+				},
+				error: (error) => {
+					console.error("Error loading tour passes:", error);
+				},
+			});
 	}
 
 	/**
-	 * Refresh charts (public method for template)
+	 * Refresh content (public method for template)
 	 */
-	refreshCharts(): void {
-		this.loadChartsWithFilters(this.filterService.getFilters());
+	refreshContent(): void {
+		this.loadWithFilters(this.filterService.getFilters());
 	}
 
 	/**
 	 * Handle search input from searchbar
 	 */
 	onSearch(query: string): void {
-		console.log("Search query:", query);
 		this.filterService.setQuery(query);
 	}
 
@@ -199,7 +224,6 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	 * Handle sort selection
 	 */
 	onSortChange(sortBy: Option): void {
-		console.log("Sort by:", sortBy);
 		this.filterService.setSortBy(sortBy.value as SortOption);
 	}
 
@@ -217,19 +241,34 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	/**
-	 * Handle page change
+	 * Open tour pass dialog
 	 */
-	onPageChange(event: PageEvent): void {
-		this.currentPage = event.pageIndex + 1;
-		window.scrollTo({ top: 0, behavior: "smooth" });
-		this.loadChartsWithFilters(this.filterService.getFilters());
+	openTourPassDialog(tourpass: TourPassModel): void {
+		this.dialog.open(TourPassDialogComponent, {
+			data: {
+				tourpass,
+			},
+			width: "575px",
+			maxHeight: "85vh",
+		});
 	}
 
 	/**
-	 * Get total pages
+	 * Handle scroll for infinite scroll
 	 */
-	get totalPages(): number {
-		return Math.ceil(this.totalCharts / this.pageSize);
+	@HostListener("window:scroll")
+	onScroll(): void {
+		const scrollPosition = window.innerHeight + window.scrollY;
+		const documentHeight = document.documentElement.scrollHeight;
+
+		if (
+			scrollPosition >= documentHeight - 200 &&
+			(this.charts?.length ?? 0) < this.totalItems &&
+			!(this.isLoading$ as any)?.value
+		) {
+			this.currentPage++;
+			this.loadWithFilters(this.filterService.getFilters(), true);
+		}
 	}
 
 	/**

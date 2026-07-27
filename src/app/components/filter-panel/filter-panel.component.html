@@ -19,7 +19,7 @@
 			title="Categories"
 			[data]="categories()"
 			(optionSelectionChange)="onSelectionChange('categories', $event)"
-			[disabled]="true"
+			[disabled]="disabled()"
 		></app-expansion-panel>
 
 		<app-expansion-panel
