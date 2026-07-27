@@ -29,18 +29,9 @@ import {
 import { convertStringToMonth } from "@/lib/time";
 import {
 	groupByMonth,
-	isChart,
-	isTourPass,
-	isTheme,
 	mapCategoriesToTypes,
 	type ContentByMonth,
 } from "@/lib/content-grouping";
-
-// Models
-import type { CatalogItemModel } from "@/models/catalog-item.model";
-import type { ChartModel } from "@/models/chart.model";
-import type { TourPassModel } from "@/models/tour-pass.model";
-import type { ThemeModel } from "@/models/theme.model";
 
 // Enums
 import {
@@ -83,9 +74,6 @@ export class Uploads implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
 	convertStringToMonth = convertStringToMonth;
-	isChart = isChart;
-	isTourPass = isTourPass;
-	isTheme = isTheme;
 
 	// Sort options
 	sortOptions: Option[] = Object.values(SortOption).map((option) => ({
@@ -97,10 +85,8 @@ export class Uploads implements OnInit, OnDestroy {
 
 	filters = [];
 
-	// Unified content
-	chartsByMonth: ContentByMonth<ChartModel>[] = [];
-	tourPassesByMonth: ContentByMonth<TourPassModel>[] = [];
-	themesByMonth: ContentByMonth<ThemeModel>[] = [];
+	// Unified content grouped by date, then by type
+	contentByMonth: ContentByMonth[] = [];
 	totalCount = 0;
 	currentOffset = 0;
 	private readonly pageSize = 20;
@@ -169,28 +155,14 @@ export class Uploads implements OnInit, OnDestroy {
 				next: (response) => {
 					const items = response.items || [];
 
-					const charts = items.filter(isChart);
-					const tourPasses = items.filter(isTourPass);
-					const themes = items.filter(isTheme);
-
 					if (append) {
-						this.chartsByMonth = this.mergeGroupedContent(
-							this.chartsByMonth,
-							groupByMonth(charts),
-						);
-						this.tourPassesByMonth = this.mergeGroupedContent(
-							this.tourPassesByMonth,
-							groupByMonth(tourPasses),
-						);
-						this.themesByMonth = this.mergeGroupedContent(
-							this.themesByMonth,
-							groupByMonth(themes),
+						this.contentByMonth = this.mergeGroupedContent(
+							this.contentByMonth,
+							groupByMonth(items),
 						);
 						this.currentOffset += items.length;
 					} else {
-						this.chartsByMonth = groupByMonth(charts);
-						this.tourPassesByMonth = groupByMonth(tourPasses);
-						this.themesByMonth = groupByMonth(themes);
+						this.contentByMonth = groupByMonth(items);
 						this.currentOffset = items.length;
 					}
 
@@ -223,28 +195,51 @@ export class Uploads implements OnInit, OnDestroy {
 		}
 	}
 
-	private mergeGroupedContent<T extends CatalogItemModel>(
-		existing: ContentByMonth<T>[],
-		newItems: ContentByMonth<T>[],
-	): ContentByMonth<T>[] {
-		const merged = new Map<string, T[]>();
+	private mergeGroupedContent(
+		existing: ContentByMonth[],
+		newItems: ContentByMonth[],
+	): ContentByMonth[] {
+		const merged = new Map<string, ContentByMonth>();
 
-		// Add existing items
 		for (const group of existing) {
-			merged.set(group.name, [...group.items]);
+			merged.set(group.name, {
+				name: group.name,
+				charts: [...group.charts],
+				tourPasses: [...group.tourPasses],
+				themes: [...group.themes],
+			});
 		}
 
-		// Add new items
 		for (const group of newItems) {
-			const existingItems = merged.get(group.name) || [];
-			const existingIds = new Set(existingItems.map((i) => i.id));
-			const uniqueNew = group.items.filter((i) => !existingIds.has(i.id));
-			merged.set(group.name, [...existingItems, ...uniqueNew]);
+			const target = merged.get(group.name) ?? {
+				name: group.name,
+				charts: [],
+				tourPasses: [],
+				themes: [],
+			};
+
+			const existingIds = new Set([
+				...target.charts.map((i) => i.id),
+				...target.tourPasses.map((i) => i.id),
+				...target.themes.map((i) => i.id),
+			]);
+
+			for (const item of group.charts) {
+				if (!existingIds.has(item.id)) target.charts.push(item);
+			}
+			for (const item of group.tourPasses) {
+				if (!existingIds.has(item.id)) target.tourPasses.push(item);
+			}
+			for (const item of group.themes) {
+				if (!existingIds.has(item.id)) target.themes.push(item);
+			}
+
+			merged.set(group.name, target);
 		}
 
-		return Array.from(merged.entries())
-			.sort(([a], [b]) => b.localeCompare(a))
-			.map(([name, items]) => ({ name, items }));
+		return Array.from(merged.values()).sort((a, b) =>
+			b.name.localeCompare(a.name),
+		);
 	}
 
 	onSortChange(sortBy: Option): void {
@@ -265,10 +260,8 @@ export class Uploads implements OnInit, OnDestroy {
 	}
 
 	get hasAnyContent(): boolean {
-		return (
-			this.chartsByMonth.length > 0 ||
-			this.tourPassesByMonth.length > 0 ||
-			this.themesByMonth.length > 0
+		return this.contentByMonth.some(
+			(m) => m.charts.length > 0 || m.tourPasses.length > 0 || m.themes.length > 0,
 		);
 	}
 

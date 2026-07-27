@@ -3,13 +3,15 @@ import type { ChartModel } from "@/models/chart.model";
 import type { TourPassModel } from "@/models/tour-pass.model";
 import type { ThemeModel } from "@/models/theme.model";
 
-export interface ContentByMonth<T extends CatalogItemModel = CatalogItemModel> {
+export interface ContentByMonth {
 	name: string;
-	items: T[];
+	charts: ChartModel[];
+	tourPasses: TourPassModel[];
+	themes: ThemeModel[];
 }
 
-function groupItems<T extends CatalogItemModel>(items: T[]): ContentByMonth<T>[] {
-	const map = new Map<string, T[]>();
+export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
+	const map = new Map<string, ContentByMonth>();
 
 	for (const item of items) {
 		const dateSource = item.updatedAt ?? item.createdAt;
@@ -18,22 +20,22 @@ function groupItems<T extends CatalogItemModel>(items: T[]): ContentByMonth<T>[]
 			: "unknown";
 
 		if (!map.has(month)) {
-			map.set(month, []);
+			map.set(month, { name: month, charts: [], tourPasses: [], themes: [] });
 		}
-		map.get(month)!.push(item);
+
+		const group = map.get(month)!;
+		if (isChart(item)) {
+			group.charts.push(item);
+		} else if (isTourPass(item)) {
+			group.tourPasses.push(item);
+		} else if (isTheme(item)) {
+			group.themes.push(item);
+		}
 	}
 
-	return Array.from(map.entries())
-		.sort(([a], [b]) => b.localeCompare(a))
-		.map(([name, items]) => ({ name, items }));
-}
-
-export function groupByMonth(items: ChartModel[]): ContentByMonth<ChartModel>[];
-export function groupByMonth(items: TourPassModel[]): ContentByMonth<TourPassModel>[];
-export function groupByMonth(items: ThemeModel[]): ContentByMonth<ThemeModel>[];
-export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[];
-export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
-	return groupItems(items);
+	return Array.from(map.values()).sort((a, b) =>
+		b.name.localeCompare(a.name),
+	);
 }
 
 export function isChart(item: CatalogItemModel): item is ChartModel {

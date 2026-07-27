@@ -160,82 +160,68 @@
 				[style.opacity]="(isLoading$ | async) ? '0.5' : '1'"
 				[style.pointerEvents]="(isLoading$ | async) ? 'none' : 'auto'"
 			>
-				@if (chartsByMonth.length > 0) {
-					<section class="flex flex-col items-start justify-start w-full gap-4">
-						<h4 class="text-xl font-medium">Charts</h4>
-						<ul class="flex flex-col items-start justify-start w-full gap-9">
-							@for (month of chartsByMonth; track $index) {
-								<app-list-section
-									class="w-full"
-									[title]="convertStringToMonth(month.name)"
-								>
-								@for (item of month.items; track item.id) {
-									<app-chart-preview
-										[chart]="item"
-										[routerLink]="['/dashboard/chart', item.id]"
-										class="w-full md:w-[calc(50%-0.5rem)]"
-									></app-chart-preview>
-								}
-								</app-list-section>
-							}
-						</ul>
-					</section>
-				}
+				@for (month of contentByMonth; track month.name) {
+					<app-list-section
+						class="w-full"
+						[title]="convertStringToMonth(month.name)"
+					>
+						@if (month.charts.length > 0) {
+							<section class="flex flex-col items-start justify-start w-full gap-4">
+								<h5 class="text-lg font-medium">Charts</h5>
+								<div class="flex flex-wrap gap-4 w-full">
+									@for (item of month.charts; track item.id) {
+										<app-chart-preview
+											[chart]="item"
+											[routerLink]="['/dashboard/chart', item.id]"
+											class="w-full md:w-[calc(50%-0.5rem)]"
+										></app-chart-preview>
+									}
+								</div>
+							</section>
+						}
 
-				@if (tourPassesByMonth.length > 0) {
-					<section class="flex flex-col items-start justify-start w-full gap-4">
-						<h4 class="text-xl font-medium">Tour Passes</h4>
-						<ul class="flex flex-col items-start justify-start w-full gap-9">
-							@for (month of tourPassesByMonth; track $index) {
-								<app-list-section
-									class="w-full"
-									[title]="convertStringToMonth(month.name)"
-								>
-								@for (item of month.items; track item.id) {
-									<app-tourpass-preview
-										[tourpass]="item"
-										[routerLink]="['/dashboard/tourpass', item.id]"
-										class="w-full md:w-[calc(50%-0.5rem)]"
-									/>
-								}
-								</app-list-section>
-							}
-						</ul>
-					</section>
-				}
+						@if (month.tourPasses.length > 0) {
+							<section class="flex flex-col items-start justify-start w-full gap-4">
+								<h5 class="text-lg font-medium">Tour Passes</h5>
+								<div class="flex flex-wrap gap-4 w-full">
+									@for (item of month.tourPasses; track item.id) {
+										<app-tourpass-preview
+											[tourpass]="item"
+											[routerLink]="['/dashboard/tourpass', item.id]"
+											class="w-full md:w-[calc(50%-0.5rem)]"
+										/>
+									}
+								</div>
+							</section>
+						}
 
-				@if (themesByMonth.length > 0) {
-					<section class="flex flex-col items-start justify-start w-full gap-4">
-						<h4 class="text-xl font-medium">Themes</h4>
-						<ul class="flex flex-col items-start justify-start w-full gap-9">
-							@for (month of themesByMonth; track $index) {
-								<app-list-section
-									class="w-full"
-									[title]="convertStringToMonth(month.name)"
-								>
-								@for (item of month.items; track item.id) {
-									<div
-										class="flex flex-col items-center justify-center bg-surface-container-low rounded-2xl p-4 w-full md:w-[calc(50%-0.5rem)] cursor-pointer"
-										[routerLink]="['/dashboard/theme', item.id]"
-									>
-										@if (item.coverUrl) {
-											<img
-												[src]="item.coverUrl"
-												[alt]="item.name"
-												class="w-full h-40 object-cover rounded-xl"
-											/>
-										} @else {
-											<div class="w-full h-40 bg-surface-container rounded-xl flex items-center justify-center">
-												<ng-glyph name="palette" size="40" class="text-on-surface/30" />
-											</div>
-										}
-										<p class="mt-2 text-sm font-medium truncate w-full text-center">{{ item.name }}</p>
-									</div>
-								}
-								</app-list-section>
-							}
-						</ul>
-					</section>
+						@if (month.themes.length > 0) {
+							<section class="flex flex-col items-start justify-start w-full gap-4">
+								<h5 class="text-lg font-medium">Themes</h5>
+								<div class="flex flex-wrap gap-4 w-full">
+									@for (item of month.themes; track item.id) {
+										<div
+											class="flex flex-col items-center justify-center bg-surface-container-low rounded-2xl p-4 w-full md:w-[calc(50%-0.5rem)] cursor-pointer"
+											[routerLink]="['/dashboard/theme', item.id]"
+										>
+											@if (item.coverUrl) {
+												<img
+													[src]="item.coverUrl"
+													[alt]="item.name"
+													class="w-full h-40 object-cover rounded-xl"
+												/>
+											} @else {
+												<div class="w-full h-40 bg-surface-container rounded-xl flex items-center justify-center">
+													<ng-glyph name="palette" size="40" class="text-on-surface/30" />
+												</div>
+											}
+											<p class="mt-2 text-sm font-medium truncate w-full text-center">{{ item.name }}</p>
+										</div>
+									}
+								</div>
+							</section>
+						}
+					</app-list-section>
 				}
 			</div>
 
