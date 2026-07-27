@@ -3,7 +3,8 @@
 >
 	<app-filter-panel
 		class="w-full md:w-1/3 md:max-w-md"
-		[disabled]="(isLoading$ | async) || !charts"
+		[disabled]="(isLoading$ | async) ?? false"
+		[singleCategorySelect]="true"
 	></app-filter-panel>
 	<div class="flex flex-col items-start justify-start gap-6 w-full">
 		<app-panel class="w-full" variant="warning">
@@ -19,7 +20,7 @@
 				placeholder="Search for charts, tourpasses and themes..."
 				[enableSuggestions]="true"
 				class="flex flex-1 max-md:w-full relative"
-				[disabled]="(isLoading$ | async) || !charts"
+				[disabled]="(isLoading$ | async) ?? false"
 				[isLoading]="(isLoading$ | async) ?? false"
 				[onSearch]="onSearch.bind(this)"
 			/>
@@ -36,13 +37,13 @@
 							(filters$ | async)?.sortBy?.toString() || null
 						"
 						(selectionChange)="onSortChange($event)"
-						[disabled]="(isLoading$ | async) || !charts"
+						[disabled]="(isLoading$ | async) ?? false"
 					/>
 				</span>
 			</div>
 		</div>
 
-		@if ((isLoading$ | async) && !charts) {
+		@if ((isLoading$ | async) && !charts && tourPasses.length === 0) {
 			<ul
 				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
 			>
@@ -150,7 +151,7 @@
 				}
 
 				<!-- Loading indicator for infinite scroll -->
-				@if ((isLoading$ | async) && charts) {
+				@if ((isLoading$ | async) && (charts || tourPasses.length > 0)) {
 					<div class="flex items-center justify-center w-full py-4">
 						<mat-progress-spinner
 							diameter="24"

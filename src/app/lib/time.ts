@@ -63,7 +63,9 @@ export function convertDateTimeToHumanReadable(value: string | Date): string {
 }
 
 export function convertStringToMonth(value: string): string {
+	if (!value || value === "unknown") return "Other";
 	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return "Other";
 	const options: Intl.DateTimeFormatOptions = {
 		month: "long",
 		year: "numeric",

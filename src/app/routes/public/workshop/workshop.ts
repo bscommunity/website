@@ -96,6 +96,12 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	placeholders = Array(20);
 
 	ngOnInit(): void {
+		// Set default category to Charts for workshop
+		const currentFilters = this.filterService.getFilters();
+		if (currentFilters.categories.length === 0) {
+			this.filterService.setFilterArray("categories", ["Charts"]);
+		}
+
 		// Initial load (immediate, no debounce)
 		this.loadWithFilters(this.filterService.getFilters());
 
@@ -139,64 +145,80 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 			? (this.currentPage - 1) * this.pageSize
 			: 0;
 
-		// Load charts
-		this.chartService
-			.getCharts(filters, {
-				limit: this.pageSize,
-				offset,
-				storage: "session",
-				count: true,
-			})
-			.pipe(takeUntil(this.destroy$))
-			.subscribe({
-				next: (response) => {
-					if (append) {
-						this.charts = [...(this.charts || []), ...response.first];
-					} else {
-						this.charts = response.first;
-					}
-					if (response.second !== null) {
-						this.totalItems = response.second;
-					}
-					this.filterService.setLoading(false);
-					this.cdr.markForCheck();
-				},
-				error: (error) => {
-					console.error("Error loading charts:", error);
-					const errorMessage =
-						error.error?.message ||
-						"Failed to load charts. Please try again.";
-					this.filterService.setError(errorMessage);
-					this.charts = [];
-					this.filterService.setLoading(false);
-					this.cdr.markForCheck();
-				},
-			});
+		const selectedCategories = filters.categories;
+		const showCharts = selectedCategories.includes("Charts");
+		const showTourPasses = selectedCategories.includes("Tourpasses");
 
-		// Load tour passes
-		this.userService
-			.getPublicTourPasses({
-				limit: this.pageSize,
-				offset,
-				count: true,
-			})
-			.pipe(takeUntil(this.destroy$))
-			.subscribe({
-				next: (response) => {
-					if (append) {
-						this.tourPasses = [...this.tourPasses, ...response[0]];
-					} else {
-						this.tourPasses = response[0];
-					}
-					if (response[1] !== null) {
-						this.totalItems = Math.max(this.totalItems, response[1]);
-					}
-					this.cdr.markForCheck();
-				},
-				error: (error) => {
-					console.error("Error loading tour passes:", error);
-				},
-			});
+		if (showCharts) {
+			// Load charts
+			this.chartService
+				.getCharts(filters, {
+					limit: this.pageSize,
+					offset,
+					storage: "session",
+					count: true,
+				})
+				.pipe(takeUntil(this.destroy$))
+				.subscribe({
+					next: (response) => {
+						if (append) {
+							this.charts = [...(this.charts || []), ...response.first];
+						} else {
+							this.charts = response.first;
+						}
+						if (response.second !== null) {
+							this.totalItems = response.second;
+						}
+						this.filterService.setLoading(false);
+						this.cdr.markForCheck();
+					},
+					error: (error) => {
+						console.error("Error loading charts:", error);
+						const errorMessage =
+							error.error?.message ||
+							"Failed to load charts. Please try again.";
+						this.filterService.setError(errorMessage);
+						this.charts = [];
+						this.filterService.setLoading(false);
+						this.cdr.markForCheck();
+					},
+				});
+		} else {
+			this.charts = [];
+		}
+
+		if (showTourPasses) {
+			// Load tour passes
+			this.userService
+				.getPublicTourPasses({
+					limit: this.pageSize,
+					offset,
+					count: true,
+				})
+				.pipe(takeUntil(this.destroy$))
+				.subscribe({
+					next: (response) => {
+						if (append) {
+							this.tourPasses = [...this.tourPasses, ...response[0]];
+						} else {
+							this.tourPasses = response[0];
+						}
+						if (response[1] !== null) {
+							this.totalItems = Math.max(this.totalItems, response[1]);
+						}
+						this.cdr.markForCheck();
+					},
+					error: (error) => {
+						console.error("Error loading tour passes:", error);
+					},
+				});
+		} else {
+			this.tourPasses = [];
+		}
+
+		if (!showCharts && !showTourPasses) {
+			this.filterService.setLoading(false);
+		}
 	}
 
 	/**
@@ -218,6 +240,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	 */
 	clearFilters(): void {
 		this.filterService.resetFilters();
+		this.filterService.setFilterArray("categories", ["Charts"]);
 	}
 
 	/**
@@ -261,9 +284,12 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		const scrollPosition = window.innerHeight + window.scrollY;
 		const documentHeight = document.documentElement.scrollHeight;
 
+		const loadedCount =
+			(this.charts?.length ?? 0) + this.tourPasses.length;
+
 		if (
 			scrollPosition >= documentHeight - 200 &&
-			(this.charts?.length ?? 0) < this.totalItems &&
+			loadedCount < this.totalItems &&
 			!(this.isLoading$ as any)?.value
 		) {
 			this.currentPage++;

@@ -44,6 +44,7 @@ export class FilterPanelComponent {
 	private filterService = inject(FilterService);
 
 	readonly disabled = input<boolean>(false);
+	readonly singleCategorySelect = input<boolean>(false);
 
 	private _difficulties = difficulties;
 	private _genres = genres;
@@ -53,7 +54,7 @@ export class FilterPanelComponent {
 		ToggleableFilter,
 		(value: string) => void
 	> = {
-		categories: (val) => this.filterService.toggleCategory(val),
+		categories: (val) => this.handleCategoryToggle(val),
 		difficulties: (val) => this.filterService.toggleDifficulty(val),
 		genres: (val) => this.filterService.toggleGenre(val),
 		versions: (val) => this.filterService.toggleVersion(val),
@@ -65,6 +66,21 @@ export class FilterPanelComponent {
 	readonly categories = computed(() =>
 		this.withSelection(this._categories, this.filtersSignal().categories),
 	);
+
+	readonly showGenres = computed(() => {
+		const cats = this.filtersSignal().categories;
+		return cats.length === 0 || cats.includes("Charts");
+	});
+
+	readonly showDifficulties = computed(() => {
+		const cats = this.filtersSignal().categories;
+		return cats.length === 0 || cats.includes("Charts") || cats.includes("Tourpasses");
+	});
+
+	readonly showVersions = computed(() => {
+		const cats = this.filtersSignal().categories;
+		return cats.length === 0 || cats.includes("Charts") || cats.includes("Tourpasses");
+	});
 
 	readonly difficulties = computed(() =>
 		this.withSelection(
@@ -107,6 +123,32 @@ export class FilterPanelComponent {
 
 	clearFilters(): void {
 		this.filterService.resetFilters();
+	}
+
+	private handleCategoryToggle(value: string): void {
+		if (this.singleCategorySelect()) {
+			const current = this.filterService.getFilters().categories;
+			if (current.length === 1 && current[0] === value) {
+				this.filterService.setFilterArray("categories", []);
+			} else {
+				this.filterService.setFilterArray("categories", [value]);
+			}
+		} else {
+			this.filterService.toggleCategory(value);
+		}
+
+		// Clear filters that no longer apply to the selected categories
+		const categories = this.filterService.getFilters().categories;
+		const hasCharts = categories.length === 0 || categories.includes("Charts");
+		const hasChartsOrTourPasses = categories.length === 0 || categories.includes("Charts") || categories.includes("Tourpasses");
+
+		if (!hasCharts) {
+			this.filterService.setFilterArray("genres", []);
+		}
+		if (!hasChartsOrTourPasses) {
+			this.filterService.setFilterArray("difficulties", []);
+			this.filterService.setFilterArray("versions", []);
+		}
 	}
 
 	private withSelection(

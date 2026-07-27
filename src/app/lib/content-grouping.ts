@@ -12,8 +12,9 @@ export function groupByMonth(items: CatalogItemModel[]): ContentByMonth[] {
 	const map = new Map<string, CatalogItemModel[]>();
 
 	for (const item of items) {
-		const month = item.updatedAt
-			? new Date(item.updatedAt).toISOString().slice(0, 7)
+		const dateSource = item.updatedAt ?? item.createdAt;
+		const month = dateSource
+			? new Date(dateSource).toISOString().slice(0, 7)
 			: "unknown";
 
 		if (!map.has(month)) {

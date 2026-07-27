@@ -7,7 +7,6 @@ import {
 	type OnInit,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
-import { RouterLink } from "@angular/router";
 
 // Icons
 import { NgGlyph } from "@ng-icons/core";
@@ -59,7 +58,6 @@ import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass
 		AsyncPipe,
 		NgGlyph,
 		MatButtonModule,
-		RouterLink,
 		SelectComponent,
 		FilterPanelComponent,
 		ListSectionComponent,
@@ -149,6 +147,7 @@ export class Uploads implements OnInit, OnDestroy {
 				sortBy: filters.sortBy || undefined,
 				limit: this.pageSize,
 				offset: append ? this.currentOffset : 0,
+				disableCache,
 			})
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({

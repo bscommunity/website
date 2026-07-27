@@ -15,12 +15,14 @@ import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 // Lib
 import { apiUrl } from "@/lib/api";
+import { StorageService } from "../storage.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class UserService {
 	private http = inject(HttpClient);
+	private storageService = inject(StorageService);
 
 	private readonly apiUrl = `${apiUrl}/users`;
 	private readonly meUrl = `${apiUrl}/me`;
@@ -72,6 +74,7 @@ export class UserService {
 			sortBy?: string;
 			limit?: number;
 			offset?: number;
+			disableCache?: boolean;
 		} = {},
 	): Observable<ItemsPageModel<CatalogItemModel>> {
 		const httpParams: Record<string, string | number> = {};
@@ -81,14 +84,58 @@ export class UserService {
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 
+		const cacheKey = this.buildUploadsCacheKey(httpParams);
+		const isPaginated = (params.offset ?? 0) > 0;
+
+		if (!params.disableCache && !isPaginated) {
+			const cached = this.getFromUploadsCache(cacheKey);
+			if (cached) {
+				return of(cached);
+			}
+		}
+
 		return this.http.get<ItemsPageModel<CatalogItemModel>>(
 			`${this.meUrl}/uploads`,
 			{ params: httpParams },
+		).pipe(
+			tap((response) => {
+				if (!isPaginated) {
+					this.setUploadsCache(cacheKey, response);
+				}
+			}),
 		);
 	}
 
+	private buildUploadsCacheKey(params: Record<string, string | number>): string {
+		const parts = [
+			params["types"] || "all",
+			params["query"] || "",
+			params["sortBy"] || "",
+			params["limit"] || 20,
+		];
+		return `uploads_${parts.join("|")}`;
+	}
+
+	private getFromUploadsCache(key: string): ItemsPageModel<CatalogItemModel> | null {
+		const raw = this.storageService.getItem(key, true);
+		if (!raw) return null;
+		try {
+			const parsed = JSON.parse(raw);
+			if (parsed && Array.isArray(parsed.items)) {
+				return parsed as ItemsPageModel<CatalogItemModel>;
+			}
+		} catch {
+			this.storageService.removeItem(key, true);
+		}
+		return null;
+	}
+
+	private setUploadsCache(key: string, data: ItemsPageModel<CatalogItemModel>): void {
+		this.storageService.setItem(key, JSON.stringify(data), true);
+	}
+
 	getPublicTourPasses(
-		params: { query?: string; sortBy?: string; limit?: number; offset?: number; count?: boolean } = {},
+		params: { query?: string; sortBy?: string; limit?: number; offset?: number; count?: boolean; disableCache?: boolean } = {},
 	): Observable<[TourPassModel[], number | null]> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;
@@ -97,10 +144,53 @@ export class UserService {
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 		if (params.count) httpParams["count"] = true;
 
+		const cacheKey = this.buildTourPassesCacheKey(httpParams);
+		const isPaginated = (params.offset ?? 0) > 0;
+
+		if (!params.disableCache && !isPaginated) {
+			const cached = this.getFromTourPassesCache(cacheKey);
+			if (cached) {
+				return of(cached);
+			}
+		}
+
 		return this.http.get<[TourPassModel[], number | null]>(
 			`${apiUrl}/tourpasses`,
 			{ params: httpParams },
+		).pipe(
+			tap((response) => {
+				if (!isPaginated) {
+					this.setTourPassesCache(cacheKey, response);
+				}
+			}),
 		);
+	}
+
+	private buildTourPassesCacheKey(params: Record<string, string | number | boolean>): string {
+		const parts = [
+			params["query"] || "",
+			params["sortBy"] || "",
+			params["limit"] || 20,
+		];
+		return `tourpasses_${parts.join("|")}`;
+	}
+
+	private getFromTourPassesCache(key: string): [TourPassModel[], number | null] | null {
+		const raw = this.storageService.getItem(key, true);
+		if (!raw) return null;
+		try {
+			const parsed = JSON.parse(raw);
+			if (parsed && Array.isArray(parsed[0])) {
+				return parsed as [TourPassModel[], number | null];
+			}
+		} catch {
+			this.storageService.removeItem(key, true);
+		}
+		return null;
+	}
+
+	private setTourPassesCache(key: string, data: [TourPassModel[], number | null]): void {
+		this.storageService.setItem(key, JSON.stringify(data), true);
 	}
 
 	getPublicThemes(

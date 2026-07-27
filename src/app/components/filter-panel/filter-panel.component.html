@@ -22,29 +22,35 @@
 			[disabled]="disabled()"
 		></app-expansion-panel>
 
-		<app-expansion-panel
-			class="w-full"
-			title="Difficulties"
-			[data]="difficulties()"
-			(optionSelectionChange)="onSelectionChange('difficulties', $event)"
-			[disabled]="disabled()"
-		></app-expansion-panel>
+		@if (showDifficulties()) {
+			<app-expansion-panel
+				class="w-full"
+				title="Difficulties"
+				[data]="difficulties()"
+				(optionSelectionChange)="onSelectionChange('difficulties', $event)"
+				[disabled]="disabled()"
+			></app-expansion-panel>
+		}
 
-		<app-expansion-panel
-			class="w-full"
-			title="Genres"
-			[data]="genres()"
-			(optionSelectionChange)="onSelectionChange('genres', $event)"
-			[disabled]="disabled()"
-		></app-expansion-panel>
+		@if (showGenres()) {
+			<app-expansion-panel
+				class="w-full"
+				title="Genres"
+				[data]="genres()"
+				(optionSelectionChange)="onSelectionChange('genres', $event)"
+				[disabled]="disabled()"
+			></app-expansion-panel>
+		}
 
-		<app-expansion-panel
-			class="w-full"
-			title="Versions"
-			[data]="versions()"
-			(optionSelectionChange)="onSelectionChange('versions', $event)"
-			[disabled]="disabled()"
-		></app-expansion-panel>
+		@if (showVersions()) {
+			<app-expansion-panel
+				class="w-full"
+				title="Versions"
+				[data]="versions()"
+				(optionSelectionChange)="onSelectionChange('versions', $event)"
+				[disabled]="disabled()"
+			></app-expansion-panel>
+		}
 
 		<!-- <mat-expansion-panel
 			class="!shadow-none w-full"
