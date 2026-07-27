@@ -219,8 +219,13 @@ export class Uploads implements OnInit, OnDestroy {
 	}
 
 	openBatchMock() {
-		this.dialog.open(PublishChartBatchComponent, {
+		const dialogRef = this.dialog.open(PublishChartBatchComponent, {
 			width: "600px",
 		});
+	 dialogRef.afterClosed()
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.fetchCharts(true);
+			});
 	}
 }

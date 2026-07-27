@@ -120,9 +120,12 @@ export class PublishDialogService<
 
 			if (result === "batch") {
 				this.dialog.closeAll();
-				this.dialog.open(PublishChartBatchComponent, {
+				const batchRef = this.dialog.open(PublishChartBatchComponent, {
 					width: "600px",
 					disableClose: true,
+				});
+				batchRef.afterClosed().subscribe(() => {
+					this.router.navigate(["/dashboard/uploads"]);
 				});
 				this.reset();
 				return;
