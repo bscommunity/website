@@ -26,7 +26,6 @@ export const initialTourPassFormData: TourPassFormData = {
 	name: "",
 	description: "",
 	artist: "",
-	coverId: null,
 	chartIds: [],
 	coverFile: null,
 	coverUrl: "",
@@ -35,9 +34,10 @@ export const initialTourPassFormData: TourPassFormData = {
 };
 
 @Injectable({ providedIn: "root" })
-export class TourPassPublishHandler
-	implements PublishHandler<TourPassFormData, TourPassModel>
-{
+export class TourPassPublishHandler implements PublishHandler<
+	TourPassFormData,
+	TourPassModel
+> {
 	private tourPassService = inject(TourPassService);
 
 	getStepComponents(): Type<unknown>[] {
@@ -58,13 +58,8 @@ export class TourPassPublishHandler
 	}
 
 	async submit(data: TourPassFormData): Promise<TourPassModel> {
-		const {
-			contentType,
-			coverFile,
-			trailerUrl,
-			selectedCharts,
-			...rest
-		} = data as TourPassFormData & { contentType?: string };
+		const { contentType, coverFile, trailerUrl, selectedCharts, ...rest } =
+			data as TourPassFormData & { contentType?: string };
 
 		const payload: CreateTourPassModel & { coverFile?: File | null } = {
 			...rest,

@@ -1,0 +1,39 @@
+<div
+	[class]="classes()"
+	[ngStyle]="{
+		opacity: !isPublic(tourpass()) && showVisibility() ? 0.5 : 1,
+	}"
+>
+	<img
+		[src]="tourpass().coverUrl"
+		alt="Cover"
+		class="w-full h-full object-cover"
+	/>
+	<app-difficulty-mark
+		[difficulty]="averageDifficulty()?.difficulty"
+		[size]="size() === 'sm' ? 32 : 40"
+	/>
+	@if (!isPublic(tourpass()) && showVisibility()) {
+		<div
+			class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full h-full bg-black/70"
+		>
+			<ng-glyph name="visibility_off" class="relative" />
+		</div>
+	}
+	<div
+		class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full h-full bg-black/70 xl:hidden opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+	>
+		<a
+			matTooltip="Open in Discord"
+			matTooltipPosition="above"
+			matRipple
+			class="flex items-center justify-center rounded-full bg-secondary-container hover:bg-primary-container transition-colors p-2 h-10 w-10"
+			[href]="discordLink"
+			target="_blank"
+			title="Open in Discord"
+			(click)="$event.stopPropagation()"
+		>
+			<ng-icon name="discord" />
+		</a>
+	</div>
+</div>

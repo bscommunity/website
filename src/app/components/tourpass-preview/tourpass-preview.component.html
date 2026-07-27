@@ -1,0 +1,136 @@
+<a
+	[class]="classes()"
+	[routerLink]="routerLink()"
+	title="{{ this.tourpass().name }}"
+	tabindex="0"
+>
+	<app-tourpass-cover
+		class="w-full"
+		[tourpass]="tourpass()"
+		[size]="size()"
+		[showVisibility]="showItems().includes('visibility')"
+	/>
+	<div
+		class="flex flex-row flex-1 items-center justify-between w-full gap-2 relative overflow-hidden"
+	>
+		<div class="flex flex-col items-start justify-start gap-0.5 flex-1">
+			<div class="flex flex-row items-center justify-start gap-2">
+				<p
+					class="text-base font-semibold overflow-hidden text-ellipsis line-clamp-1"
+				>
+					{{ this.tourpass().name }}
+				</p>
+				<span class="inline-flex gap-1 items-center justify-start">
+					@if (
+						this.tourpass().charts.some((chart) => chart.isExplicit)
+					) {
+						<ng-glyph name="explicit" class="filled-icon" />
+					}
+					@if (
+						this.tourpass().charts.some((chart) => chart.isDeluxe)
+					) {
+						<ng-icon
+							name="deluxe"
+							size="24"
+							aria-hidden="false"
+							aria-label="Deluxe icon"
+						/>
+					}
+				</span>
+			</div>
+			<p class="text-sm font-medium line-clamp-1">No headliner</p>
+		</div>
+		@if (
+			showItems().includes("contributors") &&
+			(this.tourpass().contributors.length || 0) > 0
+		) {
+			<div
+				class="flex flex-row items-center justify-center gap-2 pl-1 py-1 md:pl-1.5 pr-2.5 md:py-1.5 rounded-full border border-outline/80"
+			>
+				<ul class="flex flex-row items-center justify-start">
+					@for (
+						contributor of this.tourpass().contributors;
+						track contributor.user.id
+					) {
+						<li class="-ml-1.5 first:ml-0 w-5 h-5">
+							<app-avatar
+								[src]="contributor.user.avatarUrl"
+								[alt]="contributor.user.username"
+								[class]="'bg-surface-variant text-xs font-medium text-on-surface-variant w-5 h-5'"
+							></app-avatar>
+						</li>
+					}
+				</ul>
+				<!-- <span
+					class="text-xs md:text-sm text-on-surface line-clamp-1"
+					title="{{ contributorsNames(tourpass()) }}"
+				>
+					tourpass by {{ contributorsNames(tourpass()) }}
+				</span> -->
+			</div>
+		} @else if (showItems().includes("data")) {
+			<div class="flex flex-col items-end justify-start gap-0">
+				<div class="flex flex-row items-center justify-start gap-2">
+					<ng-glyph name="timer" />
+					<span class="line-clamp-1">{{
+						transformDuration(
+							this.tourpass().charts.reduce(
+								(acc, chart) =>
+									acc + (chart.track.duration || 0),
+								0
+							)
+						)
+					}}</span>
+				</div>
+				<div class="flex flex-row items-center justify-start gap-2">
+					<ng-glyph name="music_note" />
+					<span class="line-clamp-1"
+						>{{
+							this.tourpass().charts.reduce(
+								(acc, chart) => acc + (chart.notesAmount || 0),
+								0
+							)
+						}}
+						notes</span
+					>
+				</div>
+			</div>
+		}
+	</div>
+	<ng-content select="[tourpassAction]"></ng-content>
+	@if (showItems().includes("shareActions")) {
+		<div
+			class="absolute top-1/2 -translate-y-1/2 right-8 opacity-0 group-hover:opacity-100 transition-[opacity,background-color] duration-150 hidden xl:flex flex-row items-end justify-center gap-2"
+		>
+			<a
+				matRipple
+				matTooltip="Share"
+				class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 w-10 h-10"
+				[href]=""
+				target="_blank"
+				title="Share"
+				(click)="onShare($event)"
+			>
+				<ng-glyph
+					name="share"
+					size="20"
+					class="flex items-center justify-center"
+				/>
+			</a>
+			<a
+				matRipple
+				matTooltip="Open in Discord"
+				class="flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-high/80 transition-colors p-2 h-10 w-10"
+				[href]="
+					'https://discord.com/channels/951981656301006878/1404808964163768361/' +
+					this.tourpass().id
+				"
+				target="_blank"
+				title="Open in Discord"
+				(click)="$event.stopPropagation()"
+			>
+				<ng-icon name="discord" />
+			</a>
+		</div>
+	}
+</a>

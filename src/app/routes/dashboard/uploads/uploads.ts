@@ -44,6 +44,8 @@ import type { WorkshopFilters } from "@/services/filter.service";
 import { FilterService } from "@/services/filter.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { PublishChartBatchComponent } from "@/components/publish/chart/batch.component";
+import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
+import { SAMPLE_TOURPASS_1 } from "@/lib/fake";
 
 interface ChartsByMonth {
 	name: string; // e.g., "2023-10"
@@ -64,6 +66,7 @@ interface ChartsByMonth {
 		SearchbarComponent,
 		LargePanelComponent,
 		ChartPreviewComponent,
+		TourpassPreviewComponent,
 	],
 	templateUrl: "./uploads.html",
 })
@@ -86,6 +89,8 @@ export class Uploads implements OnInit, OnDestroy {
 
 	filters = [];
 
+	tourpass = SAMPLE_TOURPASS_1;
+
 	set charts(value: ChartModel[] | undefined) {
 		const charts: ChartModel[] = value || [];
 
@@ -93,8 +98,8 @@ export class Uploads implements OnInit, OnDestroy {
 		charts.forEach((chart) => {
 			const month = chart.latestVersion?.createdAt
 				? new Date(chart.latestVersion.createdAt)
-					.toISOString()
-					.slice(0, 7)
+						.toISOString()
+						.slice(0, 7)
 				: "unknown";
 
 			let monthEntry = chartsByMonth.find(
@@ -222,7 +227,8 @@ export class Uploads implements OnInit, OnDestroy {
 		const dialogRef = this.dialog.open(PublishChartBatchComponent, {
 			width: "600px",
 		});
-	 dialogRef.afterClosed()
+		dialogRef
+			.afterClosed()
 			.pipe(takeUntil(this.destroy$))
 			.subscribe(() => {
 				this.fetchCharts(true);

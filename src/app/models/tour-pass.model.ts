@@ -12,9 +12,9 @@ import { StreamingLink } from "./streaming-link.model";
 
 export const TourPass = z.object({
 	id: z.string(),
-	type: z.nativeEnum(CatalogItemType),
-	status: z.nativeEnum(CatalogItemStatus),
-	visibility: z.nativeEnum(Visibility),
+	type: z.enum(CatalogItemType),
+	status: z.enum(CatalogItemStatus),
+	visibility: z.enum(Visibility),
 	isFeatured: z.boolean(),
 	downloadsSum: z.number().min(0).default(0),
 	contributors: z.array(Contributor).default([]),
@@ -32,7 +32,7 @@ export const TourPass = z.object({
 	description: z.string().optional().nullable(),
 	artist: z.string().optional().nullable(),
 	charts: z.array(Chart).default([]),
-	coverId: z.string().optional().nullable(),
+	coverUrl: z.string().optional().nullable(),
 });
 
 export type TourPassModel = z.infer<typeof TourPass>;

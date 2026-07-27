@@ -6,6 +6,7 @@ import { Difficulty } from "@/models/enums/difficulty.enum";
 import { Genre } from "@/models/enums/genre.enum";
 import { ContributorRole } from "@/models/enums/role.enum";
 import { Visibility } from "@/models/enums/visibility.enum";
+import { TourPassModel } from "@/models/tour-pass.model";
 import type { TrackModel } from "@/models/track.model";
 import type { VersionModel } from "@/models/version.model";
 
@@ -81,4 +82,47 @@ export const SAMPLE_CHART_1: ChartModel = {
 	isDeluxe: false,
 	isExplicit: false,
 	latestVersion: fakeVersion,
+};
+
+export const SAMPLE_TOURPASS_1: TourPassModel = {
+	id: "1411705646297907221",
+	type: CatalogItemType.TOUR_PASS,
+	status: CatalogItemStatus.PUBLISHED,
+	visibility: Visibility.PUBLIC,
+	isFeatured: false,
+	downloadsSum: 1234,
+	contributors: [
+		{
+			user: {
+				id: "b27abf7e-6a1a-48f1-9b8f-02a96687a371",
+				username: "zkyant",
+				avatarUrl:
+					"https://cdn.discordapp.com/avatars/598634405778554890/b2e144548221ef78c8300922c2c46447.png",
+				bannerUrl: null,
+				bio: null,
+				accentColor: null,
+				isVerified: true,
+				followersCount: 10,
+				followingCount: 5,
+			},
+			catalogItemId: "1411705646297907221",
+			role: ContributorRole.AUDIO,
+			joinedAt: new Date("2025-08-30T18:45:00"),
+		},
+	],
+	createdAt: new Date("2025-08-30T18:45:00"),
+	publishedAt: new Date("2025-09-01T12:00:00"),
+	updatedAt: new Date("2025-09-03T18:45:00"),
+	likedAt: new Date("2025-09-02T15:30:00"),
+	bookmarkedAt: new Date("2025-09-01T12:00:00"),
+	previewVideoId: null,
+	discordChannelId: null,
+	discordMessageId: null,
+	authorId: null,
+
+	name: "Sample Tourpass 1",
+	description: "This is a sample tourpass for testing purposes.",
+	artist: "Sample Artist",
+	charts: [SAMPLE_CHART_1],
+	coverUrl: null,
 };

@@ -9,14 +9,14 @@ import { Component, OnChanges, SimpleChanges, input } from "@angular/core";
 })
 export class DifficultyMarkComponent implements OnChanges {
 	readonly class = input<string>();
-	readonly difficulty = input.required<Difficulty>();
+	readonly difficulty = input<Difficulty | undefined>(undefined);
 	readonly size = input<number>(40);
 
 	difficultyIcon: string | null = null;
 
 	ngOnChanges(changes: SimpleChanges): void {
-		const difficulty = this.difficulty();
-  if (changes["difficulty"] && difficulty) {
+		const difficulty = this.difficulty() || Difficulty.NORMAL;
+		if (changes["difficulty"] && difficulty) {
 			this.difficultyIcon = getDifficultyIcon(difficulty);
 			/* console.log(
 				`Difficulty icon: ${this.difficultyIcon} for difficulty: ${this.difficulty}`,
