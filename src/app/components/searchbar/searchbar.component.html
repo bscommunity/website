@@ -54,6 +54,13 @@
 				</span>
 			</button>
 		}
+		@if (isLoading()) {
+			<mat-progress-spinner
+				mode="indeterminate"
+				diameter="16"
+				class="flex flex-1 mr-4 items-center justify-center"
+			></mat-progress-spinner>
+		}
 		<ng-content></ng-content>
 	</span>
 </div>

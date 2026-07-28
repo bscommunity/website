@@ -5,19 +5,27 @@
 		class="w-full md:w-1/3 md:max-w-md"
 		[disabled]="(isLoading$ | async) ?? false"
 	></app-filter-panel>
+
 	<div class="flex flex-col items-start justify-start gap-9 w-full relative">
-		@if (isLoading$ | async) {
-			<div class="absolute inset-0 z-10 flex items-start justify-center pt-9">
-				<mat-progress-spinner
-					diameter="36"
-					mode="indeterminate"
-				></mat-progress-spinner>
-			</div>
+		@if ((isLoading$ | async) && !hasAnyContent) {
+			<ul
+				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
+			>
+				@for (placeholder of placeholders; track $index) {
+					<div
+						class="animate-pulse bg-surface-container-low rounded-2xl h-30.5 w-full"
+					></div>
+				}
+			</ul>
 		}
 		<div
 			class="flex flex-col sm:flex-row items-center justify-start w-full gap-4"
-			[style.opacity]="(isLoading$ | async) && hasAnyContent ? '0.5' : '1'"
-			[style.pointerEvents]="(isLoading$ | async) && hasAnyContent ? 'none' : 'auto'"
+			[style.opacity]="
+				(isLoading$ | async) && hasAnyContent ? '0.5' : '1'
+			"
+			[style.pointerEvents]="
+				(isLoading$ | async) && hasAnyContent ? 'none' : 'auto'
+			"
 		>
 			<app-searchbar
 				placeholder="Search for charts, tourpasses and themes..."
@@ -30,16 +38,13 @@
 				<span
 					class="flex flex-row items-center justify-end gap-4 h-full"
 				>
-					<label class="min-w-fit" for="sort-by"
-						>Sort by</label
-					>
+					<label class="min-w-fit" for="sort-by">Sort by</label>
 					<app-select
 						class="h-full"
 						id="sort-by"
 						[options]="sortOptions"
 						[defaultValue]="
-							(filters$ | async)?.sortBy?.toString() ||
-							null
+							(filters$ | async)?.sortBy?.toString() || null
 						"
 						(selectionChange)="onSortChange($event)"
 						[disabled]="(isLoading$ | async) ?? false"
@@ -53,9 +58,7 @@
 					class="flex! items-center! justify-center!"
 					[disabled]="isLoading$ | async"
 				>
-					<span
-						class="flex flex-1 items-center justify-center"
-					>
+					<span class="flex flex-1 items-center justify-center">
 						<ng-glyph name="refresh" />
 					</span>
 				</button>
@@ -77,8 +80,8 @@
 					>
 						{{ error }} <br />
 						<p>
-							Please try again later or check Discord if the problem
-							persists
+							Please try again later or check Discord if the
+							problem persists
 						</p>
 						<button
 							mat-stroked-button
@@ -98,20 +101,20 @@
 					</div>
 				</div>
 			</div>
-		} @else if (hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)) {
+		} @else if (
+			hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)
+		) {
 			<div
 				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 			>
-				<div
-					class="flex flex-col items-center justify-center gap-4"
-				>
+				<div class="flex flex-col items-center justify-center gap-4">
 					<ng-glyph name="sentiment_dissatisfied" size="60" />
 					<h1 class="text-2xl">
 						We couldn't find anything based on your search
 					</h1>
 					<p class="max-w-[50%] text-center">
-						Try removing some filters or searching for
-						something else
+						Try removing some filters or searching for something
+						else
 					</p>
 				</div>
 				<button
@@ -124,7 +127,9 @@
 					<ng-glyph name="cancel" class="mr-0! ml-2!" />
 				</button>
 			</div>
-		} @else if (!hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)) {
+		} @else if (
+			!hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)
+		) {
 			<div class="flex flex-col items-center justify-start gap-6 w-full">
 				<div
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
@@ -157,7 +162,7 @@
 		@if (hasAnyContent) {
 			<div
 				class="flex flex-col items-start justify-start w-full gap-9"
-				[style.opacity]="(isLoading$ | async) ? '0.5' : '1'"
+				[class.animate-pulse]="isLoading$ | async"
 				[style.pointerEvents]="(isLoading$ | async) ? 'none' : 'auto'"
 			>
 				@for (month of contentByMonth; track month.name) {
@@ -166,13 +171,18 @@
 						[title]="convertStringToMonth(month.name)"
 					>
 						@if (month.charts.length > 0) {
-							<section class="flex flex-col items-start justify-start w-full gap-4">
+							<section
+								class="flex flex-col items-start justify-start w-full gap-4"
+							>
 								<h5 class="text-lg font-medium">Charts</h5>
 								<div class="flex flex-wrap gap-4 w-full">
 									@for (item of month.charts; track item.id) {
 										<app-chart-preview
 											[chart]="item"
-											[routerLink]="['/dashboard/chart', item.id]"
+											[routerLink]="[
+												'/dashboard/chart',
+												item.id,
+											]"
 											class="w-full md:w-[calc(50%-0.5rem)]"
 										></app-chart-preview>
 									}
@@ -181,13 +191,21 @@
 						}
 
 						@if (month.tourPasses.length > 0) {
-							<section class="flex flex-col items-start justify-start w-full gap-4">
+							<section
+								class="flex flex-col items-start justify-start w-full gap-4"
+							>
 								<h5 class="text-lg font-medium">Tour Passes</h5>
 								<div class="flex flex-wrap gap-4 w-full">
-									@for (item of month.tourPasses; track item.id) {
+									@for (
+										item of month.tourPasses;
+										track item.id
+									) {
 										<app-tourpass-preview
 											[tourpass]="item"
-											[routerLink]="['/dashboard/tourpass', item.id]"
+											[routerLink]="[
+												'/dashboard/tourpass',
+												item.id,
+											]"
 											class="w-full md:w-[calc(50%-0.5rem)]"
 										/>
 									}
@@ -196,13 +214,18 @@
 						}
 
 						@if (month.themes.length > 0) {
-							<section class="flex flex-col items-start justify-start w-full gap-4">
+							<section
+								class="flex flex-col items-start justify-start w-full gap-4"
+							>
 								<h5 class="text-lg font-medium">Themes</h5>
 								<div class="flex flex-wrap gap-4 w-full">
 									@for (item of month.themes; track item.id) {
 										<div
 											class="flex flex-col items-center justify-center bg-surface-container-low rounded-2xl p-4 w-full md:w-[calc(50%-0.5rem)] cursor-pointer"
-											[routerLink]="['/dashboard/theme', item.id]"
+											[routerLink]="[
+												'/dashboard/theme',
+												item.id,
+											]"
 										>
 											@if (item.coverUrl) {
 												<img
@@ -211,11 +234,21 @@
 													class="w-full h-40 object-cover rounded-xl"
 												/>
 											} @else {
-												<div class="w-full h-40 bg-surface-container rounded-xl flex items-center justify-center">
-													<ng-glyph name="palette" size="40" class="text-on-surface/30" />
+												<div
+													class="w-full h-40 bg-surface-container rounded-xl flex items-center justify-center"
+												>
+													<ng-glyph
+														name="palette"
+														size="40"
+														class="text-on-surface/30"
+													/>
 												</div>
 											}
-											<p class="mt-2 text-sm font-medium truncate w-full text-center">{{ item.name }}</p>
+											<p
+												class="mt-2 text-sm font-medium truncate w-full text-center"
+											>
+												{{ item.name }}
+											</p>
 										</div>
 									}
 								</div>
@@ -232,7 +265,7 @@
 						(click)="loadMore()"
 						(keypress)="loadMore()"
 						[disabled]="isLoading$ | async"
-						class="min-w-[200px]"
+						class="min-w-50"
 					>
 						@if (isLoading$ | async) {
 							<mat-progress-spinner

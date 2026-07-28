@@ -94,6 +94,8 @@ export class Uploads implements OnInit, OnDestroy {
 
 	error: string | undefined = undefined;
 
+	placeholders = Array(20);
+
 	// Expose observables
 	filters$ = this.filterService.filters$;
 	isLoading$ = this.filterService.isLoading$;
