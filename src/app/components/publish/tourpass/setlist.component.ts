@@ -160,7 +160,7 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 	readonly backClicked = output<void>();
 
 	get isInlineMode(): boolean {
-		return !this.data;
+		return !this.data?.formData;
 	}
 
 	charts: ChartModel[] = [];

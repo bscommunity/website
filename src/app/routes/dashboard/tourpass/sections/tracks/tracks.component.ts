@@ -6,7 +6,7 @@ import {
 	output,
 	signal,
 } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 
 // Material
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
@@ -32,7 +32,6 @@ import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 		MatDialogModule,
 		MatButtonModule,
 		MatTableModule,
-		RouterLink,
 		NgGlyph,
 		NgIcon,
 		ChartSectionComponent,
@@ -44,6 +43,7 @@ import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 })
 export class TracksSectionComponent {
 	readonly dialog = inject(MatDialog);
+	private router = inject(Router);
 
 	readonly tourPassId = input.required<string>();
 	readonly charts = input.required<ChartModel[]>();
@@ -85,5 +85,11 @@ export class TracksSectionComponent {
 		return chart.contributors
 			.map((c) => c.user?.username || "Unknown")
 			.join(", ");
+	}
+
+	navigateToChart(chartId: string) {
+		this.router.navigate(["/dashboard/chart", chartId], {
+			state: { tourPassId: this.tourPassId() },
+		});
 	}
 }

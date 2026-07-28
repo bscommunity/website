@@ -257,7 +257,7 @@ export class PublishTourPassReorderComponent {
     readonly backClicked = output<void>();
 
     get isInlineMode(): boolean {
-        return !this.data;
+        return !this.data?.formData;
     }
 
     selectedCharts: ChartModel[] = [

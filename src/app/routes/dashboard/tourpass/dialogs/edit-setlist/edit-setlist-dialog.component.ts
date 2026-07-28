@@ -17,11 +17,10 @@ import { PublishTourPassReorderComponent } from "@/components/publish/tourpass/r
 import { TourPassService } from "@/services/api/tour-pass.service";
 
 // Models
-import type { TourPassModel } from "@/models/tour-pass.model";
 import type { ChartModel } from "@/models/chart.model";
 
 export interface EditSetlistDialogData {
-	tourpass: TourPassModel;
+	tourpass: { id: string; charts: ChartModel[] };
 }
 
 @Component({

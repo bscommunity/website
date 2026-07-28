@@ -1,5 +1,10 @@
 import { Component, OnInit, inject } from "@angular/core";
-import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
+import {
+	ActivatedRoute,
+	Router,
+	RouterLink,
+	TitleStrategy,
+} from "@angular/router";
 
 // Modules
 import { FormsModule } from "@angular/forms";
@@ -32,6 +37,7 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 		NgIcon,
 		NgGlyph,
 		MatTooltipModule,
+		RouterLink,
 		AsideComponent,
 		ChangelogComponent,
 		ContributorsComponent,
@@ -57,6 +63,7 @@ export class Chart implements OnInit {
 	private _chart!: ChartModel;
 
 	difficultyIcon: string | null = null;
+	tourPassId: string | null = history.state?.tourPassId ?? null;
 
 	ngOnInit(): void {
 		// Listen to route parameter changes to reload the chart
@@ -64,6 +71,9 @@ export class Chart implements OnInit {
 			// Access resolved data
 			this.chart = this.route.snapshot.data["chart"];
 			console.warn("Chart data", this.chart);
+
+			// Update tourPassId from navigation state (may change on re-navigation)
+			this.tourPassId = history.state?.tourPassId ?? null;
 
 			if (!this.chart.contributors) {
 				console.error("Chart data is incomplete", this.chart);
@@ -73,9 +83,7 @@ export class Chart implements OnInit {
 			}
 
 			if (this.chart.difficulty) {
-				this.difficultyIcon = getDifficultyIcon(
-					this.chart.difficulty,
-				);
+				this.difficultyIcon = getDifficultyIcon(this.chart.difficulty);
 			}
 		});
 	}
