@@ -12,8 +12,8 @@ import { Visibility } from "@/models/enums/visibility.enum";
 import { ChartService } from "@/services/api/chart.service";
 import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
 // Components
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
-import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
+import { DangerZoneListItemComponent } from "@/components/danger-zone-list-item/danger-zone-list-item.component";
 
 const VISIBILITY_LABELS: Record<Visibility, string> = {
 	[Visibility.PUBLIC]: "Public",

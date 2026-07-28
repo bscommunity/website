@@ -5,8 +5,8 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 
 // Components
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
-import { DangerZoneListItemComponent } from "./subcomponents/list-item.component";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
+import { DangerZoneListItemComponent } from "@/components/danger-zone-list-item/danger-zone-list-item.component";
 import { DeleteTourPassComponent } from "../../dialogs/delete-tourpass/delete-tourpass.component";
 
 @Component({

@@ -12,6 +12,7 @@ import { Component, input } from "@angular/core";
 				</div>
 			}
 			<ng-content select="section-body"></ng-content>
+			<ng-content></ng-content>
 		</div>
 	`,
 })
@@ -21,12 +22,14 @@ export class ChartSectionComponent {
 
 @Component({
 	selector: "section-header",
-	template: `<ng-content>section-header</ng-content>`,
+	imports: [],
+	template: `<ng-content></ng-content>`,
 })
 export class SectionHeader {}
 
 @Component({
 	selector: "section-body",
-	template: `<ng-content>section-body</ng-content>`,
+	imports: [],
+	template: `<ng-content></ng-content>`,
 })
 export class SectionBody {}

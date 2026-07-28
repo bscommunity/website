@@ -31,7 +31,7 @@ import {
 	ChartPublishHandler,
 	initialChartFormData,
 } from "@/services/publish/handlers/chart-publish.handler";
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 import {
 	type Action,
 	type TableColumn,

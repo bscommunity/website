@@ -19,7 +19,7 @@ import {
 	ChartSectionComponent,
 	SectionBody,
 	SectionHeader,
-} from "../../subcomponents/chart-section.component";
+} from "@/components/chart-section/chart-section.component";
 import { EditSetlistDialogComponent } from "../../dialogs/edit-setlist/edit-setlist-dialog.component";
 
 // Models

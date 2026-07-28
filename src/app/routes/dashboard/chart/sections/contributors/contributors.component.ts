@@ -11,7 +11,7 @@ import {
 	TableColumn,
 	Action,
 } from "../../subcomponents/table/table.component";
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 
 // Dialogs
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";

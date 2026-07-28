@@ -6,8 +6,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
-import { AsideSectionComponent } from "./aside-section.component";
-import { AsideContainerComponent } from "./aside-container.component";
+import { AsideSectionComponent } from "@/components/aside-section/aside-section.component";
+import { AsideContainerComponent } from "@/components/aside-container/aside-container.component";
 import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 
 // Services

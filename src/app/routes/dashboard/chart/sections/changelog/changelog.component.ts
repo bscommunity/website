@@ -11,7 +11,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 // Components
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 
 // Services
