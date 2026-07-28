@@ -6,10 +6,12 @@ import {
 	output,
 	signal,
 } from "@angular/core";
+import { RouterLink } from "@angular/router";
 
 // Material
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
+import { MatTableModule } from "@angular/material/table";
 import { NgGlyph, NgIcon } from "@ng-icons/core";
 
 // Components
@@ -29,6 +31,8 @@ import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
+		MatTableModule,
+		RouterLink,
 		NgGlyph,
 		NgIcon,
 		ChartSectionComponent,
@@ -46,6 +50,8 @@ export class TracksSectionComponent {
 	readonly chartsChanged = output<ChartModel[]>();
 
 	viewMode = signal<"list" | "grid">("list");
+
+	readonly displayedColumns = ["track", "contributors"];
 
 	getDifficultyIcon = getDifficultyIcon;
 
