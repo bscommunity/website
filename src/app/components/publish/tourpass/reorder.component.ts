@@ -256,6 +256,7 @@ export class PublishTourPassReorderComponent implements OnInit {
 
     // Inline mode inputs/outputs (used when not in a dialog)
     readonly initialCharts = input<ChartModel[]>([]);
+    readonly setlistChanged = input<boolean>(false);
     readonly reordered = output<string[]>();
     readonly backClicked = output<void>();
 
@@ -275,6 +276,7 @@ export class PublishTourPassReorderComponent implements OnInit {
     }
 
     get hasChanges(): boolean {
+        if (this.setlistChanged()) return true;
         if (this.selectedCharts.length !== this.initialIds.length) return true;
         return this.selectedCharts.some(
             (chart, i) => chart.id !== this.initialIds[i],

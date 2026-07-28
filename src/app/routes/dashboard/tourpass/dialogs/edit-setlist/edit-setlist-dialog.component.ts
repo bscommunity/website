@@ -40,9 +40,10 @@ export interface EditSetlistDialogData {
 				(setlistChanged)="onSetlistChanged($event)"
 				(backClicked)="dialogRef.close('back')"
 			></app-publish-tourpass-setlist>
-		} @else if (currentStep() === 'reorder') {
+		} 		@else if (currentStep() === 'reorder') {
 			<app-publish-tourpass-reorder
 				[initialCharts]="selectedCharts()"
+				[setlistChanged]="setlistChanged"
 				(reordered)="onReordered($event)"
 				(backClicked)="currentStep.set('setlist')"
 			></app-publish-tourpass-reorder>
@@ -69,6 +70,13 @@ export class EditSetlistDialogComponent {
 
 	initialCharts: ChartModel[] = [...this.data.tourpass.charts];
 	selectedCharts = signal<ChartModel[]>([...this.data.tourpass.charts]);
+
+	get setlistChanged(): boolean {
+		const originalIds = this.data.tourpass.charts.map((c) => c.id);
+		const currentIds = this.selectedCharts().map((c) => c.id);
+		if (originalIds.length !== currentIds.length) return true;
+		return originalIds.some((id, i) => id !== currentIds[i]);
+	}
 
 	onSetlistChanged(charts: ChartModel[]) {
 		this.selectedCharts.set(charts);
