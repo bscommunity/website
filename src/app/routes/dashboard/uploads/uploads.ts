@@ -143,9 +143,15 @@ export class Uploads implements OnInit, OnDestroy {
 				types,
 				query: filters.query || undefined,
 				sortBy: filters.sortBy || undefined,
-				genres: filters.genres?.length ? filters.genres.join(",") : undefined,
-				difficulties: filters.difficulties?.length ? filters.difficulties.join(",") : undefined,
-				versions: filters.versions?.length ? filters.versions.join(",") : undefined,
+				genres: filters.genres?.length
+					? filters.genres.join(",")
+					: undefined,
+				difficulties: filters.difficulties?.length
+					? filters.difficulties.join(",")
+					: undefined,
+				versions: filters.versions?.length
+					? filters.versions.join(",")
+					: undefined,
 				limit: this.pageSize,
 				offset: append ? this.currentOffset : 0,
 				disableCache,
@@ -154,6 +160,12 @@ export class Uploads implements OnInit, OnDestroy {
 			.subscribe({
 				next: (response) => {
 					const items = response.items || [];
+					console.log(
+						"Fetched uploads:",
+						items,
+						"Total count:",
+						response.counts,
+					);
 
 					if (append) {
 						this.contentByMonth = this.mergeGroupedContent(
@@ -261,7 +273,10 @@ export class Uploads implements OnInit, OnDestroy {
 
 	get hasAnyContent(): boolean {
 		return this.contentByMonth.some(
-			(m) => m.charts.length > 0 || m.tourPasses.length > 0 || m.themes.length > 0,
+			(m) =>
+				m.charts.length > 0 ||
+				m.tourPasses.length > 0 ||
+				m.themes.length > 0,
 		);
 	}
 

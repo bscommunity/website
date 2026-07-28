@@ -8,9 +8,11 @@ import {
 } from "@angular/cdk/drag-drop";
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     inject,
     input,
+    OnInit,
     output,
     ViewEncapsulation,
 } from "@angular/core";
@@ -104,7 +106,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
                 <button
                     mat-button
                     type="submit"
-                    [disabled]="selectedCharts.length === 0"
+                    [disabled]="!hasChanges"
                 >
                     Continue
                 </button>
@@ -246,7 +248,8 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishTourPassReorderComponent {
+export class PublishTourPassReorderComponent implements OnInit {
+    private cdr = inject(ChangeDetectorRef);
     dialogRef =
         inject<MatDialogRef<PublishTourPassReorderComponent>>(MatDialogRef, { optional: true });
     data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA, { optional: true });
@@ -260,9 +263,23 @@ export class PublishTourPassReorderComponent {
         return !this.data?.formData;
     }
 
-    selectedCharts: ChartModel[] = [
-        ...(this.isInlineMode ? this.initialCharts() : (this.data!.formData.selectedCharts || [])),
-    ];
+    selectedCharts: ChartModel[] = [];
+    private initialIds: string[] = [];
+
+    ngOnInit() {
+        const source = this.isInlineMode
+            ? this.initialCharts()
+            : (this.data!.formData.selectedCharts || []);
+        this.selectedCharts = [...source];
+        this.initialIds = source.map((c) => c.id);
+    }
+
+    get hasChanges(): boolean {
+        if (this.selectedCharts.length !== this.initialIds.length) return true;
+        return this.selectedCharts.some(
+            (chart, i) => chart.id !== this.initialIds[i],
+        );
+    }
 
     drop(event: CdkDragDrop<ChartModel[]>) {
         moveItemInArray(
@@ -270,6 +287,7 @@ export class PublishTourPassReorderComponent {
             event.previousIndex,
             event.currentIndex,
         );
+        this.cdr.markForCheck();
     }
 
     onSubmit() {

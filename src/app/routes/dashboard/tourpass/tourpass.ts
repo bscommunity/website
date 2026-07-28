@@ -24,7 +24,6 @@ import { TourpassTitleStrategy } from "./tourpass-title.strategy";
 	imports: [
 		FormsModule,
 		MatButtonModule,
-		NgGlyph,
 		MatTooltipModule,
 		AsideComponent,
 		TracksSectionComponent,
@@ -51,6 +50,8 @@ export class TourPass implements OnInit {
 	ngOnInit(): void {
 		this.route.params.subscribe(() => {
 			this.tourpass = this.route.snapshot.data["tourpass"];
+
+			console.log("Tourpass data:", this.tourpass);
 
 			if (!this.tourpass) {
 				this.router.navigate(["error"], {
