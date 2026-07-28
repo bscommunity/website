@@ -11,6 +11,7 @@ import type {
 // Lib
 import { apiUrl } from "@/lib/api";
 import { StorageService } from "../storage.service";
+import { UserService } from "./user.service";
 
 @Injectable({
 	providedIn: "root",
@@ -18,6 +19,7 @@ import { StorageService } from "../storage.service";
 export class TourPassService {
 	private http = inject(HttpClient);
 	private storageService = inject(StorageService);
+	private userService = inject(UserService);
 
 	private readonly apiUrl = `${apiUrl}/tourpasses`;
 
@@ -49,9 +51,12 @@ export class TourPassService {
 			formData.append("cover", coverFile);
 		}
 
-		return firstValueFrom(
+		const result = await firstValueFrom(
 			this.http.post<TourPassModel>(this.apiUrl, formData),
 		);
+
+		this.userService.invalidateUploadsCache();
+		return result;
 	}
 
 	async updateTourPass(
@@ -72,12 +77,14 @@ export class TourPassService {
 		);
 
 		this.setCache(`tourpass_${id}`, result);
+		this.userService.updateUploadsCacheItem(id, result);
 		return result;
 	}
 
 	async deleteTourPass(id: string): Promise<void> {
 		await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
 		this.removeItemFromCache(`tourpass_${id}`);
+		this.userService.invalidateUploadsCache();
 	}
 
 	private getFromCache(key: string): TourPassModel | null {

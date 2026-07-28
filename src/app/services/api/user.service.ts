@@ -28,6 +28,7 @@ export class UserService {
 	private readonly meUrl = `${apiUrl}/me`;
 
 	private readonly searchCache = new Map<string, UserModel[]>();
+	private readonly uploadsCacheKeys = new Set<string>();
 
 	// Read
 	searchUsers(query: string): Observable<UserModel[]> {
@@ -106,6 +107,7 @@ export class UserService {
 		).pipe(
 			tap((response) => {
 				if (!isPaginated) {
+					this.uploadsCacheKeys.add(cacheKey);
 					this.setUploadsCache(cacheKey, response);
 				}
 			}),
@@ -141,6 +143,26 @@ export class UserService {
 
 	private setUploadsCache(key: string, data: ItemsPageModel<CatalogItemModel>): void {
 		this.storageService.setItem(key, JSON.stringify(data), true);
+	}
+
+	updateUploadsCacheItem(id: string, data: Partial<CatalogItemModel>): void {
+		for (const key of this.uploadsCacheKeys) {
+			const cached = this.getFromUploadsCache(key);
+			if (!cached) continue;
+
+			const item = cached.items.find((i) => i.id === id);
+			if (item) {
+				Object.assign(item, data);
+				this.setUploadsCache(key, cached);
+			}
+		}
+	}
+
+	invalidateUploadsCache(): void {
+		for (const key of this.uploadsCacheKeys) {
+			this.storageService.removeItem(key, true);
+		}
+		this.uploadsCacheKeys.clear();
 	}
 
 	getPublicTourPasses(
