@@ -93,8 +93,26 @@
 
 					<ng-container matColumnDef="contributors">
 						<th mat-header-cell *matHeaderCellDef>Contributors</th>
-						<td mat-cell *matCellDef="let chart" class="!py-3">
-							{{ getContributorsSummary(chart) }}
+						<td mat-cell *matCellDef="let chart" class="py-3!">
+							<div
+								class="flex flex-wrap flex-row justify-center items-center gap-2"
+							>
+								@for (
+									contributor of chart.contributors;
+									track contributor.user.id
+								) {
+									<span
+										class="text-sm text-on-surface-variant bg-surface-container-high rounded-full pl-1 pr-2 py-0.5 flex flex-row items-center gap-1"
+									>
+										<img
+											class="w-4 h-4 rounded-full object-cover inline-block mr-1"
+											[src]="contributor.user.avatarUrl"
+											[alt]="contributor.user.username"
+										/>
+										{{ contributor.user.username }}
+									</span>
+								}
+							</div>
 						</td>
 					</ng-container>
 
@@ -114,7 +132,7 @@
 			>
 				@for (chart of charts(); track chart.id) {
 					<a
-						class="flex flex-col items-start gap-2 p-4 rounded-lg bg-surface-container border border-outline-variant/50 cursor-pointer hover:bg-surface-container-low"
+						class="flex flex-col items-start gap-2 p-3 rounded-lg bg-surface-container border border-outline-variant/50 cursor-pointer hover:bg-surface-container-low"
 						(click)="navigateToChart(chart.id)"
 					>
 						@if (chart.track.coverUrl) {
