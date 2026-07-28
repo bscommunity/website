@@ -5,6 +5,7 @@ import { StorageService } from "./storage.service";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
+import { TourPassModel } from "@/models/tour-pass.model";
 import { UserProfileResponseModel } from "@/models/user.model";
 import { HistoryItem } from "@/components/history/history.component";
 
@@ -16,6 +17,11 @@ interface ProfileCacheData {
 
 interface ChartsCacheData {
 	charts: ChartModel[];
+	total: number;
+}
+
+interface TourPassesCacheData {
+	tourPasses: TourPassModel[];
 	total: number;
 }
 
@@ -35,6 +41,10 @@ export class ProfileCacheService {
 
 	private getActivityCacheKey(username: string): string {
 		return `activity_${username}`;
+	}
+
+	private getTourPassesCacheKey(username: string, page: number): string {
+		return `tourpasses_${username}_${page}`;
 	}
 
 	// Profile caching
@@ -105,6 +115,29 @@ export class ProfileCacheService {
 	setActivity(username: string, data: HistoryItem[]): void {
 		this.storageService.setItem(
 			this.getActivityCacheKey(username),
+			JSON.stringify(data),
+			true,
+		);
+	}
+
+	// Tour Passes caching
+	getTourPasses(username: string, page: number): TourPassesCacheData | null {
+		const cached = this.storageService.getItem(
+			this.getTourPassesCacheKey(username, page),
+			true,
+		);
+		if (!cached) return null;
+		try {
+			return JSON.parse(cached);
+		} catch (e) {
+			console.warn("Failed to parse cached tour passes data:", e);
+			return null;
+		}
+	}
+
+	setTourPasses(username: string, page: number, data: TourPassesCacheData): void {
+		this.storageService.setItem(
+			this.getTourPassesCacheKey(username, page),
 			JSON.stringify(data),
 			true,
 		);

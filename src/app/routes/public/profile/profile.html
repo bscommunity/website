@@ -201,12 +201,21 @@
 						<section
 							class="flex flex-col items-center justify-start w-full"
 						>
-							<ng-container
-								*ngTemplateOutlet="
-									chartsSection;
-									context: { isDesktop: true }
-								"
-							></ng-container>
+							@if (tab.value === 'charts') {
+								<ng-container
+									*ngTemplateOutlet="
+										chartsSection;
+										context: { isDesktop: true }
+									"
+								></ng-container>
+							} @else if (tab.value === 'tour_passes') {
+								<ng-container
+									*ngTemplateOutlet="
+										tourPassesSection;
+										context: { isDesktop: true }
+									"
+								></ng-container>
+							}
 						</section>
 					</mat-tab>
 				}
@@ -263,38 +272,40 @@
 					}
 				</ng-template>
 
-				<div class="relative w-full overflow-hidden">
-					<mat-tab-nav-panel #tabPanel class="w-full">
+			<div class="relative w-full overflow-hidden">
+				<mat-tab-nav-panel #tabPanel class="w-full">
+					@for (tab of mobileTabs; track tab.value) {
 						<div
 							class="mobile-tab-collapse"
-							[class.open]="currentTab === mobileTabs[0].value"
+							[class.open]="currentTab === tab.value"
 						>
 							<div class="mobile-tab-collapse-inner">
 								<app-tab-content-wrapper class="w-full flex">
-									<ng-container
-										*ngTemplateOutlet="activityContent"
-									></ng-container>
+									@if (tab.value === 'history') {
+										<ng-container
+											*ngTemplateOutlet="activityContent"
+										></ng-container>
+									} @else if (tab.value === 'charts') {
+										<ng-container
+											*ngTemplateOutlet="
+												chartsSection;
+												context: { isDesktop: false }
+											"
+										></ng-container>
+									} @else if (tab.value === 'tour_passes') {
+										<ng-container
+											*ngTemplateOutlet="
+												tourPassesSection;
+												context: { isDesktop: false }
+											"
+										></ng-container>
+									}
 								</app-tab-content-wrapper>
 							</div>
 						</div>
-
-						<div
-							class="mobile-tab-collapse"
-							[class.open]="currentTab === mobileTabs[1].value"
-						>
-							<div class="mobile-tab-collapse-inner">
-								<app-tab-content-wrapper class="w-full flex">
-									<ng-container
-										*ngTemplateOutlet="
-											chartsSection;
-											context: { isDesktop: false }
-										"
-									></ng-container>
-								</app-tab-content-wrapper>
-							</div>
-						</div>
-					</mat-tab-nav-panel>
-				</div>
+					}
+				</mat-tab-nav-panel>
+			</div>
 			</section>
 		</div>
 
@@ -403,6 +414,117 @@
 						<h1 class="text-xl text-center">No charts available</h1>
 						<p class="text-center px-8 mt-4">
 							This user hasn't uploaded any charts yet. <br />
+							Check back later or explore the workshop!
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
+
+		<ng-template
+			#tourPassesList
+			let-groupedTourPasses="groupedTourPasses"
+			let-isDesktop="isDesktop"
+		>
+			<ul
+				class="flex flex-col items-start justify-start w-full overflow-hidden"
+				[class.mt-6]="isDesktop"
+				[class.gap-8]="isDesktop"
+			>
+				@for (item of groupedTourPasses; track $index) {
+					<li
+						class="w-full gap-4 flex flex-col"
+						[class]="!isDesktop ? 'mb-6 last:mb-12' : ''"
+					>
+						<h6 class="self-start">
+							<span
+								class="inline-block w-fit font-medium"
+								[matTooltip]="formatGroupDate(item.date)"
+								[matTooltipPosition]="
+									isDesktop ? 'right' : 'above'
+								"
+							>
+								{{ convertDateTimeToHumanReadable(item.date) }}
+							</span>
+						</h6>
+						@if (isDesktop) {
+							<div
+								class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
+							>
+								@for (tourpass of item.data; track $index) {
+									<app-tourpass-preview
+										[tourpass]="tourpass"
+										[showItems]="['contributors', 'shareActions', 'data']"
+										(click)="openTourPassDialog(tourpass)"
+										(keydown.enter)="openTourPassDialog(tourpass)"
+										(keydown.space)="openTourPassDialog(tourpass)"
+									/>
+								}
+							</div>
+						} @else {
+							@for (tourpass of item.data; track $index) {
+								<app-tourpass-preview
+									[tourpass]="tourpass"
+									(click)="openTourPassDialog(tourpass)"
+									(keydown.enter)="openTourPassDialog(tourpass)"
+									(keydown.space)="openTourPassDialog(tourpass)"
+								/>
+							}
+						}
+					</li>
+				}
+			</ul>
+		</ng-template>
+
+		<ng-template #tourPassesSection let-isDesktop="isDesktop">
+			@if (isTourPassesLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedTourPasses() && groupedTourPasses()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						tourPassesList;
+						context: {
+							groupedTourPasses: groupedTourPasses(),
+							isDesktop: isDesktop,
+						}
+					"
+				></ng-container>
+				@if (totalTourPassPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalTourPasses()"
+							[hidePageSize]="true"
+							[pageSize]="tourPassesPageSize"
+							[pageIndex]="currentTourPassesPage()"
+							(page)="onTourPassesPageChange($event)"
+							[disabled]="isTourPassesLoading()"
+							aria-label="Select tour passes page"
+						></mat-paginator>
+					</div>
+				}
+			} @else if (groupedTourPasses() === null) {
+				<p
+					class="mt-6"
+					[class.text-lg]="isDesktop"
+					[class.text-base]="!isDesktop"
+					[class.text-on-surface-variant]="!isDesktop"
+				>
+					Failed to load tour passes. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<ng-glyph name="music_video" size="48" />
+						<h1 class="text-xl text-center">No tour passes available</h1>
+						<p class="text-center px-8 mt-4">
+							This user hasn't created any tour passes yet. <br />
 							Check back later or explore the workshop!
 						</p>
 					</div>

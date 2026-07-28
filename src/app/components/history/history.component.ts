@@ -15,9 +15,12 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 
 // Models
 import { ChartModel } from "@/models/chart.model";
+import { TourPassModel } from "@/models/tour-pass.model";
 import { SimplifiedUserModel } from "@/models/user.model";
 import { ActivityType } from "@/models/enums/activity-type.enum";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
+
+export type HistoryDataItem = ChartModel | TourPassModel;
 
 export interface HistoryActivityEntry {
 	type: ActivityType;
@@ -27,7 +30,7 @@ export interface HistoryActivityEntry {
 
 export interface HistoryItem {
 	date: Date;
-	data: ChartModel[];
+	data: HistoryDataItem[];
 	label?: string;
 	actionType?: ActivityType;
 	activities?: HistoryActivityEntry[];
@@ -71,9 +74,9 @@ export class UserHistoryComponent {
 		if (source.length > 0) {
 			return source.filter((entry) => Boolean(entry.chart));
 		}
-		return item.data.map((chart) => ({
+		return item.data.map((entry) => ({
 			type: ActivityType.CREATED_CHART,
-			chart,
+			chart: (entry as ChartModel),
 		}));
 	}
 
