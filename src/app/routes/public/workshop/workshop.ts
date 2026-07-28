@@ -89,7 +89,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 
 	// Current data
 	charts: ChartModel[] | undefined = undefined;
-	tourPasses: TourPassModel[] = [];
+	tourPasses: TourPassModel[] | undefined = [];
 	totalItems = 0;
 	currentPage = 1;
 	pageSize = 20;
@@ -198,18 +198,33 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				.pipe(takeUntil(this.destroy$))
 				.subscribe({
 					next: (response) => {
+						const items = Array.isArray(response)
+							? response[0]
+							: (response as any).first ?? [];
+						const total = Array.isArray(response)
+							? response[1]
+							: (response as any).second ?? null;
+
 						if (append) {
-							this.tourPasses = [...this.tourPasses, ...response[0]];
+							this.tourPasses = [...(this.tourPasses ?? []), ...items];
 						} else {
-							this.tourPasses = response[0];
+							this.tourPasses = items;
 						}
-						if (response[1] !== null) {
-							this.totalItems = Math.max(this.totalItems, response[1]);
+						if (total !== null) {
+							this.totalItems = Math.max(this.totalItems, total);
 						}
+						this.filterService.setLoading(false);
 						this.cdr.markForCheck();
 					},
 					error: (error) => {
 						console.error("Error loading tour passes:", error);
+						const errorMessage =
+							error.error?.message ||
+							"Failed to load tour passes. Please try again.";
+						this.filterService.setError(errorMessage);
+						this.tourPasses = [];
+						this.filterService.setLoading(false);
+						this.cdr.markForCheck();
 					},
 				});
 		} else {
@@ -285,7 +300,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		const documentHeight = document.documentElement.scrollHeight;
 
 		const loadedCount =
-			(this.charts?.length ?? 0) + this.tourPasses.length;
+			(this.charts?.length ?? 0) + (this.tourPasses?.length ?? 0);
 
 		if (
 			scrollPosition >= documentHeight - 200 &&
