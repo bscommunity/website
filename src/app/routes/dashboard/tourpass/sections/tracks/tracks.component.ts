@@ -13,7 +13,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { NgGlyph, NgIcon } from "@ng-icons/core";
 
 // Components
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
+import {
+	ChartSectionComponent,
+	SectionBody,
+	SectionHeader,
+} from "../../subcomponents/chart-section.component";
 import { EditSetlistDialogComponent } from "../../dialogs/edit-setlist/edit-setlist-dialog.component";
 
 // Models
@@ -28,6 +32,8 @@ import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
 		NgGlyph,
 		NgIcon,
 		ChartSectionComponent,
+		SectionHeader,
+		SectionBody,
 	],
 	templateUrl: "./tracks.component.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,

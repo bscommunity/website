@@ -1,25 +1,27 @@
 <aside class="flex flex-col items-start justify-start gap-6 w-full">
 	<!-- Edit tour pass button -->
-	<button
-		class="w-full"
-		mat-stroked-button
+	<app-aside-container
+		class="cursor-pointer w-full"
+		asideContainerClass="hover:bg-surface-container-high transition-colors"
+		icon="edit"
+		info="Edit tour pass"
 		(click)="openEditDialog()"
-	>
-		Edit tour pass
-	</button>
+	></app-aside-container>
 
 	<!-- Likes / Bookmarks -->
 	<app-aside-section class="w-full">
-		<app-aside-container
-			class="w-full"
-			icon="favorite"
-			[info]="
-				(tourpass().likedAt ? '1' : '0') +
-				' likes · ' +
-				(tourpass().bookmarkedAt ? '1' : '0') +
-				' bookmarks'
-			"
-		></app-aside-container>
+		<div class="flex flex-row items-center justify-center gap-4 w-full">
+			<app-aside-container
+				class="flex-1"
+				icon="favorite"
+				[info]="(tourpass().likedAt ? '1' : '0') + ' likes'"
+			></app-aside-container>
+			<app-aside-container
+				class="flex-1"
+				icon="bookmark"
+				[info]="(tourpass().bookmarkedAt ? '1' : '0') + ' bookmarks'"
+			></app-aside-container>
+		</div>
 		<app-aside-container
 			class="w-full"
 			icon="download"
@@ -32,7 +34,7 @@
 		<app-aside-container
 			class="w-full"
 			icon="timer"
-			[info]="transformDuration(totalDuration) + ' avg duration'"
+			[info]="'~' + transformDuration(totalDuration)"
 		></app-aside-container>
 		<app-aside-container
 			class="w-full"
@@ -46,7 +48,7 @@
 		<a
 			class="w-full cursor-pointer opacity-50 pointer-events-none"
 			tabindex="-1"
-			(title)="'Bundle download not available yet'"
+			(title)="('Bundle download not available yet')"
 		>
 			<app-aside-container
 				class="w-full"

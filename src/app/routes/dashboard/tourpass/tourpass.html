@@ -6,7 +6,7 @@
 		<app-aside
 			[tourpass]="tourpass"
 			(tourPassUpdated)="onTourPassUpdated($event)"
-			class="hidden md:flex md:sticky md:top-8"
+			class="hidden md:flex md:sticky md:top-8 md:w-72 xl:w-96"
 		></app-aside>
 
 		<div
@@ -15,16 +15,14 @@
 			<!-- Cover art (full width) -->
 			<div class="w-full relative overflow-hidden rounded-xl">
 				<img
-					class="w-full aspect-[3/1] object-cover"
+					class="w-full aspect-4/1 object-cover"
 					[src]="tourpass.coverUrl"
 					[alt]="tourpass.name"
 				/>
 			</div>
 
 			<!-- Name / description + Featured badge -->
-			<div
-				class="flex flex-row items-start justify-between w-full gap-4"
-			>
+			<div class="flex flex-row items-start justify-between w-full gap-4">
 				<div class="flex flex-col items-start justify-start gap-2">
 					<h1 class="font-medium text-5xl leading-tight">
 						{{ tourpass.name }}
@@ -35,12 +33,12 @@
 						</p>
 					}
 				</div>
-				<div
+				<!-- <div
 					class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-container text-on-primary-container text-sm font-medium whitespace-nowrap"
 				>
 					<ng-glyph name="star" />
 					<span>Featured on Editor's Choice</span>
-				</div>
+				</div> -->
 			</div>
 
 			<!-- Mobile aside -->
