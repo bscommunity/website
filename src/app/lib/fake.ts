@@ -115,6 +115,8 @@ export const SAMPLE_TOURPASS_1: TourPassModel = {
 	updatedAt: new Date("2025-09-03T18:45:00"),
 	likedAt: new Date("2025-09-02T15:30:00"),
 	bookmarkedAt: new Date("2025-09-01T12:00:00"),
+	likesCount: 42,
+	bookmarksCount: 18,
 	previewVideoId: null,
 	discordChannelId: null,
 	discordMessageId: null,

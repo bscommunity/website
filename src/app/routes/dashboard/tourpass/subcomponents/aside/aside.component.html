@@ -14,12 +14,12 @@
 			<app-aside-container
 				class="flex-1"
 				icon="favorite"
-				[info]="(tourpass().likedAt ? '1' : '0') + ' likes'"
+				[info]="tourpass().likesCount + ' likes'"
 			></app-aside-container>
 			<app-aside-container
 				class="flex-1"
 				icon="bookmark"
-				[info]="(tourpass().bookmarkedAt ? '1' : '0') + ' bookmarks'"
+				[info]="tourpass().bookmarksCount + ' bookmarks'"
 			></app-aside-container>
 		</div>
 		<app-aside-container
