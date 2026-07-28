@@ -67,9 +67,12 @@ export class TourPassService {
 			formData.append("cover", coverFile);
 		}
 
-		return firstValueFrom(
+		const result = await firstValueFrom(
 			this.http.put<TourPassModel>(`${this.apiUrl}/${id}`, formData),
 		);
+
+		this.setCache(`tourpass_${id}`, result);
+		return result;
 	}
 
 	async deleteTourPass(id: string): Promise<void> {
