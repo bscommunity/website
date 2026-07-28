@@ -54,13 +54,7 @@ export class FilterService {
 	private readonly clearSearchSubject = new Subject<void>();
 
 	// Public observables
-	readonly filters$ = this.filtersSubject
-		.asObservable()
-		.pipe(
-			distinctUntilChanged(
-				(a, b) => JSON.stringify(a) === JSON.stringify(b),
-			),
-		);
+	readonly filters$ = this.filtersSubject.asObservable();
 
 	readonly isLoading$ = this.isLoadingSubject.asObservable();
 	readonly error$ = this.errorSubject.asObservable();

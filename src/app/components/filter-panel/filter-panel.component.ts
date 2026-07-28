@@ -127,12 +127,7 @@ export class FilterPanelComponent {
 
 	private handleCategoryToggle(value: string): void {
 		if (this.singleCategorySelect()) {
-			const current = this.filterService.getFilters().categories;
-			if (current.length === 1 && current[0] === value) {
-				this.filterService.setFilterArray("categories", []);
-			} else {
-				this.filterService.setFilterArray("categories", [value]);
-			}
+			this.filterService.setFilterArray("categories", [value]);
 		} else {
 			this.filterService.toggleCategory(value);
 		}
@@ -161,7 +156,7 @@ export class FilterPanelComponent {
 			...option,
 			isSelected: selection.has(
 				useValue ? (option.value ?? option.name) : option.name,
-			),
+			) ? {} : null,
 		}));
 	}
 
