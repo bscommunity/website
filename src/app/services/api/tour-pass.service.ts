@@ -29,7 +29,7 @@ export class TourPassService {
 			this.http.get<TourPassModel>(`${this.apiUrl}/${id}`),
 		);
 
-		this.cacheService.setEntity("tourpass", id, tourPass);
+		this.cacheService.upsertEntities("tourpass", [tourPass]);
 		return tourPass;
 	}
 
@@ -49,7 +49,7 @@ export class TourPassService {
 			this.http.post<TourPassModel>(this.apiUrl, formData),
 		);
 
-		this.cacheService.setEntity("tourpass", result.id, result);
+		this.cacheService.upsertEntities("tourpass", [result]);
 		this.cacheService.insertIntoQueryResults("tourpass", result);
 		this.cacheService.insertIntoQueryResults("upload", result);
 		return result;
@@ -72,7 +72,7 @@ export class TourPassService {
 			this.http.put<TourPassModel>(`${this.apiUrl}/${id}`, formData),
 		);
 
-		this.cacheService.setEntity("tourpass", id, result);
+		this.cacheService.upsertEntities("tourpass", [result]);
 		return result;
 	}
 

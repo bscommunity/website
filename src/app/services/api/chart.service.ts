@@ -68,7 +68,7 @@ export class ChartService {
 			this.http.post<ChartModel>(this.apiUrl, formData, { headers }),
 		);
 
-		this.cacheService.setEntity("chart", createdChart.id, createdChart);
+		this.cacheService.upsertEntities("chart", [createdChart]);
 		this.cacheService.insertIntoQueryResults("chart", createdChart);
 		this.cacheService.insertIntoQueryResults("upload", createdChart);
 
@@ -97,7 +97,7 @@ export class ChartService {
 	}
 
 	addChartToCache(chart: ChartModel): void {
-		this.cacheService.setEntity("chart", chart.id, chart);
+		this.cacheService.upsertEntities("chart", [chart]);
 		this.cacheService.insertIntoQueryResults("chart", chart);
 		this.cacheService.insertIntoQueryResults("upload", chart);
 	}
@@ -227,7 +227,7 @@ export class ChartService {
 
 		const parsedChart = Chart.parse(response);
 
-		this.cacheService.setEntity("chart", parsedChart.id, parsedChart);
+		this.cacheService.upsertEntities("chart", [parsedChart]);
 		return parsedChart;
 	}
 
@@ -254,7 +254,7 @@ export class ChartService {
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
 
-		this.cacheService.setEntity("chart", updatedChart.id, updatedChart);
+		this.cacheService.upsertEntities("chart", [updatedChart]);
 
 		return updatedChart;
 	}
