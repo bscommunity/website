@@ -32,9 +32,9 @@ import {
 
 			<div
 				class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed border-surface-variant rounded-lg cursor-pointer hover:bg-primary/10 transition-colors"
-				(dragover.prevent)="onDragOver($event)"
-				(dragleave.prevent)="onDragLeave($event)"
-				(drop.prevent)="onDrop($event)"
+				(dragover)="onDragOver($event)"
+				(dragleave)="onDragLeave($event)"
+				(drop)="onDrop($event)"
 				#dropZone
 			>
 				<ng-glyph
@@ -83,10 +83,18 @@ import {
 								<ng-glyph
 									name="folder_zip"
 									size="24"
-									[class.text-primary]="bundle.status === 'ready'"
-									[class.text-on-secondary-container]="bundle.status === 'uploading'"
-									[class.text-success]="bundle.status === 'success'"
-									[class.text-error]="bundle.status === 'error'"
+									[class.text-primary]="
+										bundle.status === 'ready'
+									"
+									[class.text-on-secondary-container]="
+										bundle.status === 'uploading'
+									"
+									[class.text-success]="
+										bundle.status === 'success'
+									"
+									[class.text-error]="
+										bundle.status === 'error'
+									"
 									class="shrink-0"
 								></ng-glyph>
 
@@ -109,9 +117,15 @@ import {
 							<div class="flex items-center justify-center gap-2">
 								<div
 									class="bg-secondary-container rounded-full px-2.5 py-0.5 text-xs text-on-secondary-container"
-									[class.animate-pulse]="bundle.status === 'uploading'"
-									[class.bg-success-container]="bundle.status === 'success'"
-									[class.bg-error-container]="bundle.status === 'error'"
+									[class.animate-pulse]="
+										bundle.status === 'uploading'
+									"
+									[class.bg-success-container]="
+										bundle.status === 'success'
+									"
+									[class.bg-error-container]="
+										bundle.status === 'error'
+									"
 								>
 									{{ bundle.status }}
 								</div>
@@ -145,11 +159,7 @@ import {
 			}
 		</mat-dialog-content>
 		<mat-dialog-actions align="end">
-			<button
-				type="button"
-				mat-button
-				(click)="onCancel()"
-			>
+			<button type="button" mat-button (click)="onCancel()">
 				@if (isUploading) {
 					Cancel uploads
 				} @else {
@@ -168,11 +178,7 @@ import {
 			}
 		</mat-dialog-actions>
 	`,
-	imports: [
-		MatDialogModule,
-		MatButtonModule,
-		NgGlyph,
-	],
+	imports: [MatDialogModule, MatButtonModule, NgGlyph],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishChartBatchComponent implements OnDestroy {
@@ -197,7 +203,9 @@ export class PublishChartBatchComponent implements OnDestroy {
 	get isCompleted(): boolean {
 		return (
 			this.bundles.length > 0 &&
-			this.bundles.every((b) => b.status === "success" || b.status === "error")
+			this.bundles.every(
+				(b) => b.status === "success" || b.status === "error",
+			)
 		);
 	}
 
