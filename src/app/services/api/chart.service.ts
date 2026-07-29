@@ -64,13 +64,15 @@ export class ChartService {
 			headers["X-Publish-Session-Id"] = publishSessionId;
 		}
 
-		const createdChart = await firstValueFrom(
-			this.http.post<ChartModel>(this.apiUrl, formData, { headers }),
+		const createdChart = Chart.parse(
+			await firstValueFrom(
+				this.http.post<ChartModel>(this.apiUrl, formData, { headers }),
+			),
 		);
 
 		this.cacheService.upsertEntities("chart", [createdChart]);
-		this.cacheService.insertIntoQueryResults("chart", createdChart, "chart");
-		this.cacheService.insertIntoQueryResults("upload", createdChart, "chart");
+		this.cacheService.insertIntoQueryResults("chart", createdChart);
+		this.cacheService.insertIntoQueryResults("upload", createdChart);
 
 		return createdChart;
 	}
@@ -98,8 +100,8 @@ export class ChartService {
 
 	addChartToCache(chart: ChartModel): void {
 		this.cacheService.upsertEntities("chart", [chart]);
-		this.cacheService.insertIntoQueryResults("chart", chart, "chart");
-		this.cacheService.insertIntoQueryResults("upload", chart, "chart");
+		this.cacheService.insertIntoQueryResults("chart", chart);
+		this.cacheService.insertIntoQueryResults("upload", chart);
 	}
 
 	/**

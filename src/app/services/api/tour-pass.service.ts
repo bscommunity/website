@@ -2,10 +2,7 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
-import type {
-	CreateTourPassModel,
-	TourPassModel,
-} from "@/models/tour-pass.model";
+import { TourPass, type CreateTourPassModel, type TourPassModel } from "@/models/tour-pass.model";
 
 import { apiUrl } from "@/lib/api";
 import { CacheService } from "../cache.service";
@@ -45,13 +42,15 @@ export class TourPassService {
 			formData.append("cover", coverFile);
 		}
 
-		const result = await firstValueFrom(
-			this.http.post<TourPassModel>(this.apiUrl, formData),
+		const result = TourPass.parse(
+			await firstValueFrom(
+				this.http.post<TourPassModel>(this.apiUrl, formData),
+			),
 		);
 
 		this.cacheService.upsertEntities("tourpass", [result]);
-		this.cacheService.insertIntoQueryResults("tourpass", result, "tourpass");
-		this.cacheService.insertIntoQueryResults("upload", result, "tourpass");
+		this.cacheService.insertIntoQueryResults("tourpass", result);
+		this.cacheService.insertIntoQueryResults("upload", result);
 		return result;
 	}
 

@@ -216,21 +216,19 @@ export class CacheService {
 	 * Only stores the id + entity type mapping; the full entity data must
 	 * have already been placed in the entity cache via setEntity/upsertEntities.
 	 */
-	insertIntoQueryResults<T extends { id: string }>(
+	insertIntoQueryResults<T extends { id: string; type?: string }>(
 		type: string,
 		item: T,
-		entityType?: string,
 		storage?: STORAGE,
 	): void {
 		this.mutateQueryResults(type, storage, (entry) => {
-			if (entry.ids.includes((item as any).id)) return entry;
-			const id = (item as any).id;
+			if (entry.ids.includes(item.id)) return entry;
 		return {
 				...entry,
-				ids: [id, ...entry.ids],
+				ids: [item.id, ...entry.ids],
 				entityTypes: {
 					...entry.entityTypes,
-					[id]: entityType ?? this.resolveEntityType((item as any).type, type),
+					[item.id]: this.resolveEntityType(item.type, type),
 				},
 				cachedAt: Date.now(),
 				totalCount:

@@ -12,7 +12,7 @@ import { StreamingLink } from "./streaming-link.model";
 
 export const TourPass = z.object({
 	id: z.string(),
-	type: z.enum(CatalogItemType),
+	type: z.enum(CatalogItemType).default(CatalogItemType.TOUR_PASS),
 	status: z.enum(CatalogItemStatus),
 	visibility: z.enum(Visibility),
 	isFeatured: z.boolean(),
