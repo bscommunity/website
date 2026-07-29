@@ -35,11 +35,11 @@ export class UserService {
 		const cached = this.searchCache.get(query);
 		if (cached) return of(cached);
 
-		return this.http.get<UserModel[]>(this.apiUrl, {
-			params: { search: query },
-		}).pipe(
-			tap((results) => this.searchCache.set(query, results)),
-		);
+		return this.http
+			.get<UserModel[]>(this.apiUrl, {
+				params: { search: query },
+			})
+			.pipe(tap((results) => this.searchCache.set(query, results)));
 	}
 
 	getUserByUsername(username: string): Observable<UserProfileResponseModel> {
@@ -60,7 +60,12 @@ export class UserService {
 
 	getUserTourPasses(
 		userId: string,
-		params: { query?: string; sortBy?: string; limit?: number; offset?: number } = {},
+		params: {
+			query?: string;
+			sortBy?: string;
+			limit?: number;
+			offset?: number;
+		} = {},
 	): Observable<ItemsPageModel<TourPassModel>> {
 		return this.http.get<ItemsPageModel<TourPassModel>>(
 			`${this.apiUrl}/${userId}/tourpasses`,
@@ -86,7 +91,8 @@ export class UserService {
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
 		if (params.genres) httpParams["genres"] = params.genres;
-		if (params.difficulties) httpParams["difficulties"] = params.difficulties;
+		if (params.difficulties)
+			httpParams["difficulties"] = params.difficulties;
 		if (params.versions) httpParams["versions"] = params.versions;
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
@@ -101,20 +107,23 @@ export class UserService {
 			}
 		}
 
-		return this.http.get<ItemsPageModel<CatalogItemModel>>(
-			`${this.meUrl}/uploads`,
-			{ params: httpParams },
-		).pipe(
-			tap((response) => {
-				if (!isPaginated) {
-					this.uploadsCacheKeys.add(cacheKey);
-					this.setUploadsCache(cacheKey, response);
-				}
-			}),
-		);
+		return this.http
+			.get<
+				ItemsPageModel<CatalogItemModel>
+			>(`${this.meUrl}/uploads`, { params: httpParams })
+			.pipe(
+				tap((response) => {
+					if (!isPaginated) {
+						this.uploadsCacheKeys.add(cacheKey);
+						this.setUploadsCache(cacheKey, response);
+					}
+				}),
+			);
 	}
 
-	private buildUploadsCacheKey(params: Record<string, string | number>): string {
+	private buildUploadsCacheKey(
+		params: Record<string, string | number>,
+	): string {
 		const parts = [
 			params["types"] || "all",
 			params["query"] || "",
@@ -127,7 +136,9 @@ export class UserService {
 		return `uploads_${parts.join("|")}`;
 	}
 
-	private getFromUploadsCache(key: string): ItemsPageModel<CatalogItemModel> | null {
+	private getFromUploadsCache(
+		key: string,
+	): ItemsPageModel<CatalogItemModel> | null {
 		const raw = this.storageService.getItem(key, true);
 		if (!raw) return null;
 		try {
@@ -141,7 +152,10 @@ export class UserService {
 		return null;
 	}
 
-	private setUploadsCache(key: string, data: ItemsPageModel<CatalogItemModel>): void {
+	private setUploadsCache(
+		key: string,
+		data: ItemsPageModel<CatalogItemModel>,
+	): void {
 		this.storageService.setItem(key, JSON.stringify(data), true);
 	}
 
@@ -165,8 +179,84 @@ export class UserService {
 		this.uploadsCacheKeys.clear();
 	}
 
+	addToUploadsCache(chart: ChartModel): void {
+		for (const key of this.uploadsCacheKeys) {
+			const cached = this.getFromUploadsCache(key);
+			if (!cached) continue;
+
+			if (!this.chartMatchesUploadsFilters(chart, key)) continue;
+
+			if (cached.items.some((item) => item.id === chart.id)) continue;
+
+			cached.items.unshift(chart);
+
+			if (cached.counts) {
+				cached.counts.charts = (cached.counts.charts ?? 0) + 1;
+			}
+
+			this.setUploadsCache(key, cached);
+		}
+
+		console.log("Chart added to uploads cache:", chart.id);
+	}
+
+	private chartMatchesUploadsFilters(
+		chart: ChartModel,
+		cacheKey: string,
+	): boolean {
+		const prefix = "uploads_";
+		if (!cacheKey.startsWith(prefix)) return true;
+
+		const parts = cacheKey.slice(prefix.length).split("|");
+		const types = parts[0];
+		const query = parts[1];
+
+		if (types && types !== "all") {
+			if (!types.split(",").includes("CHART")) return false;
+		}
+
+		if (query) {
+			const haystack =
+				`${chart.track.artist} ${chart.track.title}`.toLowerCase();
+			if (!haystack.includes(query.toLowerCase())) return false;
+		}
+
+		const genres = parts[3];
+		if (genres) {
+			if (
+				!chart.track.genre ||
+				!genres.split(",").includes(chart.track.genre)
+			)
+				return false;
+		}
+
+		const difficulties = parts[4];
+		if (difficulties) {
+			if (
+				chart.difficulty == null ||
+				!difficulties.split(",").includes(chart.difficulty)
+			)
+				return false;
+		}
+
+		const versions = parts[5];
+		if (versions) {
+			if (versions.split(",").includes("Deluxe") && !chart.isDeluxe)
+				return false;
+		}
+
+		return true;
+	}
+
 	getPublicTourPasses(
-		params: { query?: string; sortBy?: string; limit?: number; offset?: number; count?: boolean; disableCache?: boolean } = {},
+		params: {
+			query?: string;
+			sortBy?: string;
+			limit?: number;
+			offset?: number;
+			count?: boolean;
+			disableCache?: boolean;
+		} = {},
 	): Observable<[TourPassModel[], number | null]> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;
@@ -185,19 +275,22 @@ export class UserService {
 			}
 		}
 
-		return this.http.get<[TourPassModel[], number | null]>(
-			`${apiUrl}/tourpasses`,
-			{ params: httpParams },
-		).pipe(
-			tap((response) => {
-				if (!isPaginated) {
-					this.setTourPassesCache(cacheKey, response);
-				}
-			}),
-		);
+		return this.http
+			.get<
+				[TourPassModel[], number | null]
+			>(`${apiUrl}/tourpasses`, { params: httpParams })
+			.pipe(
+				tap((response) => {
+					if (!isPaginated) {
+						this.setTourPassesCache(cacheKey, response);
+					}
+				}),
+			);
 	}
 
-	private buildTourPassesCacheKey(params: Record<string, string | number | boolean>): string {
+	private buildTourPassesCacheKey(
+		params: Record<string, string | number | boolean>,
+	): string {
 		const parts = [
 			params["query"] || "",
 			params["sortBy"] || "",
@@ -206,7 +299,9 @@ export class UserService {
 		return `tourpasses_${parts.join("|")}`;
 	}
 
-	private getFromTourPassesCache(key: string): [TourPassModel[], number | null] | null {
+	private getFromTourPassesCache(
+		key: string,
+	): [TourPassModel[], number | null] | null {
 		const raw = this.storageService.getItem(key, true);
 		if (!raw) return null;
 		try {
@@ -220,12 +315,21 @@ export class UserService {
 		return null;
 	}
 
-	private setTourPassesCache(key: string, data: [TourPassModel[], number | null]): void {
+	private setTourPassesCache(
+		key: string,
+		data: [TourPassModel[], number | null],
+	): void {
 		this.storageService.setItem(key, JSON.stringify(data), true);
 	}
 
 	getPublicThemes(
-		params: { query?: string; sortBy?: string; limit?: number; offset?: number; count?: boolean } = {},
+		params: {
+			query?: string;
+			sortBy?: string;
+			limit?: number;
+			offset?: number;
+			count?: boolean;
+		} = {},
 	): Observable<[CatalogItemModel[], number | null]> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;

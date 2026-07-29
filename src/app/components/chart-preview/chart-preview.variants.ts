@@ -12,7 +12,8 @@ export const chartPreview = cva(
 
 				static: "bg-surface-container text-on-surface border-outline-variant/50",
 
-				selected: "bg-primary-container text-on-primary-container border-transparent",
+				selected:
+					"bg-primary-container text-on-primary-container border-transparent",
 			},
 
 			size: {

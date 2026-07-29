@@ -17,6 +17,7 @@ import type { SimplifiedContributorModel } from "@/models/contributor.model";
 // Services
 import { ChartService, type CreateChartPayload } from "@/services/api/chart.service";
 import { ContributorService } from "@/services/api/contributor.service";
+import { UserService } from "@/services/api/user.service";
 import { CacheService } from "@/services/cache.service";
 import type { PublishHandler } from "../publish-handler.interface";
 
@@ -63,6 +64,7 @@ export class ChartPublishHandler
 {
 	private chartService = inject(ChartService);
 	private contributorService = inject(ContributorService);
+	private userService = inject(UserService);
 	private cacheService = inject(CacheService);
 
 	getStepComponents(): Type<unknown>[] {
@@ -132,6 +134,7 @@ export class ChartPublishHandler
 		console.log("Chart created successfully:", response);
 
 		this.cacheService.addChart(response);
+		this.userService.addToUploadsCache(response);
 
 		return response;
 	}

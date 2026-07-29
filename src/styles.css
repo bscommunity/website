@@ -135,11 +135,11 @@ ng-glyph {
 }
 
 .stamp-effect {
-	mask-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/8399/grunge.png");
-	-webkit-mask-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/8399/grunge.png");
-	mask-size: 944px 604px;
-	-webkit-mask-size: 944px 604px;
-	mix-blend-mode: multiply;
+	mask-image: url("/assets/images/grunge.png");
+	-webkit-mask-image: url("/assets/images/grunge.png");
+	mask-size: 600px 450px;
+	-webkit-mask-size: 600px 450px;
+	mix-blend-mode: normal;
 }
 
 .fade-in {
