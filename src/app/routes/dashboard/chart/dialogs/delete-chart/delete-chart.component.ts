@@ -24,6 +24,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { ViewportScroller } from "@angular/common";
 
 interface DeleteChartDialogData {
 	id: string;
@@ -48,6 +49,7 @@ interface DeleteChartDialogData {
 export class DeleteChartComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
+	private viewportScroller = inject(ViewportScroller);
 
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<DeleteChartComponent>);
@@ -80,9 +82,7 @@ export class DeleteChartComponent {
 			this.dialogRef.close(false);
 			this.router
 				.navigate(["/dashboard/uploads"], { replaceUrl: true })
-				.then(() => {
-					requestAnimationFrame(() => window.scrollTo({ top: 0 }));
-				});
+				.then(() => this.viewportScroller.scrollToPosition([0, 0]));
 
 			this._matSnackBar.open("Chart deleted successfully", "Dismiss", {
 				duration: 2000,

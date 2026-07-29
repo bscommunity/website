@@ -100,7 +100,6 @@ export class UserService {
 		if (!params.disableCache && !isPaginated) {
 			const cached = this.cacheService.getQuery<CatalogItemModel>("upload", cacheKey, "session");
 			if (cached) {
-				this.seedUploadEntities(cached.items);
 				return of(cached);
 			}
 		}
@@ -119,25 +118,9 @@ export class UserService {
 					if (!isPaginated) {
 						this.cacheService.setQuery("upload", cacheKey, page, "session", 30_000);
 					}
-					this.seedUploadEntities(page.items);
+					this.cacheService.upsertEntities("upload", page.items);
 				}),
 			);
-	}
-
-	private seedUploadEntities(items: CatalogItemModel[]): void {
-		for (const item of items) {
-			if (item.type === "CHART") {
-				this.cacheService.setEntity<ChartModel>("chart", item.id, item as ChartModel);
-			} else if (item.type === "TOUR_PASS") {
-				this.cacheService.setEntity<TourPassModel>("tourpass", item.id, item as TourPassModel);
-			}
-		}
-	}
-
-	private seedTourPassEntities(tourPasses: TourPassModel[]): void {
-		for (const tp of tourPasses) {
-			this.cacheService.setEntity("tourpass", tp.id, tp);
-		}
 	}
 
 	private buildUploadsCacheKey(params: Record<string, string | number>): string {
@@ -175,7 +158,6 @@ export class UserService {
 		if (!params.disableCache && !isPaginated) {
 			const cached = this.cacheService.getQuery<TourPassModel>("tourpass", cacheKey, "session");
 			if (cached) {
-				this.seedTourPassEntities(cached.items);
 				return of(cached);
 			}
 		}
@@ -188,7 +170,7 @@ export class UserService {
 					if (!isPaginated) {
 						this.cacheService.setQuery("tourpass", cacheKey, page, "session", 30_000);
 					}
-					this.seedTourPassEntities(page.items);
+					this.cacheService.upsertEntities("tourpass", page.items);
 				}),
 			);
 	}

@@ -150,9 +150,6 @@ export class ChartService {
 			const cachedPayload = this.cacheService.getQuery<ChartModel>(cacheType, cacheKey, cacheStorage);
 
 			if (cachedPayload) {
-				for (const chart of cachedPayload.items) {
-					this.cacheService.setEntity("chart", chart.id, chart);
-				}
 				return of(cachedPayload);
 			}
 		}
@@ -205,9 +202,7 @@ export class ChartService {
 				} else {
 					this.cacheService.setQuery(cacheType, `${cacheKey}|page=${pageKey}`, page, cacheStorage, 30_000);
 				}
-				for (const chart of page.items) {
-					this.cacheService.setEntity("chart", chart.id, chart);
-				}
+				this.cacheService.upsertEntities("chart", page.items);
 			}),
 			shareReplay({ bufferSize: 1, refCount: true }),
 		);
@@ -260,8 +255,6 @@ export class ChartService {
 		);
 
 		this.cacheService.setEntity("chart", updatedChart.id, updatedChart);
-		this.cacheService.updateInQueryResults("chart", updatedChart.id, () => updatedChart);
-		this.cacheService.updateInQueryResults("upload", updatedChart.id, () => updatedChart);
 
 		return updatedChart;
 	}

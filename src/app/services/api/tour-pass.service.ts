@@ -73,8 +73,6 @@ export class TourPassService {
 		);
 
 		this.cacheService.setEntity("tourpass", id, result);
-		this.cacheService.updateInQueryResults("tourpass", id, () => result);
-		this.cacheService.updateInQueryResults("upload", id, () => result);
 		return result;
 	}
 
