@@ -105,10 +105,14 @@ export class CacheService {
 	): QueryPage<T> | null {
 		const key = `${QUERY_PREFIX}:${type}:${paramsKey}`;
 		const raw = this.storageService.getItem(key, storage === "session");
-		if (!raw) return null;
+		if (!raw) {
+			console.log(`[getQuery] MISS (no raw entry) type=${type} key=${paramsKey} storage=${storage}`);
+			return null;
+		}
 		try {
 			const entry = JSON.parse(raw) as QueryCacheEntry;
 			if (entry.ttl && Date.now() - entry.cachedAt > entry.ttl) {
+				console.log(`[getQuery] MISS (TTL expired) type=${type} key=${paramsKey} cachedAt=${entry.cachedAt} ttl=${entry.ttl}`);
 				this.removeQuery(type, paramsKey, storage);
 				return null;
 			}
@@ -116,11 +120,16 @@ export class CacheService {
 			for (const id of entry.ids) {
 				const entityType = entry.entityTypes[id];
 				const entity = this.getEntity<unknown>(entityType, id);
-				if (entity === null) return null;
+				if (entity === null) {
+					console.log(`[getQuery] MISS (entity null) type=${type} key=${paramsKey} id=${id} entityType=${entityType}`);
+					return null;
+				}
 				items.push(entity as T);
 			}
+			console.log(`[getQuery] HIT type=${type} key=${paramsKey} ids=${entry.ids.length} total=${entry.totalCount}`);
 			return { items, total: entry.totalCount };
-		} catch {
+		} catch (e) {
+			console.log(`[getQuery] ERROR parsing cache entry for type=${type} key=${paramsKey}`, e);
 			this.removeQuery(type, paramsKey, storage);
 			return null;
 		}
@@ -202,6 +211,7 @@ export class CacheService {
 				...entry,
 				ids,
 				entityTypes,
+				cachedAt: Date.now(),
 				totalCount:
 					entry.totalCount !== null
 						? Math.max(0, entry.totalCount - 1)
@@ -218,20 +228,30 @@ export class CacheService {
 	insertIntoQueryResults<T extends { id: string }>(
 		type: string,
 		item: T,
+		entityType?: string,
 		storage?: STORAGE,
 	): void {
+		console.log(`[insertIntoQueryResults] type=${type} id=${(item as any).id} entityType=${entityType ?? 'auto:' + (item as any).type}`);
 		this.mutateQueryResults(type, storage, (entry) => {
-			if (entry.ids.includes((item as any).id)) return entry;
+			if (entry.ids.includes((item as any).id)) {
+				console.log(`[insertIntoQueryResults] id ${(item as any).id} already in entry, skipping`);
+				return entry;
+			}
 			const id = (item as any).id;
-			return {
+			const resolved = entityType ?? this.resolveEntityType((item as any).type, type);
+			console.log(`[insertIntoQueryResults] inserting id=${id} entityType=${resolved} ids=${entry.ids.length}→${entry.ids.length + 1} totalCount=${entry.totalCount}→${entry.totalCount !== null ? entry.totalCount + 1 : null}`);
+		return {
 				...entry,
 				ids: [id, ...entry.ids],
 				entityTypes: {
 					...entry.entityTypes,
-					[id]: this.resolveEntityType((item as any).type, type),
+					[id]: resolved,
 				},
+				cachedAt: Date.now(),
 				totalCount:
-					entry.totalCount !== null ? entry.totalCount + 1 : null,
+					entry.totalCount !== null
+						? entry.totalCount + 1
+						: null,
 			};
 		});
 	}
@@ -282,18 +302,23 @@ export class CacheService {
 	): void {
 		this.forEachQueryKey(type, storage, (key, s) => {
 			const raw = this.storageService.getItem(key, s === "session");
-			if (!raw) return;
+			if (!raw) {
+				console.log(`[mutateQueryResults] no raw entry for key=${key} storage=${s}`);
+				return;
+			}
 			try {
 				const entry = JSON.parse(raw) as QueryCacheEntry;
 				const mutated = mutator(entry);
 				if (mutated !== entry) {
+					console.log(`[mutateQueryResults] writing mutated key=${key} storage=${s} ids=${mutated.ids.length} totalCount=${mutated.totalCount}`);
 					this.storageService.setItem(
 						key,
 						JSON.stringify(mutated),
 						s === "session",
 					);
 				}
-			} catch {
+			} catch (e) {
+				console.log(`[mutateQueryResults] error parsing key=${key}`, e);
 				this.storageService.removeItem(key, s === "session");
 			}
 		});
@@ -320,6 +345,7 @@ export class CacheService {
 				prefix,
 				s === "session",
 			);
+			console.log(`[forEachQueryKey] type=${type} storage=${s} prefix="${prefix}" found=${keys.length} keys`);
 			for (const key of keys) fn(key, s);
 		}
 	}

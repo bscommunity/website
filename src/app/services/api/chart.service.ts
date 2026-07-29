@@ -69,8 +69,8 @@ export class ChartService {
 		);
 
 		this.cacheService.upsertEntities("chart", [createdChart]);
-		this.cacheService.insertIntoQueryResults("chart", createdChart);
-		this.cacheService.insertIntoQueryResults("upload", createdChart);
+		this.cacheService.insertIntoQueryResults("chart", createdChart, "chart");
+		this.cacheService.insertIntoQueryResults("upload", createdChart, "chart");
 
 		return createdChart;
 	}
@@ -98,8 +98,8 @@ export class ChartService {
 
 	addChartToCache(chart: ChartModel): void {
 		this.cacheService.upsertEntities("chart", [chart]);
-		this.cacheService.insertIntoQueryResults("chart", chart);
-		this.cacheService.insertIntoQueryResults("upload", chart);
+		this.cacheService.insertIntoQueryResults("chart", chart, "chart");
+		this.cacheService.insertIntoQueryResults("upload", chart, "chart");
 	}
 
 	/**

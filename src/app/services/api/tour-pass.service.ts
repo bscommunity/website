@@ -50,8 +50,8 @@ export class TourPassService {
 		);
 
 		this.cacheService.upsertEntities("tourpass", [result]);
-		this.cacheService.insertIntoQueryResults("tourpass", result);
-		this.cacheService.insertIntoQueryResults("upload", result);
+		this.cacheService.insertIntoQueryResults("tourpass", result, "tourpass");
+		this.cacheService.insertIntoQueryResults("upload", result, "tourpass");
 		return result;
 	}
 
