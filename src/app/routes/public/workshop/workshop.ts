@@ -162,12 +162,12 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				.subscribe({
 					next: (response) => {
 						if (append) {
-							this.charts = [...(this.charts || []), ...response.first];
+							this.charts = [...(this.charts || []), ...response.items];
 						} else {
-							this.charts = response.first;
+							this.charts = response.items;
 						}
-						if (response.second !== null) {
-							this.totalItems = response.second;
+						if (response.total !== null) {
+							this.totalItems = response.total;
 						}
 						this.filterService.setLoading(false);
 						this.cdr.markForCheck();
@@ -198,20 +198,13 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				.pipe(takeUntil(this.destroy$))
 				.subscribe({
 					next: (response) => {
-						const items = Array.isArray(response)
-							? response[0]
-							: (response as any).first ?? [];
-						const total = Array.isArray(response)
-							? response[1]
-							: (response as any).second ?? null;
-
 						if (append) {
-							this.tourPasses = [...(this.tourPasses ?? []), ...items];
+							this.tourPasses = [...(this.tourPasses ?? []), ...response.items];
 						} else {
-							this.tourPasses = items;
+							this.tourPasses = response.items;
 						}
-						if (total !== null) {
-							this.totalItems = Math.max(this.totalItems, total);
+						if (response.total !== null) {
+							this.totalItems = Math.max(this.totalItems, response.total);
 						}
 						this.filterService.setLoading(false);
 						this.cdr.markForCheck();

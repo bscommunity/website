@@ -60,6 +60,31 @@ export class StorageService {
 	}
 
 	/**
+	 * Returns all keys in the specified storage that start with the given prefix.
+	 *
+	 * @param prefix - The prefix to filter keys by.
+	 * @param useSession - If true, uses sessionStorage; otherwise, uses localStorage. Defaults to false.
+	 * @returns An array of matching keys.
+	 */
+	getKeysWithPrefix(prefix: string, useSession = false): string[] {
+		if (!this.isBrowser) return [];
+
+		const storage = useSession
+			? this.getSessionStorage()
+			: this.getLocalStorage();
+		if (!storage) return [];
+
+		const keys: string[] = [];
+		for (let i = 0; i < storage.length; i++) {
+			const key = storage.key(i);
+			if (key && key.startsWith(prefix)) {
+				keys.push(key);
+			}
+		}
+		return keys;
+	}
+
+	/**
 	 * Clears all items from the specified storage.
 	 *
 	 * @param useSession - If true, clears sessionStorage; otherwise, clears localStorage. Defaults to false.

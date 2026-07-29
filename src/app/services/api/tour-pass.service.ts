@@ -19,10 +19,6 @@ export class TourPassService {
 
 	private readonly apiUrl = `${apiUrl}/tourpasses`;
 
-	private static entityKey(id: string): string {
-		return `tourpass:${id}`;
-	}
-
 	async getTourPassById(id: string, disableCache = false): Promise<TourPassModel> {
 		if (!disableCache) {
 			const cached = this.cacheService.getEntity<TourPassModel>("tourpass", id);
@@ -54,7 +50,8 @@ export class TourPassService {
 		);
 
 		this.cacheService.setEntity("tourpass", result.id, result);
-		this.cacheService.invalidateQueries("upload");
+		this.cacheService.insertIntoQueryResults("tourpass", result);
+		this.cacheService.insertIntoQueryResults("upload", result);
 		return result;
 	}
 
@@ -76,13 +73,15 @@ export class TourPassService {
 		);
 
 		this.cacheService.setEntity("tourpass", id, result);
-		this.cacheService.invalidateQueries("upload");
+		this.cacheService.updateInQueryResults("tourpass", id, () => result);
+		this.cacheService.updateInQueryResults("upload", id, () => result);
 		return result;
 	}
 
 	async deleteTourPass(id: string): Promise<void> {
 		await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
 		this.cacheService.removeEntity("tourpass", id);
+		this.cacheService.removeFromQueryResults("tourpass", id);
 		this.cacheService.removeFromQueryResults("upload", id);
 	}
 }

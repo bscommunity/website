@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { firstValueFrom, type Observable, of, shareReplay, tap } from "rxjs";
+import { firstValueFrom, type Observable, of, map, shareReplay, tap } from "rxjs";
 import { apiUrl } from "@/lib/api";
 import {
 	Chart,
@@ -10,7 +10,7 @@ import {
 import type { Difficulty } from "@/models/enums/difficulty.enum";
 import type { Genre } from "@/models/enums/genre.enum";
 import type { StreamingLinkModel } from "@/models/streaming-link.model";
-import type { STORAGE } from "../cache.service";
+import type { QueryPage, STORAGE } from "../cache.service";
 import { CacheService } from "../cache.service";
 import type { WorkshopFilters } from "../filter.service";
 
@@ -33,11 +33,6 @@ export interface CreateChartPayload {
 	bundleUrl?: string;
 	fileSizeBytes?: number;
 	chartBundle?: File;
-}
-
-interface ChartsResponse {
-	first: ChartModel[];
-	second: number;
 }
 
 type CacheScope = "public" | "private";
@@ -74,7 +69,8 @@ export class ChartService {
 		);
 
 		this.cacheService.setEntity("chart", createdChart.id, createdChart);
-		this.cacheService.invalidateQueries("chart");
+		this.cacheService.insertIntoQueryResults("chart", createdChart);
+		this.cacheService.insertIntoQueryResults("upload", createdChart);
 
 		return createdChart;
 	}
@@ -102,7 +98,8 @@ export class ChartService {
 
 	addChartToCache(chart: ChartModel): void {
 		this.cacheService.setEntity("chart", chart.id, chart);
-		this.cacheService.invalidateQueries("chart");
+		this.cacheService.insertIntoQueryResults("chart", chart);
+		this.cacheService.insertIntoQueryResults("upload", chart);
 	}
 
 	/**
@@ -135,7 +132,7 @@ export class ChartService {
 			count?: boolean;
 			myCharts?: boolean;
 		},
-	): Observable<ChartsResponse> {
+	): Observable<QueryPage<ChartModel>> {
 		const isDashboardRequest = options?.isDashboard ?? false;
 		const cacheScope: CacheScope = isDashboardRequest ? "private" : "public";
 		const cacheType = cacheScope === "private" ? "chart:dashboard" : "chart:workshop";
@@ -150,10 +147,10 @@ export class ChartService {
 				: undefined;
 
 		if (canReadCache) {
-			const cachedPayload = this.cacheService.getQuery<ChartsResponse>(cacheType, cacheKey, cacheStorage);
+			const cachedPayload = this.cacheService.getQuery<ChartModel>(cacheType, cacheKey, cacheStorage);
 
 			if (cachedPayload) {
-				for (const chart of cachedPayload.first) {
+				for (const chart of cachedPayload.items) {
 					this.cacheService.setEntity("chart", chart.id, chart);
 				}
 				return of(cachedPayload);
@@ -200,14 +197,15 @@ export class ChartService {
 			params = params.set("myCharts", "true");
 		}
 
-		return this.http.get<ChartsResponse>(this.apiUrl, { params }).pipe(
-			tap((fetchedCharts) => {
+		return this.http.get<{ first: ChartModel[]; second: number }>(this.apiUrl, { params }).pipe(
+			map((res) => ({ items: res.first, total: res.second })),
+			tap((page) => {
 				if (!isPaginated) {
-					this.cacheService.setQuery(cacheType, cacheKey, fetchedCharts, cacheStorage, 30_000);
+					this.cacheService.setQuery(cacheType, cacheKey, page, cacheStorage, 30_000);
 				} else {
-					this.cacheService.setQuery(cacheType, `${cacheKey}|page=${pageKey}`, fetchedCharts, cacheStorage, 30_000);
+					this.cacheService.setQuery(cacheType, `${cacheKey}|page=${pageKey}`, page, cacheStorage, 30_000);
 				}
-				for (const chart of fetchedCharts.first) {
+				for (const chart of page.items) {
 					this.cacheService.setEntity("chart", chart.id, chart);
 				}
 			}),
@@ -262,7 +260,8 @@ export class ChartService {
 		);
 
 		this.cacheService.setEntity("chart", updatedChart.id, updatedChart);
-		this.cacheService.invalidateQueries("chart");
+		this.cacheService.updateInQueryResults("chart", updatedChart.id, () => updatedChart);
+		this.cacheService.updateInQueryResults("upload", updatedChart.id, () => updatedChart);
 
 		return updatedChart;
 	}

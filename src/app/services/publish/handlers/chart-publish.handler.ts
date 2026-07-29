@@ -18,7 +18,6 @@ import type { SimplifiedContributorModel } from "@/models/contributor.model";
 import { ChartService, type CreateChartPayload } from "@/services/api/chart.service";
 import { ContributorService } from "@/services/api/contributor.service";
 import { UserService } from "@/services/api/user.service";
-import { CacheService } from "@/services/cache.service";
 import type { PublishHandler } from "../publish-handler.interface";
 
 export interface ChartFormData {
@@ -65,7 +64,6 @@ export class ChartPublishHandler
 	private chartService = inject(ChartService);
 	private contributorService = inject(ContributorService);
 	private userService = inject(UserService);
-	private cacheService = inject(CacheService);
 
 	getStepComponents(): Type<unknown>[] {
 		return [
@@ -132,9 +130,6 @@ export class ChartPublishHandler
 			);
 
 		console.log("Chart created successfully:", response);
-
-		this.cacheService.setEntity("chart", response.id, response);
-		this.cacheService.invalidateQueries("upload");
 
 		return response;
 	}

@@ -7,29 +7,54 @@ const QUERY_PREFIX = "_q";
 
 export type STORAGE = "persistent" | "session";
 
+/**
+ * Every query/list cache entry across the app must use this shape.
+ * Making every service agree on ONE shape is what lets CacheService
+ * mutate cached lists generically — it only ever needs to know an
+ * item has an `id`, never what a "chart" or "tourpass" looks like.
+ */
+export interface QueryPage<T> {
+	items: T[];
+	total: number | null;
+}
+
+interface QueryEntry<T> {
+	data: QueryPage<T>;
+	cachedAt: number;
+	ttl: number | null;
+}
+
 @Injectable({ providedIn: "root" })
 export class CacheService {
 	private storageService = inject(StorageService);
 	private cookieService = inject(CookieService);
 
 	// ---------------------------------------------------------------------------
-	// Generic Entity Cache — type + id scoped keys
+	// Entity cache — unchanged, this part was already solid
 	// ---------------------------------------------------------------------------
 
-	getEntity<T>(type: string, id: string, storage: STORAGE = "persistent"): T | null {
-		const raw = this.storageService.getItem(
-			`${ENTITY_PREFIX}:${type}:${id}`,
-			storage === "session",
-		);
+	getEntity<T>(
+		type: string,
+		id: string,
+		storage: STORAGE = "persistent",
+	): T | null {
+		const key = `${ENTITY_PREFIX}:${type}:${id}`;
+		const raw = this.storageService.getItem(key, storage === "session");
 		if (!raw) return null;
 		try {
 			return JSON.parse(raw).data as T;
 		} catch {
+			this.storageService.removeItem(key, storage === "session");
 			return null;
 		}
 	}
 
-	setEntity<T>(type: string, id: string, data: T, storage: STORAGE = "persistent"): void {
+	setEntity<T>(
+		type: string,
+		id: string,
+		data: T,
+		storage: STORAGE = "persistent",
+	): void {
 		this.storageService.setItem(
 			`${ENTITY_PREFIX}:${type}:${id}`,
 			JSON.stringify({ data }),
@@ -37,7 +62,11 @@ export class CacheService {
 		);
 	}
 
-	removeEntity(type: string, id: string, storage: STORAGE = "persistent"): void {
+	removeEntity(
+		type: string,
+		id: string,
+		storage: STORAGE = "persistent",
+	): void {
 		this.storageService.removeItem(
 			`${ENTITY_PREFIX}:${type}:${id}`,
 			storage === "session",
@@ -55,22 +84,24 @@ export class CacheService {
 	}
 
 	// ---------------------------------------------------------------------------
-	// Generic Query Cache — type + paramsKey scoped, with TTL
+	// Query cache — now typed around QueryPage<T> instead of `unknown`
 	// ---------------------------------------------------------------------------
 
-	getQuery<T>(type: string, paramsKey: string, storage: STORAGE = "session"): T | null {
-		const raw = this.storageService.getItem(
-			`${QUERY_PREFIX}:${type}:${paramsKey}`,
-			storage === "session",
-		);
+	getQuery<T>(
+		type: string,
+		paramsKey: string,
+		storage: STORAGE = "session",
+	): QueryPage<T> | null {
+		const key = `${QUERY_PREFIX}:${type}:${paramsKey}`;
+		const raw = this.storageService.getItem(key, storage === "session");
 		if (!raw) return null;
 		try {
-			const entry = JSON.parse(raw);
+			const entry = JSON.parse(raw) as QueryEntry<T>;
 			if (entry.ttl && Date.now() - entry.cachedAt > entry.ttl) {
 				this.removeQuery(type, paramsKey, storage);
 				return null;
 			}
-			return entry.data as T;
+			return entry.data;
 		} catch {
 			this.removeQuery(type, paramsKey, storage);
 			return null;
@@ -80,18 +111,27 @@ export class CacheService {
 	setQuery<T>(
 		type: string,
 		paramsKey: string,
-		data: T,
+		data: QueryPage<T>,
 		storage: STORAGE = "session",
 		ttlMs?: number,
 	): void {
+		const entry: QueryEntry<T> = {
+			data,
+			cachedAt: Date.now(),
+			ttl: ttlMs ?? null,
+		};
 		this.storageService.setItem(
 			`${QUERY_PREFIX}:${type}:${paramsKey}`,
-			JSON.stringify({ data, cachedAt: Date.now(), ttl: ttlMs ?? null }),
+			JSON.stringify(entry),
 			storage === "session",
 		);
 	}
 
-	removeQuery(type: string, paramsKey: string, storage: STORAGE = "session"): void {
+	removeQuery(
+		type: string,
+		paramsKey: string,
+		storage: STORAGE = "session",
+	): void {
 		this.storageService.removeItem(
 			`${QUERY_PREFIX}:${type}:${paramsKey}`,
 			storage === "session",
@@ -99,99 +139,125 @@ export class CacheService {
 	}
 
 	invalidateQueries(type: string, storage?: STORAGE): void {
-		const storages: STORAGE[] = storage ? [storage] : ["session", "persistent"];
-		for (const s of storages) {
-			const store = s === "session" ? window.sessionStorage : window.localStorage;
-			const prefix = `${QUERY_PREFIX}:${type}:`;
-			const toRemove: string[] = [];
-			for (let i = 0; i < store.length; i++) {
-				const key = store.key(i)!;
-				if (key.startsWith(prefix)) {
-					toRemove.push(key);
+		this.forEachQueryKey(type, storage, (key, s) => {
+			this.storageService.removeItem(key, s === "session");
+		});
+	}
+
+	/**
+	 * Remove one item (by id) from every cached page of `type`, across every
+	 * cached filter/sort variant — no need to know which pages exist.
+	 */
+	removeFromQueryResults<T extends { id: string }>(
+		type: string,
+		itemId: string,
+		storage?: STORAGE,
+	): void {
+		this.mutateQueryResults<T>(type, storage, (page) => {
+			const items = page.items.filter((item) => item.id !== itemId);
+			if (items.length === page.items.length) return page; // unchanged -> skip write
+			return {
+				items,
+				total: page.total !== null ? Math.max(0, page.total - 1) : null,
+			};
+		});
+	}
+
+	/**
+	 * Insert a freshly created item into every cached page of `type`.
+	 * This is the piece that was missing: it's what lets `createChart`
+	 * update lists in place instead of calling invalidateQueries and
+	 * forcing a refetch on the next read.
+	 */
+	insertIntoQueryResults<T extends { id: string }>(
+		type: string,
+		item: T,
+		storage?: STORAGE,
+	): void {
+		this.mutateQueryResults<T>(type, storage, (page) => {
+			if (page.items.some((existing) => existing.id === item.id))
+				return page;
+			return {
+				items: [item, ...page.items],
+				total: page.total !== null ? page.total + 1 : null,
+			};
+		});
+	}
+
+	/**
+	 * Patch one item (by id) in place across every cached page — e.g. after
+	 * an update/PUT, so lists reflect the new data without a refetch.
+	 */
+	updateInQueryResults<T extends { id: string }>(
+		type: string,
+		itemId: string,
+		updater: (item: T) => T,
+		storage?: STORAGE,
+	): void {
+		this.mutateQueryResults<T>(type, storage, (page) => {
+			let changed = false;
+			const items = page.items.map((item) => {
+				if (item.id !== itemId) return item;
+				changed = true;
+				return updater(item);
+			});
+			return changed ? { ...page, items } : page;
+		});
+	}
+
+	/**
+	 * Single shared traversal used by insert/remove/update above. Reads every
+	 * cached page for `type`, runs `mutator`, writes back only if it changed.
+	 * Replaces the old duplicated manual loops + shape-guessing.
+	 */
+	private mutateQueryResults<T>(
+		type: string,
+		storage: STORAGE | undefined,
+		mutator: (page: QueryPage<T>) => QueryPage<T>,
+	): void {
+		this.forEachQueryKey(type, storage, (key, s) => {
+			const raw = this.storageService.getItem(key, s === "session");
+			if (!raw) return;
+			try {
+				const entry = JSON.parse(raw) as QueryEntry<T>;
+				const mutated = mutator(entry.data);
+				if (mutated !== entry.data) {
+					entry.data = mutated;
+					this.storageService.setItem(
+						key,
+						JSON.stringify(entry),
+						s === "session",
+					);
 				}
-			}
-			for (const key of toRemove) {
+			} catch {
+				// malformed entry — drop it rather than leave/propagate bad state
 				this.storageService.removeItem(key, s === "session");
 			}
-		}
+		});
 	}
 
-	removeFromQueryResults(type: string, itemId: string, storage?: STORAGE): void {
-		const storages: STORAGE[] = storage ? [storage] : ["session", "persistent"];
+	/**
+	 * NOTE: this assumes StorageService exposes a `getKeysWithPrefix` method
+	 * (wrapping localStorage/sessionStorage key iteration). Add it there so
+	 * CacheService never touches window.localStorage/sessionStorage directly —
+	 * that direct access in the original invalidateQueries/removeFromQueryResults
+	 * was the one place bypassing the storage abstraction used everywhere else.
+	 */
+	private forEachQueryKey(
+		type: string,
+		storage: STORAGE | undefined,
+		fn: (key: string, storage: STORAGE) => void,
+	): void {
+		const storages: STORAGE[] = storage
+			? [storage]
+			: ["session", "persistent"];
+		const prefix = `${QUERY_PREFIX}:${type}:`;
 		for (const s of storages) {
-			const store = s === "session" ? window.sessionStorage : window.localStorage;
-			const prefix = `${QUERY_PREFIX}:${type}:`;
-			for (let i = 0; i < store.length; i++) {
-				const key = store.key(i)!;
-				if (!key.startsWith(prefix)) continue;
-				const raw = this.storageService.getItem(key, s === "session");
-				if (!raw) continue;
-				try {
-					const entry = JSON.parse(raw);
-					const mutated = this.removeItemFromPayload(entry.data, itemId);
-					if (mutated !== entry.data) {
-						entry.data = mutated;
-						this.storageService.setItem(key, JSON.stringify(entry), s === "session");
-					}
-				} catch {
-					// skip malformed entries
-				}
-			}
-		}
-	}
-
-	private removeItemFromPayload(data: unknown, itemId: string): unknown {
-		if (Array.isArray(data)) {
-			if (data.length >= 2 && Array.isArray(data[0])) {
-				const filtered = data[0].filter((item: any) => item.id !== itemId);
-				if (filtered.length === data[0].length) return data;
-				const count = typeof data[1] === "number" ? data[1] - 1 : data[1];
-				return [filtered, count, ...data.slice(2)];
-			}
-			return data;
-		}
-
-		if (data && typeof data === "object" && !Array.isArray(data)) {
-			const obj = data as Record<string, unknown>;
-
-			if (Array.isArray(obj["first"]) && typeof obj["second"] === "number") {
-				const first = obj["first"] as any[];
-				const filtered = first.filter((item: any) => item.id !== itemId);
-				if (filtered.length === first.length) return data;
-				return { ...obj, first: filtered, second: (obj["second"] as number) - 1 };
-			}
-
-			if (Array.isArray(obj["items"])) {
-				const items = obj["items"] as any[];
-				const filtered = items.filter((item: any) => item.id !== itemId);
-				if (filtered.length === items.length) return data;
-				const result: Record<string, unknown> = { ...obj, items: filtered };
-				const counts = obj["counts"];
-				if (counts && typeof counts === "object") {
-					const item = items.find((it: any) => it.id === itemId);
-					if (item?.type) {
-						const countKey = this.typeToCountKey(item.type);
-						const newCounts = { ...(counts as Record<string, number>) };
-						if (countKey && typeof newCounts[countKey] === "number") {
-							newCounts[countKey] = Math.max(0, newCounts[countKey] - 1);
-						}
-						result["counts"] = newCounts;
-					}
-				}
-				return result;
-			}
-		}
-
-		return data;
-	}
-
-	private typeToCountKey(type: string): string | null {
-		switch (type) {
-			case "CHART": return "charts";
-			case "TOUR_PASS": return "tourPasses";
-			case "THEME": return "themes";
-			case "COLLECTION": return "collections";
-			default: return null;
+			const keys = this.storageService.getKeysWithPrefix(
+				prefix,
+				s === "session",
+			);
+			for (const key of keys) fn(key, s);
 		}
 	}
 

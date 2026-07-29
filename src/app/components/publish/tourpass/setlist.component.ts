@@ -207,7 +207,7 @@ export class PublishTourPassSetlistComponent implements OnInit, OnDestroy {
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
-					this.charts = response.first || [];
+					this.charts = response.items || [];
 					this.isLoading = false;
 					this.cdr.markForCheck();
 				},

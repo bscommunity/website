@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable, of, tap } from "rxjs";
+import { Observable, of, map, tap } from "rxjs";
 
 import {
 	ItemsPageModel,
@@ -13,6 +13,7 @@ import { TourPassModel } from "@/models/tour-pass.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 import { apiUrl } from "@/lib/api";
+import type { QueryPage } from "../cache.service";
 import { CacheService } from "../cache.service";
 
 @Injectable({
@@ -82,7 +83,7 @@ export class UserService {
 			offset?: number;
 			disableCache?: boolean;
 		} = {},
-	): Observable<ItemsPageModel<CatalogItemModel>> {
+	): Observable<QueryPage<CatalogItemModel>> {
 		const httpParams: Record<string, string | number> = {};
 		if (params.types) httpParams["types"] = params.types;
 		if (params.query) httpParams["query"] = params.query;
@@ -97,7 +98,7 @@ export class UserService {
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.cacheService.getQuery<ItemsPageModel<CatalogItemModel>>("upload", cacheKey, "session");
+			const cached = this.cacheService.getQuery<CatalogItemModel>("upload", cacheKey, "session");
 			if (cached) {
 				this.seedUploadEntities(cached.items);
 				return of(cached);
@@ -107,11 +108,18 @@ export class UserService {
 		return this.http
 			.get<ItemsPageModel<CatalogItemModel>>(`${this.meUrl}/uploads`, { params: httpParams })
 			.pipe(
-				tap((response) => {
+				map((res) => ({
+					items: res.items,
+					total:
+						res.counts
+							? (res.counts.charts ?? 0) + (res.counts.tourPasses ?? 0) + (res.counts.themes ?? 0)
+							: null,
+				})),
+				tap((page) => {
 					if (!isPaginated) {
-						this.cacheService.setQuery("upload", cacheKey, response, "session", 30_000);
+						this.cacheService.setQuery("upload", cacheKey, page, "session", 30_000);
 					}
-					this.seedUploadEntities(response.items);
+					this.seedUploadEntities(page.items);
 				}),
 			);
 	}
@@ -119,9 +127,9 @@ export class UserService {
 	private seedUploadEntities(items: CatalogItemModel[]): void {
 		for (const item of items) {
 			if (item.type === "CHART") {
-				this.cacheService.setEntity("chart", item.id, item as any);
+				this.cacheService.setEntity<ChartModel>("chart", item.id, item as ChartModel);
 			} else if (item.type === "TOUR_PASS") {
-				this.cacheService.setEntity("tourpass", item.id, item as any);
+				this.cacheService.setEntity<TourPassModel>("tourpass", item.id, item as TourPassModel);
 			}
 		}
 	}
@@ -153,7 +161,7 @@ export class UserService {
 			count?: boolean;
 			disableCache?: boolean;
 		} = {},
-	): Observable<[TourPassModel[], number | null]> {
+	): Observable<QueryPage<TourPassModel>> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
@@ -165,9 +173,9 @@ export class UserService {
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.cacheService.getQuery<[TourPassModel[], number | null]>("tourpass", cacheKey, "session");
+			const cached = this.cacheService.getQuery<TourPassModel>("tourpass", cacheKey, "session");
 			if (cached) {
-				this.seedTourPassEntities(cached[0]);
+				this.seedTourPassEntities(cached.items);
 				return of(cached);
 			}
 		}
@@ -175,11 +183,12 @@ export class UserService {
 		return this.http
 			.get<[TourPassModel[], number | null]>(`${apiUrl}/tourpasses`, { params: httpParams })
 			.pipe(
-				tap((response) => {
+				map((res) => ({ items: res[0], total: res[1] })),
+				tap((page) => {
 					if (!isPaginated) {
-						this.cacheService.setQuery("tourpass", cacheKey, response, "session", 30_000);
+						this.cacheService.setQuery("tourpass", cacheKey, page, "session", 30_000);
 					}
-					this.seedTourPassEntities(response[0]);
+					this.seedTourPassEntities(page.items);
 				}),
 			);
 	}

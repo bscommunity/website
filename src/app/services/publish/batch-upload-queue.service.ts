@@ -3,7 +3,6 @@ import { Injectable, inject } from "@angular/core";
 import { BehaviorSubject, type Subscription, Subject, finalize } from "rxjs";
 
 import { ChartService, type CreateChartPayload } from "../api/chart.service";
-import { CacheService } from "../cache.service";
 import { Difficulty } from "@/models/enums/difficulty.enum";
 import type { ChartModel } from "@/models/chart.model";
 
@@ -22,7 +21,6 @@ const MAX_BUNDLES = 15;
 @Injectable({ providedIn: "root" })
 export class BatchUploadQueueService {
 	private chartService = inject(ChartService);
-	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
 
 	private bundles: Bundle[] = [];
@@ -154,7 +152,6 @@ export class BatchUploadQueueService {
 			.subscribe({
 				next: (result) => {
 					this.chartService.addChartToCache(result);
-					this.cacheService.invalidateQueries("upload");
 					this.updateBundle(bundle.id, { status: "success", result });
 				},
 				error: (error: unknown) => {

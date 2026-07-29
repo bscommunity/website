@@ -175,7 +175,7 @@ export class Uploads implements OnInit, OnDestroy {
 						"Fetched uploads:",
 						items,
 						"Total count:",
-						response.counts,
+						response.total,
 					);
 
 					if (append) {
@@ -189,10 +189,7 @@ export class Uploads implements OnInit, OnDestroy {
 						this.currentOffset = items.length;
 					}
 
-					this.totalCount =
-						(response.counts?.charts ?? 0) +
-						(response.counts?.tourPasses ?? 0) +
-						(response.counts?.themes ?? 0);
+					this.totalCount = response.total ?? 0;
 					this.hasMore = items.length >= this.pageSize;
 
 					this.filterService.setLoading(false);
