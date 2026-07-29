@@ -10,6 +10,7 @@ import {
 
 import { MatDialogModule, MatDialogRef } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgGlyph } from "@ng-icons/core";
 import { Subject, takeUntil } from "rxjs";
 
@@ -31,27 +32,35 @@ import {
 			</p>
 
 			<div
-				class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed border-surface-variant rounded-lg cursor-pointer hover:bg-primary/10 transition-colors"
+				class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed rounded-lg transition-colors duration-150"
+				[class.border-surface-variant]="!isDraggingOver"
+				[class.border-primary]="isDraggingOver"
+				[class.bg-primary/10]="isDraggingOver"
+				[class.scale-[1.01]]="isDraggingOver"
 				(dragover)="onDragOver($event)"
 				(dragleave)="onDragLeave($event)"
 				(drop)="onDrop($event)"
-				#dropZone
 			>
 				<ng-glyph
-					name="file_upload"
+					[name]="isDraggingOver ? 'add_circle' : 'file_upload'"
 					size="32"
-					class="text-primary mb-2"
+					class="mb-2 transition-all"
+					[class.text-primary]="true"
 				></ng-glyph>
-				<span>
-					Drag and drop .zip bundles here or
-					<button
-						class="underline text-primary"
-						type="button"
-						(click)="selectFiles()"
-					>
-						select files
-					</button>
-				</span>
+				@if (isDraggingOver) {
+					<span class="font-medium">Release to add bundles</span>
+				} @else {
+					<span>
+						Drag and drop .zip bundles here or
+						<button
+							class="underline text-primary"
+							type="button"
+							(click)="selectFiles()"
+						>
+							select files
+						</button>
+					</span>
+				}
 				@if (queue.bundlesCount >= queue.maxBundles) {
 					<span class="text-sm text-outline mt-1">
 						Maximum of {{ queue.maxBundles }} bundles reached
@@ -76,6 +85,7 @@ import {
 						<li
 							class="flex items-center justify-between gap-6 px-4 py-3 border-surface-variant"
 							[class.border-b]="!$last"
+							[class.py-5]="bundle.status === 'uploading'"
 						>
 							<div
 								class="flex items-center justify-start gap-4 flex-1 min-w-0"
@@ -183,11 +193,13 @@ import {
 })
 export class PublishChartBatchComponent implements OnDestroy {
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
-	@ViewChild("dropZone") dropZone!: ElementRef<HTMLDivElement>;
+
+	isDraggingOver = false;
 
 	queue = inject(BatchUploadQueueService);
 	dialogRef = inject<MatDialogRef<PublishChartBatchComponent>>(MatDialogRef);
 	private cdr = inject(ChangeDetectorRef);
+	private snackBar = inject(MatSnackBar);
 	private destroy$ = new Subject<void>();
 
 	bundles: Bundle[] = [];
@@ -228,7 +240,7 @@ export class PublishChartBatchComponent implements OnDestroy {
 			.pipe(takeUntil(this.destroy$))
 			.subscribe((bundles) => {
 				this.bundles = bundles;
-				this.cdr.markForCheck();
+				this.cdr.detectChanges();
 			});
 	}
 
@@ -245,30 +257,46 @@ export class PublishChartBatchComponent implements OnDestroy {
 	onFileSelected(event: Event): void {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
-			this.queue.addFiles(Array.from(input.files));
+			const { skipped } = this.queue.addFiles(Array.from(input.files));
+			if (skipped.length > 0) {
+				this.showDuplicateWarning(skipped);
+			}
 			input.value = "";
 		}
 	}
 
 	onDragOver(event: Event): void {
 		event.preventDefault();
-		this.dropZone.nativeElement.classList.add("bg-primary/10");
+		this.isDraggingOver = true;
 	}
 
 	onDragLeave(event: Event): void {
 		event.preventDefault();
-		this.dropZone.nativeElement.classList.remove("bg-primary/10");
+		this.isDraggingOver = false;
 	}
 
 	onDrop(event: Event): void {
 		event.preventDefault();
-		this.dropZone.nativeElement.classList.remove("bg-primary/10");
+		this.isDraggingOver = false;
 
 		const dragEvent = event as DragEvent;
 		const files = dragEvent.dataTransfer?.files;
 		if (files) {
-			this.queue.addFiles(Array.from(files));
+			const { skipped } = this.queue.addFiles(Array.from(files));
+			if (skipped.length > 0) {
+				this.showDuplicateWarning(skipped);
+			}
 		}
+	}
+
+	private showDuplicateWarning(skipped: string[]): void {
+		const count = skipped.length;
+		const suffix = count === 1 ? "file was" : "files were";
+		this.snackBar.open(
+			`${count} ${suffix} already added and was skipped`,
+			"Close",
+			{ duration: 4000 },
+		);
 	}
 
 	removeBundle(id: string): void {

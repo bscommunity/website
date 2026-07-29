@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { BehaviorSubject, type Subscription } from "rxjs";
+import { BehaviorSubject, type Subscription, Subject, finalize } from "rxjs";
 
 import { ChartService, type CreateChartPayload } from "../api/chart.service";
 import { UserService } from "../api/user.service";
@@ -32,6 +32,9 @@ export class BatchUploadQueueService {
 	private bundlesSubject = new BehaviorSubject<Bundle[]>([]);
 	bundles$ = this.bundlesSubject.asObservable();
 
+	private uploadCompletedSubject = new Subject<void>();
+	uploadCompleted$ = this.uploadCompletedSubject.asObservable();
+
 	get bundlesCount(): number {
 		return this.bundles.length;
 	}
@@ -46,10 +49,19 @@ export class BatchUploadQueueService {
 		}
 	}
 
-	addFiles(files: File[]): Bundle[] {
+	addFiles(files: File[]): { added: Bundle[]; skipped: string[] } {
+		const existingNames = new Set(this.bundles.map((b) => b.name));
 		const availableSlots = MAX_BUNDLES - this.bundles.length;
+		const skipped: string[] = [];
 		const filesToAdd = Array.from(files)
 			.filter((f) => f.name.endsWith(".zip"))
+			.filter((f) => {
+				if (existingNames.has(f.name)) {
+					skipped.push(f.name);
+					return false;
+				}
+				return true;
+			})
 			.slice(0, availableSlots);
 
 		const newBundles: Bundle[] = filesToAdd.map((file) => ({
@@ -59,9 +71,9 @@ export class BatchUploadQueueService {
 			status: "ready" as const,
 		}));
 
-		this.bundles = [...this.bundles, ...newBundles];
+		this.bundles = [...newBundles, ...this.bundles];
 		this.emit();
-		return newBundles;
+		return { added: newBundles, skipped };
 	}
 
 	removeBundle(id: string): void {
@@ -94,6 +106,15 @@ export class BatchUploadQueueService {
 			this.activeCount++;
 			this.uploadBundle(next);
 		}
+
+		if (
+			this.activeCount === 0 &&
+			!this.bundles.some(
+				(b) => b.status === "ready" || b.status === "uploading",
+			)
+		) {
+			this.uploadCompletedSubject.next();
+		}
 	}
 
 	private uploadBundle(bundle: Bundle): void {
@@ -114,10 +135,22 @@ export class BatchUploadQueueService {
 		};
 
 		const sessionId = crypto.randomUUID();
-		const { formData, headers } = this.chartService.buildChartData(payload, sessionId);
+		const { formData, headers } = this.chartService.buildChartData(
+			payload,
+			sessionId,
+		);
 
 		const sub = this.http
-			.post<ChartModel>(this.chartService.apiUrlRef, formData, { headers })
+			.post<ChartModel>(this.chartService.apiUrlRef, formData, {
+				headers,
+			})
+			.pipe(
+				finalize(() => {
+					this.subscriptions.delete(bundle.id);
+					this.activeCount--;
+					this.processNext();
+				}),
+			)
 			.subscribe({
 				next: (result) => {
 					this.chartService.addChartToCache(result);
@@ -126,20 +159,19 @@ export class BatchUploadQueueService {
 				},
 				error: (error: unknown) => {
 					const message =
-						(error && typeof error === "object" && "statusText" in error
+						(error &&
+						typeof error === "object" &&
+						"statusText" in error
 							? (error as { statusText?: string }).statusText
 							: undefined) ||
-						(error instanceof Error ? error.message : "Upload failed");
+						(error instanceof Error
+							? error.message
+							: "Upload failed");
 
 					this.updateBundle(bundle.id, {
 						status: "error",
 						errorMessage: message,
 					});
-				},
-				complete: () => {
-					this.subscriptions.delete(bundle.id);
-					this.activeCount--;
-					this.processNext();
 				},
 			});
 

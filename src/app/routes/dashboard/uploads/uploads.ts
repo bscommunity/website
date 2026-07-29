@@ -44,6 +44,7 @@ import { UserService } from "@/services/api/user.service";
 import { AuthService } from "@/services/auth.service";
 import type { WorkshopFilters } from "@/services/filter.service";
 import { FilterService } from "@/services/filter.service";
+import { BatchUploadQueueService } from "@/services/publish/batch-upload-queue.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
 
@@ -69,6 +70,7 @@ export class Uploads implements OnInit, OnDestroy {
 	private filterService = inject(FilterService);
 	private userService = inject(UserService);
 	private authService = inject(AuthService);
+	private batchUploadQueue = inject(BatchUploadQueueService);
 	private cdr = inject(ChangeDetectorRef);
 
 	private destroy$ = new Subject<void>();
@@ -116,6 +118,13 @@ export class Uploads implements OnInit, OnDestroy {
 		this.fetchContent();
 
 		this.filterService.filterChanges$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.currentOffset = 0;
+				this.fetchContent();
+			});
+
+		this.batchUploadQueue.uploadCompleted$
 			.pipe(takeUntil(this.destroy$))
 			.subscribe(() => {
 				this.currentOffset = 0;
