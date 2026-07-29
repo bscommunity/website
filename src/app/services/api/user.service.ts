@@ -2,33 +2,30 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, of, tap } from "rxjs";
 
-// Models
 import {
 	ItemsPageModel,
 	UserActivityItem,
 	UserModel,
 	UserProfileResponseModel,
 } from "@/models/user.model";
-import { ChartModel } from "@/models/chart.model";
+import type { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
-// Lib
 import { apiUrl } from "@/lib/api";
-import { StorageService } from "../storage.service";
+import { CacheService } from "../cache.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class UserService {
 	private http = inject(HttpClient);
-	private storageService = inject(StorageService);
+	private cacheService = inject(CacheService);
 
 	private readonly apiUrl = `${apiUrl}/users`;
 	private readonly meUrl = `${apiUrl}/me`;
 
 	private readonly searchCache = new Map<string, UserModel[]>();
-	private readonly uploadsCacheKeys = new Set<string>();
 
 	// Read
 	searchUsers(query: string): Observable<UserModel[]> {
@@ -91,8 +88,7 @@ export class UserService {
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
 		if (params.genres) httpParams["genres"] = params.genres;
-		if (params.difficulties)
-			httpParams["difficulties"] = params.difficulties;
+		if (params.difficulties) httpParams["difficulties"] = params.difficulties;
 		if (params.versions) httpParams["versions"] = params.versions;
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
@@ -101,29 +97,24 @@ export class UserService {
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.getFromUploadsCache(cacheKey);
+			const cached = this.cacheService.getQuery<ItemsPageModel<CatalogItemModel>>("upload", cacheKey, "session");
 			if (cached) {
 				return of(cached);
 			}
 		}
 
 		return this.http
-			.get<
-				ItemsPageModel<CatalogItemModel>
-			>(`${this.meUrl}/uploads`, { params: httpParams })
+			.get<ItemsPageModel<CatalogItemModel>>(`${this.meUrl}/uploads`, { params: httpParams })
 			.pipe(
 				tap((response) => {
 					if (!isPaginated) {
-						this.uploadsCacheKeys.add(cacheKey);
-						this.setUploadsCache(cacheKey, response);
+						this.cacheService.setQuery("upload", cacheKey, response, "session", 30_000);
 					}
 				}),
 			);
 	}
 
-	private buildUploadsCacheKey(
-		params: Record<string, string | number>,
-	): string {
+	private buildUploadsCacheKey(params: Record<string, string | number>): string {
 		const parts = [
 			params["types"] || "all",
 			params["query"] || "",
@@ -133,117 +124,8 @@ export class UserService {
 			params["versions"] || "",
 			params["limit"] || 20,
 		];
-		return `uploads_${parts.join("|")}`;
+		return parts.join("|");
 	}
-
-	private getFromUploadsCache(
-		key: string,
-	): ItemsPageModel<CatalogItemModel> | null {
-		const raw = this.storageService.getItem(key, true);
-		if (!raw) return null;
-		try {
-			const parsed = JSON.parse(raw);
-			if (parsed && Array.isArray(parsed.items)) {
-				return parsed as ItemsPageModel<CatalogItemModel>;
-			}
-		} catch {
-			this.storageService.removeItem(key, true);
-		}
-		return null;
-	}
-
-	private setUploadsCache(
-		key: string,
-		data: ItemsPageModel<CatalogItemModel>,
-	): void {
-		this.storageService.setItem(key, JSON.stringify(data), true);
-	}
-
-	updateUploadsCacheItem(id: string, data: Partial<CatalogItemModel>): void {
-		for (const key of this.uploadsCacheKeys) {
-			const cached = this.getFromUploadsCache(key);
-			if (!cached) continue;
-
-			const item = cached.items.find((i) => i.id === id);
-			if (item) {
-				Object.assign(item, data);
-				this.setUploadsCache(key, cached);
-			}
-		}
-	}
-
-	invalidateUploadsCache(): void {
-		for (const key of this.uploadsCacheKeys) {
-			this.storageService.removeItem(key, true);
-		}
-		this.uploadsCacheKeys.clear();
-	}
-
-	addToUploadsCache(chart: ChartModel): void {
-		for (const key of this.uploadsCacheKeys) {
-			const cached = this.getFromUploadsCache(key);
-			if (!cached) continue;
-
-			if (!this.chartMatchesUploadsFilters(chart, key)) continue;
-
-			if (cached.items.some((item) => item.id === chart.id)) continue;
-
-			cached.items.unshift(chart);
-
-			this.setUploadsCache(key, cached);
-		}
-
-		console.log("Chart added to uploads cache:", chart.id);
-	}
-
-	private chartMatchesUploadsFilters(
-		chart: ChartModel,
-		cacheKey: string,
-	): boolean {
-		const prefix = "uploads_";
-		if (!cacheKey.startsWith(prefix)) return true;
-
-		const parts = cacheKey.slice(prefix.length).split("|");
-		const types = parts[0];
-		const query = parts[1];
-
-		if (types && types !== "all") {
-			if (!types.split(",").includes("CHART")) return false;
-		}
-
-		if (query) {
-			const haystack =
-				`${chart.track.artist} ${chart.track.title}`.toLowerCase();
-			if (!haystack.includes(query.toLowerCase())) return false;
-		}
-
-		const genres = parts[3];
-		if (genres) {
-			if (
-				!chart.track.genre ||
-				!genres.split(",").includes(chart.track.genre)
-			)
-				return false;
-		}
-
-		const difficulties = parts[4];
-		if (difficulties) {
-			if (
-				chart.difficulty == null ||
-				!difficulties.split(",").includes(chart.difficulty)
-			)
-				return false;
-		}
-
-		const versions = parts[5];
-		if (versions) {
-			if (versions.split(",").includes("Deluxe") && !chart.isDeluxe)
-				return false;
-		}
-
-		return true;
-	}
-
 	getPublicTourPasses(
 		params: {
 			query?: string;
@@ -265,57 +147,30 @@ export class UserService {
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.getFromTourPassesCache(cacheKey);
+			const cached = this.cacheService.getQuery<[TourPassModel[], number | null]>("tourpass", cacheKey, "session");
 			if (cached) {
 				return of(cached);
 			}
 		}
 
 		return this.http
-			.get<
-				[TourPassModel[], number | null]
-			>(`${apiUrl}/tourpasses`, { params: httpParams })
+			.get<[TourPassModel[], number | null]>(`${apiUrl}/tourpasses`, { params: httpParams })
 			.pipe(
 				tap((response) => {
 					if (!isPaginated) {
-						this.setTourPassesCache(cacheKey, response);
+						this.cacheService.setQuery("tourpass", cacheKey, response, "session", 30_000);
 					}
 				}),
 			);
 	}
 
-	private buildTourPassesCacheKey(
-		params: Record<string, string | number | boolean>,
-	): string {
+	private buildTourPassesCacheKey(params: Record<string, string | number | boolean>): string {
 		const parts = [
 			params["query"] || "",
 			params["sortBy"] || "",
 			params["limit"] || 20,
 		];
-		return `tourpasses_${parts.join("|")}`;
-	}
-
-	private getFromTourPassesCache(
-		key: string,
-	): [TourPassModel[], number | null] | null {
-		const raw = this.storageService.getItem(key, true);
-		if (!raw) return null;
-		try {
-			const parsed = JSON.parse(raw);
-			if (parsed && Array.isArray(parsed[0])) {
-				return parsed as [TourPassModel[], number | null];
-			}
-		} catch {
-			this.storageService.removeItem(key, true);
-		}
-		return null;
-	}
-
-	private setTourPassesCache(
-		key: string,
-		data: [TourPassModel[], number | null],
-	): void {
-		this.storageService.setItem(key, JSON.stringify(data), true);
+		return parts.join("|");
 	}
 
 	getPublicThemes(

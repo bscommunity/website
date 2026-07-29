@@ -2,32 +2,30 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
-// Models
 import type {
 	CreateTourPassModel,
 	TourPassModel,
 } from "@/models/tour-pass.model";
 
-// Lib
 import { apiUrl } from "@/lib/api";
-import { StorageService } from "../storage.service";
-import { UserService } from "./user.service";
+import { CacheService } from "../cache.service";
 
 @Injectable({
 	providedIn: "root",
 })
 export class TourPassService {
 	private http = inject(HttpClient);
-	private storageService = inject(StorageService);
-	private userService = inject(UserService);
+	private cacheService = inject(CacheService);
 
 	private readonly apiUrl = `${apiUrl}/tourpasses`;
 
-	async getTourPassById(id: string, disableCache = false): Promise<TourPassModel> {
-		const cacheKey = `tourpass_${id}`;
+	private static entityKey(id: string): string {
+		return `tourpass:${id}`;
+	}
 
+	async getTourPassById(id: string, disableCache = false): Promise<TourPassModel> {
 		if (!disableCache) {
-			const cached = this.getFromCache(cacheKey);
+			const cached = this.cacheService.getEntity<TourPassModel>("tourpass", id);
 			if (cached) return cached;
 		}
 
@@ -35,7 +33,7 @@ export class TourPassService {
 			this.http.get<TourPassModel>(`${this.apiUrl}/${id}`),
 		);
 
-		this.setCache(cacheKey, tourPass);
+		this.cacheService.setEntity("tourpass", id, tourPass);
 		return tourPass;
 	}
 
@@ -55,7 +53,8 @@ export class TourPassService {
 			this.http.post<TourPassModel>(this.apiUrl, formData),
 		);
 
-		this.userService.invalidateUploadsCache();
+		this.cacheService.setEntity("tourpass", result.id, result);
+		this.cacheService.invalidateQueries("upload");
 		return result;
 	}
 
@@ -76,36 +75,14 @@ export class TourPassService {
 			this.http.put<TourPassModel>(`${this.apiUrl}/${id}`, formData),
 		);
 
-		this.setCache(`tourpass_${id}`, result);
-		this.userService.updateUploadsCacheItem(id, result);
+		this.cacheService.setEntity("tourpass", id, result);
+		this.cacheService.invalidateQueries("upload");
 		return result;
 	}
 
 	async deleteTourPass(id: string): Promise<void> {
 		await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
-		this.removeItemFromCache(`tourpass_${id}`);
-		this.userService.invalidateUploadsCache();
-	}
-
-	private getFromCache(key: string): TourPassModel | null {
-		const raw = this.storageService.getItem(key, true);
-		if (!raw) return null;
-		try {
-			const parsed = JSON.parse(raw);
-			if (parsed && typeof parsed === "object" && typeof parsed.id === "string") {
-				return parsed as TourPassModel;
-			}
-		} catch {
-			this.storageService.removeItem(key, true);
-		}
-		return null;
-	}
-
-	private setCache(key: string, data: TourPassModel): void {
-		this.storageService.setItem(key, JSON.stringify(data), true);
-	}
-
-	private removeItemFromCache(key: string): void {
-		this.storageService.removeItem(key, true);
+		this.cacheService.removeEntity("tourpass", id);
+		this.cacheService.invalidateQueries("upload");
 	}
 }

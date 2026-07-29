@@ -6,6 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { CacheService } from "../cache.service";
 
 // Models
+import type { ChartModel } from "@/models/chart.model";
 import { ContributorRole } from "@/models/enums/role.enum";
 import {
 	ContributorModel,
@@ -38,14 +39,14 @@ export class ContributorService {
 			),
 		);
 
-		this.cacheService.updateChart(chartId, (chart) => {
-			const currentContributors = chart.contributors || [];
+		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
+			const currentContributors = (chart?.contributors) || [];
 			const updatedUserIds = new Set(response.map((c) => c.user.id));
 			const filtered = currentContributors.filter(
 				(c) => !updatedUserIds.has(c.user.id),
 			);
 			return {
-				...chart,
+				...(chart ?? ({} as ChartModel)),
 				contributors: [...filtered, ...response],
 			};
 		});
@@ -68,14 +69,14 @@ export class ContributorService {
 			),
 		);
 
-		this.cacheService.updateChart(chartId, (chart) => {
-			const currentContributors = chart.contributors || [];
+		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
+			const currentContributors = (chart?.contributors) || [];
 			const updatedUserIds = new Set(updatedContributors.map((c) => c.user.id));
 			const filtered = currentContributors.filter(
 				(c) => !updatedUserIds.has(c.user.id),
 			);
 			return {
-				...chart,
+				...(chart ?? ({} as ChartModel)),
 				contributors: [...filtered, ...updatedContributors],
 			};
 		});
@@ -100,9 +101,9 @@ export class ContributorService {
 				),
 			);
 
-			this.cacheService.updateChart(chartId, (chart) => ({
-				...chart,
-				contributors: (chart.contributors || []).filter(
+			this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => ({
+				...(chart ?? ({} as ChartModel)),
+				contributors: ((chart?.contributors) || []).filter(
 					(contributor) =>
 						role
 							? !(contributor.user.id === id && contributor.role === role)

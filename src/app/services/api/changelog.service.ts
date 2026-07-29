@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
 // Models
+import type { ChartModel } from "@/models/chart.model";
 import type {
 	ChangelogModel,
 	CreateChangelogModel,
@@ -34,11 +35,12 @@ export class ChangelogService {
 			),
 		);
 
-		this.cacheService.updateChart(chartId, (chart) => {
+		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
+			const current = chart ?? ({} as ChartModel);
 			return {
-				...chart,
+				...current,
 				changelog: [
-					...chart.changelog,
+					...(current.changelog || []),
 					{
 						id: response.id,
 						description: entry.description,
@@ -61,10 +63,11 @@ export class ChangelogService {
 				),
 			);
 
-			this.cacheService.updateChart(chartId, (chart) => {
+			this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
+				const current = chart ?? ({} as ChartModel);
 				return {
-					...chart,
-					changelog: chart.changelog.filter(
+					...current,
+					changelog: (current.changelog || []).filter(
 						(entry) => entry.id !== logId,
 					),
 				};

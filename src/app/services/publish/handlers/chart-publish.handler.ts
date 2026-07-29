@@ -133,8 +133,8 @@ export class ChartPublishHandler
 
 		console.log("Chart created successfully:", response);
 
-		this.cacheService.addChart(response);
-		this.userService.addToUploadsCache(response);
+		this.cacheService.setEntity("chart", response.id, response);
+		this.cacheService.invalidateQueries("upload");
 
 		return response;
 	}
