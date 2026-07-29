@@ -153,6 +153,9 @@ export class ChartService {
 			const cachedPayload = this.cacheService.getQuery<ChartsResponse>(cacheType, cacheKey, cacheStorage);
 
 			if (cachedPayload) {
+				for (const chart of cachedPayload.first) {
+					this.cacheService.setEntity("chart", chart.id, chart);
+				}
 				return of(cachedPayload);
 			}
 		}
@@ -203,6 +206,9 @@ export class ChartService {
 					this.cacheService.setQuery(cacheType, cacheKey, fetchedCharts, cacheStorage, 30_000);
 				} else {
 					this.cacheService.setQuery(cacheType, `${cacheKey}|page=${pageKey}`, fetchedCharts, cacheStorage, 30_000);
+				}
+				for (const chart of fetchedCharts.first) {
+					this.cacheService.setEntity("chart", chart.id, chart);
 				}
 			}),
 			shareReplay({ bufferSize: 1, refCount: true }),
@@ -268,8 +274,8 @@ export class ChartService {
 				this.http.delete<ChartModel>(`${this.apiUrl}/${id}`),
 			);
 			this.cacheService.removeEntity("chart", id);
-			this.cacheService.invalidateQueries("chart");
-			this.cacheService.invalidateQueries("upload");
+			this.cacheService.removeFromQueryResults("chart", id);
+			this.cacheService.removeFromQueryResults("upload", id);
 
 			return true;
 		} catch (error) {

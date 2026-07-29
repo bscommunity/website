@@ -116,6 +116,85 @@ export class CacheService {
 		}
 	}
 
+	removeFromQueryResults(type: string, itemId: string, storage?: STORAGE): void {
+		const storages: STORAGE[] = storage ? [storage] : ["session", "persistent"];
+		for (const s of storages) {
+			const store = s === "session" ? window.sessionStorage : window.localStorage;
+			const prefix = `${QUERY_PREFIX}:${type}:`;
+			for (let i = 0; i < store.length; i++) {
+				const key = store.key(i)!;
+				if (!key.startsWith(prefix)) continue;
+				const raw = this.storageService.getItem(key, s === "session");
+				if (!raw) continue;
+				try {
+					const entry = JSON.parse(raw);
+					const mutated = this.removeItemFromPayload(entry.data, itemId);
+					if (mutated !== entry.data) {
+						entry.data = mutated;
+						this.storageService.setItem(key, JSON.stringify(entry), s === "session");
+					}
+				} catch {
+					// skip malformed entries
+				}
+			}
+		}
+	}
+
+	private removeItemFromPayload(data: unknown, itemId: string): unknown {
+		if (Array.isArray(data)) {
+			if (data.length >= 2 && Array.isArray(data[0])) {
+				const filtered = data[0].filter((item: any) => item.id !== itemId);
+				if (filtered.length === data[0].length) return data;
+				const count = typeof data[1] === "number" ? data[1] - 1 : data[1];
+				return [filtered, count, ...data.slice(2)];
+			}
+			return data;
+		}
+
+		if (data && typeof data === "object" && !Array.isArray(data)) {
+			const obj = data as Record<string, unknown>;
+
+			if (Array.isArray(obj["first"]) && typeof obj["second"] === "number") {
+				const first = obj["first"] as any[];
+				const filtered = first.filter((item: any) => item.id !== itemId);
+				if (filtered.length === first.length) return data;
+				return { ...obj, first: filtered, second: (obj["second"] as number) - 1 };
+			}
+
+			if (Array.isArray(obj["items"])) {
+				const items = obj["items"] as any[];
+				const filtered = items.filter((item: any) => item.id !== itemId);
+				if (filtered.length === items.length) return data;
+				const result: Record<string, unknown> = { ...obj, items: filtered };
+				const counts = obj["counts"];
+				if (counts && typeof counts === "object") {
+					const item = items.find((it: any) => it.id === itemId);
+					if (item?.type) {
+						const countKey = this.typeToCountKey(item.type);
+						const newCounts = { ...(counts as Record<string, number>) };
+						if (countKey && typeof newCounts[countKey] === "number") {
+							newCounts[countKey] = Math.max(0, newCounts[countKey] - 1);
+						}
+						result["counts"] = newCounts;
+					}
+				}
+				return result;
+			}
+		}
+
+		return data;
+	}
+
+	private typeToCountKey(type: string): string | null {
+		switch (type) {
+			case "CHART": return "charts";
+			case "TOUR_PASS": return "tourPasses";
+			case "THEME": return "themes";
+			case "COLLECTION": return "collections";
+			default: return null;
+		}
+	}
+
 	clearCache(): void {
 		this.storageService.clear();
 		this.storageService.clear(true);

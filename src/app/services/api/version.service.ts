@@ -6,6 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { CacheService } from "../cache.service";
 
 // Models
+import type { ChartModel } from "@/models/chart.model";
 import { CreateVersionModel, VersionModel } from "@/models/version.model";
 
 import { apiUrl } from "@/lib/api";
@@ -44,8 +45,8 @@ export class VersionService {
 			),
 		);
 
-		this.cacheService.updateEntity("chart", chartId, (chart: any) => ({
-			...(chart ?? {}),
+		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => ({
+			...(chart ?? ({} as ChartModel)),
 			latestVersion: response,
 			versionsCount: (chart?.versionsCount ?? 0) + 1,
 		}));

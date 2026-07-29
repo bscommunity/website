@@ -83,6 +83,6 @@ export class TourPassService {
 	async deleteTourPass(id: string): Promise<void> {
 		await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
 		this.cacheService.removeEntity("tourpass", id);
-		this.cacheService.invalidateQueries("upload");
+		this.cacheService.removeFromQueryResults("upload", id);
 	}
 }
