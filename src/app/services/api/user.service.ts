@@ -190,10 +190,6 @@ export class UserService {
 
 			cached.items.unshift(chart);
 
-			if (cached.counts) {
-				cached.counts.charts = (cached.counts.charts ?? 0) + 1;
-			}
-
 			this.setUploadsCache(key, cached);
 		}
 

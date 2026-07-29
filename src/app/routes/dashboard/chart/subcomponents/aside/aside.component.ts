@@ -1,4 +1,4 @@
-import { Component, inject, input } from "@angular/core";
+import { Component, inject, input, signal } from "@angular/core";
 import { Router } from "@angular/router";
 
 // Material
@@ -18,6 +18,8 @@ import { ChartModel } from "@/models/chart.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
+import { NgGlyph } from "@ng-icons/core";
+import { Visibility } from "@/models/enums/visibility.enum";
 
 @Component({
 	selector: "app-aside",
@@ -26,6 +28,7 @@ import { transformDuration } from "@/lib/time";
 		AsideSectionComponent,
 		AsideContainerComponent,
 		DifficultyMarkComponent,
+		NgGlyph,
 	],
 })
 export class AsideComponent {
@@ -37,16 +40,27 @@ export class AsideComponent {
 
 	readonly chart = input.required<ChartModel>();
 
+	visibility = Visibility;
 	transformDuration = transformDuration;
+
+	isFetchingBundle = signal(false);
 
 	async downloadBundle() {
 		try {
+			console.log("Downloading bundle...");
+			this.isFetchingBundle.set(true);
+			/* await Promise.resolve(
+				new Promise((resolve) => setTimeout(resolve, 2000)),
+			); */
 			const url = await this.chartService.getBundleUrl(this.chart().id);
 			window.open(url, "_blank");
 		} catch {
 			this._snackBar.open("Failed to get download link", "Close", {
-				duration: 3000,
+				duration: 2500,
 			});
+		} finally {
+			this.isFetchingBundle.set(false);
+			console.log("Finished downloading bundle.");
 		}
 	}
 }

@@ -184,7 +184,7 @@ export class Uploads implements OnInit, OnDestroy {
 						(response.counts?.charts ?? 0) +
 						(response.counts?.tourPasses ?? 0) +
 						(response.counts?.themes ?? 0);
-					this.hasMore = this.currentOffset < this.totalCount;
+					this.hasMore = items.length >= this.pageSize;
 
 					this.filterService.setLoading(false);
 					this.filterService.setError(null);

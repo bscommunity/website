@@ -9,12 +9,15 @@
 		alt="Cover"
 		class="w-full h-full aspect-square object-cover"
 	/>
-	<app-difficulty-mark [difficulty]="chart().difficulty" [size]="size() === 'sm' ? 32 : 40" />
+	<app-difficulty-mark
+		[difficulty]="chart().difficulty"
+		[size]="size() === 'sm' ? 32 : 40"
+	/>
 	@if (!isPublic(chart()) && showVisibility()) {
 		<div
 			class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full h-full bg-black/70"
 		>
-			<ng-glyph name="visibility_off" class="relative" />
+			<ng-glyph name="visibility_off" size="28" class="relative" />
 		</div>
 	}
 	<div

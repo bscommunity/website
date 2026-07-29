@@ -11,9 +11,20 @@
 				[difficulty]="chart().difficulty"
 				[size]="96"
 			></app-difficulty-mark>
+			@if (this.chart().visibility === this.visibility.PRIVATE) {
+				<div
+					class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full h-full bg-black/70"
+				>
+					<ng-glyph
+						name="visibility_off"
+						size="64"
+						class="relative"
+					/>
+				</div>
+			}
 		</div>
 		<div
-			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-gradient-to-b from-transparent to-background"
+			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-linear-to-b from-transparent to-background"
 		></div>
 	</div>
 	<app-aside-section title="Chart Info" class="w-full">
@@ -30,14 +41,15 @@
 	</app-aside-section>
 	<app-aside-section title="Files" class="w-full">
 		<a
-			class="w-full cursor-pointer"
+			class="w-full"
 			(click)="downloadBundle()"
 			(keypress)="downloadBundle()"
 		>
 			<app-aside-container
 				class="w-full"
-				asideContainerClass="hover:bg-surface-container-low"
+				asideContainerClass="hover:bg-surface-container-low cursor-pointer"
 				info="Download .zip"
+				[isLoading]="isFetchingBundle()"
 			></app-aside-container>
 		</a>
 	</app-aside-section>

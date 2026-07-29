@@ -16,6 +16,7 @@ import type { StreamingLinkModel } from "@/models/streaming-link.model";
 import type { STORAGE } from "../cache.service";
 // Services
 import { CacheService } from "../cache.service";
+import { UserService } from "./user.service";
 import type { WorkshopFilters } from "../filter.service";
 import { StorageService } from "../storage.service";
 
@@ -84,6 +85,7 @@ const CACHE_SCOPE_STRATEGIES: Record<CacheScope, CacheScopeStrategy> = {
 })
 export class ChartService {
 	private cacheService = inject(CacheService);
+	private userService = inject(UserService);
 	private storageService = inject(StorageService);
 	private http = inject(HttpClient);
 
@@ -366,6 +368,7 @@ export class ChartService {
 
 		this.cacheService.updateChart(updatedChart.id, () => updatedChart);
 		this.updateScopedCachesWithChart("private", updatedChart);
+		this.userService.updateUploadsCacheItem(updatedChart.id, updatedChart);
 
 		return updatedChart;
 	}
