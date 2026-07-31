@@ -10,6 +10,7 @@ import {
 import type { Difficulty } from "@/models/enums/difficulty.enum";
 import type { Genre } from "@/models/enums/genre.enum";
 import type { StreamingLinkModel } from "@/models/streaming-link.model";
+import type { SimplifiedContributorModel } from "@/models/contributor.model";
 import type { QueryPage, STORAGE } from "../cache.service";
 import { CacheService } from "../cache.service";
 import type { WorkshopFilters } from "../filter.service";
@@ -33,6 +34,7 @@ export interface CreateChartPayload {
 	bundleUrl?: string;
 	fileSizeBytes?: number;
 	chartBundle?: File;
+	contributors?: SimplifiedContributorModel[];
 }
 
 type CacheScope = "public" | "private";

@@ -22,7 +22,7 @@ export class ContributorService {
 	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
 
-	private readonly apiUrl = `${apiUrl}/contributors/chart`;
+	private readonly apiUrl = `${apiUrl}/contributors`;
 
 	// Add
 	async addContributors(
