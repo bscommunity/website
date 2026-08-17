@@ -6,7 +6,7 @@
 			class="w-full"
 			title="Change visibility of this chart"
 			description="The chart is currently <strong>{{
-				isPublic() ? 'public' : 'private'
+				visibilityLabels[visibility()]
 			}}</strong>. Changing the visibility will affect all users."
 			buttonLabel="Change visibility"
 			[buttonAction]="openVisibilityDialog.bind(this)"

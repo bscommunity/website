@@ -8,8 +8,10 @@ import {
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
+
+// Icons
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatRippleModule } from "@angular/material/core";
@@ -24,12 +26,14 @@ import type { UserModel } from "@/models/user.model";
 import { AuthService } from "@/services/auth.service";
 import { PublishDialogService } from "@/services/publish/publish.service";
 import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
+import { TourPassPublishHandler } from "@/services/publish/handlers/tourpass-publish.handler";
 
 @Component({
 	selector: "app-header",
 	templateUrl: "./header.component.html",
 	imports: [
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		MatMenuModule,
 		MatButtonModule,
 		MatRippleModule,
@@ -42,6 +46,7 @@ import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.h
 export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
 	private chartPublishHandler = inject(ChartPublishHandler);
+	private tourPassPublishHandler = inject(TourPassPublishHandler);
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
@@ -58,7 +63,13 @@ export class HeaderComponent implements OnInit {
 			}
 		}); */
 
-		this.uploadDialog.setHandler(this.chartPublishHandler);
+		this.uploadDialog.setHandlers(
+			{
+				Chart: this.chartPublishHandler,
+				Tourpass: this.tourPassPublishHandler,
+			},
+			"Chart",
+		);
 	}
 
 	openWarning() {

@@ -9,10 +9,11 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ShareService } from "@/services/share.service";
+import { ChartService } from "@/services/api/chart.service";
 import { MatChipsModule } from "@angular/material/chips";
 
-// Types
-import { MatIcon } from "@angular/material/icon";
+// Icons
+import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { ChartContributorsComponent } from "@/components/chart-contributors/chart-contributors.component";
@@ -37,10 +38,10 @@ interface ChartDialogData {
 		>
 			<h6 class="mb-2 text-sm font-medium">Chart</h6>
 			<h2 class="text-2xl font-bold">
-				{{ data.chart.track }}
+				{{ data.chart.track.title }}
 			</h2>
 			<h3 class="text-lg text-on-surface/70">
-				{{ data.chart.artist }}
+				{{ data.chart.track.artist }}
 			</h3>
 
 			<button
@@ -48,9 +49,7 @@ interface ChartDialogData {
 				matRipple
 				(click)="dialogRef.close()"
 			>
-				<mat-icon class=" text-on-surface/70 hover:text-on-surface">
-					close
-				</mat-icon>
+				<ng-glyph name="close" class="text-on-surface/70 hover:text-on-surface" />
 			</button>
 		</div>
 
@@ -69,14 +68,14 @@ interface ChartDialogData {
 				class="flex flex-row items-center justify-center gap-2 h-42 md:h-48"
 			>
 				<img
-					[src]="data.chart.coverUrl"
+					[src]="data.chart.track.coverUrl"
 					alt="Chart Cover"
 					class="h-full object-contain rounded-[28px]"
 				/>
 				<app-chart-video-preview
 					class="h-full w-full"
-					[audioPreviewUrl]="data.chart.trackPreviewUrl ?? null"
-					[previewUrl]="data.chart.latestVersion.previewUrl ?? null"
+					[audioPreviewUrl]="data.chart.track.previewUrl ?? null"
+					[previewUrl]="data.chart.previewVideoId ?? null"
 				></app-chart-video-preview>
 			</div>
 			<ul class="flex flex-row flex-wrap items-start justify-start gap-2">
@@ -84,14 +83,11 @@ interface ChartDialogData {
 					<li
 						class="flex items-center justify-center gap-2 pl-2 pr-3 py-1 rounded-lg border border-outline-variant"
 					>
-						<mat-icon
-							inline="true"
-							class="text-xl flex items-center justify-center"
-						>
-							<span class="text-base leading-none">{{
-								button.icon
-							}}</span>
-						</mat-icon>
+					<ng-glyph
+						[name]="button.icon"
+						size="16"
+						class="leading-none"
+					/>
 						<span class="mt-0.5 font-medium text-sm leading-none">
 							{{ button.data }}
 						</span>
@@ -109,7 +105,7 @@ interface ChartDialogData {
 				(click)="onShare()"
 				(keypress)="onShare()"
 			>
-				<mat-icon> share </mat-icon>
+				<ng-glyph name="share" />
 				Share
 			</a>
 			<a
@@ -125,7 +121,7 @@ interface ChartDialogData {
 				class="flex! md:hidden! w-full min-h-10 mx-0!"
 				tabindex="1"
 				mat-flat-button
-				href="bscm://chart/{{ data.chart.contentId }}"
+				href="bscm://chart/{{ data.chart.id }}"
 				(click)="onOpenInApp()"
 				(keypress)="onOpenInApp()"
 			>
@@ -136,7 +132,7 @@ interface ChartDialogData {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatIcon,
+		NgGlyph,
 		MatChipsModule,
 		ChartContributorsComponent,
 		ChartVideoPreviewComponent,
@@ -151,34 +147,35 @@ export class ChartDialogComponent {
 
 	private _snackBar = inject(MatSnackBar);
 	private shareService = inject(ShareService);
+	private chartService = inject(ChartService);
 
 	get buttons() {
 		return [
 			{
 				icon: "timer",
 				data: this.formatDuration(
-					this.data.chart.latestVersion.duration,
+					this.data.chart.track.duration,
 				),
-				amount: this.data.chart.latestVersion.duration,
+				amount: this.data.chart.track.duration,
 			},
 			{
 				icon: "music_note",
-				data: `${this.data.chart.latestVersion.notesAmount} notes`,
-				amount: this.data.chart.latestVersion.notesAmount,
+				data: `${this.data.chart.notesAmount} notes`,
+				amount: this.data.chart.notesAmount,
 			},
 			{
 				icon: "blur_on",
-				data: `${this.data.chart.latestVersion.effectsAmount} effects`,
-				amount: this.data.chart.latestVersion.effectsAmount,
+				data: `${this.data.chart.effectsAmount} effects`,
+				amount: this.data.chart.effectsAmount,
 			},
 			{
 				icon: "download",
-				data: `${this.data.chart.latestVersion.downloadsAmount} downloads`,
-				amount: this.data.chart.latestVersion.downloadsAmount,
+				data: `${this.data.chart.latestVersion?.downloadsAmount ?? 0} downloads`,
+				amount: this.data.chart.latestVersion?.downloadsAmount ?? 0,
 			},
 			{
 				icon: "calendar_today",
-				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.updatedAt.toString())}`,
+				data: `Updated ${convertDateTimeToHumanReadable(this.data.chart.updatedAt?.toString() ?? '')}`,
 				amount: null,
 			},
 		].filter((button) => button.amount === null || button.amount > 0);
@@ -190,8 +187,15 @@ export class ChartDialogComponent {
 		return `${minutes}m${seconds}s`;
 	}
 
-	downloadChart() {
-		window.open(this.data.chart.latestVersion.bundleUrl, "_blank");
+	async downloadChart() {
+		try {
+			const url = await this.chartService.getBundleUrl(this.data.chart.id);
+			window.open(url, "_blank");
+		} catch {
+			this._snackBar.open("Failed to get download link", "Close", {
+				duration: 3000,
+			});
+		}
 		this.dialogRef.close();
 	}
 
@@ -213,7 +217,7 @@ export class ChartDialogComponent {
 	}
 
 	onShare() {
-		const url = `${window.location.origin}/link/chart/${this.data.chart.contentId}`;
+		const url = `${window.location.origin}/link/chart/${this.data.chart.id}`;
 		this.shareService.share(url);
 		this.dialogRef.close();
 	}

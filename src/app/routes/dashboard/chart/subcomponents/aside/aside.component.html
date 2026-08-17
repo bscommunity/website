@@ -3,42 +3,53 @@
 		<div class="relative overflow-hidden md:rounded-lg">
 			<img
 				class="w-full opacity-50 md:opacity-100 md:w-72 xl:w-96 aspect-square"
-				[src]="chart().coverUrl"
-				[alt]="chart().track"
+				[src]="chart().track.coverUrl"
+				[alt]="chart().track.title"
 			/>
 			<app-difficulty-mark
 				class="hidden md:flex"
-				[difficulty]="chart().latestVersion.difficulty"
+				[difficulty]="chart().difficulty"
 				[size]="96"
 			></app-difficulty-mark>
+			@if (this.chart().visibility === this.visibility.PRIVATE) {
+				<div
+					class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full h-full bg-black/70"
+				>
+					<ng-glyph
+						name="visibility_off"
+						size="64"
+						class="relative"
+					/>
+				</div>
+			}
 		</div>
 		<div
-			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-gradient-to-b from-transparent to-background"
+			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-linear-to-b from-transparent to-background"
 		></div>
 	</div>
 	<app-aside-section title="Chart Info" class="w-full">
 		<app-aside-container
 			class="w-full"
 			icon="timer"
-			[info]="transformDuration(chart().latestVersion.duration || 0)"
+			[info]="transformDuration(chart().track.duration || 0)"
 		></app-aside-container>
 		<app-aside-container
 			class="w-full"
 			icon="music_note"
-			[info]="chart().latestVersion.notesAmount + ' notes'"
+			[info]="chart().notesAmount + ' notes'"
 		></app-aside-container>
 	</app-aside-section>
 	<app-aside-section title="Files" class="w-full">
 		<a
-			class="w-full cursor-pointer"
-			[href]="chart().coverUrl"
-			target="_blank"
-			download
+			class="w-full"
+			(click)="downloadBundle()"
+			(keypress)="downloadBundle()"
 		>
 			<app-aside-container
 				class="w-full"
-				asideContainerClass="hover:bg-surface-container-low"
+				asideContainerClass="hover:bg-surface-container-low cursor-pointer"
 				info="Download .zip"
+				[isLoading]="isFetchingBundle()"
 			></app-aside-container>
 		</a>
 	</app-aside-section>

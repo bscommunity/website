@@ -7,7 +7,7 @@
 		@if (contentId && contentType) {
 			<div class="flex flex-col items-center justify-center gap-4">
 				<span class="md:text-6xl text-5xl"
-					><mat-icon inline>share</mat-icon></span
+					><ng-glyph name="share" /></span
 				>
 				<h1 class="text-2xl w-full text-center">
 					Someone shared a {{ contentType }} with you!
@@ -36,7 +36,7 @@
 		} @else {
 			<div class="flex flex-col items-center justify-center gap-4">
 				<span class="md:text-6xl text-5xl"
-					><mat-icon inline>share</mat-icon></span
+					><ng-glyph name="share" /></span
 				>
 				<h1 class="text-2xl w-full text-center">Invalid link</h1>
 				<p class="md:max-w-[55%] text-center">

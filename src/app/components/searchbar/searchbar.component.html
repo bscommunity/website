@@ -1,11 +1,9 @@
 <div class="flex flex-1 relative">
-	<span class="text-xl">
-		<mat-icon
-			inline
-			class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
-			>search</mat-icon
-		>
-	</span>
+	<ng-glyph
+		name="search"
+		size="20"
+		class="text-on-surface-variant absolute top-1/2 -translate-y-1/2 left-6"
+	/>
 	@if (enableSuggestions()) {
 		<input
 			#input
@@ -42,7 +40,15 @@
 		/>
 	}
 	<span class="absolute top-1/2 -translate-y-1/2 right-1.5">
-		@if (this.input() && this.input().nativeElement.value.length > 0) {
+		@if (isLoading()) {
+			<mat-progress-spinner
+				mode="indeterminate"
+				diameter="16"
+				class="flex flex-1 mr-4 items-center justify-center"
+			></mat-progress-spinner>
+		} @else if (
+			this.input() && this.input().nativeElement.value.length > 0
+		) {
 			<button
 				mat-icon-button
 				type="button"
@@ -52,7 +58,7 @@
 				[disabled]="disabled()"
 			>
 				<span class="flex flex-1 items-center justify-center">
-					<mat-icon inline>close</mat-icon>
+					<ng-glyph name="close" />
 				</span>
 			</button>
 		}

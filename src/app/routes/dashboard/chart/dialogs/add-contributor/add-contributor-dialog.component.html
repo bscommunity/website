@@ -1,83 +1,17 @@
 <h2 mat-dialog-title>Add contributor</h2>
 <mat-dialog-content class="!flex flex-col gap-4">
 	<p>Tag some creators to add them to your chart credits</p>
-	<app-searchbar
-		#searchbar
-		[debounceDuration]="2500"
-		[onSearch]="onSearch"
-		[autoComplete]="auto"
-		placeholder="Search for community members"
-		class="w-full mb-4"
-	>
-		<mat-autocomplete
-			class="mt-2"
-			#auto="matAutocomplete"
-			(optionSelected)="onOptionSelected($event)"
-		>
-			@if (queryContributors === "start") {
-				<mat-option class="pointer-events-none select-none w-full">
-					<p class="text-center w-full">Start typing to search</p>
-				</mat-option>
-			} @else if (queryContributors === undefined) {
-				<mat-option class="pointer-events-none select-none w-full">
-					<span class="flex items-center justify-center w-full">
-						<mat-progress-spinner
-							mode="indeterminate"
-							diameter="24"
-						></mat-progress-spinner>
-					</span>
-				</mat-option>
-			} @else if (queryContributors === null) {
-				<mat-option class="pointer-events-none select-none w-full">
-					<p class="text-center w-full">
-						We found an error while fetching the data
-					</p>
-				</mat-option>
-			} @else if (queryContributors.length === 0) {
-				<mat-option
-					class="w-full flex items-center justify-center pointer-events-none select-none"
-				>
-					<p class="text-center w-full">No results found</p>
-				</mat-option>
-			} @else {
-				@for (user of queryContributors; track $index) {
-					<mat-option [value]="user.username">
-						<span
-							class="flex flex-row items-center justify-start gap-4"
-						>
-							<app-avatar
-								class="w-8 h-8"
-								[src]="user.avatarUrl"
-								alt="{{ user.username }}"
-							/>
-							&#64;{{ user.username }}
-						</span>
-					</mat-option>
-				}
-			}
-		</mat-autocomplete>
-	</app-searchbar>
-	@if (poolUsers.length > 0) {
-		<ul class="flex flex-col items-center justify-start w-full gap-4">
-			@for (user of poolUsers; track $index) {
-				<app-contributor-item
-					[user]="user"
-					[roles]="roles"
-					canRemove
-					(remove)="removeContributor($event)"
-				>
-				</app-contributor-item>
-			}
-		</ul>
-	} @else {
-		<div class="flex flex-col items-center justify-center gap-4 pt-4">
-			<span class="text-5xl"><mat-icon inline>conditions</mat-icon></span>
-			<p class="text-center w-full px-6">
-				No contributors added. <br />
-				Start adding members for them to appear here!
-			</p>
-		</div>
-	}
+	<app-contributor-search
+		[existingUserIds]="[...data.usersIds, ...poolUsers().map((u) => u.id)]"
+		(userAdded)="onUserAdded($event)"
+	/>
+	<app-contributor-list
+		[users]="poolUsers()"
+		[roles]="roles"
+		[availableRoles]="availableRoles"
+		[canRemove]="true"
+		(userRemoved)="removeContributor($event)"
+	/>
 </mat-dialog-content>
 <mat-dialog-actions>
 	<button mat-button mat-dialog-close="cancel" [disabled]="isLoading()">
@@ -87,7 +21,7 @@
 		mat-button
 		(click)="onSubmit()"
 		[disabled]="
-			poolUsers.length < 1 ||
+			poolUsers().length < 1 ||
 			allContributorsHaveAtLeastOneRole() === false ||
 			isLoading()
 		"

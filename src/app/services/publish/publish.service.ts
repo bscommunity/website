@@ -1,19 +1,18 @@
 import { Injectable, inject } from "@angular/core";
-import { Router } from "@angular/router";
-import { BehaviorSubject } from "rxjs";
-
-import { PublishHandler } from "./publish-handler.interface";
-
 // Material
 import { MatDialog } from "@angular/material/dialog";
-
-// Components
-import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
-import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
+import { Router } from "@angular/router";
+import { BehaviorSubject } from "rxjs";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
+// Components
+import { PublishDialogSuccessComponent } from "@/components/publish/success.component";
+import { PublishChartBatchComponent } from "@/components/publish/chart/batch.component";
 // Services
 import { AuthService } from "../auth.service";
+import { PublishEventService } from "./publish-event.service";
+import type { PublishHandler } from "./publish-handler.interface";
+import { PublishDialogUploadingComponent } from "@/components/dialogs/uploading/uploading.component";
 
 // Types
 export interface DialogData<TFormData = Record<string, unknown>> {
@@ -36,7 +35,8 @@ export type PublishProgressData =
 			additionalData?: Record<string, unknown>;
 	  }
 	| "back"
-	| "next";
+	| "next"
+	| "batch";
 
 @Injectable({
 	providedIn: "root",
@@ -46,6 +46,7 @@ export class PublishDialogService<
 	TSuccessData = unknown,
 > {
 	private authService = inject(AuthService);
+	private publishEventService = inject(PublishEventService);
 
 	private router = inject(Router);
 	private dialog = inject(MatDialog);
@@ -54,12 +55,29 @@ export class PublishDialogService<
 	currentStep$ = this.currentStepSubject.asObservable();
 
 	private handler!: PublishHandler<TFormData, TSuccessData>;
+	private handlersByType: Record<string, PublishHandler<any, any>> | null =
+		null;
 	private formData!: TFormData;
 	private additionalData: Record<string, unknown> = {};
 
 	setHandler(handler: PublishHandler<TFormData, TSuccessData>) {
 		this.handler = handler;
 		this.formData = handler.getInitialFormData();
+	}
+
+	setHandlers(
+		handlers: Record<string, PublishHandler<any, any>>,
+		defaultType?: string,
+	) {
+		this.handlersByType = handlers;
+		if (defaultType && handlers[defaultType]) {
+			this.setHandler(
+				handlers[defaultType] as PublishHandler<
+					TFormData,
+					TSuccessData
+				>,
+			);
+		}
 	}
 
 	open() {
@@ -100,13 +118,35 @@ export class PublishDialogService<
 				return;
 			}
 
+			if (result === "batch") {
+				this.dialog.closeAll();
+				const batchRef = this.dialog.open(PublishChartBatchComponent, {
+					width: "600px",
+					disableClose: true,
+				});
+				batchRef.afterClosed().subscribe(() => {
+					this.router.navigate(["/dashboard/uploads"]);
+				});
+				this.reset();
+				return;
+			}
+
 			if (result === "back") {
 				this.moveToStep(this.currentStepSubject.value - 1);
 			} else if (result === "next") {
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
+				if (
+					result &&
+					typeof result === "object" &&
+					"contentType" in result
+				) {
+					this.switchHandler(String(result.contentType));
+				}
 				this.formData = { ...this.formData, ...result };
-				this.additionalData = result.additionalData || {};
+				if (result.additionalData) {
+					this.additionalData = { ...this.additionalData, ...result.additionalData };
+				}
 
 				this.moveToStep(this.currentStepSubject.value + 1);
 			}
@@ -148,15 +188,35 @@ export class PublishDialogService<
 			return;
 		}
 
+		const publishSessionId = crypto.randomUUID();
+		const progress$ = this.publishEventService.connect(publishSessionId);
+
 		// Open loading dialog
-		const loadingDialog = this.dialog.open(PublishDialogLoadingComponent, {
-			disableClose: true,
-		});
+		const loadingDialog = this.dialog.open(
+			PublishDialogUploadingComponent,
+			{
+				disableClose: true,
+				width: "450px",
+				data: { progress$ },
+			},
+		);
 
 		try {
-			const response = await this.handler.submit(this.formData);
+			const response = await this.handler.submit(
+				this.formData,
+				publishSessionId,
+			);
+
+			// Post-submit hook (e.g., adding contributors)
+			if (this.handler.onPostSubmit) {
+				await this.handler.onPostSubmit(this.formData, response);
+			}
+
 			loadingDialog.close();
-			this.dialog.open(PublishDialogSuccessComponent, {
+			const successComponent =
+				this.handler.getSuccessComponent?.() ||
+				PublishDialogSuccessComponent;
+			this.dialog.open(successComponent, {
 				hasBackdrop: true,
 				disableClose: true,
 				data: response,
@@ -183,5 +243,13 @@ export class PublishDialogService<
 		} finally {
 			this.reset();
 		}
+	}
+
+	private switchHandler(type: string) {
+		const nextHandler = this.handlersByType?.[type];
+		if (!nextHandler || nextHandler === this.handler) return;
+		this.handler = nextHandler as PublishHandler<TFormData, TSuccessData>;
+		this.formData = this.handler.getInitialFormData();
+		this.additionalData = {};
 	}
 }

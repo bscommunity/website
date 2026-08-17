@@ -2,14 +2,14 @@ import { Component, OnInit, inject } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon } from "@ng-icons/core";
 
 import { AuthService } from "@/services/auth.service";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
 	selector: "app-login",
-	imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+	imports: [MatButtonModule, NgIcon, MatProgressSpinnerModule],
 	templateUrl: "./login.html",
 })
 export class Login implements OnInit {

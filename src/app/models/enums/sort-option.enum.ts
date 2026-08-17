@@ -3,6 +3,8 @@ export enum SortOption {
 	LAST_UPDATED = "LAST_UPDATED",
 	MOST_DOWNLOADED = "MOST_DOWNLOADED",
 	MOST_LIKED = "MOST_LIKED",
+	ALPHA_ASC = "ALPHA_ASC",
+	ALPHA_DESC = "ALPHA_DESC",
 }
 
 export const getSortOptionLabel = (option: SortOption): string => {
@@ -15,6 +17,10 @@ export const getSortOptionLabel = (option: SortOption): string => {
 			return "Most Downloaded";
 		case SortOption.MOST_LIKED:
 			return "Most Liked";
+		case SortOption.ALPHA_ASC:
+			return "Alphabetical A-Z";
+		case SortOption.ALPHA_DESC:
+			return "Alphabetical Z-A";
 		default:
 			return "Unknown";
 	}

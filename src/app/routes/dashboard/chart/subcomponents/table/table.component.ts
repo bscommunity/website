@@ -12,7 +12,7 @@ import {
 } from "@angular/core";
 import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatRippleModule } from "@angular/material/core";
@@ -56,7 +56,7 @@ export class SafeHtmlPipe implements PipeTransform {
 		NgTemplateOutlet,
 		MatTableModule,
 		MatSortModule,
-		MatIconModule,
+		NgGlyph,
 		MatTooltipModule,
 		MatRippleModule,
 		SafeHtmlPipe,

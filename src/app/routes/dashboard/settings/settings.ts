@@ -6,7 +6,6 @@ import { RouterModule } from "@angular/router";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
 import { MatDialog } from "@angular/material/dialog";
 
 // Components
@@ -17,6 +16,7 @@ import {
 	type Tab,
 	TabNavBarComponent,
 } from "@/components/tabs/tab-nav-bar.component";
+import { ConnectionPanelComponent } from "@/components/connection-panel/connection-panel.component";
 
 // Services
 import { OAuthService } from "@/services/oauth.service";
@@ -29,10 +29,10 @@ import { OAuthService } from "@/services/oauth.service";
 		MatTabsModule,
 		MatButtonModule,
 		MatSlideToggleModule,
-		MatIconModule,
 		SettingsCardComponent,
 		TabContentWrapperComponent,
 		TabNavBarComponent,
+		ConnectionPanelComponent,
 	],
 	templateUrl: "./settings.html",
 })

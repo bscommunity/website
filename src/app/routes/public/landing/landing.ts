@@ -4,7 +4,7 @@ import { RouterLink } from "@angular/router";
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 
 // Screens
 // import { WorkshopScreenComponent } from "./subcomponents/workshop-screen/workshop-screen.component";
@@ -13,14 +13,14 @@ import { MatIconModule } from "@angular/material/icon";
 import { LandingTagComponent } from "./subcomponents/tag.component";
 
 // Services
-import { ChangelogService } from "@/services/changelog.service";
+import { ReleaseNoteService } from "@/services/release-note.service";
 
 @Component({
 	selector: "app-landing",
 	imports: [
 		MatButtonModule,
 		MatTooltipModule,
-		MatIconModule,
+		NgGlyph,
 		RouterLink,
 		LandingTagComponent,
 		// Screens
@@ -29,8 +29,8 @@ import { ChangelogService } from "@/services/changelog.service";
 	templateUrl: "./landing.html",
 })
 export class LandingComponent {
-	changelogService = inject(ChangelogService);
-	latestReleaseTags = this.changelogService.latestReleaseTags;
+	releaseNoteService = inject(ReleaseNoteService);
+	latestReleaseTags = this.releaseNoteService.latestReleaseTags;
 
 	isDebugMode = false;
 

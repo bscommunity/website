@@ -135,7 +135,7 @@ export class FormService {
 
 	createFormGroup(
 		fields: FormFieldConfig[],
-		initialData: Record<string, unknown> = {},
+		initialData: object = {},
 	): FormGroup {
 		const group: Record<string, FormControl> = {};
 		for (const [key, value] of Object.entries(initialData)) {

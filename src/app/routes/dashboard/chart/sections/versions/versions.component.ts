@@ -2,56 +2,47 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	effect,
 	inject,
 	input,
 	viewChild,
-	effect,
 } from "@angular/core";
-
+import { MatButtonModule } from "@angular/material/button";
 // Material
 import { MatDialog } from "@angular/material/dialog";
+import { NgGlyph } from "@ng-icons/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { MatIconModule } from "@angular/material/icon";
-import { MatButtonModule } from "@angular/material/button";
-
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 // Components
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
-// import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
-import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
-import {
-	TableComponent,
-	TableColumn,
-	Action,
-} from "../../subcomponents/table/table.component";
-import { ChartSectionComponent } from "../../subcomponents/chart-section.component";
-
+// Utils
+import { getApiErrorMessage } from "@/models/api-error.model";
 // Model
 import {
-	Version,
 	type CreateVersionModel,
+	Version,
 	type VersionModel,
 } from "@/models/version.model";
-import { CreateChartModel } from "@/models/chart.model";
+import { VersionService } from "@/services/api/version.service";
 
 // Service
 import {
-	ChartFormData,
+	type ChartFormData,
 	ChartPublishHandler,
 	initialChartFormData,
 } from "@/services/publish/handlers/chart-publish.handler";
-import { VersionService } from "@/services/api/version.service";
-
-// Types
-import { type DialogData } from "@/services/publish/publish.service";
-
-// Utils
-import { getApiErrorMessage } from "@/models/api-error.model";
+import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
+import {
+	type Action,
+	type TableColumn,
+	TableComponent,
+} from "../../subcomponents/table/table.component";
 
 @Component({
 	selector: "app-chart-versions-section",
 	imports: [
 		// Modules
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		// Components
 		ChartSectionComponent,
@@ -91,9 +82,9 @@ export class VersionsComponent {
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
-			columnDef: "index",
+			columnDef: "versionCode",
 			header: "Version",
-			cell: (item: VersionModel) => `${item.index}`,
+			cell: (item: VersionModel) => `${item.versionCode}`,
 		},
 		{
 			columnDef: "publishedAt",
@@ -111,8 +102,8 @@ export class VersionsComponent {
 		{
 			description: "Download",
 			icon: "download",
-			href: (_, item) => item.bundleUrl,
-			disabled: () => false,
+			href: () => "",
+			disabled: () => true,
 		},
 		{
 			description: "Switch version",
@@ -124,8 +115,7 @@ export class VersionsComponent {
 				// Check if this is the latest version by comparing with the versions signal
 				const versions = this.versions();
 				return (
-					versions.length === 0 ||
-					item.id === versions[versions.length - 1].id
+					versions.length === 0 || item.id === versions[versions.length - 1].id
 				);
 			},
 		},
@@ -139,7 +129,7 @@ export class VersionsComponent {
 				return (
 					versions.length === 0 ||
 					item.id !== versions[versions.length - 1].id ||
-					item.index <= 1
+					item.versionCode <= 1
 				);
 			},
 		},
@@ -160,7 +150,7 @@ export class VersionsComponent {
 					formData: { ...initialChartFormData },
 					inactive: [],
 					mode: "uploading",
-				} as DialogData<CreateChartModel>,
+				},
 			},
 		);
 
@@ -261,8 +251,8 @@ export class VersionsComponent {
 		this.versionTable().updateTableData((items) =>
 			items.map(
 				(item) =>
-					item.index > version.index
-						? { ...item, index: item.index - 1 }
+					item.versionCode > version.versionCode
+						? { ...item, versionCode: item.versionCode - 1 }
 						: item, // Keep other items unchanged
 			),
 		);

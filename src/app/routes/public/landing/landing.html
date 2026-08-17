@@ -8,10 +8,10 @@
 	<div class="px-8 z-10">
 		<app-landing-tag
 			class="flex items-center justify-center"
-			label="Notice"
-			text="bscm is currently in maintenance mode, check our Discord for updates"
-			mobileText="bscm is currently in maintenance mode"
-			href="https://discord.com/channels/951981656301006878/1420327929153589328/1500618452824756255"
+			[label]="releaseLabel"
+			[text]="desktopReleaseText"
+			[mobileText]="mobileReleaseText"
+			href="/release-notes"
 		/>
 	</div>
 
@@ -37,9 +37,9 @@
 		>
 			<div class="flex flex-row items-center justify-center gap-2">
 				<span
-					class="flex self-center text-lg text-inherit leading-none select-none"
+					class="flex self-center text-inherit leading-none select-none"
 				>
-					<mat-icon inline> download </mat-icon>
+					<ng-glyph name="download" size="18" />
 				</span>
 				Download app
 			</div>

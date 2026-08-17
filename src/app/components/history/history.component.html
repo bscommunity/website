@@ -34,12 +34,15 @@
 							<app-chart-preview
 								class="w-full"
 								[chart]="entry.chart!"
-								[showContributors]="true"
-								[actionIcon]="getActionIcon(entry.type)"
+								[showItems]="['contributors']"
 								(click)="chartClick.emit(entry.chart!)"
 								(keydown.enter)="chartClick.emit(entry.chart!)"
 								(keydown.space)="chartClick.emit(entry.chart!)"
-							/>
+							>
+								@if (getActionIcon(entry.type)) {
+									<ng-glyph [name]="getActionIcon(entry.type)!" chartAction />
+								}
+							</app-chart-preview>
 						}
 					</ul>
 					@if (getUserActivities(item).length > 0) {

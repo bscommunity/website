@@ -1,7 +1,7 @@
 import {
 	type ApplicationConfig,
 	provideZonelessChangeDetection,
-	provideBrowserGlobalErrorListeners
+	provideBrowserGlobalErrorListeners,
 } from "@angular/core";
 import {
 	provideRouter,
@@ -17,7 +17,14 @@ import {
 	withEventReplay,
 } from "@angular/platform-browser";
 
-import { MatIconRegistry } from "@angular/material/icon";
+import {
+	provideNgIconsConfig,
+	provideNgIconLoader,
+	provideNgGlyphs,
+	withCaching,
+} from "@ng-icons/core";
+import { withMaterialSymbolsRounded } from "@ng-icons/material-symbols";
+
 import {
 	provideHttpClient,
 	withFetch,
@@ -27,9 +34,30 @@ import {
 import { authInterceptor } from "./routes/auth/auth.interceptor";
 import { ChartTitleStrategy } from "./routes/dashboard/chart/chart-title.strategy";
 
+const CUSTOM_SVG_ICONS: Record<string, string> = {
+	logo: "assets/logos/logo.svg",
+	github: "assets/logos/github.svg",
+	discord: "assets/logos/discord.svg",
+	google: "assets/logos/google.svg",
+	spotify: "assets/logos/spotify.svg",
+	deezer: "assets/logos/deezer.svg",
+	"yt-music": "assets/logos/yt-music.svg",
+	tidal: "assets/logos/tidal.svg",
+	"apple-music": "assets/logos/apple-music.svg",
+	deluxe: "assets/icons/deluxe.svg",
+};
+
 export const appConfig: ApplicationConfig = {
 	providers: [
-		MatIconRegistry, // MatIconRegistry config
+		provideNgIconsConfig({ size: "1.5em" }),
+		provideNgGlyphs(withMaterialSymbolsRounded()),
+		provideNgIconLoader(
+			(name) => {
+				const path = CUSTOM_SVG_ICONS[name] ?? `assets/${name}.svg`;
+				return fetch(path).then((res) => res.text());
+			},
+			withCaching(),
+		),
 		provideZonelessChangeDetection(),
 		provideBrowserGlobalErrorListeners(),
 		provideClientHydration(withEventReplay()),
@@ -38,8 +66,8 @@ export const appConfig: ApplicationConfig = {
 			routes,
 			withComponentInputBinding(),
 			withInMemoryScrolling({
-				scrollPositionRestoration: "top", // Scrolls to the top on navigation
-				anchorScrolling: "enabled", // Enables anchor (fragment) scrolling
+				scrollPositionRestoration: "top",
+				anchorScrolling: "enabled",
 			}),
 			withRouterConfig({
 				onSameUrlNavigation: "reload",

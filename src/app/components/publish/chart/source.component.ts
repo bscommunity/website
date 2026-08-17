@@ -71,10 +71,10 @@ interface FormMode {
 				}
 
 				<!-- Disclaimer -->
-				<app-panel>
-					Your chart bundle is not stored. Only the necessary metadata
-					is extracted on your submission.
-				</app-panel>
+				<!-- <app-panel>
+					Your chart will be published into the Discord server and
+					made publicly visible.
+				</app-panel> -->
 			</mat-dialog-content>
 			<mat-dialog-actions align="center" class="gap-2">
 				<button
@@ -105,7 +105,7 @@ interface FormMode {
 		MatSlideToggleModule,
 		ReactiveFormsModule,
 		FormFieldComponent,
-		PanelComponent,
+		// PanelComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })

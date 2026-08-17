@@ -100,18 +100,46 @@ body {
 		"opsz" 48;
 }
 
+.mdc-button__label {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 0.5rem !important;
+}
+
+.mdc-icon-button {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+ng-glyph .mdc-icon-button {
+	margin-top: 0.125rem;
+}
+
+.mat-mdc-menu-item-text {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.75rem;
+}
+
+ng-glyph {
+	user-select: none;
+	pointer-events: none;
+}
+
 .icon-20 {
 	font-size: 20px;
-	min-width: 20px !important;
-	height: 20px !important;
 }
 
 .stamp-effect {
-	mask-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/8399/grunge.png");
-	-webkit-mask-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/8399/grunge.png");
-	mask-size: 944px 604px;
-	-webkit-mask-size: 944px 604px;
-	mix-blend-mode: multiply;
+	mask-image: url("/assets/images/grunge.png");
+	-webkit-mask-image: url("/assets/images/grunge.png");
+	mask-size: 600px 450px;
+	-webkit-mask-size: 600px 450px;
+	mix-blend-mode: normal;
 }
 
 .fade-in {
@@ -126,6 +154,70 @@ body {
 	to {
 		opacity: 1;
 	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes dotBounce {
+	0%,
+	80%,
+	100% {
+		transform: translateY(0);
+		opacity: 0.4;
+	}
+	40% {
+		transform: translateY(-6px);
+		opacity: 1;
+	}
+}
+
+@keyframes slideUpFade {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideOutToTop {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+}
+
+.dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--mat-sys-on-surface-variant);
+	animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+.animate-spin-loading {
+	animation: spin 0.9s linear infinite;
+}
+
+.animate-slide-fade {
+	animation: slideUpFade 300ms ease-out;
+}
+
+.animate-slide-out {
+	animation: slideOutToTop 400ms ease-in forwards;
 }
 
 @keyframes audioWave {

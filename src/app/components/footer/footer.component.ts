@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon } from "@ng-icons/core";
 
 import { ThemePickerComponent } from "@/components/theme-picker/theme-picker.component";
 import { StatusDisplayComponent } from "@/components/status-display/status-display.component";
@@ -11,7 +11,7 @@ import { StatusDisplayComponent } from "@/components/status-display/status-displ
 	selector: "app-footer",
 	imports: [
 		MatButtonModule,
-		MatIconModule,
+		NgIcon,
 		RouterLink,
 		ThemePickerComponent,
 		StatusDisplayComponent,

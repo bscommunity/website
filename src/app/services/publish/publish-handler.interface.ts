@@ -28,9 +28,16 @@ export interface PublishHandler<
 	/**
 	 * Submit the form data for processing.
 	 * @param formData - The data to be submitted.
+	 * @param publishSessionId - Optional session ID for SSE progress events.
 	 * @returns A promise that resolves with the success data upon successful submission.
 	 */
-	submit(formData: TFormData): Promise<TSuccessData>;
+	submit(formData: TFormData, publishSessionId?: string): Promise<TSuccessData>;
+
+	/**
+	 * Optional success component override for the publish flow.
+	 * @returns A component type to render on success.
+	 */
+	getSuccessComponent?(): Type<unknown>;
 
 	/**
 	 * Optional custom validation for the form data.
@@ -38,4 +45,12 @@ export interface PublishHandler<
 	 * @returns A string with an error message if validation fails, or null if validation passes.
 	 */
 	validate?(formData: TFormData): string | null;
+
+	/**
+	 * Optional hook called after successful submit and before the success dialog.
+	 * Use this to perform post-creation operations (e.g., adding contributors).
+	 * @param formData - The submitted form data.
+	 * @param response - The data returned by submit().
+	 */
+	onPostSubmit?(formData: TFormData, response: TSuccessData): Promise<void>;
 }

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from "@angular/core";
 import { MatRippleModule } from "@angular/material/core";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import {
 	RouterLink,
 	RouterLinkActive,
@@ -9,18 +9,18 @@ import {
 
 @Component({
 	selector: "app-mobile-menu-item",
-	imports: [RouterLink, MatIconModule, MatRippleModule, RouterLinkActive],
+	imports: [RouterLink, NgIcon, NgGlyph, MatRippleModule, RouterLinkActive],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	template: `
+		template: `
 		@if (variant === "simple") {
 			<div
 				class="flex items-center justify-between py-2 text-on-surface w-full"
 			>
 				<span class="flex items-center justify-start gap-4">
 					@if (svgIcon) {
-						<mat-icon [svgIcon]="svgIcon"></mat-icon>
+						<ng-icon [name]="svgIcon"></ng-icon>
 					} @else if (icon) {
-						<mat-icon>{{ icon }}</mat-icon>
+						<ng-glyph [name]="icon" />
 					}
 					{{ text }}
 				</span>
@@ -33,9 +33,9 @@ import {
 				class="flex items-center justify-start gap-4 py-2 text-on-surface hover:text-primary"
 			>
 				@if (svgIcon) {
-					<mat-icon [svgIcon]="svgIcon"></mat-icon>
+					<ng-icon [name]="svgIcon"></ng-icon>
 				} @else if (icon) {
-					<mat-icon>{{ icon }}</mat-icon>
+					<ng-glyph [name]="icon" />
 				}
 				{{ text }}
 			</a>
@@ -49,9 +49,9 @@ import {
 				(click)="closeMenu.emit()"
 			>
 				@if (svgIcon) {
-					<mat-icon [svgIcon]="svgIcon"></mat-icon>
+					<ng-icon [name]="svgIcon"></ng-icon>
 				} @else if (icon) {
-					<mat-icon>{{ icon }}</mat-icon>
+					<ng-glyph [name]="icon" />
 				}
 				{{ text }}
 			</a>

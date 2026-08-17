@@ -6,7 +6,7 @@ import { PublicHeaderComponent } from "@/components/public-header/public-header.
 import { FooterComponent } from "@/components/footer/footer.component";
 
 // Services
-import { ChangelogService } from "@/services/changelog.service";
+import { ReleaseNoteService } from "@/services/release-note.service";
 
 @Component({
 	selector: "app-public-layout",
@@ -20,9 +20,9 @@ import { ChangelogService } from "@/services/changelog.service";
 	`,
 })
 export class PublicLayoutComponent implements OnInit {
-	private changelogService = inject(ChangelogService);
+	private releaseNoteService = inject(ReleaseNoteService);
 
 	ngOnInit() {
-		this.changelogService.fetchReleaseNotes();
+		this.releaseNoteService.fetchReleaseNotes();
 	}
 }

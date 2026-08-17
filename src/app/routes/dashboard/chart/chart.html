@@ -1,4 +1,4 @@
-@if (chart && chart.latestVersion && chart.versions && chart.contributors) {
+@if (chart && chart.latestVersion && chart.contributors) {
 	<main
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
@@ -8,9 +8,19 @@
 		<div
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
 		>
+			@if (tourPassId) {
+				<a
+					mat-stroked-button
+					[routerLink]="['/dashboard/tourpass', tourPassId]"
+					class="back-to-tourpass"
+				>
+					<ng-glyph name="arrow_back" />
+					Back to tourpass
+				</a>
+			}
 			<div class="flex flex-col items-start justify-start gap-2 relative">
 				<h1 class="font-medium text-5xl leading-tight">
-					<span class="mr-4">{{ chart.track }}</span>
+					<span class="mr-4">{{ chart.track.title }}</span>
 					<span class="relative inline-flex gap-4 text-2xl h-full">
 						@if (difficultyIcon) {
 							<img
@@ -19,31 +29,30 @@
 								alt="Difficulty badge icon"
 							/>
 						}
-						@if (chart.latestVersion.isExplicit) {
-							<mat-icon class="filled-icon" inline
-								>explicit</mat-icon
-							>
+						@if (chart.isExplicit) {
+							<ng-glyph name="explicit" class="filled-icon" />
 						}
-						@if (chart.latestVersion.isDeluxe) {
-							<mat-icon
-								svgIcon="deluxe"
-								class="!w-8 !h-8 relative"
+						@if (chart.isDeluxe) {
+							<ng-icon
+								name="deluxe"
+								size="32"
+								class="relative"
 								aria-label="Deluxe icon"
-							></mat-icon>
+							/>
 						}
 					</span>
 				</h1>
-				<h2 class="text-3xl">{{ chart.artist }}</h2>
+				<h2 class="text-3xl">{{ chart.track.artist }}</h2>
 			</div>
 			<!-- Mobile "aside" -->
 			<app-aside [chart]="chart" class="flex w-full md:hidden">
 			</app-aside>
-			<app-chart-known-issues-section
+			<app-chart-changelog-section
 				#changelogSection
 				class="w-full"
 				[chartId]="chart.id"
-				[issues]="chart.latestVersion.changelog"
-			></app-chart-known-issues-section>
+				[entries]="chart.changelog"
+			></app-chart-changelog-section>
 			<app-chart-contributors-section
 				#contributorsSection
 				class="w-full"
@@ -54,19 +63,15 @@
 				#versionsSection
 				class="w-full"
 				[chartId]="chart.id"
-				[versions]="
-					chart.versions.length > 0
-						? chart.versions
-						: [chart.latestVersion]
-				"
+				[versions]="[chart.latestVersion]"
 			></app-chart-versions-section>
 			<app-chart-danger-zone-section
 				#dangerZoneSection
 				class="w-full"
 				[chartId]="chart.id"
-				[chartName]="chart.track"
-				[isPublic]="chart.isPublic"
-				(visibilityChanged)="chart.isPublic = $event"
+				[chartName]="chart.track.title"
+				[visibility]="chart.visibility"
+				(visibilityChanged)="chart.visibility = $event"
 			></app-chart-danger-zone-section>
 		</div>
 	</main>

@@ -5,7 +5,7 @@ import { catchError, finalize, forkJoin, of, switchMap } from "rxjs";
 import { Subscription } from "rxjs";
 
 // Material
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTabsModule } from "@angular/material/tabs";
@@ -33,18 +33,18 @@ import {
 } from "@/components/history/history.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
+import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
+import { TourPassDialogComponent } from "@/components/dialogs/tourpass/tourpass-dialog.component";
 
 // Lib
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
-import {
-	ActivityType,
-	type SimplifiedUserModel,
-	UserActivityItem,
-	UserProfileResponseModel,
-} from "@/models/user.model";
+import { TourPassModel } from "@/models/tour-pass.model";
+import { type SimplifiedUserModel, UserProfileResponseModel } from "@/models/user.model";
+import { ActivityType } from "@/models/enums/activity-type.enum";
+import type { UserActivityItem } from "@/models/user.model";
 import { UserService } from "@/services/api/user.service";
 import { PaginatorIntl } from "@/components/paginator/paginator-intl";
 import { ShareService } from "@/services/share.service";
@@ -62,6 +62,11 @@ const MOBILE_TABS: Tab<HistoryItem>[] = [
 		value: "charts",
 		icon: "library_music",
 	},
+	{
+		label: "Tour Passes",
+		value: "tour_passes",
+		icon: "music_video",
+	},
 ];
 
 const DESKTOP_TABS: Tab<HistoryItem>[] = [
@@ -76,14 +81,12 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		value: "tour_passes",
 		icon: "music_video",
 		showLabel: true,
-		disabled: true,
 	},
 	{
 		label: "Themes",
 		value: "themes",
 		icon: "palette",
 		showLabel: true,
-		items: [],
 		disabled: true,
 	},
 ];
@@ -91,7 +94,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 @Component({
 	selector: "app-profile",
 	imports: [
-		MatIconModule,
+		NgGlyph,
 		MatButtonModule,
 		MatRippleModule,
 		MatTabsModule,
@@ -105,6 +108,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		TabNavBarComponent,
 		UserHistoryComponent,
 		ChartPreviewComponent,
+		TourpassPreviewComponent,
 	],
 	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	styles: [
@@ -152,8 +156,14 @@ export class Profile implements OnInit, OnDestroy {
 	currentChartsPage = signal(0);
 
 	private readonly chartsCache = new Map<number, ChartModel[]>();
+	private readonly tourPassesCache = new Map<number, TourPassModel[]>();
 	private routeParamSubscription?: Subscription;
-	// groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
+
+	groupedTourPasses = signal<HistoryItem[] | undefined | null>(undefined);
+	totalTourPasses = signal(0);
+	tourPassesPageSize = 20;
+	currentTourPassesPage = signal(0);
+	isTourPassesLoading = signal(false);
 	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
 
 	mobileTabs = MOBILE_TABS;
@@ -203,6 +213,7 @@ export class Profile implements OnInit, OnDestroy {
 		this.resetProfileState();
 
 		this.isChartsLoading.set(true);
+		this.isTourPassesLoading.set(true);
 
 		// Check for cached profile data
 		const cachedProfile = this.profileCacheService.getProfile(username);
@@ -222,6 +233,17 @@ export class Profile implements OnInit, OnDestroy {
 				this.applyChartGroups(cachedCharts.charts);
 			}
 
+			// Load cached tour passes for page 0
+			const cachedTourPasses = this.profileCacheService.getTourPasses(
+				username,
+				0,
+			);
+			if (cachedTourPasses) {
+				this.tourPassesCache.set(0, cachedTourPasses.tourPasses);
+				this.totalTourPasses.set(cachedTourPasses.total);
+				this.applyTourPassGroups(cachedTourPasses.tourPasses);
+			}
+
 			// Load cached activity
 			const cachedActivity =
 				this.profileCacheService.getActivity(username);
@@ -230,6 +252,7 @@ export class Profile implements OnInit, OnDestroy {
 			}
 
 			this.isChartsLoading.set(false);
+			this.isTourPassesLoading.set(false);
 			return;
 		}
 
@@ -244,6 +267,7 @@ export class Profile implements OnInit, OnDestroy {
 						this.getAuthenticatedUserId() === profile.user.id,
 					);
 					this.currentChartsPage.set(0);
+					this.currentTourPassesPage.set(0);
 
 					// Cache the profile data
 					this.profileCacheService.setProfile(username, {
@@ -261,6 +285,13 @@ export class Profile implements OnInit, OnDestroy {
 								offset: 0,
 							},
 						),
+						tourPassesPage: this.userService.getUserTourPasses(
+							profile.user.id,
+							{
+								limit: 20,
+								offset: 0,
+							},
+						),
 						activity: this.userService
 							.getUserActivity(profile.user.id, {
 								limit: 20,
@@ -271,7 +302,8 @@ export class Profile implements OnInit, OnDestroy {
 				}),
 			)
 			.subscribe({
-				next: ({ chartsPage, activity }) => {
+				next: ({ chartsPage, tourPassesPage, activity }) => {
+					// Process charts
 					const initialCharts = chartsPage.items ?? [];
 					this.chartsCache.set(0, initialCharts);
 					this.totalCharts.set(
@@ -283,6 +315,20 @@ export class Profile implements OnInit, OnDestroy {
 					this.profileCacheService.setCharts(username, 0, {
 						charts: initialCharts,
 						total: this.totalCharts(),
+					});
+
+					// Process tour passes
+					const initialTourPasses = tourPassesPage?.items ?? [];
+					this.tourPassesCache.set(0, initialTourPasses);
+					this.totalTourPasses.set(
+						tourPassesPage?.counts?.tourPasses ?? initialTourPasses.length,
+					);
+					this.applyTourPassGroups(initialTourPasses);
+
+					// Cache tour passes
+					this.profileCacheService.setTourPasses(username, 0, {
+						tourPasses: initialTourPasses,
+						total: this.totalTourPasses(),
 					});
 
 					const profile = this.profile();
@@ -299,14 +345,19 @@ export class Profile implements OnInit, OnDestroy {
 					);
 
 					this.isChartsLoading.set(false);
+					this.isTourPassesLoading.set(false);
 				},
 				error: (err) => {
 					this.profile.set(null);
 					this.groupedCharts.set(null);
+					this.groupedTourPasses.set(null);
 					this.userActivity.set(null);
 					this.isChartsLoading.set(false);
+					this.isTourPassesLoading.set(false);
 					this.totalCharts.set(0);
+					this.totalTourPasses.set(0);
 					this.currentChartsPage.set(0);
+					this.currentTourPassesPage.set(0);
 					this.isFollowing.set(false);
 					this.isOwnProfile.set(false);
 					console.error("Error fetching user data:", err);
@@ -317,13 +368,18 @@ export class Profile implements OnInit, OnDestroy {
 	private resetProfileState(): void {
 		this.profile.set(undefined);
 		this.groupedCharts.set(undefined);
+		this.groupedTourPasses.set(undefined);
 		this.userActivity.set(undefined);
 		this.isChartsLoading.set(true);
+		this.isTourPassesLoading.set(true);
 		this.totalCharts.set(0);
+		this.totalTourPasses.set(0);
 		this.currentChartsPage.set(0);
+		this.currentTourPassesPage.set(0);
 		this.isFollowing.set(false);
 		this.isOwnProfile.set(false);
 		this.chartsCache.clear();
+		this.tourPassesCache.clear();
 	}
 
 	private scrollToTop(): void {
@@ -443,9 +499,77 @@ export class Profile implements OnInit, OnDestroy {
 			});
 	}
 
+	onTourPassesPageChange(event: PageEvent): void {
+		const pageIndex = event.pageIndex;
+		this.currentTourPassesPage.set(pageIndex);
+
+		const cached = this.tourPassesCache.get(pageIndex);
+		if (cached) {
+			this.applyTourPassGroups(cached);
+			return;
+		}
+
+		const sessionCached = this.profileCacheService.getTourPasses(
+			this.username,
+			pageIndex,
+		);
+		if (sessionCached) {
+			this.tourPassesCache.set(pageIndex, sessionCached.tourPasses);
+			this.applyTourPassGroups(sessionCached.tourPasses);
+			return;
+		}
+
+		const profile = this.profile();
+		if (!profile) {
+			return;
+		}
+
+		this.isTourPassesLoading.set(true);
+		this.userService
+			.getUserTourPasses(profile.user.id, {
+				limit: this.tourPassesPageSize,
+				offset: pageIndex * this.tourPassesPageSize,
+			})
+			.subscribe({
+				next: (tourPassesPage) => {
+					const tourPasses = tourPassesPage.items ?? [];
+					this.tourPassesCache.set(pageIndex, tourPasses);
+					if (pageIndex === 0) {
+						this.totalTourPasses.set(
+							tourPassesPage.counts?.tourPasses ?? tourPasses.length,
+						);
+					}
+					this.applyTourPassGroups(tourPasses);
+
+					this.profileCacheService.setTourPasses(
+						this.username,
+						pageIndex,
+						{
+							tourPasses,
+							total: this.totalTourPasses(),
+						},
+					);
+
+					this.isTourPassesLoading.set(false);
+				},
+				error: () => {
+					this.groupedTourPasses.set(null);
+					this.isTourPassesLoading.set(false);
+				},
+			});
+	}
+
 	openChartDialog(chart: ChartModel): void {
 		this.dialog.open(ChartDialogComponent, {
 			data: { chart },
+			width: "575px",
+			maxHeight: "85vh",
+		});
+	}
+
+	openTourPassDialog(tourpass: TourPassModel): void {
+		this.dialog.open(TourPassDialogComponent, {
+			data: { tourpass },
 			width: "575px",
 			maxHeight: "85vh",
 		});
@@ -467,6 +591,11 @@ export class Profile implements OnInit, OnDestroy {
 		return total > 0 ? Math.ceil(total / this.chartsPageSize) : 0;
 	}
 
+	get totalTourPassPages(): number {
+		const total = this.totalTourPasses();
+		return total > 0 ? Math.ceil(total / this.tourPassesPageSize) : 0;
+	}
+
 	private applyChartGroups(charts: ChartModel[]): void {
 		const groupedCharts = this.groupChartsByDate(charts);
 		this.groupedCharts.set(groupedCharts);
@@ -474,6 +603,43 @@ export class Profile implements OnInit, OnDestroy {
 			...this.desktopTabs[0],
 			items: groupedCharts,
 		};
+	}
+
+	private applyTourPassGroups(tourPasses: TourPassModel[]): void {
+		const groupedTourPasses = this.groupTourPassesByDate(tourPasses);
+		this.groupedTourPasses.set(groupedTourPasses);
+		this.desktopTabs[1] = {
+			...this.desktopTabs[1],
+			items: groupedTourPasses,
+		};
+	}
+
+	private getTourPassDate(tourpass: TourPassModel): Date | null {
+		return this.normalizeDate(tourpass.updatedAt ?? tourpass.createdAt);
+	}
+
+	private groupTourPassesByDate(tourPasses: TourPassModel[]): HistoryItem[] {
+		const groups = tourPasses.reduce((map, tourpass) => {
+			const date = this.getTourPassDate(tourpass);
+			if (!date) {
+				return map;
+			}
+			const key = this.buildDateKey(date);
+			const existing = map.get(key);
+			if (existing) {
+				if (date.getTime() > existing.date.getTime()) {
+					existing.date = date;
+				}
+				existing.data.push(tourpass);
+				return map;
+			}
+			map.set(key, { date, data: [tourpass] });
+			return map;
+		}, new Map<string, HistoryItem>());
+
+		return Array.from(groups.values()).sort(
+			(a, b) => b.date.getTime() - a.date.getTime(),
+		);
 	}
 
 	private getAuthenticatedUserId(): string | null {
@@ -501,8 +667,9 @@ export class Profile implements OnInit, OnDestroy {
 	}
 
 	private getChartDate(chart: ChartModel): Date | null {
-		return this.normalizeDate(chart.updatedAt);
+		return this.normalizeDate(chart.updatedAt ?? chart.createdAt);
 	}
+
 
 	private buildDateKey(date: Date): string {
 		return date.toISOString().split("T")[0] ?? date.toISOString();
@@ -542,10 +709,22 @@ export class Profile implements OnInit, OnDestroy {
 		switch (type) {
 			case ActivityType.CREATED_CHART:
 				return `created ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.CREATED_TOUR_PASS:
+				return `created ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.CREATED_THEME:
+				return `created ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.LIKED_CHART:
 				return `liked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.LIKED_TOUR_PASS:
+				return `liked ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.LIKED_THEME:
+				return `liked ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.BOOKMARKED_CHART:
 				return `bookmarked ${count} chart${count > 1 ? "s" : ""}`;
+			case ActivityType.BOOKMARKED_TOUR_PASS:
+				return `bookmarked ${count} tour pass${count > 1 ? "es" : ""}`;
+			case ActivityType.BOOKMARKED_THEME:
+				return `bookmarked ${count} theme${count > 1 ? "s" : ""}`;
 			case ActivityType.FOLLOWED_USER:
 				return `followed ${count} user${count > 1 ? "s" : ""}`;
 		}
@@ -624,8 +803,14 @@ export class Profile implements OnInit, OnDestroy {
 
 			const orderedTypes: ActivityType[] = [
 				ActivityType.CREATED_CHART,
+				ActivityType.CREATED_TOUR_PASS,
+				ActivityType.CREATED_THEME,
 				ActivityType.LIKED_CHART,
+				ActivityType.LIKED_TOUR_PASS,
+				ActivityType.LIKED_THEME,
 				ActivityType.BOOKMARKED_CHART,
+				ActivityType.BOOKMARKED_TOUR_PASS,
+				ActivityType.BOOKMARKED_THEME,
 				ActivityType.FOLLOWED_USER,
 			];
 

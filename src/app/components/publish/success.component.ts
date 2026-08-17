@@ -27,7 +27,6 @@ import { ChartModel } from "@/models/chart.model";
 			<div class="relative w-full">
 				<app-chart-preview
 					class="pointer-events-none"
-					[showVisibility]="false"
 					[chart]="data"
 				></app-chart-preview>
 				<div
@@ -43,7 +42,7 @@ import { ChartModel } from "@/models/chart.model";
 					<p
 						class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-secondary opacity-80 w-full text-center"
 					>
-						v1.0 | {{ this.data.id.slice(-4) }}
+						v1.0 | {{ this.data.id }}
 					</p>
 				</div>
 			</div>

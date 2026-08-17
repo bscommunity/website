@@ -12,10 +12,12 @@ import { DOCUMENT } from "@angular/common";
 // Material
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatRipple } from "@angular/material/core";
+
+// Icons
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 
 // RxJS
 import { Subject } from "rxjs";
@@ -31,7 +33,8 @@ import { MobileMenuComponent } from "./subcomponents/mobile-menu.component";
 @Component({
 	selector: "app-public-header",
 	imports: [
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		MatButtonModule,
 		RouterLink,
 		RouterLinkActive,

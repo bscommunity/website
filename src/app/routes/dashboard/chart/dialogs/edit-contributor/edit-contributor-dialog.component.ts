@@ -1,16 +1,13 @@
 import {
 	ChangeDetectionStrategy,
-	ChangeDetectorRef,
 	Component,
 	computed,
 	inject,
 	signal,
 } from "@angular/core";
-import { Router } from "@angular/router";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
 import {
 	MAT_DIALOG_DATA,
 	MatDialogActions,
@@ -23,20 +20,19 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
-import { ContributorItemComponent } from "../../subcomponents/contributor-item/contributor-item.component";
+import { ContributorListComponent } from "@/components/contributors/contributor-list/contributor-list.component";
 
 // Models
-import { ContributorModel } from "@/models/contributor.model";
-
-// Libs
-import { compareArrays, elementToKey } from "@/lib/compare";
+import { ContributorRole, CHART_CONTRIBUTOR_ROLES } from "@/models/enums/role.enum";
+import { SimplifiedUserModel } from "@/models/user.model";
 
 // Services
 import { ContributorService } from "@/services/api/contributor.service";
 
 export interface DialogData {
 	chartId: string;
-	contributor: ContributorModel;
+	user: SimplifiedUserModel;
+	roles: ContributorRole[];
 }
 
 @Component({
@@ -45,36 +41,36 @@ export interface DialogData {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		MatButtonModule,
-		MatIconModule,
 		MatDialogTitle,
 		MatDialogContent,
 		MatDialogActions,
 		MatDialogClose,
 		MatProgressSpinnerModule,
-		ContributorItemComponent,
+		ContributorListComponent,
 	],
 })
 export class EditContributorDialogComponent {
 	private contributorService = inject(ContributorService);
-	private router = inject(Router);
-	private cdr = inject(ChangeDetectorRef);
 
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<EditContributorDialogComponent>);
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	readonly isLoading = signal(false);
+	readonly availableRoles = CHART_CONTRIBUTOR_ROLES;
 
-	roles = signal(
-		new Map([[this.data.contributor.user.id, this.data.contributor.roles]]),
+	readonly roles = signal(
+		new Map([[this.data.user.id, [...this.data.roles]]]),
 	);
-	isEqual = computed(() =>
-		compareArrays(
-			this.data.contributor.roles,
-			this.roles().get(this.data.contributor.user.id) || [],
-			elementToKey,
-		),
-	);
+
+	isEqual = computed(() => {
+		const current = this.roles().get(this.data.user.id) || [];
+		const original = this.data.roles;
+		return (
+			current.length === original.length &&
+			current.every((r) => original.includes(r))
+		);
+	});
 
 	async onSubmit(): Promise<void> {
 		this.dialogRef.disableClose = true;
@@ -82,19 +78,15 @@ export class EditContributorDialogComponent {
 		try {
 			this.isLoading.update(() => true);
 
+			const selectedRoles = this.roles().get(this.data.user.id) || [];
 			await this.contributorService.updateContributor(
 				this.data.chartId,
-				this.data.contributor.user.id,
-				this.roles().get(this.data.contributor.user.id) || [],
+				this.data.user.id,
+				selectedRoles,
 			);
 
-			// Close the dialog
 			this.dialogRef.close();
 
-			// Reload page to update the contributor list
-			/* this.router.navigate([this.router.url], {
-				onSameUrlNavigation: "reload",
-			}); */
 			window.location.reload();
 
 			console.log("Updated contributor. Now reloading page...");

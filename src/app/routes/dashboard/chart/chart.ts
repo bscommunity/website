@@ -1,15 +1,20 @@
 import { Component, OnInit, inject } from "@angular/core";
-import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
+import {
+	ActivatedRoute,
+	Router,
+	RouterLink,
+	TitleStrategy,
+} from "@angular/router";
 
 // Modules
 import { FormsModule } from "@angular/forms";
-import { MatIconModule } from "@angular/material/icon";
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { AsideComponent } from "./subcomponents/aside/aside.component";
-import { changelogComponent } from "./sections/known-issues/known-issues.component";
+import { ChangelogComponent } from "./sections/changelog/changelog.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
 import { PageError } from "../../error/error";
@@ -29,10 +34,12 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 	imports: [
 		FormsModule,
 		MatButtonModule,
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		MatTooltipModule,
+		RouterLink,
 		AsideComponent,
-		changelogComponent,
+		ChangelogComponent,
 		ContributorsComponent,
 		DangerZoneComponent,
 		VersionsComponent,
@@ -56,6 +63,7 @@ export class Chart implements OnInit {
 	private _chart!: ChartModel;
 
 	difficultyIcon: string | null = null;
+	tourPassId: string | null = history.state?.tourPassId ?? null;
 
 	ngOnInit(): void {
 		// Listen to route parameter changes to reload the chart
@@ -64,17 +72,18 @@ export class Chart implements OnInit {
 			this.chart = this.route.snapshot.data["chart"];
 			console.warn("Chart data", this.chart);
 
-			if (!this.chart?.versions || !this.chart.contributors) {
+			// Update tourPassId from navigation state (may change on re-navigation)
+			this.tourPassId = history.state?.tourPassId ?? null;
+
+			if (!this.chart.contributors) {
 				console.error("Chart data is incomplete", this.chart);
 				this.router.navigate(["error"], {
 					state: { error: "Chart data is incomplete" },
 				});
 			}
 
-			if (this.chart.latestVersion) {
-				this.difficultyIcon = getDifficultyIcon(
-					this.chart.latestVersion.difficulty,
-				);
+			if (this.chart.difficulty) {
+				this.difficultyIcon = getDifficultyIcon(this.chart.difficulty);
 			}
 		});
 	}

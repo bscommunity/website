@@ -1,0 +1,61 @@
+<aside class="flex flex-col items-start justify-start gap-6 w-full">
+	<!-- Edit tour pass button -->
+	<app-aside-container
+		class="cursor-pointer w-full"
+		asideContainerClass="hover:bg-surface-container-high transition-colors"
+		icon="edit"
+		info="Edit tour pass"
+		(click)="openEditDialog()"
+	></app-aside-container>
+
+	<!-- Likes / Bookmarks -->
+	<app-aside-section class="w-full">
+		<div class="flex flex-row items-center justify-center gap-4 w-full">
+			<app-aside-container
+				class="flex-1"
+				icon="favorite"
+				[info]="tourpass().likesCount + ' likes'"
+			></app-aside-container>
+			<app-aside-container
+				class="flex-1"
+				icon="bookmark"
+				[info]="tourpass().bookmarksCount + ' bookmarks'"
+			></app-aside-container>
+		</div>
+		<app-aside-container
+			class="w-full"
+			icon="download"
+			[info]="tourpass().downloadsSum + ' downloads'"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Pass info -->
+	<app-aside-section title="Pass info" class="w-full">
+		<app-aside-container
+			class="w-full"
+			icon="timer"
+			[info]="'~' + transformDuration(totalDuration)"
+		></app-aside-container>
+		<app-aside-container
+			class="w-full"
+			icon="music_note"
+			[info]="tracksAmount + ' tracks'"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Files -->
+	<app-aside-section title="Files" class="w-full">
+		<a
+			class="w-full cursor-pointer opacity-50 pointer-events-none"
+			tabindex="-1"
+			(title)="('Bundle download not available yet')"
+		>
+			<app-aside-container
+				class="w-full"
+				asideContainerClass="hover:bg-surface-container-low"
+				icon="download"
+				info="Download .zip"
+			></app-aside-container>
+		</a>
+	</app-aside-section>
+</aside>

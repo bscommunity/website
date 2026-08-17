@@ -9,10 +9,7 @@ import {
 import { MatRadioModule } from "@angular/material/radio";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-
-// Types
-import { type DialogData } from "@/services/publish/publish.service";
+import { MatDialogRef } from "@angular/material/dialog";
 
 @Component({
 	selector: "app-publish-type",
@@ -32,7 +29,7 @@ import { type DialogData } from "@/services/publish/publish.service";
 						<mat-radio-button
 							class="m-1 w-full"
 							[value]="type"
-							[disabled]="i !== 0"
+							[disabled]="disabledTypes.has(type)"
 						>
 							{{ type }}
 						</mat-radio-button>
@@ -65,20 +62,19 @@ import { type DialogData } from "@/services/publish/publish.service";
 export class PublishTypeComponent {
 	private fb = inject(FormBuilder);
 	dialogRef = inject<MatDialogRef<PublishTypeComponent>>(MatDialogRef);
-	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
 		contentType: "",
 	});
 
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
+	readonly disabledTypes = new Set(["Theme"]);
 	currentContentType = "Chart";
 
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
-				...this.data.formData,
-				...this.form.value,
+				contentType: this.form.get("contentType")?.value,
 			});
 		}
 	}

@@ -9,7 +9,7 @@ import {
 export interface ExpansionPanelData {
 	name: string;
 	value?: string;
-	isSelected?: boolean;
+	isSelected?: object | null;
 }
 
 export interface ExpansionPanelSelectionChange {

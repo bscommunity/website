@@ -1,0 +1,10 @@
+<mat-chip-set aria-label="Select contributor roles">
+	@for (role of availableRoles(); track role) {
+		<mat-chip-option
+			[selected]="isRoleSelected(role)"
+			(selectionChange)="toggleRole($event, role)"
+		>
+			{{ getRoleLabel(role) }}
+		</mat-chip-option>
+	}
+</mat-chip-set>

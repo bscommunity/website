@@ -1,0 +1,184 @@
+<app-chart-section class="w-full" title="Tracks">
+	<section-header>
+		<!-- Header with view toggle -->
+		<div
+			class="flex items-center rounded-lg border border-outline-variant/50 overflow-hidden"
+		>
+			<button
+				class="flex items-center justify-center px-3 py-1.5 text-sm transition-colors"
+				[class]="
+					viewMode() === 'list'
+						? 'bg-primary-container text-on-primary-container'
+						: 'bg-transparent text-on-surface hover:bg-surface-container-low'
+				"
+				(click)="viewMode.set('list')"
+			>
+				<ng-glyph name="view_list" size="18" />
+			</button>
+			<button
+				class="flex items-center justify-center px-3 py-1.5 text-sm transition-colors"
+				[class]="
+					viewMode() === 'grid'
+						? 'bg-primary-container text-on-primary-container'
+						: 'bg-transparent text-on-surface hover:bg-surface-container-low'
+				"
+				(click)="viewMode.set('grid')"
+			>
+				<ng-glyph name="grid_view" size="18" />
+			</button>
+		</div>
+	</section-header>
+	<section-body class="flex flex-col items-start justify-start gap-4 w-full">
+		@if (charts().length === 0) {
+			<div
+				class="flex flex-col items-center justify-center gap-4 w-full py-9 rounded-lg bg-surface-container border border-inverse-on-surface"
+			>
+				<ng-glyph name="library_music" size="36" />
+				<h1 class="text-base font-medium">
+					No tracks in this tour pass
+				</h1>
+				<p class="text-sm text-center text-on-surface-variant">
+					Add tracks to get started
+				</p>
+			</div>
+		} @else if (viewMode() === "list") {
+			<!-- List view: Material Table -->
+			<div
+				class="rounded-lg border border-inverse-on-surface overflow-hidden w-full"
+			>
+				<table mat-table [dataSource]="charts()" class="w-full">
+					<ng-container matColumnDef="track">
+						<th mat-header-cell *matHeaderCellDef>Track</th>
+						<td mat-cell *matCellDef="let chart" class="!py-3">
+							<div class="flex items-center gap-3">
+								@if (chart.track.coverUrl) {
+									<img
+										class="w-8 h-8 rounded object-cover"
+										[src]="chart.track.coverUrl"
+										[alt]="chart.track.title"
+									/>
+								}
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-sm">
+										{{ chart.track.title || "Untitled" }}
+									</span>
+									@if (chart.difficulty) {
+										<img
+											class="w-5 h-5"
+											[src]="
+												getDifficultyIcon(
+													chart.difficulty
+												)
+											"
+											alt="Difficulty"
+										/>
+									}
+									@if (chart.isDeluxe) {
+										<ng-icon
+											name="deluxe"
+											size="20"
+											aria-label="Deluxe icon"
+										/>
+									}
+									@if (chart.isExplicit) {
+										<ng-glyph
+											name="explicit"
+											class="filled-icon text-base"
+										/>
+									}
+								</div>
+							</div>
+						</td>
+					</ng-container>
+
+					<ng-container matColumnDef="contributors">
+						<th mat-header-cell *matHeaderCellDef>Contributors</th>
+						<td mat-cell *matCellDef="let chart" class="py-3!">
+							<div
+								class="flex flex-wrap flex-row justify-center items-center gap-2"
+							>
+								@for (
+									contributor of chart.contributors;
+									track contributor.user.id
+								) {
+									<span
+										class="text-sm text-on-surface-variant bg-surface-container-high rounded-full pl-1 pr-2 py-0.5 flex flex-row items-center gap-1"
+									>
+										<img
+											class="w-4 h-4 rounded-full object-cover inline-block mr-1"
+											[src]="contributor.user.avatarUrl"
+											[alt]="contributor.user.username"
+										/>
+										{{ contributor.user.username }}
+									</span>
+								}
+							</div>
+						</td>
+					</ng-container>
+
+					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+					<tr
+						mat-row
+						*matRowDef="let row; columns: displayedColumns"
+						(click)="navigateToChart(row.id)"
+						class="cursor-pointer transition-colors hover:bg-surface-container-low!"
+					></tr>
+				</table>
+			</div>
+		} @else {
+			<!-- Grid view -->
+			<div
+				class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+			>
+				@for (chart of charts(); track chart.id) {
+					<a
+						class="flex flex-col items-start gap-2 p-3 rounded-lg bg-surface-container border border-outline-variant/50 cursor-pointer hover:bg-surface-container-low"
+						(click)="navigateToChart(chart.id)"
+					>
+						@if (chart.track.coverUrl) {
+							<img
+								class="w-full aspect-square rounded object-cover"
+								[src]="chart.track.coverUrl"
+								[alt]="chart.track.title"
+							/>
+						}
+						<div class="flex items-center gap-1.5">
+							<span class="text-sm font-medium line-clamp-1">
+								{{ chart.track.title || "Untitled" }}
+							</span>
+							@if (chart.difficulty) {
+								<img
+									class="w-4 h-4 shrink-0"
+									[src]="getDifficultyIcon(chart.difficulty)"
+									alt="Difficulty"
+								/>
+							}
+							@if (chart.isDeluxe) {
+								<ng-icon
+									name="deluxe"
+									size="16"
+									class="shrink-0"
+									aria-label="Deluxe icon"
+								/>
+							}
+							@if (chart.isExplicit) {
+								<ng-glyph
+									name="explicit"
+									class="filled-icon text-sm shrink-0"
+								/>
+							}
+						</div>
+					</a>
+				}
+			</div>
+		}
+
+		<!-- Edit setlist button -->
+		<span class="flex items-center justify-end w-full">
+			<button mat-stroked-button (click)="openEditSetlistDialog()">
+				<ng-glyph name="edit" />
+				Edit setlist
+			</button>
+		</span>
+	</section-body>
+</app-chart-section>

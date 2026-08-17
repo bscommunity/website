@@ -1,18 +1,18 @@
 import { RouterLink, UrlTree } from "@angular/router";
-import { Component, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { chartPreview } from "./chart-preview.variants";
 
-// Material
-import { MatIconModule } from "@angular/material/icon";
-import { MatSnackBar } from "@angular/material/snack-bar";
+// Ng Icons
+import { NgIcon, NgGlyph } from "@ng-icons/core";
 import { ShareService } from "@/services/share.service";
 import { MatButtonModule } from "@angular/material/button";
 import { MatRippleModule } from "@angular/material/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
-import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
 import { AvatarComponent } from "@/components/avatar/avatar.component";
+import { ChartCoverComponent } from "./cover/chart-cover.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
@@ -20,31 +20,35 @@ import { ChartModel } from "@/models/chart.model";
 // Libs
 import { transformDuration } from "@/lib/time";
 
-export enum Tendency {
-	Up = "up",
-	Down = "down",
-	Neutral = "neutral",
-}
-
 @Component({
 	selector: "app-chart-preview",
 	imports: [
-		MatIconModule,
+		NgIcon,
+		NgGlyph,
 		RouterLink,
-		DifficultyMarkComponent,
 		AvatarComponent,
 		CommonModule,
 		MatButtonModule,
 		MatRippleModule,
 		MatTooltipModule,
+		ChartCoverComponent,
 	],
 	templateUrl: "./chart-preview.component.html",
 })
 export class ChartPreviewComponent {
 	chart = input.required<ChartModel>();
-	size = input<"small" | "medium" | "large">("medium");
+	size = input<"sm" | "md">("md");
+	variant = input<"default" | "static" | "selected">("default");
+	fullWidth = input<boolean>(false);
 
-	private _snackBar = inject(MatSnackBar);
+	classes = computed(() =>
+		chartPreview({
+			variant: this.variant(),
+			size: this.size(),
+			fullWidth: this.fullWidth(),
+		}),
+	);
+
 	private shareService = inject(ShareService);
 
 	readonly contributorsNames = (chart: ChartModel) =>
@@ -53,25 +57,18 @@ export class ChartPreviewComponent {
 			.join(", ");
 
 	transformDuration = transformDuration;
-	showVisibility = input<boolean>(false);
-	showContributors = input<boolean>(false);
-	showShareActions = input<boolean>(false);
-	actionIcon = input<string | null>(null);
+	showItems = input<('visibility' | 'contributors' | 'shareActions' | 'data')[]>(['data']);
 
 	readonly routerLink = input<string | string[] | UrlTree | null | undefined>(
 		null,
 	);
-
-	/* tendencyNeutral = Tendency.Neutral;
-	tendencyUp = Tendency.Up;
-	tendencyDown = Tendency.Down; */
 
 	onShare(event: MouseEvent | undefined = undefined) {
 		if (event) {
 			event.stopPropagation();
 		}
 
-		const url = `${window.location.origin}/link/chart/${this.chart()?.contentId}`;
+		const url = `${window.location.origin}/link/chart/${this.chart()?.id}`;
 		this.shareService.share(url);
 	}
 }

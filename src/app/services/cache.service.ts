@@ -1,510 +1,335 @@
 import { Injectable, inject } from "@angular/core";
-
-// Services
 import { StorageService } from "./storage.service";
 import { CookieService } from "./cookie.service";
 
-// Models
-import { ChartModel } from "@/models/chart.model";
-import { ContributorModel } from "@/models/contributor.model";
-import { VersionModel } from "@/models/version.model";
-import { KnownIssueModel } from "@/models/known-issue.model";
-import { SortOption } from "@/models/enums/sort-option.enum";
-import { WorkshopFilters } from "./filter.service";
-
-const MAX_CACHED_CHARTS_PERSISTENT = 20;
-const MAX_CACHED_CHARTS_SESSION = 30;
-const CACHE_VALIDITY_HOURS = 4;
-const DEFAULT_CHARTS_CACHE_KEY = "defaultChartsCache";
-
-interface CachedChart extends ChartModel {
-	lastAccessed: string;
-}
-
-interface DefaultCacheMetadata {
-	timestamp: string;
-	filters: string; // JSON stringified filters
-}
-
-interface DefaultChartsCachePayload {
-	charts: ChartModel[];
-	total: number;
-}
+const ENTITY_PREFIX = "_e";
+const QUERY_PREFIX = "_q";
+const ENTITY_TYPE_MAP: Record<string, string> = {
+	CHART: "chart",
+	TOUR_PASS: "tourpass",
+	THEME: "theme",
+};
 
 export type STORAGE = "persistent" | "session";
 
-@Injectable({
-	providedIn: "root",
-})
+/**
+ * Public-facing shape returned to services — full items resolved
+ * from the entity cache, not from the query cache (ids only).
+ */
+export interface QueryPage<T> {
+	items: T[];
+	total: number | null;
+}
+
+/**
+ * Shape stored in localStorage/sessionStorage for every query cache
+ * entry. Only ids + metadata — entities live in the entity cache
+ * under `_e:{type}:{id}`.
+ */
+interface QueryCacheEntry {
+	ids: string[];
+	entityTypes: Record<string, string>;
+	totalCount: number | null;
+	cachedAt: number;
+	ttl: number | null;
+}
+
+@Injectable({ providedIn: "root" })
 export class CacheService {
 	private storageService = inject(StorageService);
 	private cookieService = inject(CookieService);
 
-	public get isOnRefreshCooldown(): boolean {
-		const lastRefresh = this.cookieService.get("lastRefresh");
-		if (!lastRefresh) {
-			return false;
-		}
+	// ---------------------------------------------------------------------------
+	// Entity cache — unchanged, this part was already solid
+	// ---------------------------------------------------------------------------
 
-		const lastRefreshDate = new Date(lastRefresh);
-		const currentDate = new Date();
-
-		const timeDiff = currentDate.getTime() - lastRefreshDate.getTime();
-		const diffInMinutes = Math.floor(timeDiff / (1000 * 60)); // Convert to minutes
-
-		return diffInMinutes < 5; // 5 minutes cooldown
-	}
-
-	public setRefreshCooldown(): void {
-		this.cookieService.set("lastRefresh", new Date().toISOString(), {
-			expires: 5 / (24 * 60), // 5 minutes in days
-		});
-	}
-
-	/**
-	 * Checks if the default cache is still valid (within 4 hours)
-	 */
-	public isDefaultCacheValid(): boolean {
-		const metadata = this.storageService.getItem("defaultCacheMetadata");
-		if (!metadata) {
-			return false;
-		}
-
-		try {
-			const parsed: DefaultCacheMetadata = JSON.parse(metadata);
-			const cacheDate = new Date(parsed.timestamp);
-			const currentDate = new Date();
-			const hoursDiff =
-				(currentDate.getTime() - cacheDate.getTime()) /
-				(1000 * 60 * 60);
-
-			return hoursDiff < CACHE_VALIDITY_HOURS;
-		} catch (error) {
-			console.error("Error parsing default cache metadata:", error);
-			return false;
-		}
-	}
-
-	/**
-	 * Sets metadata for default cache (no filters/queries)
-	 */
-	public setDefaultCacheMetadata(filters: WorkshopFilters | undefined): void {
-		const metadata: DefaultCacheMetadata = {
-			timestamp: new Date().toISOString(),
-			filters: JSON.stringify(filters),
-		};
-		this.storageService.setItem(
-			"defaultCacheMetadata",
-			JSON.stringify(metadata),
-		);
-	}
-
-	/**
-	 * Gets the stored default cache metadata
-	 */
-	public getDefaultCacheMetadata(): DefaultCacheMetadata | null {
-		const metadata = this.storageService.getItem("defaultCacheMetadata");
-		if (!metadata) {
-			return null;
-		}
-		try {
-			return JSON.parse(metadata);
-		} catch (error) {
-			console.error("Error parsing default cache metadata:", error);
-			return null;
-		}
-	}
-
-	/**
-	 * Checks if current filters match the default cache
-	 */
-	public isDefaultFilters(filters: WorkshopFilters | undefined): boolean {
-		if (!filters) return true;
-
-		const hasQuery = filters.query && filters.query.trim() !== "";
-		const hasGenres = filters.genres && filters.genres.length > 0;
-		const hasDifficulties =
-			filters.difficulties && filters.difficulties.length > 0;
-		const hasCategories =
-			filters.categories && filters.categories.length > 0;
-		const hasVersions = filters.versions && filters.versions.length > 0;
-		const hasCustomSort =
-			filters.sortBy && filters.sortBy !== SortOption.LAST_UPDATED;
-
-		return (
-			!hasQuery &&
-			!hasGenres &&
-			!hasDifficulties &&
-			!hasCategories &&
-			!hasVersions &&
-			!hasCustomSort
-		);
-	}
-
-	public setDefaultChartsCache(charts: ChartModel[], total: number): void {
-		const payload: DefaultChartsCachePayload = {
-			charts,
-			total,
-		};
-		this.storageService.setItem(
-			DEFAULT_CHARTS_CACHE_KEY,
-			JSON.stringify(payload),
-		);
-	}
-
-	public getDefaultChartsCache(): DefaultChartsCachePayload | null {
-		const cached = this.storageService.getItem(DEFAULT_CHARTS_CACHE_KEY);
-		if (!cached) {
-			return null;
-		}
-
-		try {
-			const parsed = JSON.parse(cached) as DefaultChartsCachePayload;
-			if (
-				!Array.isArray(parsed.charts) ||
-				typeof parsed.total !== "number"
-			) {
-				throw new Error("Invalid default cache payload");
-			}
-			return parsed;
-		} catch (error) {
-			console.error("Error parsing default charts cache:", error);
-			this.storageService.removeItem(DEFAULT_CHARTS_CACHE_KEY);
-			return null;
-		}
-	}
-
-	private getChartCount(): number {
-		return parseInt(this.storageService.getItem("chartCount") || "0");
-	}
-
-	private increaseChartCount(): void {
-		this.storageService.setItem(
-			"chartCount",
-			(this.getChartCount() + 1).toString(),
-		);
-	}
-
-	private decreaseChartCount(): void {
-		this.storageService.setItem(
-			"chartCount",
-			(this.getChartCount() - 1).toString(),
-		);
-	}
-
-	/**
-	 * Retrieves all charts stored in the browser's localStorage and removes those not found remotely.
-	 *
-	 * @param storage - The type of storage to use ("persistent" for localStorage, "session" for sessionStorage). Default is "persistent".
-	 * @param remoteChartIds - List of chart IDs found remotely.
-	 * @returns {ChartModel[] | undefined} An array of ChartModel objects if the "charts" object is found; otherwise, undefined.
-	 */
-	getAllCharts(
-		storage: STORAGE = "persistent",
-		remoteChartIds?: string[],
-	): ChartModel[] | undefined {
-		const charts = Object.keys(
-			storage === "persistent"
-				? window.localStorage
-				: window.sessionStorage,
-		)
-			.filter((key) => key.startsWith("chart_"))
-			.filter((key) =>
-				this.storageService.getItem(key, storage === "session"),
-			)
-			.map(
-				(key) =>
-					JSON.parse(
-						this.storageService.getItem(
-							key,
-							storage === "session",
-						)!,
-					) as CachedChart,
-			);
-
-		// Remove cached charts not found remotely if remoteChartIds is provided
-		if (remoteChartIds) {
-			charts.forEach((chart) => {
-				if (!remoteChartIds.includes(chart.id)) {
-					this.removeChart(chart.id);
-				}
-			});
-		}
-
-		return charts;
-	}
-
-	getChart(
+	getEntity<T>(
+		type: string,
 		id: string,
 		storage: STORAGE = "persistent",
-	): CachedChart | undefined {
-		const chart = this.storageService.getItem(
-			`chart_${id}`,
-			storage === "session",
-		);
-		return chart ? JSON.parse(chart) : undefined;
-	}
-
-	addChart(
-		chart: ChartModel,
-		maxCache: number = MAX_CACHED_CHARTS_PERSISTENT,
-	): void {
-		// If we have reached the maximum number of cached charts, we need to remove the oldest one
-		if (this.getChartCount() >= maxCache) {
-			const allCharts = this.getAllCharts() as CachedChart[];
-
-			if (!allCharts || allCharts.length === 0) {
-				return;
-			}
-
-			const oldestChart = allCharts.reduce((oldest, current) => {
-				const oldestDate = new Date(oldest.lastAccessed);
-				const currentDate = new Date(current.lastAccessed);
-
-				return oldestDate < currentDate ? oldest : current;
-			});
-
-			console.log("Full cache. Removing oldest chart:", oldestChart);
-
-			this.removeChart(oldestChart.id);
-		}
-
-		// Usar getItem ao invés de 'in' para evitar problemas de verificação
-		const cacheKey = `chart_${chart.id}`;
-
-		if (localStorage.getItem(cacheKey) !== null) {
-			return this.updateChart(chart);
-		}
-
-		this.storageService.setItem(
-			cacheKey,
-			JSON.stringify({
-				...chart,
-				lastAccessed: new Date().toISOString(),
-			}),
-		);
-
-		this.increaseChartCount();
-	}
-
-	addCharts(charts: ChartModel[], storage: STORAGE = "persistent"): void {
-		console.log("Adding charts to cache:", charts);
-
-		const currentCharts = this.getAllCharts(storage);
-		const currentChartIds = currentCharts?.map((chart) => chart.id);
-
-		// Remove charts that are not in the new list
-		if (currentChartIds) {
-			currentChartIds.forEach((id) => {
-				if (!charts.some((chart) => chart.id === id)) {
-					this.removeChart(id);
-				}
-			});
-		}
-
-		charts.forEach((chart) => {
-			if (
-				!currentCharts ||
-				!currentCharts.some((c) => c.id === chart.id)
-			) {
-				this.addChart(
-					chart,
-					storage === "persistent"
-						? MAX_CACHED_CHARTS_PERSISTENT
-						: MAX_CACHED_CHARTS_SESSION,
-				);
-			} else {
-				this.updateChart(chart, storage);
-			}
-		});
-	}
-
-	removeChart(id: string): void {
-		// If the chart exists, we remove it from the cache
-		if (this.getChart(id)) {
-			this.storageService.removeItem(`chart_${id}`);
-			this.decreaseChartCount();
+	): T | null {
+		const key = `${ENTITY_PREFIX}:${type}:${id}`;
+		const raw = this.storageService.getItem(key, storage === "session");
+		if (!raw) return null;
+		try {
+			return JSON.parse(raw).data as T;
+		} catch {
+			this.storageService.removeItem(key, storage === "session");
+			return null;
 		}
 	}
 
-	updateChart(
-		updatedChart: ChartModel,
+	setEntity<T>(
+		type: string,
+		id: string,
+		data: T,
 		storage: STORAGE = "persistent",
 	): void {
-		const chart = this.getChart(updatedChart.id);
-
-		if (!chart) {
-			return;
-		}
-
 		this.storageService.setItem(
-			`chart_${updatedChart.id}`,
-			JSON.stringify({
-				...updatedChart,
-				lastAccessed: new Date().toISOString(),
-			}),
+			`${ENTITY_PREFIX}:${type}:${id}`,
+			JSON.stringify({ data }),
 			storage === "session",
 		);
-
-		console.log(`Chart ${updatedChart.id} updated in cache.`);
-		/* console.log(
-			`Chart ${updatedChart.id} updated in cache:`,
-			this.getChart(updatedChart.id),
-		); */
 	}
 
-	// Contributors
-
-	updateChartContributors(
+	removeEntity(
+		type: string,
 		id: string,
-		newContributors: ContributorModel[],
+		storage: STORAGE = "persistent",
 	): void {
-		const chart = this.getChart(id);
-		if (!chart) {
-			return;
-		}
+		this.storageService.removeItem(
+			`${ENTITY_PREFIX}:${type}:${id}`,
+			storage === "session",
+		);
+	}
 
-		// Get the current list of contributors, if any
-		const currentContributors = chart.contributors || [];
+	updateEntity<T>(
+		type: string,
+		id: string,
+		updater: (current: T | null) => T,
+		storage: STORAGE = "persistent",
+	): void {
+		const current = this.getEntity<T>(type, id, storage);
+		this.setEntity(type, id, updater(current), storage);
+	}
 
-		// Merge contributors: update existing ones and add any new ones
-		const mergedContributors = currentContributors.map((contributor) => {
-			const updated = newContributors.find(
-				(newC) => newC.user.id === contributor.user.id,
-			);
-			return updated ? updated : contributor;
-		});
+	// ---------------------------------------------------------------------------
+	// Query cache — normalized: stores only id[] + metadata, entities live in
+	// the entity cache.  The old `QueryEntry<T>` (full-object cache) is gone.
+	// ---------------------------------------------------------------------------
 
-		newContributors.forEach((newContributor) => {
-			if (
-				!currentContributors.some(
-					(c) => c.user.id === newContributor.user.id,
-				)
-			) {
-				mergedContributors.push(newContributor);
+	getQuery<T>(
+		type: string,
+		paramsKey: string,
+		storage: STORAGE = "session",
+	): QueryPage<T> | null {
+		const key = `${QUERY_PREFIX}:${type}:${paramsKey}`;
+		const raw = this.storageService.getItem(key, storage === "session");
+		if (!raw) return null;
+		try {
+			const entry = JSON.parse(raw) as QueryCacheEntry;
+			if (entry.ttl && Date.now() - entry.cachedAt > entry.ttl) {
+				this.removeQuery(type, paramsKey, storage);
+				return null;
 			}
+			const items: T[] = [];
+			for (const id of entry.ids) {
+				const entityType = entry.entityTypes[id];
+				const entity = this.getEntity<unknown>(entityType, id);
+				if (entity === null) return null;
+				items.push(entity as T);
+			}
+			return { items, total: entry.totalCount };
+		} catch {
+			this.removeQuery(type, paramsKey, storage);
+			return null;
+		}
+	}
+
+	setQuery<T>(
+		type: string,
+		paramsKey: string,
+		data: QueryPage<T>,
+		storage: STORAGE = "session",
+		ttlMs?: number,
+	): void {
+		const items = data.items as Array<{ id: string; type?: string }>;
+		const ids = items.map((i) => i.id);
+		const entityTypes: Record<string, string> = {};
+		for (const item of items) {
+			entityTypes[item.id] = this.resolveEntityType(item.type, type);
+		}
+		const entry: QueryCacheEntry = {
+			ids,
+			entityTypes,
+			totalCount: data.total,
+			cachedAt: Date.now(),
+			ttl: ttlMs ?? null,
+		};
+		this.storageService.setItem(
+			`${QUERY_PREFIX}:${type}:${paramsKey}`,
+			JSON.stringify(entry),
+			storage === "session",
+		);
+	}
+
+	removeQuery(
+		type: string,
+		paramsKey: string,
+		storage: STORAGE = "session",
+	): void {
+		this.storageService.removeItem(
+			`${QUERY_PREFIX}:${type}:${paramsKey}`,
+			storage === "session",
+		);
+	}
+
+	invalidateQueries(type: string, storage?: STORAGE): void {
+		this.forEachQueryKey(type, storage, (key, s) => {
+			this.storageService.removeItem(key, s === "session");
 		});
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				contributors: mergedContributors,
-			}),
-		);
 	}
 
-	deleteChartContributor(id: string, contributorId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.contributors) {
-			return;
+	/**
+	 * Seed items into the entity cache.  When items have a `.type` field
+	 * (e.g. `CatalogItemModel` with `"CHART"` / `"TOUR_PASS"`) the
+	 * entity type is derived from it, otherwise `type` is used as-is.
+	 * Every list-fetching method should call this before setQuery so
+	 * that subsequent getQuery calls can resolve ids -> entities.
+	 */
+	upsertEntities(type: string, items: Array<{ id: string; type?: string }>): void {
+		for (const item of items) {
+			const entityType = this.resolveEntityType(item.type, type);
+			this.setEntity(entityType, item.id, item);
 		}
-
-		const updatedContributors = chart.contributors?.filter(
-			(contributor) => contributor.user.id !== contributorId,
-		);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				contributors: updatedContributors,
-			}),
-		);
 	}
 
-	// Versions
-
-	addVersion(id: string, version: VersionModel): void {
-		const chart = this.getChart(id);
-
-		if (!chart) {
-			return;
-		}
-
-		const versions = chart.versions || [];
-
-		versions.push(version);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions,
-			}),
-		);
-	}
-
-	removeVersion(id: string, versionId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.versions) {
-			return;
-		}
-
-		const updatedVersions = chart.versions.filter(
-			(version) => version.id !== versionId,
-		);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions: updatedVersions,
-			}),
-		);
-	}
-
-	// Known Issues
-
-	addIssue(id: string, knownIssue: KnownIssueModel): void {
-		const chart = this.getChart(id);
-
-		if (!chart) {
-			return;
-		}
-
-		const versions = chart.versions || [];
-		versions[0]?.changelog.push(knownIssue);
-
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions,
-			}),
-		);
-	}
-
-	removeIssue(id: string, logId: string): void {
-		const chart = this.getChart(id);
-
-		if (!chart || !chart.versions) {
-			return;
-		}
-
-		const updatedVersions = chart.versions.map((version) => {
+	/**
+	 * Remove one item (by id) from every cached query result of `type`.
+	 * Only touches the id array — entity cache is unaffected (caller
+	 * should call removeEntity separately if needed).
+	 */
+	removeFromQueryResults<T extends { id: string }>(
+		type: string,
+		itemId: string,
+		storage?: STORAGE,
+	): void {
+		this.mutateQueryResults(type, storage, (entry) => {
+			const ids = entry.ids.filter((id) => id !== itemId);
+			if (ids.length === entry.ids.length) return entry;
+			const { [itemId]: _, ...entityTypes } = entry.entityTypes;
 			return {
-				...version,
-				changelog: version.changelog.filter(
-					(issue) => issue.id !== logId,
-				),
+				...entry,
+				ids,
+				entityTypes,
+				cachedAt: Date.now(),
+				totalCount:
+					entry.totalCount !== null
+						? Math.max(0, entry.totalCount - 1)
+						: null,
 			};
 		});
+	}
 
-		this.storageService.setItem(
-			`chart_${id}`,
-			JSON.stringify({
-				...chart,
-				versions: updatedVersions,
-			}),
-		);
+	/**
+	 * Insert a freshly created item into every cached query result of `type`.
+	 * Only stores the id + entity type mapping; the full entity data must
+	 * have already been placed in the entity cache via setEntity/upsertEntities.
+	 */
+	insertIntoQueryResults<T extends { id: string; type?: string }>(
+		type: string,
+		item: T,
+		storage?: STORAGE,
+	): void {
+		this.mutateQueryResults(type, storage, (entry) => {
+			if (entry.ids.includes(item.id)) return entry;
+		return {
+				...entry,
+				ids: [item.id, ...entry.ids],
+				entityTypes: {
+					...entry.entityTypes,
+					[item.id]: this.resolveEntityType(item.type, type),
+				},
+				cachedAt: Date.now(),
+				totalCount:
+					entry.totalCount !== null
+						? entry.totalCount + 1
+						: null,
+			};
+		});
+	}
+
+	/**
+	 * Update/remove are now entity-cache-only operations — query cache
+	 * stores only ids, not item data.  This method is kept as a no-op
+	 * so existing call sites don't break, but callers should rely on
+	 * setEntity / updateEntity / removeEntity instead.
+	 *
+	 * @deprecated No-op — update entity cache directly instead.
+	 */
+	updateInQueryResults<T extends { id: string }>(
+		_type: string,
+		_itemId: string,
+		_updater: (item: T) => T,
+		_storage?: STORAGE,
+	): void {
+		// no-op: entity data is in entity cache, not query cache
+	}
+
+	// ---------------------------------------------------------------------------
+	// Internals
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Map a CatalogItem type string to the entity cache key.
+	 * When `itemType` is absent, fall back to the query type prefix
+	 * (works for homogeneous query types like `chart:dashboard`).
+	 */
+	private resolveEntityType(itemType: string | undefined, queryType: string): string {
+		if (itemType && ENTITY_TYPE_MAP[itemType]) {
+			return ENTITY_TYPE_MAP[itemType];
+		}
+		if (queryType.startsWith("chart")) return "chart";
+		if (queryType === "tourpass") return "tourpass";
+		return queryType;
+	}
+
+	/**
+	 * Single shared traversal used by insert/remove above. Reads every
+	 * cached entry for `type`, runs `mutator`, writes back only if it changed.
+	 */
+	private mutateQueryResults(
+		type: string,
+		storage: STORAGE | undefined,
+		mutator: (entry: QueryCacheEntry) => QueryCacheEntry,
+	): void {
+		this.forEachQueryKey(type, storage, (key, s) => {
+			const raw = this.storageService.getItem(key, s === "session");
+			if (!raw) return;
+			try {
+				const entry = JSON.parse(raw) as QueryCacheEntry;
+				const mutated = mutator(entry);
+				if (mutated !== entry) {
+					this.storageService.setItem(
+						key,
+						JSON.stringify(mutated),
+						s === "session",
+					);
+				}
+			} catch {
+				this.storageService.removeItem(key, s === "session");
+			}
+		});
+	}
+
+	/**
+	 * NOTE: this assumes StorageService exposes a `getKeysWithPrefix` method
+	 * (wrapping localStorage/sessionStorage key iteration). Add it there so
+	 * CacheService never touches window.localStorage/sessionStorage directly —
+	 * that direct access in the original invalidateQueries/removeFromQueryResults
+	 * was the one place bypassing the storage abstraction used everywhere else.
+	 */
+	private forEachQueryKey(
+		type: string,
+		storage: STORAGE | undefined,
+		fn: (key: string, storage: STORAGE) => void,
+	): void {
+		const storages: STORAGE[] = storage
+			? [storage]
+			: ["session", "persistent"];
+		const prefix = `${QUERY_PREFIX}:${type}:`;
+		for (const s of storages) {
+			const keys = this.storageService.getKeysWithPrefix(
+				prefix,
+				s === "session",
+			);
+			for (const key of keys) fn(key, s);
+		}
 	}
 
 	clearCache(): void {
 		this.storageService.clear();
-		this.storageService.clear(true); // Clear sessionStorage too
+		this.storageService.clear(true);
 		this.cookieService.delete("lastRefresh");
 	}
 }

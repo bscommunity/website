@@ -9,7 +9,7 @@ import {
 import { MatRadioModule } from "@angular/material/radio";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
+import { NgGlyph } from "@ng-icons/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 // Components
@@ -44,28 +44,33 @@ interface Option {
 							labelPosition="before"
 							class="m-1 w-full flex items-center justify-between rounded-sm border border-outline pr-5"
 							[value]="option.value"
-							[disabled]="i === 0"
 						>
 							<span
 								class="flex flex-1 pl-5 py-5 items-center justify-start gap-3 w-full"
 							>
-								<mat-icon>{{ option.icon }}</mat-icon>
+								<ng-glyph [name]="option.icon" />
 								{{ option.label }}
 							</span>
 						</mat-radio-button>
 					}
 				</mat-radio-group>
-				<app-panel>
-					Please visit
-					<button (click)="dialogRef.close()">
-						<a
-							href="http://143.110.226.4:3001/encrypt"
-							target="_blank"
+				<app-panel [variant]="form.get('chartFlow')?.value === 'new' ? 'warning' : 'info'">
+					@if (form.get('chartFlow')?.value === 'new') {
+						Please use
+							<a
+								href="http://143.110.226.4:3001/encrypt"
+								target="_blank"
+								class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+								(click)="dialogRef.close()"
+							>External's website</a>
+							to create a new bundle
+					} @else {
+						You can <button
+							type="button"
 							class="underline cursor-pointer hover:text-black dark:hover:text-white transition-colors"
-							>External's website</a
-						>
-					</button>
-					to create new chart bundles
+							(click)="dialogRef.close('batch')"
+						>batch upload</button> multiple chart bundles at once
+					}
 				</app-panel>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
@@ -79,7 +84,7 @@ interface Option {
 				<button
 					type="submit"
 					mat-button
-					[disabled]="!form.get('chartFlow')?.value"
+					[disabled]="!form.get('chartFlow')?.value || form.get('chartFlow')?.value === 'new'"
 				>
 					Continue
 				</button>
@@ -89,7 +94,7 @@ interface Option {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatIconModule,
+		NgGlyph,
 		MatRadioModule,
 		FormsModule,
 		ReactiveFormsModule,
@@ -103,7 +108,7 @@ export class PublishChartFlowComponent {
 	data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	form: FormGroup = this.fb.group({
-		chartFlow: "",
+		chartFlow: "existing",
 	});
 
 	options: Option[] = [
@@ -114,7 +119,7 @@ export class PublishChartFlowComponent {
 			value: "existing",
 		},
 	];
-	selectedOption: Option | null = null;
+	selectedOption: Option | null = this.options[1];
 
 	test = 1;
 

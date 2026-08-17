@@ -13,19 +13,19 @@
 	} @else if (profile() === null) {
 		<!-- Error state -->
 		<div class="flex flex-col items-center justify-center w-full py-24">
-			<mat-icon class="text-6xl text-error">error_outline</mat-icon>
+			<ng-glyph name="error_outline" size="60" class="text-error" />
 			<p class="mt-4 text-lg text-center">
 				Profile not found. Please check the username and try again.
 			</p>
 			<button mat-stroked-button class="mt-6" (click)="onReturn()">
-				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+			<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
 				Return to {{ this.source }}
-			</button>
-		</div>
-	} @else {
+		</button>
+	</div>
+} @else {
 		<header class="flex flex-col items-start justify-start gap-6 w-full">
 			<button mat-stroked-button (click)="onReturn()">
-				<mat-icon class="align-middle mr-2">arrow_left_alt</mat-icon>
+				<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
 				Return to
 				{{ this.source }}
 			</button>
@@ -151,13 +151,10 @@
 								(click)="onFollowClick()"
 								[disabled]="isFollowLoading()"
 							>
-								<mat-icon class="align-middle mr-2">
-									{{
-										isFollowing()
-											? "person_remove"
-											: "person_add"
-									}}
-								</mat-icon>
+								<ng-glyph
+									[name]="isFollowing() ? 'person_remove' : 'person_add'"
+									class="align-middle mr-2"
+								/>
 								{{ isFollowing() ? "Unfollow" : "Follow" }}
 							</button>
 							<button
@@ -167,9 +164,7 @@
 								aria-label="Share"
 								(click)="onShare()"
 							>
-								<mat-icon class="align-middle" inline
-									>share</mat-icon
-								>
+								<ng-glyph name="share" class="align-middle" />
 							</button>
 							<!-- <button
 								class="flex flex-row items-center justify-center rounded-full py-2 px-3 bg-primary text-xl text-on-primary hover:brightness-90 disabled:opacity-50"
@@ -180,9 +175,7 @@
 								matRippleColor="rgba(63, 30, 104, 0.1)"
 								aria-label="Report"
 							>
-								<mat-icon class="align-middle" inline
-									>flag</mat-icon
-								>
+								<ng-glyph name="flag" class="align-middle" />
 							</button> -->
 						</div>
 					}
@@ -199,9 +192,7 @@
 					<mat-tab [disabled]="tab.disabled">
 						<ng-template mat-tab-label>
 							@if (tab.icon) {
-								<mat-icon class="align-middle">{{
-									tab.icon
-								}}</mat-icon>
+								<ng-glyph [name]="tab.icon" class="align-middle" />
 							}
 							@if (tab.label && tab.showLabel) {
 								<span class="ml-4">{{ tab.label }}</span>
@@ -210,12 +201,21 @@
 						<section
 							class="flex flex-col items-center justify-start w-full"
 						>
-							<ng-container
-								*ngTemplateOutlet="
-									chartsSection;
-									context: { isDesktop: true }
-								"
-							></ng-container>
+							@if (tab.value === 'charts') {
+								<ng-container
+									*ngTemplateOutlet="
+										chartsSection;
+										context: { isDesktop: true }
+									"
+								></ng-container>
+							} @else if (tab.value === 'tour_passes') {
+								<ng-container
+									*ngTemplateOutlet="
+										tourPassesSection;
+										context: { isDesktop: true }
+									"
+								></ng-container>
+							}
 						</section>
 					</mat-tab>
 				}
@@ -245,9 +245,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<mat-icon class="text-4xl text-error"
-								>error_outline</mat-icon
-							>
+							<ng-glyph name="error_outline" size="36" class="text-error" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -258,9 +256,7 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<mat-icon class="text-4xl text-on-surface-variant"
-								>history</mat-icon
-							>
+							<ng-glyph name="history" size="36" class="text-on-surface-variant" />
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -276,38 +272,40 @@
 					}
 				</ng-template>
 
-				<div class="relative w-full overflow-hidden">
-					<mat-tab-nav-panel #tabPanel class="w-full">
+			<div class="relative w-full overflow-hidden">
+				<mat-tab-nav-panel #tabPanel class="w-full">
+					@for (tab of mobileTabs; track tab.value) {
 						<div
 							class="mobile-tab-collapse"
-							[class.open]="currentTab === mobileTabs[0].value"
+							[class.open]="currentTab === tab.value"
 						>
 							<div class="mobile-tab-collapse-inner">
 								<app-tab-content-wrapper class="w-full flex">
-									<ng-container
-										*ngTemplateOutlet="activityContent"
-									></ng-container>
+									@if (tab.value === 'history') {
+										<ng-container
+											*ngTemplateOutlet="activityContent"
+										></ng-container>
+									} @else if (tab.value === 'charts') {
+										<ng-container
+											*ngTemplateOutlet="
+												chartsSection;
+												context: { isDesktop: false }
+											"
+										></ng-container>
+									} @else if (tab.value === 'tour_passes') {
+										<ng-container
+											*ngTemplateOutlet="
+												tourPassesSection;
+												context: { isDesktop: false }
+											"
+										></ng-container>
+									}
 								</app-tab-content-wrapper>
 							</div>
 						</div>
-
-						<div
-							class="mobile-tab-collapse"
-							[class.open]="currentTab === mobileTabs[1].value"
-						>
-							<div class="mobile-tab-collapse-inner">
-								<app-tab-content-wrapper class="w-full flex">
-									<ng-container
-										*ngTemplateOutlet="
-											chartsSection;
-											context: { isDesktop: false }
-										"
-									></ng-container>
-								</app-tab-content-wrapper>
-							</div>
-						</div>
-					</mat-tab-nav-panel>
-				</div>
+					}
+				</mat-tab-nav-panel>
+			</div>
 			</section>
 		</div>
 
@@ -345,8 +343,7 @@
 								@for (chart of item.data; track $index) {
 									<app-chart-preview
 										[chart]="chart"
-										[showContributors]="true"
-										[showShareActions]="true"
+										[showItems]="['contributors', 'shareActions', 'data']"
 										(click)="openChartDialog(chart)"
 										(keydown.enter)="openChartDialog(chart)"
 										(keydown.space)="openChartDialog(chart)"
@@ -413,12 +410,121 @@
 					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
 				>
 					<div class="flex flex-col items-center justify-center">
-						<span class="text-5xl"
-							><mat-icon inline>library_music</mat-icon></span
-						>
+						<ng-glyph name="library_music" size="48" />
 						<h1 class="text-xl text-center">No charts available</h1>
 						<p class="text-center px-8 mt-4">
 							This user hasn't uploaded any charts yet. <br />
+							Check back later or explore the workshop!
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
+
+		<ng-template
+			#tourPassesList
+			let-groupedTourPasses="groupedTourPasses"
+			let-isDesktop="isDesktop"
+		>
+			<ul
+				class="flex flex-col items-start justify-start w-full overflow-hidden"
+				[class.mt-6]="isDesktop"
+				[class.gap-8]="isDesktop"
+			>
+				@for (item of groupedTourPasses; track $index) {
+					<li
+						class="w-full gap-4 flex flex-col"
+						[class]="!isDesktop ? 'mb-6 last:mb-12' : ''"
+					>
+						<h6 class="self-start">
+							<span
+								class="inline-block w-fit font-medium"
+								[matTooltip]="formatGroupDate(item.date)"
+								[matTooltipPosition]="
+									isDesktop ? 'right' : 'above'
+								"
+							>
+								{{ convertDateTimeToHumanReadable(item.date) }}
+							</span>
+						</h6>
+						@if (isDesktop) {
+							<div
+								class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
+							>
+								@for (tourpass of item.data; track $index) {
+									<app-tourpass-preview
+										[tourpass]="tourpass"
+										[showItems]="['contributors', 'shareActions', 'data']"
+										(click)="openTourPassDialog(tourpass)"
+										(keydown.enter)="openTourPassDialog(tourpass)"
+										(keydown.space)="openTourPassDialog(tourpass)"
+									/>
+								}
+							</div>
+						} @else {
+							@for (tourpass of item.data; track $index) {
+								<app-tourpass-preview
+									[tourpass]="tourpass"
+									(click)="openTourPassDialog(tourpass)"
+									(keydown.enter)="openTourPassDialog(tourpass)"
+									(keydown.space)="openTourPassDialog(tourpass)"
+								/>
+							}
+						}
+					</li>
+				}
+			</ul>
+		</ng-template>
+
+		<ng-template #tourPassesSection let-isDesktop="isDesktop">
+			@if (isTourPassesLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (groupedTourPasses() && groupedTourPasses()!.length > 0) {
+				<ng-container
+					*ngTemplateOutlet="
+						tourPassesList;
+						context: {
+							groupedTourPasses: groupedTourPasses(),
+							isDesktop: isDesktop,
+						}
+					"
+				></ng-container>
+				@if (totalTourPassPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalTourPasses()"
+							[hidePageSize]="true"
+							[pageSize]="tourPassesPageSize"
+							[pageIndex]="currentTourPassesPage()"
+							(page)="onTourPassesPageChange($event)"
+							[disabled]="isTourPassesLoading()"
+							aria-label="Select tour passes page"
+						></mat-paginator>
+					</div>
+				}
+			} @else if (groupedTourPasses() === null) {
+				<p
+					class="mt-6"
+					[class.text-lg]="isDesktop"
+					[class.text-base]="!isDesktop"
+					[class.text-on-surface-variant]="!isDesktop"
+				>
+					Failed to load tour passes. Please try again later.
+				</p>
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<ng-glyph name="music_video" size="48" />
+						<h1 class="text-xl text-center">No tour passes available</h1>
+						<p class="text-center px-8 mt-4">
+							This user hasn't created any tour passes yet. <br />
 							Check back later or explore the workshop!
 						</p>
 					</div>
