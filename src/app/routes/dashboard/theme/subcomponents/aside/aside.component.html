@@ -1,0 +1,55 @@
+<aside class="flex flex-col items-start justify-start gap-6 w-full">
+	<!-- Likes / Bookmarks -->
+	<app-aside-section class="w-full">
+		<div class="flex flex-row items-center justify-center gap-4 w-full">
+			<app-aside-container
+				class="flex-1"
+				icon="favorite"
+				[info]="theme().likesCount + ' likes'"
+			></app-aside-container>
+			<app-aside-container
+				class="flex-1"
+				icon="bookmark"
+				[info]="theme().bookmarksCount + ' bookmarks'"
+			></app-aside-container>
+		</div>
+		<app-aside-container
+			class="w-full"
+			icon="download"
+			[info]="theme().downloadsSum + ' downloads'"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Theme info -->
+	<app-aside-section title="Theme info" class="w-full">
+		<app-aside-container
+			class="w-full"
+			icon="palette"
+			[info]="theme().replaces"
+		></app-aside-container>
+		@if (theme().originalArtwork) {
+			<app-aside-container
+				class="w-full"
+				icon="brush"
+				[info]="theme().originalArtwork!"
+			></app-aside-container>
+		}
+	</app-aside-section>
+
+	<!-- Files -->
+	<app-aside-section title="Files" class="w-full">
+		<a
+			class="w-full cursor-pointer"
+			tabindex="-1"
+			(click)="downloadBundle()"
+			(keypress)="downloadBundle()"
+		>
+			<app-aside-container
+				class="w-full"
+				asideContainerClass="hover:bg-surface-container-low cursor-pointer"
+				icon="download"
+				info="Download bundle"
+			></app-aside-container>
+		</a>
+	</app-aside-section>
+</aside>

@@ -68,7 +68,7 @@ export class PublishTypeComponent {
 	});
 
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
-	readonly disabledTypes = new Set(["Theme"]);
+	readonly disabledTypes = new Set<string>();
 	currentContentType = "Chart";
 
 	onSubmit() {

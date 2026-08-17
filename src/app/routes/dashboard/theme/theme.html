@@ -1,0 +1,68 @@
+@if (theme) {
+	<main
+		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
+	>
+		<!-- Desktop aside -->
+		<app-aside
+			[theme]="theme"
+			(themeUpdated)="onThemeUpdated($event)"
+			class="hidden md:flex md:sticky md:top-8 md:w-72 xl:w-96"
+		></app-aside>
+
+		<div
+			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
+		>
+			<!-- Cover art (full width) -->
+			@if (theme.coverUrl) {
+				<div class="w-full relative overflow-hidden rounded-xl">
+					<img
+						class="w-full aspect-4/1 object-cover"
+						[src]="theme.coverUrl"
+						[alt]="theme.name"
+					/>
+				</div>
+			}
+
+			<!-- Name / replaces -->
+			<div class="flex flex-row items-start justify-between w-full gap-4">
+				<div class="flex flex-col items-start justify-start gap-2">
+					<h1 class="font-medium text-5xl leading-tight">
+						{{ theme.name }}
+					</h1>
+					<p class="text-lg text-on-surface-variant">
+						Replaces: {{ theme.replaces }}
+					</p>
+					@if (theme.originalArtwork) {
+						<p class="text-sm text-on-surface-variant">
+							Original artwork: {{ theme.originalArtwork }}
+						</p>
+					}
+				</div>
+			</div>
+
+			<!-- Mobile aside -->
+			<app-aside
+				[theme]="theme"
+				(themeUpdated)="onThemeUpdated($event)"
+				class="flex w-full md:hidden"
+			></app-aside>
+
+			<!-- Versions section -->
+			<app-theme-versions-section
+				class="w-full"
+				[themeId]="theme.id"
+			></app-theme-versions-section>
+
+			<!-- Danger Zone -->
+			<app-theme-danger-zone-section
+				class="w-full"
+				[themeId]="theme.id"
+				[themeName]="theme.name"
+			></app-theme-danger-zone-section>
+		</div>
+	</main>
+} @else {
+	<app-error
+		class="flex items-center justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14"
+	/>
+}

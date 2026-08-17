@@ -3,6 +3,7 @@ import type { Routes } from "@angular/router";
 // Resolvers
 import { ChartResolver } from "./routes/dashboard/chart/chart-resolver.service";
 import { TourPassResolver } from "./routes/dashboard/tourpass/tourpass-resolver.service";
+import { ThemeResolver } from "./routes/dashboard/theme/theme-resolver.service";
 
 // Guards
 import {
@@ -126,6 +127,15 @@ export const routes: Routes = [
 					(m) => m.TourPass,
 				),
 			resolve: { tourpass: TourPassResolver },
+			runGuardsAndResolvers: "always",
+		},
+		{
+			path: "theme/:id",
+			loadComponent: () =>
+				import("./routes/dashboard/theme/theme").then(
+					(m) => m.Theme,
+				),
+			resolve: { theme: ThemeResolver },
 			runGuardsAndResolvers: "always",
 		},
 		// ... other dashboard routes

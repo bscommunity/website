@@ -10,6 +10,7 @@ import {
 } from "@/models/user.model";
 import type { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
+import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 import { apiUrl } from "@/lib/api";
@@ -67,6 +68,19 @@ export class UserService {
 	): Observable<ItemsPageModel<TourPassModel>> {
 		return this.http.get<ItemsPageModel<TourPassModel>>(
 			`${this.apiUrl}/${userId}/tourpasses`,
+			{ params },
+		);
+	}
+
+	getUserThemes(
+		userId: string,
+		params: {
+			limit?: number;
+			offset?: number;
+		} = {},
+	): Observable<ItemsPageModel<ThemeModel>> {
+		return this.http.get<ItemsPageModel<ThemeModel>>(
+			`${this.apiUrl}/${userId}/themes`,
 			{ params },
 		);
 	}

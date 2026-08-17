@@ -43,7 +43,7 @@
 			</div>
 		</div>
 
-		@if ((isLoading$ | async) && !charts?.length && !tourPasses?.length) {
+		@if ((isLoading$ | async) && !charts?.length && !tourPasses?.length && !themes?.length) {
 			<ul
 				class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
 			>
@@ -89,7 +89,8 @@
 			!(isLoading$ | async) &&
 			hasActiveFilters() &&
 			charts?.length === 0 &&
-			!tourPasses?.length
+			!tourPasses?.length &&
+			!themes?.length
 		) {
 			<!-- No items found after filtering -->
 			<div
@@ -160,8 +161,26 @@
 				</div>
 			}
 
+			<!-- Themes Section -->
+			@if (themes && themes.length > 0) {
+				<div
+					class="flex flex-col items-start justify-start gap-4 w-full"
+				>
+					<h5 class="mat-headline-small text-2xl">Themes</h5>
+					<div
+						class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start w-full"
+					>
+						@for (theme of themes; track theme.id) {
+							<app-theme-preview
+								[theme]="theme"
+							></app-theme-preview>
+						}
+					</div>
+				</div>
+			}
+
 			<!-- Loading indicator for infinite scroll -->
-			@if ((isLoading$ | async) && (charts || tourPasses?.length)) {
+			@if ((isLoading$ | async) && (charts || tourPasses?.length || themes?.length)) {
 				<div class="flex items-center justify-center w-full py-4">
 					<mat-progress-spinner
 						diameter="24"

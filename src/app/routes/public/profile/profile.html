@@ -215,6 +215,13 @@
 										context: { isDesktop: true }
 									"
 								></ng-container>
+							} @else if (tab.value === 'themes') {
+								<ng-container
+									*ngTemplateOutlet="
+										themesSection;
+										context: { isDesktop: true }
+									"
+								></ng-container>
 							}
 						</section>
 					</mat-tab>
@@ -525,6 +532,53 @@
 						<h1 class="text-xl text-center">No tour passes available</h1>
 						<p class="text-center px-8 mt-4">
 							This user hasn't created any tour passes yet. <br />
+							Check back later or explore the workshop!
+						</p>
+					</div>
+				</div>
+			}
+		</ng-template>
+
+		<ng-template #themesSection let-isDesktop="isDesktop">
+			@if (isThemesLoading()) {
+				<div class="flex items-center justify-center w-full py-10">
+					<mat-progress-spinner
+						mode="indeterminate"
+						diameter="36"
+					></mat-progress-spinner>
+				</div>
+			} @else if (themes().length > 0) {
+				<div
+					class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-6"
+				>
+					@for (theme of themes(); track theme.id) {
+						<app-theme-preview
+							[theme]="theme"
+						></app-theme-preview>
+					}
+				</div>
+				@if (totalThemesPages > 1) {
+					<div class="flex items-center justify-end w-full">
+						<mat-paginator
+							[length]="totalThemes()"
+							[hidePageSize]="true"
+							[pageSize]="themesPageSize"
+							[pageIndex]="currentThemesPage()"
+							(page)="onThemesPageChange($event)"
+							[disabled]="isThemesLoading()"
+							aria-label="Select themes page"
+						></mat-paginator>
+					</div>
+				}
+			} @else {
+				<div
+					class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 mb-8 md:my-8 w-full"
+				>
+					<div class="flex flex-col items-center justify-center">
+						<ng-glyph name="palette" size="48" />
+						<h1 class="text-xl text-center">No themes available</h1>
+						<p class="text-center px-8 mt-4">
+							This user hasn't created any themes yet. <br />
 							Check back later or explore the workshop!
 						</p>
 					</div>
