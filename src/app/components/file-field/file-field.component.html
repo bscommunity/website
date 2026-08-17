@@ -9,14 +9,25 @@
 	(dragleave)="onDragLeave($event)"
 	(drop)="onDrop($event)"
 >
-	<p
-		[ngClass]="{
-			'text-on-background': !isInvalid(),
-			'text-error': isInvalid(),
-		}"
-	>
-		{{ title() || "Upload File" }}
-	</p>
+	<div class="flex flex-row items-center justify-start gap-4">
+		@if (info()) {
+			<span
+				class="text-on-surface-variant cursor-help inline-flex"
+				[matTooltip]="info()"
+				matTooltipPosition="above"
+			>
+				<ng-glyph name="info" />
+			</span>
+		}
+		<p
+			[ngClass]="{
+				'text-on-background': !isInvalid(),
+				'text-error': isInvalid(),
+			}"
+		>
+			{{ title() || "Upload File" }}
+		</p>
+	</div>
 	<div class="flex flex-row items-center justify-end gap-3">
 		@if (fileName() != null) {
 			<p class="italic">
@@ -29,7 +40,7 @@
 		} @else {
 			<p class="select-none hidden md:flex">
 				@if (dimensions()) {
-					{{dimensions()}}
+					{{ dimensions() }}
 				} @else {
 					Drag and drop here, or
 				}

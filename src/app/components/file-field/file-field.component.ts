@@ -12,10 +12,12 @@ import { CommonModule } from "@angular/common";
 // Material
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { NgGlyph } from "@ng-icons/core";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 @Component({
 	selector: "app-file-field",
-	imports: [MatButtonModule, ReactiveFormsModule, CommonModule],
+	imports: [MatButtonModule, ReactiveFormsModule, CommonModule, NgGlyph, MatTooltipModule],
 	templateUrl: "./file-field.component.html",
 	styleUrl: "./file-field.component.css",
 })
@@ -32,6 +34,7 @@ export class FileFieldComponent {
 	readonly fileName = input<string | null | undefined>();
 	readonly sizeLimit = input<number | null>(10); // Size limit in MB
 	readonly dimensions = input<string | undefined>(undefined);
+	readonly info = input<string | undefined>(undefined);
 
 	readonly fileChange = output<File>();
 

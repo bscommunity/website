@@ -39,37 +39,23 @@ interface AssetField {
 	template: `
 		<h2 mat-dialog-title>Theme assets</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography flex! flex-col gap-4">
+			<mat-dialog-content class="mat-typography flex! flex-col gap-3">
 				<p>
 					Upload the asset files for your theme. Each asset has
 					specific dimension requirements.
 				</p>
 
 				@for (asset of assets; track asset.key; let i = $index) {
-					<div class="flex flex-col gap-1">
-						<div class="flex items-center gap-2">
-							<p class="text-sm font-medium">{{ asset.label }}</p>
-							<span
-								class="text-xs text-on-surface-variant"
-							>
-								{{ asset.dimensions }}
-							</span>
-							<ng-glyph
-								name="info"
-								class="text-on-surface-variant cursor-help"
-								[matTooltip]="asset.info"
-								matTooltipPosition="above"
-							/>
-						</div>
-						<app-file-field
-							[key]="asset.key"
-							[title]="asset.label"
-							[accept]="['.png', '.jpg', '.jpeg', '.webp']"
-							[isInvalid]="false"
-							[fileName]="asset.file?.name ?? null"
-							(fileChange)="onFileChange(asset.key, $event)"
-						/>
-					</div>
+					<app-file-field
+						[key]="asset.key"
+						[title]="asset.label"
+						[accept]="['.png', '.jpg', '.jpeg', '.webp']"
+						[isInvalid]="false"
+						[info]="asset.info"
+						[dimensions]="asset.dimensions"
+						[fileName]="asset.file?.name ?? null"
+						(fileChange)="onFileChange(asset.key, $event)"
+					/>
 				}
 			</mat-dialog-content>
 			<mat-dialog-actions align="center" class="gap-2">
@@ -96,7 +82,6 @@ interface AssetField {
 		MatDialogModule,
 		MatButtonModule,
 		MatTooltipModule,
-		NgGlyph,
 		FormsModule,
 		ReactiveFormsModule,
 		FileFieldComponent,
@@ -167,9 +152,8 @@ export class PublishThemeFilesComponent {
 	ngOnInit() {
 		if (this.data.formData) {
 			for (const asset of this.assets) {
-				const value = this.data.formData[
-					asset.key as keyof ThemeFormData
-				];
+				const value =
+					this.data.formData[asset.key as keyof ThemeFormData];
 				if (value instanceof File) {
 					asset.file = value;
 				}
