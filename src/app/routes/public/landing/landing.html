@@ -44,9 +44,12 @@
 				Download app
 			</div>
 		</a>
-		<button mat-stroked-button routerLink="/dashboard">
-			Open dashboard
-		</button>
+
+		<div matTooltip="Publishing is currently disabled due to maintenance">
+			<button mat-stroked-button routerLink="/dashboard" disabled>
+				Open dashboard
+			</button>
+		</div>
 	</div>
 
 	<div

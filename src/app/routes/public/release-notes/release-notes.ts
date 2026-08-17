@@ -1,7 +1,9 @@
 import { Component, OnInit, inject } from "@angular/core";
+import { MatIconModule } from "@angular/material/icon";
 
 // Components
 import { ReleaseTemplateComponent } from "@/components/release-template/release-template.component";
+import { PanelComponent } from "@/components/panel/panel.component";
 
 // Services
 import { ReleaseNoteService } from "@/services/release-note.service";
