@@ -27,7 +27,13 @@
 				}}
 			</p>
 		} @else {
-			<p class="select-none hidden md:flex">Drag and drop here, or</p>
+			<p class="select-none hidden md:flex">
+				@if (dimensions()) {
+					{{dimensions()}}
+				} @else {
+					Drag and drop here, or
+				}
+			</p>
 		}
 		<button type="button" class="p-0!" mat-flat-button>
 			<label

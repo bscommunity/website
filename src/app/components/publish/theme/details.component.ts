@@ -21,7 +21,6 @@ import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
-import { NgGlyph } from "@ng-icons/core";
 
 // Services
 import { ValidationService } from "@/services/validation.service";
@@ -41,7 +40,7 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 	template: `
 		<h2 mat-dialog-title>Theme details</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography flex! flex-col gap-4">
+			<mat-dialog-content class="mat-typography flex! flex-col gap-2">
 				<p>
 					Fill in the details for your theme submission. Make sure
 					all the required fields are filled before proceeding.
@@ -81,7 +80,6 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 
 				<div class="flex flex-row gap-4">
 					<mat-form-field
-						subscriptSizing="dynamic"
 						class="flex-1"
 						appearance="outline"
 					>
@@ -102,14 +100,12 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 					</mat-form-field>
 
 					<mat-form-field
-						subscriptSizing="dynamic"
 						class="flex-1"
 						appearance="outline"
 					>
 						<mat-label>Replaces</mat-label>
 						<mat-select
 							formControlName="replaces"
-							[disabled]="!form.get('genre')?.value"
 						>
 							@for (theme of availableThemes(); track theme.id) {
 								<mat-option [value]="theme.id">
@@ -182,38 +178,41 @@ export class PublishThemeDetailsComponent implements OnInit {
 		this.form = this.fb.group({
 			name: ["", Validators.required],
 			previewUrl: [""],
-			genre: ["", Validators.required],
-			replaces: ["", Validators.required],
+			genre: [null, Validators.required],
+			replaces: [{ value: null, disabled: true }, Validators.required],
 			originalArtwork: [""],
 		});
 	}
 
 	ngOnInit() {
-		this.form.patchValue({
-			name: this.data.formData?.name ?? "",
-			previewUrl: this.data.formData?.previewUrl ?? "",
-			genre: this.data.formData?.genre ?? "",
-			replaces: this.data.formData?.replaces ?? "",
-			originalArtwork: this.data.formData?.originalArtwork ?? "",
-		});
-
 		if (this.data.formData?.genre) {
 			this.onGenreChange();
 		}
+
+		this.form.patchValue({
+			name: this.data.formData?.name ?? "",
+			previewUrl: this.data.formData?.previewUrl ?? "",
+			genre: this.data.formData?.genre ?? null,
+			replaces: this.data.formData?.replaces ?? null,
+			originalArtwork: this.data.formData?.originalArtwork ?? "",
+		});
 	}
 
 	onGenreChange() {
 		const genre = this.form.get("genre")?.value as ThemeGenre | null;
+		const replacesControl = this.form.get("replaces");
 		if (genre) {
 			this.availableThemes.set(getThemesByGenre(genre));
-			const currentReplaces = this.form.get("replaces")?.value;
+			replacesControl?.enable();
+			const currentReplaces = replacesControl?.value;
 			const themes = getThemesByGenre(genre);
 			if (currentReplaces && !themes.some((t) => t.id === currentReplaces)) {
-				this.form.get("replaces")?.setValue("");
+				replacesControl?.setValue("");
 			}
 		} else {
 			this.availableThemes.set([]);
-			this.form.get("replaces")?.setValue("");
+			replacesControl?.setValue("");
+			replacesControl?.disable();
 		}
 	}
 

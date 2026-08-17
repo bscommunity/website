@@ -31,6 +31,7 @@ export class FileFieldComponent {
 	readonly isInvalid = input.required<boolean | undefined>();
 	readonly fileName = input<string | null | undefined>();
 	readonly sizeLimit = input<number | null>(10); // Size limit in MB
+	readonly dimensions = input<string | undefined>(undefined);
 
 	readonly fileChange = output<File>();
 
