@@ -2,15 +2,15 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	OnInit,
+	computed,
 	inject,
 	signal,
 } from "@angular/core";
 import {
-	FormBuilder,
+	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
-	Validators,
 } from "@angular/forms";
 import {
 	MAT_DIALOG_DATA,
@@ -22,7 +22,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 
+// Components
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
 // Services
+import { FormService } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
 
 // Models
@@ -40,43 +44,26 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 	template: `
 		<h2 mat-dialog-title>Theme details</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
-			<mat-dialog-content class="mat-typography flex! flex-col gap-2">
+			<mat-dialog-content class="mat-typography flex! flex-col gap-4">
 				<p>
 					Fill in the details for your theme submission. Make sure
 					all the required fields are filled before proceeding.
 				</p>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Name</mat-label>
-					<input
-						matInput
-						type="text"
-						formControlName="name"
-						placeholder="Chrome Skull"
-					/>
-					@if (
-						form.get("name")?.hasError("required") &&
-						form.get("name")?.touched
-					) {
-						<mat-error>Name is <strong>required</strong></mat-error>
-					}
-				</mat-form-field>
+				<app-form-field
+					[control]="getControl()('name')"
+					[config]="fields.nameField"
+				/>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Video preview</mat-label>
-					<input
-						matInput
-						type="url"
-						formControlName="previewUrl"
-						placeholder="https://youtu.be/BY_XwvKogC8"
-					/>
-					@if (
-						form.get("previewUrl")?.hasError("invalidVideoUrl") &&
-						form.get("previewUrl")?.touched
-					) {
-						<mat-error>Must be a YouTube video URL</mat-error>
-					}
-				</mat-form-field>
+				<app-form-field
+					[control]="getControl()('displayFile')"
+					[config]="fields.displayFileField"
+				/>
+
+				<app-form-field
+					[control]="getControl()('previewUrl')"
+					[config]="fields.previewUrlField"
+				/>
 
 				<div class="flex flex-row gap-4">
 					<mat-form-field
@@ -122,15 +109,10 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 					</mat-form-field>
 				</div>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Original artwork</mat-label>
-					<input
-						matInput
-						type="text"
-						formControlName="originalArtwork"
-						placeholder="Credit or URL to the original artist"
-					/>
-				</mat-form-field>
+				<app-form-field
+					[control]="getControl()('originalArtwork')"
+					[config]="fields.originalArtworkField"
+				/>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
 				<button
@@ -154,18 +136,19 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 		MatSelectModule,
 		FormsModule,
 		ReactiveFormsModule,
+		FormFieldComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishThemeDetailsComponent implements OnInit {
-	private fb = inject(FormBuilder);
+	private formService = inject(FormService);
 	private validationService = inject(ValidationService);
 
 	dialogRef =
 		inject<MatDialogRef<PublishThemeDetailsComponent>>(MatDialogRef);
 	data = inject<DialogData<ThemeFormData>>(MAT_DIALOG_DATA);
 
-	form: FormGroup;
+	form!: FormGroup;
 
 	genres = THEME_GENRES.map((g) => ({
 		value: g,
@@ -174,28 +157,88 @@ export class PublishThemeDetailsComponent implements OnInit {
 
 	availableThemes = signal<{ id: string; name: string }[]>([]);
 
-	constructor() {
-		this.form = this.fb.group({
-			name: ["", Validators.required],
-			previewUrl: [""],
-			genre: [null, Validators.required],
-			replaces: [{ value: null, disabled: true }, Validators.required],
-			originalArtwork: [""],
-		});
-	}
+	readonly fields = {
+		nameField: this.formService.createTextField({
+			key: "name",
+			label: "Name",
+			placeholder: "Chrome Skull",
+			required: true,
+		}),
+		previewUrlField: this.formService.createTextField({
+			key: "previewUrl",
+			label: "Video preview",
+			inputType: "url",
+			placeholder: "https://youtu.be/BY_XwvKogC8",
+			required: false,
+			hint: "Must be a YouTube video URL",
+			onValueProcessed: (value) => {
+				try {
+					return this.validationService.extractYouTubeVideoId(value);
+				} catch {
+					return value;
+				}
+			},
+		}),
+		displayFileField: this.formService.createFileField({
+			key: "displayFile",
+			label: "Display art",
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			required: true,
+		}),
+		originalArtworkField: this.formService.createTextField({
+			key: "originalArtwork",
+			label: "Original artwork",
+			placeholder: "Credit or URL to the original artist",
+			required: false,
+		}),
+	};
+
+	textFields = [
+		this.fields.nameField,
+		this.fields.previewUrlField,
+		this.fields.originalArtworkField,
+	];
+
+	getControl = computed(() => (key: string): FormControl => {
+		const control = this.form.get(key) as FormControl | null;
+		if (!(control instanceof FormControl)) {
+			throw new Error(`Control with key "${key}" is not a FormControl`);
+		}
+		return control;
+	});
 
 	ngOnInit() {
+		const initialData: Record<string, unknown> = {
+			name: this.data.formData?.name ?? "",
+			previewUrl: this.data.formData?.previewUrl ?? "",
+			originalArtwork: this.data.formData?.originalArtwork ?? "",
+			displayFile: this.data.formData?.displayFile ?? null,
+		};
+
+		const textAndFileFields = [
+			this.fields.nameField,
+			this.fields.previewUrlField,
+			this.fields.displayFileField,
+			this.fields.originalArtworkField,
+		];
+
+		this.form = this.formService.createFormGroup(
+			textAndFileFields,
+			initialData,
+		);
+
+		this.form.addControl(
+			"genre",
+			new FormControl(this.data.formData?.genre ?? null, { validators: [] }),
+		);
+		this.form.addControl(
+			"replaces",
+			new FormControl({ value: this.data.formData?.replaces ?? null, disabled: true }),
+		);
+
 		if (this.data.formData?.genre) {
 			this.onGenreChange();
 		}
-
-		this.form.patchValue({
-			name: this.data.formData?.name ?? "",
-			previewUrl: this.data.formData?.previewUrl ?? "",
-			genre: this.data.formData?.genre ?? null,
-			replaces: this.data.formData?.replaces ?? null,
-			originalArtwork: this.data.formData?.originalArtwork ?? "",
-		});
 	}
 
 	onGenreChange() {
@@ -216,26 +259,22 @@ export class PublishThemeDetailsComponent implements OnInit {
 		}
 	}
 
-	onSubmit() {
-		if (this.form.invalid) return;
+	async onSubmit() {
+		const result = await this.formService.submitForm(
+			this.form,
+			[this.fields.nameField, this.fields.previewUrlField, this.fields.displayFileField, this.fields.originalArtworkField],
+		);
 
-		const values = this.form.value;
-
-		let previewUrl = values.previewUrl;
-		if (previewUrl) {
-			try {
-				previewUrl = this.validationService.extractYouTubeVideoId(previewUrl);
-			} catch {
-				// Keep original value if extraction fails
-			}
+		if (result.isValid && result.formValue) {
+			const values = result.formValue as Record<string, unknown>;
+			this.dialogRef.close({
+				name: values["name"],
+				previewUrl: values["previewUrl"] || "",
+				genre: this.form.get("genre")?.value,
+				replaces: this.form.get("replaces")?.value,
+				originalArtwork: values["originalArtwork"] || "",
+				displayFile: values["displayFile"] ?? null,
+			});
 		}
-
-		this.dialogRef.close({
-			name: values.name,
-			previewUrl: previewUrl || "",
-			genre: values.genre,
-			replaces: values.replaces,
-			originalArtwork: values.originalArtwork || "",
-		});
 	}
 }

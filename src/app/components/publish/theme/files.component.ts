@@ -2,10 +2,12 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	OnInit,
+	computed,
 	inject,
 } from "@angular/core";
 import {
-	FormBuilder,
+	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -16,22 +18,16 @@ import {
 	MatDialogRef,
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
-import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
-import { FileFieldComponent } from "@/components/file-field/file-field.component";
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
+// Services
+import { FormService, type FileFieldConfig } from "@/services/form.service";
 
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 import type { ThemeFormData } from "@/services/publish/handlers/theme-publish.handler";
-
-interface AssetField {
-	key: string;
-	label: string;
-	dimensions?: string;
-	info: string;
-	file: File | null;
-}
 
 @Component({
 	selector: "app-publish-theme-files",
@@ -44,16 +40,10 @@ interface AssetField {
 					specific dimension requirements.
 				</p>
 
-				@for (asset of assets; track asset.key; let i = $index) {
-					<app-file-field
-						[key]="asset.key"
-						[title]="asset.label"
-						[accept]="['.png', '.jpg', '.jpeg', '.webp']"
-						[isInvalid]="false"
-						[info]="asset.info"
-						[dimensions]="asset.dimensions"
-						[fileName]="asset.file?.name ?? null"
-						(fileChange)="onFileChange(asset.key, $event)"
+				@for (field of assetFields; track field.key) {
+					<app-form-field
+						[control]="getControl()(field.key)"
+						[config]="field"
 					/>
 				}
 			</mat-dialog-content>
@@ -80,103 +70,96 @@ interface AssetField {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatTooltipModule,
 		FormsModule,
 		ReactiveFormsModule,
-		FileFieldComponent,
+		FormFieldComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishThemeFilesComponent {
-	private fb = inject(FormBuilder);
-	private cdr = inject(ChangeDetectorRef);
+export class PublishThemeFilesComponent implements OnInit {
+	private formService = inject(FormService);
 
 	dialogRef = inject<MatDialogRef<PublishThemeFilesComponent>>(MatDialogRef);
 	data = inject<DialogData<ThemeFormData>>(MAT_DIALOG_DATA);
 
-	form: FormGroup = this.fb.group({});
+	form!: FormGroup;
 
-	assets: AssetField[] = [
-		{
+	assetFields: FileFieldConfig[] = [
+		this.formService.createFileField({
 			key: "iconFile",
 			label: "Icon",
-			dimensions: "256x256",
-			info: "Square icon used as the theme thumbnail",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "256x256 - Square icon used as the theme thumbnail",
+		}),
+		this.formService.createFileField({
 			key: "trackFile",
 			label: "Track",
-			dimensions: " ",
-			info: "Track lane background. Must be within the range of 512x512 to 512x2048 pixels.",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "512x512 to 512x2048 - Track lane background",
+		}),
+		this.formService.createFileField({
 			key: "topFile",
 			label: "Top",
-			dimensions: "512x256",
-			info: "Top section of the track",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "512x256 - Top section of the track",
+		}),
+		this.formService.createFileField({
 			key: "bottomFile",
 			label: "Bottom",
-			dimensions: "512x256",
-			info: "Bottom section of the track",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "512x256 - Bottom section of the track",
+		}),
+		this.formService.createFileField({
 			key: "circleFile",
 			label: "Circle",
-			dimensions: "256x256",
-			info: "Hit circle asset",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "256x256 - Hit circle asset",
+		}),
+		this.formService.createFileField({
 			key: "perfectBarFile",
 			label: "Perfect Bar",
-			dimensions: "64x256",
-			info: "Perfect timing bar",
-			file: null,
-		},
-		{
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "64x256 - Perfect timing bar",
+		}),
+		this.formService.createFileField({
 			key: "perfectLineFile",
 			label: "Perfect Line",
-			dimensions: "512x32",
-			info: "Perfect timing line",
-			file: null,
-		},
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			hint: "512x32 - Perfect timing line",
+		}),
 	];
 
-	ngOnInit() {
-		if (this.data.formData) {
-			for (const asset of this.assets) {
-				const value =
-					this.data.formData[asset.key as keyof ThemeFormData];
-				if (value instanceof File) {
-					asset.file = value;
-				}
-			}
+	getControl = computed(() => (key: string): FormControl => {
+		const control = this.form.get(key) as FormControl | null;
+		if (!(control instanceof FormControl)) {
+			throw new Error(`Control with key "${key}" is not a FormControl`);
 		}
-	}
+		return control;
+	});
 
-	onFileChange(key: string, file: File) {
-		const asset = this.assets.find((a) => a.key === key);
-		if (asset) {
-			asset.file = file;
-			this.cdr.markForCheck();
+	ngOnInit() {
+		const initialData: Record<string, unknown> = {};
+		for (const field of this.assetFields) {
+			const value = this.data.formData?.[
+				field.key as keyof ThemeFormData
+			];
+			initialData[field.key] = value instanceof File ? value : null;
 		}
+
+		this.form = this.formService.createFormGroup(
+			this.assetFields,
+			initialData,
+		);
 	}
 
 	hasAtLeastOneFile(): boolean {
-		return this.assets.some((a) => a.file !== null);
+		return this.assetFields.some(
+			(f) => this.form.get(f.key)?.value instanceof File,
+		);
 	}
 
 	onSubmit() {
-		const result: Record<string, File | null> = {};
-		for (const asset of this.assets) {
-			result[asset.key] = asset.file;
-		}
-		this.dialogRef.close(result);
+		if (this.form.invalid) return;
+		this.dialogRef.close(this.form.value);
 	}
 }

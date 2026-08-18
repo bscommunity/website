@@ -14,6 +14,7 @@ export interface CreateThemePayload {
 	originalArtwork?: string | null;
 	coverFile?: File | null;
 	displayFile?: File | null;
+	bundleFile?: File | null;
 }
 
 @Injectable({
@@ -45,7 +46,7 @@ export class ThemeService {
 		payload: CreateThemePayload,
 		publishSessionId?: string,
 	): Promise<ThemeModel> {
-		const { coverFile, displayFile, ...themeData } = payload;
+		const { coverFile, displayFile, bundleFile, ...themeData } = payload;
 
 		const formData = new FormData();
 		formData.append("theme", JSON.stringify(themeData));
@@ -56,6 +57,10 @@ export class ThemeService {
 
 		if (displayFile) {
 			formData.append("display", displayFile);
+		}
+
+		if (bundleFile) {
+			formData.append("bundle", bundleFile);
 		}
 
 		const headers: Record<string, string> = {};

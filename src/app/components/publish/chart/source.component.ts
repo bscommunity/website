@@ -31,7 +31,6 @@ import { ValidationService } from "@/services/validation.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
-import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
@@ -69,12 +68,6 @@ interface FormMode {
 						[config]="field"
 					/>
 				}
-
-				<!-- Disclaimer -->
-				<!-- <app-panel>
-					Your chart will be published into the Discord server and
-					made publicly visible.
-				</app-panel> -->
 			</mat-dialog-content>
 			<mat-dialog-actions align="center" class="gap-2">
 				<button
