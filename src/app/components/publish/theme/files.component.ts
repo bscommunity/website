@@ -17,7 +17,6 @@ import {
 } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { NgGlyph } from "@ng-icons/core";
 
 // Components
 import { FileFieldComponent } from "@/components/file-field/file-field.component";
@@ -29,7 +28,7 @@ import type { ThemeFormData } from "@/services/publish/handlers/theme-publish.ha
 interface AssetField {
 	key: string;
 	label: string;
-	dimensions: string;
+	dimensions?: string;
 	info: string;
 	file: File | null;
 }
@@ -102,49 +101,49 @@ export class PublishThemeFilesComponent {
 			key: "iconFile",
 			label: "Icon",
 			dimensions: "256x256",
-			info: "Square icon used as the theme thumbnail. Must be exactly 256x256 pixels.",
+			info: "Square icon used as the theme thumbnail",
 			file: null,
 		},
 		{
 			key: "trackFile",
 			label: "Track",
-			dimensions: "512x512",
-			info: "Track lane background. Must be exactly 512x512 pixels.",
+			dimensions: " ",
+			info: "Track lane background. Must be within the range of 512x512 to 512x2048 pixels.",
 			file: null,
 		},
 		{
 			key: "topFile",
 			label: "Top",
 			dimensions: "512x256",
-			info: "Top section of the track. Must be exactly 512x256 pixels.",
+			info: "Top section of the track",
 			file: null,
 		},
 		{
 			key: "bottomFile",
 			label: "Bottom",
 			dimensions: "512x256",
-			info: "Bottom section of the track. Must be exactly 512x256 pixels.",
+			info: "Bottom section of the track",
 			file: null,
 		},
 		{
 			key: "circleFile",
 			label: "Circle",
 			dimensions: "256x256",
-			info: "Hit circle asset. Must be exactly 256x256 pixels.",
+			info: "Hit circle asset",
 			file: null,
 		},
 		{
 			key: "perfectBarFile",
 			label: "Perfect Bar",
 			dimensions: "64x256",
-			info: "Perfect timing bar. Must be exactly 64x256 pixels.",
+			info: "Perfect timing bar",
 			file: null,
 		},
 		{
 			key: "perfectLineFile",
 			label: "Perfect Line",
 			dimensions: "512x32",
-			info: "Perfect timing line. Must be exactly 512x32 pixels.",
+			info: "Perfect timing line",
 			file: null,
 		},
 	];
