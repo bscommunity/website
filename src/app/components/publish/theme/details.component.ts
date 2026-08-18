@@ -7,7 +7,6 @@ import {
 	signal,
 } from "@angular/core";
 import {
-	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -17,27 +16,35 @@ import {
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatSelectModule } from "@angular/material/select";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
 
 // Services
-import { FormService } from "@/services/form.service";
+import { FormService, type ValuesToControls } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
 
-// Models
+// Types
 import { type DialogData } from "@/services/publish/publish.service";
 import type { ThemeFormData } from "@/services/publish/handlers/theme-publish.handler";
+
+// Models
 import {
 	THEME_GENRES,
 	THEME_GENRE_LABELS,
 	getThemesByGenre,
 } from "@/models/theme/theme-genres";
 import { ThemeGenre } from "@/models/theme/beatstar-themes";
+
+interface ThemeDetailsForm {
+	name: string;
+	displayFile: File | null;
+	previewUrl: string;
+	originalArtwork: string;
+	genre: ThemeGenre | null;
+	replaces: string | null;
+}
 
 @Component({
 	selector: "app-publish-theme-details",
@@ -51,66 +58,37 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 				</p>
 
 				<app-form-field
-					[control]="getControl()('name')"
+					[control]="form.controls.name"
 					[config]="fields.nameField"
 				/>
 
 				<app-form-field
-					[control]="getControl()('displayFile')"
+					[control]="form.controls.displayFile"
 					[config]="fields.displayFileField"
 				/>
 
 				<app-form-field
-					[control]="getControl()('previewUrl')"
+					[control]="form.controls.previewUrl"
 					[config]="fields.previewUrlField"
 				/>
 
 				<div class="flex flex-row gap-4">
-					<mat-form-field
+					<app-form-field
 						class="flex-1"
-						appearance="outline"
-					>
-						<mat-label>Genre</mat-label>
-						<mat-select formControlName="genre" (selectionChange)="onGenreChange()">
-							@for (genre of genres; track genre.value) {
-								<mat-option [value]="genre.value">
-									{{ genre.label }}
-								</mat-option>
-							}
-						</mat-select>
-						@if (
-							form.get("genre")?.hasError("required") &&
-							form.get("genre")?.touched
-						) {
-							<mat-error>Genre is <strong>required</strong></mat-error>
-						}
-					</mat-form-field>
+						[control]="form.controls.genre"
+						[config]="fields.genreField"
+					/>
 
-					<mat-form-field
+					<app-form-field
 						class="flex-1"
-						appearance="outline"
-					>
-						<mat-label>Replaces</mat-label>
-						<mat-select
-							formControlName="replaces"
-						>
-							@for (theme of availableThemes(); track theme.id) {
-								<mat-option [value]="theme.id">
-									{{ theme.name }}
-								</mat-option>
-							}
-						</mat-select>
-						@if (
-							form.get("replaces")?.hasError("required") &&
-							form.get("replaces")?.touched
-						) {
-							<mat-error>Replaces is <strong>required</strong></mat-error>
-						}
-					</mat-form-field>
+						[control]="form.controls.replaces"
+						[config]="fields.replacesField"
+						[options]="replacesOptions()"
+					/>
 				</div>
 
 				<app-form-field
-					[control]="getControl()('originalArtwork')"
+					[control]="form.controls.originalArtwork"
 					[config]="fields.originalArtworkField"
 				/>
 			</mat-dialog-content>
@@ -131,9 +109,6 @@ import { ThemeGenre } from "@/models/theme/beatstar-themes";
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatFormFieldModule,
-		MatInputModule,
-		MatSelectModule,
 		FormsModule,
 		ReactiveFormsModule,
 		FormFieldComponent,
@@ -148,21 +123,19 @@ export class PublishThemeDetailsComponent implements OnInit {
 		inject<MatDialogRef<PublishThemeDetailsComponent>>(MatDialogRef);
 	data = inject<DialogData<ThemeFormData>>(MAT_DIALOG_DATA);
 
-	form!: FormGroup;
-
-	genres = THEME_GENRES.map((g) => ({
-		value: g,
-		label: THEME_GENRE_LABELS[g],
-	}));
-
-	availableThemes = signal<{ id: string; name: string }[]>([]);
-
 	readonly fields = {
 		nameField: this.formService.createTextField({
 			key: "name",
 			label: "Name",
 			placeholder: "Chrome Skull",
 			required: true,
+		}),
+		displayFileField: this.formService.createFileField({
+			key: "displayFile",
+			label: "Display art",
+			accept: [".png", ".jpg", ".jpeg", ".webp"],
+			required: true,
+			hint: "1024x576 - Image shown in the theme preview",
 		}),
 		previewUrlField: this.formService.createTextField({
 			key: "previewUrl",
@@ -179,101 +152,98 @@ export class PublishThemeDetailsComponent implements OnInit {
 				}
 			},
 		}),
-		displayFileField: this.formService.createFileField({
-			key: "displayFile",
-			label: "Display art",
-			accept: [".png", ".jpg", ".jpeg", ".webp"],
-			required: true,
-		}),
 		originalArtworkField: this.formService.createTextField({
 			key: "originalArtwork",
 			label: "Original artwork",
 			placeholder: "Credit or URL to the original artist",
 			required: false,
 		}),
+		genreField: this.formService.createSelectField<ThemeGenre>({
+			key: "genre",
+			label: "Genre",
+			placeholder: "Select a genre",
+			options: THEME_GENRES.map((genre) => ({
+				value: genre,
+				label: THEME_GENRE_LABELS[genre],
+			})),
+			onChange: () => this.onGenreChange(),
+		}),
+		replacesField: this.formService.createSelectField<string>({
+			key: "replaces",
+			label: "Replaces",
+			placeholder: "Select a theme to replace",
+			options: [],
+			disabled: true,
+			onChange: () => this.onGenreChange(),
+		}),
 	};
 
-	textFields = [
+	private readonly allFields = [
 		this.fields.nameField,
+		this.fields.displayFileField,
 		this.fields.previewUrlField,
 		this.fields.originalArtworkField,
+		this.fields.genreField,
+		this.fields.replacesField,
 	];
 
-	getControl = computed(() => (key: string): FormControl => {
-		const control = this.form.get(key) as FormControl | null;
-		if (!(control instanceof FormControl)) {
-			throw new Error(`Control with key "${key}" is not a FormControl`);
-		}
-		return control;
-	});
-
-	ngOnInit() {
-		const initialData: Record<string, unknown> = {
+	form: FormGroup<ValuesToControls<ThemeDetailsForm>> =
+		this.formService.createFormGroup<ThemeDetailsForm>(this.allFields, {
 			name: this.data.formData?.name ?? "",
+			displayFile: this.data.formData?.displayFile ?? null,
 			previewUrl: this.data.formData?.previewUrl ?? "",
 			originalArtwork: this.data.formData?.originalArtwork ?? "",
-			displayFile: this.data.formData?.displayFile ?? null,
-		};
+			genre: (this.data.formData?.genre ?? null) as ThemeGenre | null,
+			replaces: this.data.formData?.replaces ?? null,
+		});
 
-		const textAndFileFields = [
-			this.fields.nameField,
-			this.fields.previewUrlField,
-			this.fields.displayFileField,
-			this.fields.originalArtworkField,
-		];
+	availableThemes = signal<{ id: string; name: string }[]>([]);
 
-		this.form = this.formService.createFormGroup(
-			textAndFileFields,
-			initialData,
-		);
+	replacesOptions = computed(() =>
+		this.availableThemes().map((theme) => ({
+			value: theme.id,
+			label: theme.name,
+		})),
+	);
 
-		this.form.addControl(
-			"genre",
-			new FormControl(this.data.formData?.genre ?? null, { validators: [] }),
-		);
-		this.form.addControl(
-			"replaces",
-			new FormControl({ value: this.data.formData?.replaces ?? null, disabled: true }),
-		);
-
+	ngOnInit() {
 		if (this.data.formData?.genre) {
 			this.onGenreChange();
 		}
 	}
 
 	onGenreChange() {
-		const genre = this.form.get("genre")?.value as ThemeGenre | null;
-		const replacesControl = this.form.get("replaces");
+		const genre = this.form.controls.genre.value;
+		const replaces = this.form.controls.replaces;
 		if (genre) {
-			this.availableThemes.set(getThemesByGenre(genre));
-			replacesControl?.enable();
-			const currentReplaces = replacesControl?.value;
 			const themes = getThemesByGenre(genre);
-			if (currentReplaces && !themes.some((t) => t.id === currentReplaces)) {
-				replacesControl?.setValue("");
+			this.availableThemes.set(themes);
+			replaces.enable();
+			if (replaces.value && !themes.some((t) => t.id === replaces.value)) {
+				replaces.setValue(null);
 			}
 		} else {
 			this.availableThemes.set([]);
-			replacesControl?.setValue("");
-			replacesControl?.disable();
+			replaces.setValue(null);
+			replaces.disable();
 		}
 	}
 
 	async onSubmit() {
-		const result = await this.formService.submitForm(
+		const result = await this.formService.submitForm<ThemeDetailsForm>(
+			this.allFields,
 			this.form,
-			[this.fields.nameField, this.fields.previewUrlField, this.fields.displayFileField, this.fields.originalArtworkField],
 		);
 
-		if (result.isValid && result.formValue) {
-			const values = result.formValue as Record<string, unknown>;
+		if (result.isValid) {
+			const v = result.formValue;
 			this.dialogRef.close({
-				name: values["name"],
-				previewUrl: values["previewUrl"] || "",
-				genre: this.form.get("genre")?.value,
-				replaces: this.form.get("replaces")?.value,
-				originalArtwork: values["originalArtwork"] || "",
-				displayFile: values["displayFile"] ?? null,
+				name: v.name,
+				displayFile: v.displayFile,
+				previewUrl: v.previewUrl || "",
+				genre: v.genre ?? "",
+				replaces: v.replaces ?? "",
+				originalArtwork: v.originalArtwork || "",
 			});
 		}
 	}

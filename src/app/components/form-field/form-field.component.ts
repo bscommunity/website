@@ -1,14 +1,15 @@
 import {
+	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
-	input,
-	signal,
-	OnInit,
+	computed,
 	inject,
+	input,
+	OnDestroy,
+	OnInit,
+	signal,
 } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
-
-// Components
 import { MatFormFieldModule } from "@angular/material/form-field";
 import {
 	MatError,
@@ -16,12 +17,18 @@ import {
 	MatInputModule,
 	MatLabel,
 } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
+import type { Subscription } from "rxjs";
+
+// Components
 import { FileFieldComponent } from "@/components/file-field/file-field.component";
 
 // Types
 import type {
 	FileFieldConfig,
 	FormFieldConfig,
+	SelectFieldConfig,
+	SelectOption,
 	TextFieldConfig,
 } from "@/services/form.service";
 
@@ -36,104 +43,72 @@ import type {
 		MatError,
 		MatLabel,
 		MatHint,
+		MatSelectModule,
 		FileFieldComponent,
 	],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FormFieldComponent implements OnInit {
+export class FormFieldComponent implements OnInit, OnDestroy {
 	readonly config = input.required<FormFieldConfig>();
-	readonly control = input.required<FormControl | null>();
+	readonly control = input.required<FormControl>();
+	readonly options = input<readonly SelectOption[] | undefined>(undefined);
 
-	private cdr = inject(ChangeDetectorRef);
+	private readonly cdr = inject(ChangeDetectorRef);
 
-	errorMessage = signal("");
+	/** Tracks the control's status so the error message recomputes reactively. */
+	private readonly status = signal<string | null>(null);
+	private statusSubscription: Subscription | null = null;
 
-	// This is a workaround to avoid using RxJS for Angular Forms
-	// Does not works perfectly, only updates when the control is touched or dirty
-	/* constructor() {
-		effect(() => {
-			const control = this.control();
-			if (control) {
-				// This effect will run whenever control() changes or any of its reactive properties
-				this.updateErrorMessage();
-			}
-		});
-	} */
-
-	updateErrorMessage() {
+	readonly errorMessage = computed(() => {
+		this.status();
 		const control = this.control();
-
-		/* console.log(
-			`Updating error message for control: ${this.config().key}`,
-			{
-				valid: control?.valid,
-				touched: control?.touched,
-				dirty: control?.dirty,
-			},
-		); */
-
-		const errors = control?.errors;
-
-		if (control?.valid || !errors) {
-			/* console.log(
-				`Control ${this.config().key} is valid or has no errors.`,
-			); */
-			this.errorMessage.set("");
-			this.cdr.markForCheck(); // Force change detection
-			return;
-		}
-
-		const errorMessages = Object.entries(errors).map(([key]) => {
-			return this.config().validationMessages?.[key] || `${key} error`;
-		});
-
-		// console.log(`Errors from ${this.config().key}: `, errorMessages);
-
-		this.errorMessage.set(errorMessages[0]);
-		this.cdr.markForCheck(); // Force change detection
-	}
-
-	onBlur() {
-		const control = this.control();
-		if (control) {
-			control.markAsTouched();
-			this.updateErrorMessage();
-		}
-	}
-
-	onFileChange(file: File) {
-		const control = this.control();
-
-		if (control) {
-			control.setValue(file);
-			this.updateErrorMessage();
-		}
-
-		console.log("File changed:", file);
-	}
+		const config = this.config();
+		if (control.valid || !control.errors) return "";
+		const messages = config.validationMessages;
+		const firstKey = Object.keys(control.errors)[0];
+		return (messages && messages[firstKey]) || `${firstKey} error`;
+	});
 
 	ngOnInit() {
 		const control = this.control();
+		this.status.set(control.status);
+		this.statusSubscription = control.statusChanges.subscribe(() => {
+			this.status.set(control.status);
+			this.cdr.markForCheck();
+		});
+	}
 
-		// Listen to Angular form control events without rxjs
-		// Since we can't avoid RxJS entirely with Angular Forms, we'll use a minimal approach
-		if (control) {
-			// Subscribe to value changes (not performant)
-			// control.valueChanges.subscribe(() => this.updateErrorMessage());
-
-			// Subscribe to status changes (for validation state)
-			control.statusChanges.subscribe(() => this.updateErrorMessage());
-		}
-
-		// Initial error message update
-		this.updateErrorMessage();
+	ngOnDestroy() {
+		this.statusSubscription?.unsubscribe();
+		this.statusSubscription = null;
 	}
 
 	getTextConfig(): TextFieldConfig {
-		// console.log((this.config() as TextFieldConfig).formControlName);
 		return this.config() as TextFieldConfig;
 	}
 
 	getFileConfig(): FileFieldConfig {
 		return this.config() as FileFieldConfig;
+	}
+
+	getSelectConfig(): SelectFieldConfig {
+		return this.config() as SelectFieldConfig;
+	}
+
+	onBlur() {
+		this.control().markAsTouched();
+		this.cdr.markForCheck();
+	}
+
+	onSelectionChange() {
+		const control = this.control();
+		control.markAsTouched();
+		this.getSelectConfig().onChange?.(control.value as never);
+		this.cdr.markForCheck();
+	}
+
+	onFileChange(file: File) {
+		this.control().setValue(file);
+		this.cdr.markForCheck();
 	}
 }

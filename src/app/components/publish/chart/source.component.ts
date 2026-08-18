@@ -26,7 +26,11 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 
 // Services
-import { FormService, type FormFieldConfig } from "@/services/form.service";
+import {
+	FormService,
+	type FormFieldConfig,
+	type ValuesToControls,
+} from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
 
 // Components
@@ -40,6 +44,12 @@ import { type DialogData } from "@/services/publish/publish.service";
 
 interface SourceDialogData extends DialogData {
 	mode?: "linking" | "uploading";
+}
+
+interface ChartSourceFormValues {
+	chartBundle: File | null;
+	previewUrl: string;
+	bundleUrl: string;
 }
 
 interface FormMode {
@@ -109,15 +119,11 @@ export class PublishChartSourceComponent implements OnInit {
 	private formService = inject(FormService);
 	private validationService = inject(ValidationService);
 
-	form!: FormGroup;
+	form!: FormGroup<ValuesToControls<ChartSourceFormValues>>;
 	@Input() mode: "linking" | "uploading" = "linking";
 
 	getControl = computed(() => (key: string): FormControl => {
-		const control = this.form.get(key) as FormControl | null;
-		if (!(control instanceof FormControl)) {
-			throw new Error(`Control with key "${key}" is not a FormControl`);
-		}
-		return control;
+		return this.form.controls[key as keyof ChartSourceFormValues];
 	});
 
 	private readonly FIELDS = {
@@ -180,18 +186,19 @@ export class PublishChartSourceComponent implements OnInit {
 			this.mode = this.data.mode;
 		}
 
-		this.form = this.formService.createFormGroup(
-			this.formMode.fields,
-			initialChartFormData,
-		);
+		this.form =
+			this.formService.createFormGroup<ChartSourceFormValues>(
+				this.formMode.fields,
+				initialChartFormData,
+			);
 
 		this.form.patchValue(this.data.formData);
 	}
 
 	async onSubmit() {
-		const result = await this.formService.submitForm(
-			this.form,
+		const result = await this.formService.submitForm<ChartSourceFormValues>(
 			this.formMode.fields,
+			this.form,
 		);
 
 		if (result.isValid && result.formValue) {

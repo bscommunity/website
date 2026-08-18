@@ -1,8 +1,6 @@
 import {
 	ChangeDetectionStrategy,
-	ChangeDetectorRef,
 	Component,
-	OnInit,
 	computed,
 	inject,
 } from "@angular/core";
@@ -23,11 +21,21 @@ import { MatButtonModule } from "@angular/material/button";
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
 
 // Services
-import { FormService, type FileFieldConfig } from "@/services/form.service";
+import { FormService, type ValuesToControls } from "@/services/form.service";
 
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 import type { ThemeFormData } from "@/services/publish/handlers/theme-publish.handler";
+
+interface ThemeFilesForm {
+	iconFile: File | null;
+	trackFile: File | null;
+	topFile: File | null;
+	bottomFile: File | null;
+	circleFile: File | null;
+	perfectBarFile: File | null;
+	perfectLineFile: File | null;
+}
 
 @Component({
 	selector: "app-publish-theme-files",
@@ -76,15 +84,13 @@ import type { ThemeFormData } from "@/services/publish/handlers/theme-publish.ha
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishThemeFilesComponent implements OnInit {
+export class PublishThemeFilesComponent {
 	private formService = inject(FormService);
 
 	dialogRef = inject<MatDialogRef<PublishThemeFilesComponent>>(MatDialogRef);
 	data = inject<DialogData<ThemeFormData>>(MAT_DIALOG_DATA);
 
-	form!: FormGroup;
-
-	assetFields: FileFieldConfig[] = [
+	readonly assetFields = [
 		this.formService.createFileField({
 			key: "iconFile",
 			label: "Icon",
@@ -129,37 +135,39 @@ export class PublishThemeFilesComponent implements OnInit {
 		}),
 	];
 
-	getControl = computed(() => (key: string): FormControl => {
-		const control = this.form.get(key) as FormControl | null;
-		if (!(control instanceof FormControl)) {
-			throw new Error(`Control with key "${key}" is not a FormControl`);
-		}
-		return control;
-	});
+	form: FormGroup<ValuesToControls<ThemeFilesForm>> =
+		this.formService.createFormGroup<ThemeFilesForm>(
+			this.assetFields,
+			this.initialData(),
+		);
 
-	ngOnInit() {
-		const initialData: Record<string, unknown> = {};
+	getControl = computed(
+		() =>
+			(key: string): FormControl =>
+				this.form.controls[key as keyof ThemeFilesForm],
+	);
+
+	private initialData(): Partial<ThemeFilesForm> {
+		const initialData: Partial<ThemeFilesForm> = {};
 		for (const field of this.assetFields) {
 			const value = this.data.formData?.[
 				field.key as keyof ThemeFormData
 			];
-			initialData[field.key] = value instanceof File ? value : null;
+			if (value instanceof File) {
+				initialData[field.key as keyof ThemeFilesForm] = value;
+			}
 		}
-
-		this.form = this.formService.createFormGroup(
-			this.assetFields,
-			initialData,
-		);
+		return initialData;
 	}
 
 	hasAtLeastOneFile(): boolean {
-		return this.assetFields.some(
-			(f) => this.form.get(f.key)?.value instanceof File,
+		return Object.values(this.form.controls).some(
+			(control) => control.value instanceof File,
 		);
 	}
 
 	onSubmit() {
 		if (this.form.invalid) return;
-		this.dialogRef.close(this.form.value);
+		this.dialogRef.close(this.form.getRawValue());
 	}
 }

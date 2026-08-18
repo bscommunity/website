@@ -9,11 +9,39 @@
 			<input
 				matInput
 				[type]="getTextConfig().inputType || 'text'"
-				[formControl]="control()!"
+				[formControl]="control()"
 				[placeholder]="getTextConfig().placeholder || ''"
 				(blur)="onBlur()"
 			/>
-			@if (control()?.invalid) {
+			@if (control().invalid) {
+				<mat-error [innerHTML]="errorMessage()"></mat-error>
+			}
+			@if (config().hint) {
+				<mat-hint align="start">{{ config().hint }}</mat-hint>
+			}
+		</mat-form-field>
+	}
+	@case ("select") {
+		<mat-form-field
+			class="w-full"
+			appearance="outline"
+			[subscriptSizing]="config().hint ? 'dynamic' : 'fixed'"
+		>
+			<mat-label>{{ config().label }}</mat-label>
+			<mat-select
+				[formControl]="control()"
+				[placeholder]="getSelectConfig().placeholder || ''"
+				(selectionChange)="onSelectionChange()"
+			>
+				@for (option of options() ?? getSelectConfig().options; track option.value) {
+					<mat-option [value]="option.value">
+						{{ option.label }}
+					</mat-option>
+				}
+			</mat-select>
+			@if (
+				control().invalid && (control().touched || control().dirty)
+			) {
 				<mat-error [innerHTML]="errorMessage()"></mat-error>
 			}
 			@if (config().hint) {
@@ -28,14 +56,13 @@
 				[title]="config().label"
 				[accept]="getFileConfig().accept"
 				[isInvalid]="
-					control()?.invalid &&
-					(control()?.touched || control()?.dirty)
+					control().invalid && (control().touched || control().dirty)
 				"
-				[fileName]="control()?.value?.name"
+				[fileName]="control().value?.name"
 				(fileChange)="onFileChange($event)"
 			/>
 			@if (
-				control()?.invalid && (control()?.touched || control()?.dirty)
+				control().invalid && (control().touched || control().dirty)
 			) {
 				<div
 					class="text-error text-[0.8rem] -mt-2 ml-4"
