@@ -4,6 +4,7 @@ import {
 	OnInit,
 	Pipe,
 	PipeTransform,
+	effect,
 	input,
 	model,
 	inject,
@@ -82,6 +83,17 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 
 	displayedColumns: string[] = [];
 	dataSource!: MatTableDataSource<T>;
+
+	constructor() {
+		// Keep the material data source in sync whenever the [data] binding
+		// emits a new array (guarded until ngOnInit creates the data source).
+		effect(() => {
+			const data = this.data();
+			if (this.dataSource) {
+				this.dataSource.data = data;
+			}
+		});
+	}
 
 	ngOnInit() {
 		this.displayedColumns = this.columns().map((c) => c.columnDef);

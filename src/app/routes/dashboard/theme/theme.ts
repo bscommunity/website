@@ -1,14 +1,15 @@
-import { Component, OnInit, inject } from "@angular/core";
+import { Component, OnInit, computed, inject } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
 // Modules
 import { FormsModule } from "@angular/forms";
-import { NgGlyph } from "@ng-icons/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { AsideComponent } from "./subcomponents/aside/aside.component";
+import { FilesSectionComponent } from "./sections/files/files.component";
+import { ContributorsSectionComponent } from "./sections/contributors/contributors.component";
 import { VersionsSectionComponent } from "./sections/versions/versions.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
 import { PageError } from "../../error/error";
@@ -18,6 +19,7 @@ import { ThemeModel } from "@/models/theme.model";
 
 // Providers
 import { ThemeTitleStrategy } from "./theme-title.strategy";
+import { getBeatstarThemeName } from "@/models/theme/theme-genres";
 
 @Component({
 	selector: "app-theme",
@@ -26,6 +28,8 @@ import { ThemeTitleStrategy } from "./theme-title.strategy";
 		MatButtonModule,
 		MatTooltipModule,
 		AsideComponent,
+		FilesSectionComponent,
+		ContributorsSectionComponent,
 		VersionsSectionComponent,
 		DangerZoneComponent,
 		PageError,
@@ -46,6 +50,10 @@ export class Theme implements OnInit {
 	}
 
 	private _theme!: ThemeModel;
+
+	readonly replacesName = computed(
+		() => getBeatstarThemeName(this._theme.replaces) ?? this._theme.replaces,
+	);
 
 	ngOnInit(): void {
 		this.route.params.subscribe(() => {

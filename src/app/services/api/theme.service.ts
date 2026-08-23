@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
 import { Theme, type ThemeModel } from "@/models/theme.model";
+import { Version, type VersionModel } from "@/models/version.model";
 
 import { apiUrl } from "@/lib/api";
 import { CacheService } from "../cache.service";
@@ -29,7 +30,7 @@ export class ThemeService {
 	async getThemeById(id: string, disableCache = false): Promise<ThemeModel> {
 		if (!disableCache) {
 			const cached = this.cacheService.getEntity<ThemeModel>("theme", id);
-			if (cached) return cached;
+			if (cached) return Theme.parse(cached);
 		}
 
 		const theme = Theme.parse(
@@ -130,5 +131,40 @@ export class ThemeService {
 			this.http.get<{ url: string }>(`${this.apiUrl}/${id}/bundle`),
 		);
 		return response.url;
+	}
+
+	getBundleBlob(id: string): Promise<Blob> {
+		return firstValueFrom(
+			this.http.get(`${this.apiUrl}/${id}/bundle/file`, {
+				responseType: "arraybuffer",
+			}),
+		).then((buffer) => new Blob([buffer], { type: "application/zip" }));
+	}
+
+	async addThemeVersion(
+		id: string,
+		payload: { changelog?: string; bundleFile: File },
+	): Promise<VersionModel> {
+		const formData = new FormData();
+
+		formData.append(
+			"version",
+			JSON.stringify({
+				changelog: payload.changelog ?? "",
+			}),
+		);
+		formData.append("bundle", payload.bundleFile);
+
+		const response = await firstValueFrom(
+			this.http.post<VersionModel>(`${this.apiUrl}/${id}/versions`, formData),
+		);
+
+		this.cacheService.updateEntity<ThemeModel>("theme", id, (theme) => ({
+			...(theme ?? ({} as ThemeModel)),
+			latestVersion: Version.parse(response),
+			versionsCount: (theme?.versionsCount ?? 0) + 1,
+		}));
+
+		return Version.parse(response);
 	}
 }

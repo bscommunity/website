@@ -33,6 +33,7 @@ export interface DialogData {
 	chartId: string;
 	user: SimplifiedUserModel;
 	roles: ContributorRole[];
+	availableRoles?: ContributorRole[];
 }
 
 @Component({
@@ -57,7 +58,7 @@ export class EditContributorDialogComponent {
 	readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
 	readonly isLoading = signal(false);
-	readonly availableRoles = CHART_CONTRIBUTOR_ROLES;
+	readonly availableRoles = this.data.availableRoles ?? CHART_CONTRIBUTOR_ROLES;
 
 	readonly roles = signal(
 		new Map([[this.data.user.id, [...this.data.roles]]]),

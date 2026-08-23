@@ -7,6 +7,7 @@ import { Visibility } from "./enums/visibility.enum";
 
 // Models
 import { Contributor } from "./contributor.model";
+import { Version } from "./version.model";
 
 export const Theme = z.object({
 	id: z.string(),
@@ -34,6 +35,9 @@ export const Theme = z.object({
 	replaces: z.string(),
 	originalArtwork: z.string().optional().nullable(),
 	previewUrl: z.string().optional().nullable(),
+
+	versionsCount: z.number().int().default(0),
+	latestVersion: Version.nullable().optional(),
 });
 
 export type ThemeModel = z.infer<typeof Theme>;
@@ -60,6 +64,8 @@ export const CreateTheme = Theme.omit({
 	originalArtwork: true,
 	displayArtUrl: true,
 	coverUrl: true,
+	versionsCount: true,
+	latestVersion: true,
 }).extend({
 	previewUrl: z.string().optional().nullable(),
 });
