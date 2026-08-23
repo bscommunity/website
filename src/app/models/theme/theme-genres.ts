@@ -76,3 +76,29 @@ export function getBeatstarTheme(id: string): BeatstarTheme | undefined {
 	const normalized = normalizeThemeKey(id);
 	return normalized ? THEME_BY_KEY.get(normalized) : undefined;
 }
+
+const ASSET_TYPE_LABELS: Record<string, string> = {
+	icon: "Icon",
+	track: "Track",
+	top: "Top",
+	bottom: "Bottom",
+	circle: "Circle",
+	perfectBar: "Perfect Bar",
+	perfectLine: "Perfect Line",
+};
+
+const ASSET_LABEL_BY_UUID = new Map<string, string>();
+
+for (const theme of Object.values(GENRE_THEME_MAP).flat()) {
+	for (const [type, uuid] of Object.entries(theme.assets)) {
+		if (!uuid) continue;
+		const normalized = uuid.toLowerCase();
+		if (!ASSET_LABEL_BY_UUID.has(normalized)) {
+			ASSET_LABEL_BY_UUID.set(normalized, ASSET_TYPE_LABELS[type] ?? type);
+		}
+	}
+}
+
+export function getAssetTypeLabel(uuid: string): string | undefined {
+	return ASSET_LABEL_BY_UUID.get(uuid.trim().toLowerCase());
+}

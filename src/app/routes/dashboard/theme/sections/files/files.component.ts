@@ -19,7 +19,10 @@ import {
 
 // Models
 import type { ThemeModel } from "@/models/theme.model";
-import { getBeatstarTheme } from "@/models/theme/theme-genres";
+import {
+	getAssetTypeLabel,
+	getBeatstarTheme,
+} from "@/models/theme/theme-genres";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
@@ -30,16 +33,6 @@ interface ThemeFileRow {
 	id: string;
 	blobUrl?: string;
 }
-
-const ASSET_TYPE_LABELS: Record<string, string> = {
-	icon: "Icon",
-	track: "Track",
-	top: "Top",
-	bottom: "Bottom",
-	circle: "Circle",
-	perfectBar: "Perfect Bar",
-	perfectLine: "Perfect Line",
-};
 
 @Component({
 	selector: "app-theme-files-section",
@@ -59,6 +52,7 @@ export class FilesSectionComponent {
 	private themeService = inject(ThemeService);
 
 	readonly isLoadingBundle = signal(false);
+	readonly hasLoadedBundle = signal(false);
 	readonly loadedRows = signal<ThemeFileRow[]>([]);
 
 	readonly fileRows = computed<ThemeFileRow[]>(() => {
@@ -115,30 +109,28 @@ export class FilesSectionComponent {
 			const bundle = await this.themeService.getBundleBlob(this.theme().id);
 			const zip = await JSZip.loadAsync(bundle);
 
-			const uuidToType = new Map<string, string>();
-			const beatstar = getBeatstarTheme(this.theme().replaces);
-			if (beatstar) {
-				for (const [type, uuid] of Object.entries(beatstar.assets)) {
-					if (uuid) uuidToType.set(uuid, ASSET_TYPE_LABELS[type] ?? type);
-				}
-			}
-
 			const rows: ThemeFileRow[] = [];
+			const knownIds = new Set(this.fileRows().map((row) => row.id));
 			for (const entry of Object.values(zip.files)) {
 				if (entry.dir) continue;
 
 				const id = entry.name.split("/").pop() ?? entry.name;
-				if (!id || this.fileRows().some((row) => row.id === id)) continue;
+				if (!id || id.toLowerCase() === "bscm.json") continue;
+
+				const assetId = id.replace(/\.[^.]+$/, "");
+				if (!assetId || knownIds.has(assetId)) continue;
+				knownIds.add(assetId);
 
 				const blob = await entry.async("blob");
 				rows.push({
 					image: URL.createObjectURL(blob),
-					file: uuidToType.get(id) ?? "Unknown",
-					id,
+					file: getAssetTypeLabel(assetId) ?? "Unknown",
+					id: assetId,
 				});
 			}
 
 			this.loadedRows.update((current) => [...current, ...rows]);
+			this.hasLoadedBundle.set(true);
 		} catch (error) {
 			console.error("Failed to load bundle files:", error);
 			this._snackBar.open("Could not load the bundle files", "Close", {
