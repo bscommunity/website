@@ -14,7 +14,6 @@ import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 import { apiUrl } from "@/lib/api";
-import { type CountedResponse, toQueryPage } from "@/lib/pagination";
 import type { QueryPage } from "../cache.service";
 import { CacheService } from "../cache.service";
 
@@ -178,9 +177,8 @@ export class UserService {
 		}
 
 		return this.http
-			.get<CountedResponse<TourPassModel>>(`${apiUrl}/tourpasses`, { params: httpParams })
+			.get<QueryPage<TourPassModel>>(`${apiUrl}/tourpasses`, { params: httpParams })
 			.pipe(
-				map(toQueryPage),
 				tap((page) => {
 					if (!isPaginated) {
 						this.cacheService.setQuery("tourpass", cacheKey, page, "session", 30_000);
@@ -215,9 +213,9 @@ export class UserService {
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 		if (params.count) httpParams["count"] = true;
 
-		return this.http
-			.get<CountedResponse<ThemeModel>>(`${apiUrl}/themes`, { params: httpParams })
-			.pipe(map(toQueryPage));
+		return this.http.get<QueryPage<ThemeModel>>(`${apiUrl}/themes`, {
+			params: httpParams,
+		});
 	}
 
 	getUserActivity(
