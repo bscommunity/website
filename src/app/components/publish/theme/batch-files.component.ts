@@ -334,7 +334,7 @@ export class PublishThemeBatchFilesComponent {
 	}
 
 	onSubmit(): void {
-		const result: Record<string, File | null> = {};
+		const result: Record<string, File | null | boolean> = {};
 
 		for (const item of this.identifiedFiles) {
 			if (item.assetType === "unknown") continue;
@@ -343,6 +343,8 @@ export class PublishThemeBatchFilesComponent {
 				result[assetKey] = item.file;
 			}
 		}
+
+		result["assetsFromBatch"] = true;
 
 		this.dialogRef.close(result);
 	}

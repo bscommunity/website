@@ -92,8 +92,21 @@ export class PublishDialogService<
 	}
 
 	private moveToStep(step: number) {
-		if (step < 0 || step >= this.getTotalSteps()) {
-			if (step === this.getTotalSteps()) {
+		const total = this.getTotalSteps();
+
+		if (this.handler.shouldSkipStep) {
+			const direction = step >= this.currentStepSubject.value ? 1 : -1;
+			while (
+				((direction === 1 && step < total) ||
+					(direction === -1 && step > 0)) &&
+				this.handler.shouldSkipStep(step, this.formData)
+			) {
+				step += direction;
+			}
+		}
+
+		if (step < 0 || step >= total) {
+			if (step === total) {
 				this.submitForm();
 				return;
 			}

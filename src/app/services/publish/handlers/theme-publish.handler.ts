@@ -30,6 +30,7 @@ export interface ThemeFormData {
 	perfectBarFile: File | null;
 	perfectLineFile: File | null;
 	bundleFile: File | null;
+	assetsFromBatch?: boolean;
 	contributors?: SimplifiedContributorModel[];
 }
 
@@ -67,6 +68,14 @@ export class ThemePublishHandler
 
 	getInitialFormData(): ThemeFormData {
 		return { ...initialThemeFormData };
+	}
+
+	shouldSkipStep(stepIndex: number, formData: ThemeFormData): boolean {
+		const component = this.getStepComponents()[stepIndex];
+		return (
+			component === PublishThemeFilesComponent &&
+			formData.assetsFromBatch === true
+		);
 	}
 
 	getSuccessComponent(): Type<unknown> {
@@ -110,7 +119,7 @@ export class ThemePublishHandler
 		if (assetEntries.length > 0) {
 			const zip = new JSZip();
 			for (const [name, file] of assetEntries) {
-				zip.file(name, file);
+				zip.file(name.replace(/\.[^.]+$/, ""), file);
 			}
 			const blob = await zip.generateAsync({ type: "blob" });
 			bundleFile = new File([blob], "theme.zip", { type: "application/zip" });

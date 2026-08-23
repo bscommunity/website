@@ -26,6 +26,15 @@ export interface PublishHandler<
 	getInitialFormData(): TFormData;
 
 	/**
+	 * Optional hook to determine whether a step should be skipped
+	 * during navigation (in both directions).
+	 * @param stepIndex - Index of the step in getStepComponents().
+	 * @param formData - Current accumulated form data.
+	 * @returns True if the step should be skipped.
+	 */
+	shouldSkipStep?(stepIndex: number, formData: TFormData): boolean;
+
+	/**
 	 * Submit the form data for processing.
 	 * @param formData - The data to be submitted.
 	 * @param publishSessionId - Optional session ID for SSE progress events.
