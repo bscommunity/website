@@ -18,6 +18,9 @@ import { ThemeArtComponent } from "./art/theme-art.component";
 import type { ThemeModel } from "@/models/theme.model";
 import { getBeatstarThemeName } from "@/models/theme/theme-genres";
 
+// Variants
+import { themePreview } from "./theme-preview.variants";
+
 @Component({
 	selector: "app-theme-preview",
 	imports: [
@@ -33,6 +36,17 @@ import { getBeatstarThemeName } from "@/models/theme/theme-genres";
 })
 export class ThemePreviewComponent {
 	readonly theme = input.required<ThemeModel>();
+	readonly size = input<"sm" | "md">("md");
+	readonly variant = input<"default" | "static" | "selected">("default");
+	readonly fullWidth = input<boolean>(false);
+
+	classes = computed(() =>
+		themePreview({
+			variant: this.variant(),
+			size: this.size(),
+			fullWidth: this.fullWidth(),
+		}),
+	);
 
 	readonly routerLink = input<string | string[] | UrlTree | null | undefined>(
 		null,

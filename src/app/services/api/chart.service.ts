@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { firstValueFrom, type Observable, of, map, shareReplay, tap } from "rxjs";
 import { apiUrl } from "@/lib/api";
+import { type CountedResponse, toQueryPage } from "@/lib/pagination";
 import {
 	Chart,
 	type ChartModel,
@@ -198,8 +199,8 @@ export class ChartService {
 			params = params.set("myCharts", "true");
 		}
 
-		return this.http.get<{ first: ChartModel[]; second: number }>(this.apiUrl, { params }).pipe(
-			map((res) => ({ items: res.first, total: res.second })),
+		return this.http.get<CountedResponse<ChartModel>>(this.apiUrl, { params }).pipe(
+			map(toQueryPage),
 			tap((page) => {
 				if (!isPaginated) {
 					this.cacheService.setQuery(cacheType, cacheKey, page, cacheStorage, 30_000);

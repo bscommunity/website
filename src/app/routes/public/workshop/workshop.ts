@@ -240,14 +240,13 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 				.pipe(takeUntil(this.destroy$))
 				.subscribe({
 					next: (response) => {
-						const items = (response[0] ?? []) as ThemeModel[];
 						if (append) {
-							this.themes = [...(this.themes ?? []), ...items];
+							this.themes = [...(this.themes ?? []), ...response.items];
 						} else {
-							this.themes = items;
+							this.themes = response.items;
 						}
-						if (response[1] !== null) {
-							this.totalItems = Math.max(this.totalItems, response[1]);
+						if (response.total !== null) {
+							this.totalItems = Math.max(this.totalItems, response.total);
 						}
 						this.filterService.setLoading(false);
 						this.cdr.markForCheck();

@@ -1,15 +1,25 @@
-import { Component, input } from "@angular/core";
+import { Component, computed, input } from "@angular/core";
 
 // Models
 import type { ThemeModel } from "@/models/theme.model";
 
+// Variants
+import { themeArt, themeArtCover, themeDisplayArt } from "./theme-art.variants";
+
 @Component({
 	selector: "app-theme-art",
 	host: {
-		class: "relative flex flex-row items-end justify-center w-full",
+		"[class]": "classes()",
 	},
 	templateUrl: "./theme-art.component.html",
 })
 export class ThemeArtComponent {
 	readonly theme = input.required<ThemeModel>();
+	readonly size = input<"sm" | "md">("md");
+
+	classes = computed(() => themeArt());
+
+	displayArtClasses = computed(() => themeDisplayArt({ size: this.size() }));
+
+	coverClasses = computed(() => themeArtCover({ size: this.size() }));
 }

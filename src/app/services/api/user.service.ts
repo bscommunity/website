@@ -14,6 +14,7 @@ import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 import { apiUrl } from "@/lib/api";
+import { type CountedResponse, toQueryPage } from "@/lib/pagination";
 import type { QueryPage } from "../cache.service";
 import { CacheService } from "../cache.service";
 
@@ -177,9 +178,9 @@ export class UserService {
 		}
 
 		return this.http
-			.get<[TourPassModel[], number | null]>(`${apiUrl}/tourpasses`, { params: httpParams })
+			.get<CountedResponse<TourPassModel>>(`${apiUrl}/tourpasses`, { params: httpParams })
 			.pipe(
-				map((res) => ({ items: res[0], total: res[1] })),
+				map(toQueryPage),
 				tap((page) => {
 					if (!isPaginated) {
 						this.cacheService.setQuery("tourpass", cacheKey, page, "session", 30_000);
@@ -206,7 +207,7 @@ export class UserService {
 			offset?: number;
 			count?: boolean;
 		} = {},
-	): Observable<[CatalogItemModel[], number | null]> {
+	): Observable<QueryPage<ThemeModel>> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
@@ -214,10 +215,9 @@ export class UserService {
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 		if (params.count) httpParams["count"] = true;
 
-		return this.http.get<[CatalogItemModel[], number | null]>(
-			`${apiUrl}/themes`,
-			{ params: httpParams },
-		);
+		return this.http
+			.get<CountedResponse<ThemeModel>>(`${apiUrl}/themes`, { params: httpParams })
+			.pipe(map(toQueryPage));
 	}
 
 	getUserActivity(
