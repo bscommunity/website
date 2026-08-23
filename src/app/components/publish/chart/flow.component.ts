@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import {
-	FormBuilder,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -15,8 +14,18 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 // Components
 import { PanelComponent } from "@/components/panel/panel.component";
 
+// Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
+
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
+
+interface ChartFlowForm {
+	chartFlow: "new" | "existing";
+}
 
 interface Option {
 	icon: string;
@@ -37,7 +46,7 @@ interface Option {
 				<mat-radio-group
 					aria-label="Chart flow options"
 					class="flex items-start flex-col gap-1 my-4"
-					formControlName="chartFlow"
+					[formControl]="form.controls.chartFlow"
 				>
 					@for (option of options; track option; let i = $index) {
 						<mat-radio-button
@@ -54,8 +63,8 @@ interface Option {
 						</mat-radio-button>
 					}
 				</mat-radio-group>
-				<app-panel [variant]="form.get('chartFlow')?.value === 'new' ? 'warning' : 'info'">
-					@if (form.get('chartFlow')?.value === 'new') {
+				<app-panel [variant]="form.controls.chartFlow.value === 'new' ? 'warning' : 'info'">
+					@if (form.controls.chartFlow.value === 'new') {
 						Please use
 							<a
 								href="http://143.110.226.4:3001/encrypt"
@@ -84,7 +93,7 @@ interface Option {
 				<button
 					type="submit"
 					mat-button
-					[disabled]="!form.get('chartFlow')?.value || form.get('chartFlow')?.value === 'new'"
+					[disabled]="!form.controls.chartFlow.value || form.controls.chartFlow.value === 'new'"
 				>
 					Continue
 				</button>
@@ -103,13 +112,9 @@ interface Option {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishChartFlowComponent {
-	private fb = inject(FormBuilder);
+	private formService = inject(FormService);
 	dialogRef = inject<MatDialogRef<PublishChartFlowComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
-
-	form: FormGroup = this.fb.group({
-		chartFlow: "existing",
-	});
 
 	options: Option[] = [
 		{ icon: "add", label: "Create a new chart", value: "new" },
@@ -119,14 +124,26 @@ export class PublishChartFlowComponent {
 			value: "existing",
 		},
 	];
-	selectedOption: Option | null = this.options[1];
 
-	test = 1;
+	chartFlowField = this.formService.createSelectField({
+		key: "chartFlow",
+		label: "Chart flow",
+		options: [
+			{ value: "new", label: "Create a new chart" },
+			{ value: "existing", label: "Link to an existing chart" },
+		],
+	});
+
+	form: FormGroup<ValuesToControls<ChartFlowForm>> =
+		this.formService.createFormGroup<ChartFlowForm>(
+			[this.chartFlowField],
+			{ chartFlow: "existing" },
+		);
 
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
-				data: this.form.value,
+				data: this.form.getRawValue(),
 				additionalData: {
 					mode: "uploading",
 				},

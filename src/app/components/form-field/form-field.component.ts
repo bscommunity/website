@@ -103,7 +103,7 @@ export class FormFieldComponent implements OnInit, OnDestroy {
 	onSelectionChange() {
 		const control = this.control();
 		control.markAsTouched();
-		this.getSelectConfig().onChange?.(control.value as never);
+		this.getSelectConfig().onChange?.(control.value);
 		this.cdr.markForCheck();
 	}
 

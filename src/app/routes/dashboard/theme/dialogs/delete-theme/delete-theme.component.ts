@@ -1,11 +1,6 @@
 import { Router } from "@angular/router";
 import { Component, inject, signal } from "@angular/core";
-import {
-	FormControl,
-	FormGroup,
-	ReactiveFormsModule,
-	Validators,
-} from "@angular/forms";
+import { FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ViewportScroller } from "@angular/common";
 
 // Material
@@ -18,17 +13,26 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
-import { MatFormField } from "@angular/material/form-field";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatInputModule } from "@angular/material/input";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
+// Components
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
 // Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
 import { ThemeService } from "@/services/api/theme.service";
 
 interface DeleteThemeDialogData {
 	id: string;
 	name: string;
+}
+
+interface ConfirmDeleteForm {
+	confirmName: string;
 }
 
 @Component({
@@ -39,10 +43,9 @@ interface DeleteThemeDialogData {
 		MatDialogContent,
 		MatDialogActions,
 		MatDialogClose,
-		MatInputModule,
 		MatProgressSpinnerModule,
-		MatFormField,
 		ReactiveFormsModule,
+		FormFieldComponent,
 	],
 	templateUrl: "./delete-theme.component.html",
 })
@@ -50,18 +53,31 @@ export class DeleteThemeComponent {
 	private themeService = inject(ThemeService);
 	private router = inject(Router);
 	private viewportScroller = inject(ViewportScroller);
+	private formService = inject(FormService);
 
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<DeleteThemeComponent>);
 
 	readonly data = inject<DeleteThemeDialogData>(MAT_DIALOG_DATA);
 
-	form = new FormGroup({
-		themeName: new FormControl("", [
-			Validators.required,
+	confirmField = this.formService.createTextField({
+		key: "confirmName",
+		label: "Theme name",
+		placeholder: "Type theme name",
+		required: true,
+		validators: [
 			Validators.pattern(new RegExp(escapeRegExp(this.data.name))),
-		]),
+		],
+		validationMessages: {
+			pattern: "Name must match exactly",
+		},
 	});
+
+	form: FormGroup<ValuesToControls<ConfirmDeleteForm>> =
+		this.formService.createFormGroup<ConfirmDeleteForm>(
+			[this.confirmField],
+			{},
+		);
 
 	readonly isLoading = signal(false);
 

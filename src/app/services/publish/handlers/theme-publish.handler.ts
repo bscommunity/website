@@ -52,8 +52,7 @@ export const initialThemeFormData: ThemeFormData = {
 
 @Injectable({ providedIn: "root" })
 export class ThemePublishHandler
-	implements PublishHandler<ThemeFormData, ThemeModel>
-{
+	implements PublishHandler<ThemeFormData, ThemeModel> {
 	private themeService = inject(ThemeService);
 
 	getStepComponents(): Type<unknown>[] {
@@ -90,6 +89,14 @@ export class ThemePublishHandler
 			...rest
 		} = data;
 
+		if (!iconFile || !displayFile) {
+			throw new Error("Icon and display files are required.");
+		}
+
+		if (!topFile || !perfectBarFile) {
+			throw new Error("Top file and perfect bar file are required.");
+		}
+
 		const assetEntries: [string, File][] = [];
 		if (iconFile) assetEntries.push([iconFile.name, iconFile]);
 		if (trackFile) assetEntries.push([trackFile.name, trackFile]);
@@ -118,6 +125,8 @@ export class ThemePublishHandler
 			displayFile: displayFile ?? null,
 			bundleFile,
 		};
+
+		console.log("Submitting theme with payload:", payload);
 
 		const response = await this.themeService.createTheme(
 			payload,

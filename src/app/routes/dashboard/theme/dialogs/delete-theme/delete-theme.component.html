@@ -10,18 +10,11 @@
 		<p>
 			Please type <strong>{{ this.data.name }}</strong> to confirm.
 		</p>
-		<mat-form-field
-			appearance="outline"
-			subscriptSizing="dynamic"
+		<app-form-field
 			class="w-full"
-		>
-			<input
-				matInput
-				type="text"
-				placeholder="Type theme name"
-				formControlName="themeName"
-			/>
-		</mat-form-field>
+			[control]="form.controls.confirmName"
+			[config]="confirmField"
+		/>
 	</mat-dialog-content>
 	<mat-dialog-actions>
 		<button mat-button mat-dialog-close="cancel" [disabled]="isLoading()">
@@ -31,7 +24,7 @@
 			type="submit"
 			mat-button
 			[disabled]="
-				isLoading() || !form.get('themeName')?.value || form.invalid
+				isLoading() || !form.controls.confirmName.value || form.invalid
 			"
 		>
 			@if (isLoading()) {

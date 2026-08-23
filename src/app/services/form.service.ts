@@ -33,6 +33,8 @@ export interface TextFieldConfig extends BaseFieldConfig {
 	readonly type: "text";
 	placeholder?: string;
 	inputType?: TextInputType;
+	/** Renders a <textarea> instead of an <input>. */
+	multiline?: boolean;
 	onValueProcessed?: (value: string) => Promise<void> | string;
 	urlFileExtension?: string;
 }
@@ -59,6 +61,18 @@ export type FormFieldConfig =
 	| TextFieldConfig
 	| FileFieldConfig
 	| SelectFieldConfig<any>;
+
+/**
+ * Constrains a fields array so every field's `key` must be a string key of the
+ * values interface `V`. A typo'd or unknown key is a compile-time error:
+ *
+ * ```ts
+ * createFormGroup<DetailsForm>(fields) // fields: readonly FieldsFor<DetailsForm>[]
+ * ```
+ */
+export type FieldsFor<V extends object> = {
+	[K in keyof V & string]: FormFieldConfig & { key: K };
+}[keyof V & string];
 
 /**
  * Maps a form values interface to a typed `FormGroup` controls map.
@@ -96,7 +110,16 @@ interface FormSubmissionConfig<
 export class FormService {
 	private validationService = inject(ValidationService);
 
-	createTextField(config: Omit<TextFieldConfig, "type">): TextFieldConfig {
+	/**
+	 * `const C` keeps the literal `key` type so `FieldsFor<V>` can validate it
+	 * at compile time. For new factories: never pair an explicit value generic
+	 * with `const C` — explicit type args disable literal inference for
+	 * non-literal properties (e.g. `options` from a `.map()` call), silently
+	 * widening the key back to `string`.
+	 */
+	createTextField<const C extends Omit<TextFieldConfig, "type">>(
+		config: C,
+	): TextFieldConfig & C {
 		const validators: ValidatorFn[] = config.validators
 			? [...config.validators]
 			: [];
@@ -135,10 +158,12 @@ export class FormService {
 			inputType: config.inputType || "text",
 			validators,
 			validationMessages: messages,
-		};
+		} as TextFieldConfig & C;
 	}
 
-	createFileField(config: Omit<FileFieldConfig, "type">): FileFieldConfig {
+	createFileField<const C extends Omit<FileFieldConfig, "type">>(
+		config: C,
+	): FileFieldConfig & C {
 		const validators: ValidatorFn[] = config.validators
 			? [...config.validators]
 			: [];
@@ -161,12 +186,18 @@ export class FormService {
 			type: "file",
 			validators,
 			validationMessages: messages,
-		};
+		} as FileFieldConfig & C;
 	}
 
-	createSelectField<V>(
-		config: Omit<SelectFieldConfig<V>, "type">,
-	): SelectFieldConfig<V> {
+	createSelectField<
+		V,
+		const C extends Omit<SelectFieldConfig<V>, "type"> = Omit<
+			SelectFieldConfig<V>,
+			"type"
+		>,
+	>(
+		config: C,
+	): SelectFieldConfig<V> & C {
 		const validators: ValidatorFn[] = config.validators
 			? [...config.validators]
 			: [];
@@ -189,19 +220,16 @@ export class FormService {
 	}
 
 	createFormGroup<V extends object>(
-		fields: readonly FormFieldConfig[],
+		fields: readonly FieldsFor<V>[],
 		initialData: Partial<V> = {},
 	): FormGroup<ValuesToControls<V>> {
 		const controls: Record<string, FormControl> = {};
 		for (const field of fields) {
-			const control = new FormControl(
-				initialData[field.key as keyof V] ?? null,
-				{
-					validators: field.validators?.length
-						? field.validators
-						: null,
-				},
-			);
+			const control = new FormControl(initialData[field.key] ?? null, {
+				validators: field.validators?.length
+					? field.validators
+					: null,
+			});
 			if (field.disabled) control.disable();
 			controls[field.key] = control;
 		}
@@ -295,7 +323,7 @@ export class FormService {
 	}
 
 	async submitForm<V extends object>(
-		fields: readonly FormFieldConfig[],
+		fields: readonly FieldsFor<V>[],
 		form: FormGroup<ValuesToControls<V>>,
 		enableDebugLogging = false,
 	): Promise<FormSubmissionResult<V>> {

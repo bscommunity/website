@@ -133,7 +133,7 @@ export class PublishThemeFilesComponent {
 			accept: [".png", ".jpg", ".jpeg", ".webp"],
 			hint: "512x32 - Perfect timing line",
 		}),
-	];
+	] as const;
 
 	form: FormGroup<ValuesToControls<ThemeFilesForm>> =
 		this.formService.createFormGroup<ThemeFilesForm>(

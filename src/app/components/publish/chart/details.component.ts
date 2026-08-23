@@ -6,11 +6,10 @@ import {
 } from "@angular/core";
 
 import {
-	FormBuilder,
+	FormControl,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
-	Validators,
 } from "@angular/forms";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import {
@@ -18,16 +17,31 @@ import {
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatInputModule } from "@angular/material/input";
-import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
-import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 
 // Models
 import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 
+// Components
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
+// Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
+
+// Types
 import { type DialogData } from "@/services/publish/publish.service";
 import { initialChartFormData as initialFormData } from "@/services/publish/handlers/chart-publish.handler";
+
+interface ChartDetailsForm {
+	track: string;
+	artist: string;
+	difficulty: Difficulty;
+	isDeluxe: boolean;
+	isExplicit: boolean;
+}
 
 @Component({
 	selector: "app-publish-chart-details",
@@ -39,70 +53,31 @@ import { initialChartFormData as initialFormData } from "@/services/publish/hand
 					{{ description }}
 				</p>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Title</mat-label>
-					<input
-						type="text"
-						matInput
-						formControlName="track"
-						placeholder="We Live Forever"
-					/>
-					@if (
-						form.get("track")?.hasError("required") &&
-						form.get("track")?.touched
-					) {
-						<mat-error
-							>Track is <strong>required</strong></mat-error
-						>
-					}
-				</mat-form-field>
+				<app-form-field
+					[control]="form.controls.track"
+					[config]="fields.trackField"
+				/>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Artist</mat-label>
-					<input
-						type="text"
-						matInput
-						formControlName="artist"
-						placeholder="The Prodigy"
-					/>
-					@if (
-						form.get("artist")?.hasError("required") &&
-						form.get("artist")?.touched
-					) {
-						<mat-error
-							>Artist is <strong>required</strong></mat-error
-						>
-					}
-				</mat-form-field>
+				<app-form-field
+					[control]="form.controls.artist"
+					[config]="fields.artistField"
+				/>
 
 				<div class="flex flex-row items-center justify-between last">
-					<mat-form-field
-						subscriptSizing="dynamic"
-						id="last"
+					<app-form-field
 						class="w-1/3"
-						appearance="outline"
-					>
-						<mat-label>Difficulty</mat-label>
-						<mat-select formControlName="difficulty">
-							@for (
-								difficulty of difficulties;
-								track difficulty
-							) {
-								<mat-option [value]="difficulty.key">
-									{{ difficulty.value }}
-								</mat-option>
-							}
-						</mat-select>
-					</mat-form-field>
+						[control]="form.controls.difficulty"
+						[config]="fields.difficultyField"
+					/>
 					<mat-slide-toggle
 						labelPosition="before"
-						formControlName="isDeluxe"
+						[formControl]="form.controls.isDeluxe"
 					>
 						Is deluxe?
 					</mat-slide-toggle>
 					<mat-slide-toggle
 						labelPosition="before"
-						formControlName="isExplicit"
+						[formControl]="form.controls.isExplicit"
 					>
 						Is explicit?
 					</mat-slide-toggle>
@@ -125,18 +100,15 @@ import { initialChartFormData as initialFormData } from "@/services/publish/hand
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatLabel,
-		MatSelectModule,
-		FormsModule,
-		MatFormFieldModule,
-		MatInputModule,
 		MatSlideToggleModule,
+		FormsModule,
 		ReactiveFormsModule,
+		FormFieldComponent,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishChartDetailsComponent implements OnInit {
-	private fb = inject(FormBuilder);
+	private formService = inject(FormService);
 	dialogRef =
 		inject<MatDialogRef<PublishChartDetailsComponent>>(MatDialogRef);
 	data = inject<DialogData>(MAT_DIALOG_DATA);
@@ -145,52 +117,76 @@ export class PublishChartDetailsComponent implements OnInit {
 	description =
 		"Fill in the details for your chart submission. Make sure all the required fields are filled before proceeding.";
 
-	form: FormGroup;
 	difficulties = Object.values(Difficulty).map((difficulty) => ({
-		key: difficulty,
-		value: getDifficultyLabel(difficulty),
+		value: difficulty,
+		label: getDifficultyLabel(difficulty),
 	}));
 
+	readonly fields = {
+		trackField: this.formService.createTextField({
+			key: "track",
+			label: "Title",
+			placeholder: "We Live Forever",
+			required: true,
+			disabled: this.data.inactive?.includes("track"),
+		}),
+		artistField: this.formService.createTextField({
+			key: "artist",
+			label: "Artist",
+			placeholder: "The Prodigy",
+			required: true,
+			disabled: this.data.inactive?.includes("artist"),
+		}),
+		difficultyField: this.formService.createSelectField({
+			key: "difficulty",
+			label: "Difficulty",
+			options: this.difficulties,
+			disabled: this.data.inactive?.includes("difficulty"),
+		}),
+	};
+
+	private readonly allFields = [
+		this.fields.trackField,
+		this.fields.artistField,
+		this.fields.difficultyField,
+	] as const;
+
+	form: FormGroup<ValuesToControls<ChartDetailsForm>>;
+
 	constructor() {
-		const data = this.data;
+		this.title = this.data.title || this.title;
+		this.description = this.data.description || this.description;
 
-		this.title = data.title || this.title;
-		this.description = data.description || this.description;
+		this.form = this.formService.createFormGroup<ChartDetailsForm>(
+			this.allFields,
+			{
+				track: initialFormData.track,
+				artist: initialFormData.artist,
+				difficulty: initialFormData.difficulty,
+			},
+		);
 
-		this.form = this.fb.group({
-			track: [
-				{
-					value: initialFormData.track,
-					disabled: data.inactive?.includes("track"),
-				},
-				Validators.required,
-			],
-			artist: [
-				{
-					value: initialFormData.artist,
-					disabled: data.inactive?.includes("artist"),
-				},
-				Validators.required,
-			],
-			difficulty: [
-				{
-					value: initialFormData.difficulty,
-					disabled: data.inactive?.includes("difficulty"),
-				},
-			],
-			isDeluxe: [
-				{
-					value: initialFormData.isDeluxe,
-					disabled: data.inactive?.includes("isDeluxe"),
-				},
-			],
-			isExplicit: [
-				{
-					value: initialFormData.isExplicit,
-					disabled: data.inactive?.includes("isExplicit"),
-				},
-			],
-		});
+		this.form.addControl(
+			"isDeluxe",
+			new FormControl(
+				{ value: initialFormData.isDeluxe, disabled: false },
+				{ nonNullable: true },
+			),
+		);
+		this.form.addControl(
+			"isExplicit",
+			new FormControl(
+				{ value: initialFormData.isExplicit, disabled: false },
+				{ nonNullable: true },
+			),
+		);
+
+		if (this.data.inactive?.includes("isDeluxe")) {
+			this.form.controls.isDeluxe.disable();
+		}
+		if (this.data.inactive?.includes("isExplicit")) {
+			this.form.controls.isExplicit.disable();
+		}
 	}
 
 	ngOnInit() {
@@ -198,9 +194,14 @@ export class PublishChartDetailsComponent implements OnInit {
 		this.form.patchValue(this.data.formData);
 	}
 
-	onSubmit() {
-		if (this.form.valid) {
-			this.dialogRef.close(this.form.value);
+	async onSubmit() {
+		const result = await this.formService.submitForm<ChartDetailsForm>(
+			this.allFields,
+			this.form,
+		);
+
+		if (result.isValid) {
+			this.dialogRef.close(result.formValue);
 		}
 	}
 }

@@ -224,19 +224,30 @@ function loadImageDimensions(
 				class="w-full md:w-[49%]! mx-0!"
 				mat-button
 				type="button"
-				(click)="onSkip()"
+				(click)="dialogRef.close('back')"
 			>
-				Skip
+				Back
 			</button>
-			<button
-				class="w-full md:w-[49%]! mx-0!"
-				mat-flat-button
-				type="button"
-				[disabled]="!canContinue()"
-				(click)="onSubmit()"
-			>
-				Continue
-			</button>
+			@if (hasInsertedFiles) {
+				<button
+					class="w-full md:w-[49%]! mx-0!"
+					mat-flat-button
+					type="button"
+					[disabled]="!canContinue()"
+					(click)="onSubmit()"
+				>
+					Continue
+				</button>
+			} @else {
+				<button
+					class="w-full md:w-[49%]! mx-0!"
+					mat-flat-button
+					type="button"
+					(click)="onSkip()"
+				>
+					Skip
+				</button>
+			}
 		</mat-dialog-actions>
 	`,
 	imports: [MatDialogModule, MatButtonModule, NgGlyph],
@@ -254,6 +265,10 @@ export class PublishThemeBatchFilesComponent {
 	private cdr = inject(ChangeDetectorRef);
 	private snackBar = inject(MatSnackBar);
 	private uuidLookup = buildUuidLookup();
+
+	get hasInsertedFiles(): boolean {
+		return this.identifiedFiles.length > 0;
+	}
 
 	get hasValidFiles(): boolean {
 		return this.identifiedFiles.some((f) => f.assetType !== "unknown");

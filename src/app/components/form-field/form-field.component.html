@@ -6,13 +6,23 @@
 			[subscriptSizing]="config().hint ? 'dynamic' : 'fixed'"
 		>
 			<mat-label>{{ config().label }}</mat-label>
-			<input
-				matInput
-				[type]="getTextConfig().inputType || 'text'"
-				[formControl]="control()"
-				[placeholder]="getTextConfig().placeholder || ''"
-				(blur)="onBlur()"
-			/>
+			@if (getTextConfig().multiline) {
+				<textarea
+					matInput
+					rows="2"
+					[formControl]="control()"
+					[placeholder]="getTextConfig().placeholder || ''"
+					(blur)="onBlur()"
+				></textarea>
+			} @else {
+				<input
+					matInput
+					[type]="getTextConfig().inputType || 'text'"
+					[formControl]="control()"
+					[placeholder]="getTextConfig().placeholder || ''"
+					(blur)="onBlur()"
+				/>
+			}
 			@if (control().invalid) {
 				<mat-error [innerHTML]="errorMessage()"></mat-error>
 			}

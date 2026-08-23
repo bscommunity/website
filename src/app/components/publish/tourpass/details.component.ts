@@ -5,29 +5,26 @@ import {
 	inject,
 } from "@angular/core";
 import {
-	FormBuilder,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
-	Validators,
-	ValidatorFn,
-	FormControl,
 } from "@angular/forms";
 import {
 	MAT_DIALOG_DATA,
 	MatDialogModule,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
-import { MatFormFieldModule } from "@angular/material/form-field";
-
-// Services
-import { FormService, type FormFieldConfig } from "@/services/form.service";
-import { ValidationService } from "@/services/validation.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
+// Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
+import { ValidationService } from "@/services/validation.service";
 
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
@@ -35,6 +32,13 @@ import {
 	initialTourPassFormData,
 	type TourPassFormData,
 } from "@/services/publish/handlers/tourpass-publish.handler";
+
+interface TourPassDetailsForm {
+	name: string;
+	description: string;
+	trailerUrl: string;
+	coverFile: File | null;
+}
 
 @Component({
 	selector: "app-publish-tourpass-details",
@@ -47,51 +51,24 @@ import {
 					all the required fields are filled before proceeding.
 				</p>
 
-				<mat-form-field appearance="outline">
-					<mat-label>Name</mat-label>
-					<input
-						matInput
-						type="text"
-						formControlName="name"
-						placeholder="Festival Afterglow"
-					/>
-					@if (
-						form.get("name")?.hasError("required") &&
-						form.get("name")?.touched
-					) {
-						<mat-error>Name is <strong>required</strong></mat-error>
-					}
-				</mat-form-field>
-
-				<mat-form-field appearance="outline">
-					<mat-label>Description</mat-label>
-					<textarea
-						matInput
-						rows="2"
-						formControlName="description"
-						placeholder="A bright setlist of festival-ready charts."
-					></textarea>
-				</mat-form-field>
-
-				<mat-form-field appearance="outline">
-					<mat-label>Trailer</mat-label>
-					<input
-						matInput
-						type="url"
-						formControlName="trailerUrl"
-						placeholder="https://youtu.be/BY_XwvKogC8"
-					/>
-					@if (
-						form.get("trailerUrl")?.hasError("invalidVideoUrl") &&
-						form.get("trailerUrl")?.touched
-					) {
-						<mat-error>Must be a YouTube video URL</mat-error>
-					}
-				</mat-form-field>
+				<app-form-field
+					[control]="form.controls.name"
+					[config]="fields.nameField"
+				/>
 
 				<app-form-field
-					[control]="coverControl"
-					[config]="coverField"
+					[control]="form.controls.description"
+					[config]="fields.descriptionField"
+				/>
+
+				<app-form-field
+					[control]="form.controls.trailerUrl"
+					[config]="fields.trailerUrlField"
+				/>
+
+				<app-form-field
+					[control]="form.controls.coverFile"
+					[config]="fields.coverFileField"
 				/>
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
@@ -111,8 +88,6 @@ import {
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
-		MatFormFieldModule,
-		MatInputModule,
 		FormsModule,
 		ReactiveFormsModule,
 		FormFieldComponent,
@@ -120,7 +95,6 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishTourPassDetailsComponent implements OnInit {
-	private fb = inject(FormBuilder);
 	private formService = inject(FormService);
 	private validationService = inject(ValidationService);
 
@@ -128,67 +102,89 @@ export class PublishTourPassDetailsComponent implements OnInit {
 		inject<MatDialogRef<PublishTourPassDetailsComponent>>(MatDialogRef);
 	data = inject<DialogData<TourPassFormData>>(MAT_DIALOG_DATA);
 
-	form: FormGroup;
-	coverField: FormFieldConfig = this.formService.createFileField({
-		key: "coverFile",
-		label: "Cover art",
-		required: true,
-		accept: [".png", ".jpeg", ".jpg", ".avif", ".webp"],
-		hint: "Accepted formats: .png, .jpeg, .avif, .webp",
-	});
+	readonly fields = {
+		nameField: this.formService.createTextField({
+			key: "name",
+			label: "Name",
+			placeholder: "Festival Afterglow",
+			required: true,
+		}),
+		descriptionField: this.formService.createTextField({
+			key: "description",
+			label: "Description",
+			multiline: true,
+			placeholder: "A bright setlist of festival-ready charts.",
+		}),
+		trailerUrlField: this.formService.createTextField({
+			key: "trailerUrl",
+			label: "Trailer",
+			placeholder: "https://youtu.be/BY_XwvKogC8",
+			validators: [this.validationService.getYouTubeValidator()],
+			validationMessages: {
+				invalidVideoUrl:
+					this.validationService.messages.invalidVideoUrl,
+			},
+			onValueProcessed: (value) =>
+				this.validationService.extractYouTubeVideoId(value),
+		}),
+		coverFileField: this.formService.createFileField({
+			key: "coverFile",
+			label: "Cover art",
+			required: true,
+			accept: [".png", ".jpeg", ".jpg", ".avif", ".webp"],
+			hint: "Accepted formats: .png, .jpeg, .avif, .webp",
+		}),
+	};
 
-	constructor() {
-		const trailerValidator: ValidatorFn = (control) => {
-			if (!control.value) return null;
-			try {
-				this.validationService.extractYouTubeVideoId(control.value);
-				return null;
-			} catch {
-				return { invalidVideoUrl: true };
-			}
-		};
+	private readonly allFields = [
+		this.fields.nameField,
+		this.fields.descriptionField,
+		this.fields.trailerUrlField,
+		this.fields.coverFileField,
+	] as const;
 
-		this.form = this.fb.group({
-			name: [initialTourPassFormData.name, Validators.required],
-			description: [initialTourPassFormData.description],
-			trailerUrl: [
-				initialTourPassFormData.trailerUrl,
-				[trailerValidator],
-			],
-			coverFile: [initialTourPassFormData.coverFile, Validators.required],
-		});
-	}
-
-	get coverControl(): FormControl {
-		return this.form.get("coverFile") as FormControl;
-	}
+	form: FormGroup<ValuesToControls<TourPassDetailsForm>> =
+		this.formService.createFormGroup<TourPassDetailsForm>(
+			this.allFields,
+			{
+				name: initialTourPassFormData.name,
+				description: initialTourPassFormData.description ?? "",
+				trailerUrl: initialTourPassFormData.trailerUrl ?? "",
+				coverFile: initialTourPassFormData.coverFile ?? null,
+			},
+		);
 
 	ngOnInit() {
-		this.form.patchValue(this.data.formData);
+		this.form.patchValue({
+			name: this.data.formData.name ?? "",
+			description: this.data.formData.description ?? "",
+			trailerUrl: this.data.formData.trailerUrl ?? "",
+			coverFile: this.data.formData.coverFile ?? null,
+		});
+
 		if (this.data.formData.coverUrl) {
-			const control = this.form.get("coverFile");
-			control?.clearValidators();
-			control?.updateValueAndValidity();
+			const control = this.form.controls.coverFile;
+			control.clearValidators();
+			control.updateValueAndValidity();
 		}
 	}
 
 	async onSubmit() {
-		if (this.form.invalid) return;
+		const result = await this.formService.submitForm<TourPassDetailsForm>(
+			this.allFields,
+			this.form,
+		);
 
-		const values = this.form.value as TourPassFormData;
-		const coverFile = values.coverFile as File | null;
-		const coverUrl = coverFile
-			? await this.fileToDataUrl(coverFile)
+		if (!result.isValid) return;
+
+		const v = result.formValue;
+		const coverUrl = v.coverFile
+			? await this.fileToDataUrl(v.coverFile)
 			: this.data.formData.coverUrl || "";
 
-		const trailerUrl = values.trailerUrl
-			? this.validationService.extractYouTubeVideoId(values.trailerUrl)
-			: "";
-
 		this.dialogRef.close({
-			...values,
+			...v,
 			coverUrl,
-			trailerUrl,
 		});
 	}
 

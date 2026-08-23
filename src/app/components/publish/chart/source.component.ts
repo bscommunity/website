@@ -28,7 +28,6 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 // Services
 import {
 	FormService,
-	type FormFieldConfig,
 	type ValuesToControls,
 } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
@@ -50,12 +49,6 @@ interface ChartSourceFormValues {
 	chartBundle: File | null;
 	previewUrl: string;
 	bundleUrl: string;
-}
-
-interface FormMode {
-	title: string;
-	description: string;
-	fields: FormFieldConfig[];
 }
 
 @Component({
@@ -143,37 +136,32 @@ export class PublishChartSourceComponent implements OnInit {
 			required: false,
 			onValueProcessed: this.validationService.extractYouTubeVideoId,
 		}),
+		bundleUrlField: this.formService.createTextField({
+			key: "bundleUrl",
+			label: "Bundle",
+			inputType: "url",
+			placeholder: "https://example.com/chart.zip",
+			hint: "Must be a direct link to the .zip file",
+			required: true,
+			urlFileExtension: "zip",
+		}),
 	};
 
 	// Form modes configuration
-	private readonly formModes: Record<string, FormMode> = {
+	private readonly formModes = {
 		linking: {
 			title: "Linking",
 			description: "Provide the URL to your chart bundle.",
-			fields: [
-				this.formService.createTextField({
-					key: "bundleUrl",
-					label: "Bundle",
-					inputType: "url",
-					placeholder: "https://example.com/chart.zip",
-					hint: "Must be a direct link to the .zip file",
-					required: true,
-					urlFileExtension: "zip",
-				}),
-				this.FIELDS.gameplayUrlField,
-			],
+			fields: [this.FIELDS.bundleUrlField, this.FIELDS.gameplayUrlField],
 		},
 		uploading: {
 			title: "Uploading",
 			description: "Upload your chart bundle to Discord's workshop.",
-			fields: [
-				this.FIELDS.chartBundleField,
-				this.FIELDS.gameplayUrlField,
-			],
+			fields: [this.FIELDS.chartBundleField, this.FIELDS.gameplayUrlField],
 		},
 	};
 
-	get formMode(): FormMode {
+	get formMode() {
 		return this.formModes[this.mode];
 	}
 
@@ -201,7 +189,7 @@ export class PublishChartSourceComponent implements OnInit {
 			this.form,
 		);
 
-		if (result.isValid && result.formValue) {
+		if (result.isValid) {
 			console.log(
 				"Form submitted successfully with value:",
 				result.formValue,

@@ -135,7 +135,7 @@ export class PublishThemeDetailsComponent implements OnInit {
 			label: "Display art",
 			accept: [".png", ".jpg", ".jpeg", ".webp"],
 			required: true,
-			hint: "1024x576 - Image shown in the theme preview",
+			hint: "A 9x16 portrait image is recommended.",
 		}),
 		previewUrlField: this.formService.createTextField({
 			key: "previewUrl",
@@ -158,7 +158,7 @@ export class PublishThemeDetailsComponent implements OnInit {
 			placeholder: "Credit or URL to the original artist",
 			required: false,
 		}),
-		genreField: this.formService.createSelectField<ThemeGenre>({
+		genreField: this.formService.createSelectField({
 			key: "genre",
 			label: "Genre",
 			placeholder: "Select a genre",
@@ -168,7 +168,7 @@ export class PublishThemeDetailsComponent implements OnInit {
 			})),
 			onChange: () => this.onGenreChange(),
 		}),
-		replacesField: this.formService.createSelectField<string>({
+		replacesField: this.formService.createSelectField({
 			key: "replaces",
 			label: "Replaces",
 			placeholder: "Select a theme to replace",
@@ -185,7 +185,7 @@ export class PublishThemeDetailsComponent implements OnInit {
 		this.fields.originalArtworkField,
 		this.fields.genreField,
 		this.fields.replacesField,
-	];
+	] as const;
 
 	form: FormGroup<ValuesToControls<ThemeDetailsForm>> =
 		this.formService.createFormGroup<ThemeDetailsForm>(this.allFields, {

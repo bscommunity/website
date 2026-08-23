@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 
 import {
-	FormBuilder,
 	FormGroup,
 	FormsModule,
 	ReactiveFormsModule,
@@ -10,6 +9,16 @@ import { MatRadioModule } from "@angular/material/radio";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogRef } from "@angular/material/dialog";
+
+// Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
+
+interface ContentTypeForm {
+	contentType: string;
+}
 
 @Component({
 	selector: "app-publish-type",
@@ -23,7 +32,7 @@ import { MatDialogRef } from "@angular/material/dialog";
 				<mat-radio-group
 					aria-labelledby="content-type-group"
 					class="flex items-start flex-col my-4"
-					formControlName="contentType"
+					[formControl]="form.controls.contentType"
 				>
 					@for (type of contentTypes; track type; let i = $index) {
 						<mat-radio-button
@@ -43,7 +52,7 @@ import { MatDialogRef } from "@angular/material/dialog";
 				<button
 					type="submit"
 					mat-button
-					[disabled]="!form.get('contentType')?.value"
+					[disabled]="!form.controls.contentType.value"
 				>
 					Continue
 				</button>
@@ -60,21 +69,32 @@ import { MatDialogRef } from "@angular/material/dialog";
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishTypeComponent {
-	private fb = inject(FormBuilder);
+	private formService = inject(FormService);
 	dialogRef = inject<MatDialogRef<PublishTypeComponent>>(MatDialogRef);
-
-	form: FormGroup = this.fb.group({
-		contentType: "",
-	});
 
 	contentTypes: string[] = ["Chart", "Tourpass", "Theme"];
 	readonly disabledTypes = new Set<string>();
-	currentContentType = "Chart";
+
+	contentTypeField = this.formService.createSelectField({
+		key: "contentType",
+		label: "Content type",
+		options: this.contentTypes.map((type) => ({
+			value: type,
+			label: type,
+		})),
+		required: true,
+	});
+
+	form: FormGroup<ValuesToControls<ContentTypeForm>> =
+		this.formService.createFormGroup<ContentTypeForm>(
+			[this.contentTypeField],
+			{},
+		);
 
 	onSubmit() {
 		if (this.form.valid) {
 			this.dialogRef.close({
-				contentType: this.form.get("contentType")?.value,
+				contentType: this.form.controls.contentType.value,
 			});
 		}
 	}
