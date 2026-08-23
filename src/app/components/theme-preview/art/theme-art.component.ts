@@ -15,7 +15,7 @@ import { themeArt, themeArtCover, themeDisplayArt } from "./theme-art.variants";
 })
 export class ThemeArtComponent {
 	readonly theme = input.required<ThemeModel>();
-	readonly size = input<"sm" | "md">("md");
+	readonly size = input<"sm" | "md" | "lg">("md");
 
 	classes = computed(() => themeArt());
 

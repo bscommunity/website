@@ -14,6 +14,7 @@ export const themeDisplayArt = cva(
 			size: {
 				sm: "w-20 xl:w-24",
 				md: "w-28 xl:w-32",
+				lg: "w-full border-4 mb-6",
 			},
 		},
 
@@ -32,6 +33,7 @@ export const themeArtCover = cva(
 			size: {
 				sm: "w-14 h-14 xl:w-16 xl:h-16 -ml-5",
 				md: "w-18 h-18 xl:w-20 xl:h-20 -ml-6",
+				lg: "w-36 h-36 -ml-16 border-4",
 			},
 		},
 

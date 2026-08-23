@@ -173,6 +173,9 @@
 						@for (theme of themes; track theme.id) {
 							<app-theme-preview
 								[theme]="theme"
+								(click)="openThemeDialog(theme)"
+								(keydown.enter)="openThemeDialog(theme)"
+								(keydown.space)="openThemeDialog(theme)"
 							></app-theme-preview>
 						}
 					</div>

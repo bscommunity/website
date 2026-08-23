@@ -37,6 +37,7 @@ import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.
 // Dialogs
 import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
 import { TourPassDialogComponent } from "@/components/dialogs/tourpass/tourpass-dialog.component";
+import { ThemeDialogComponent } from "@/components/dialogs/theme/theme-dialog.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
@@ -320,6 +321,19 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		this.dialog.open(TourPassDialogComponent, {
 			data: {
 				tourpass,
+			},
+			width: "575px",
+			maxHeight: "85vh",
+		});
+	}
+
+	/**
+	 * Open theme dialog
+	 */
+	openThemeDialog(theme: ThemeModel): void {
+		this.dialog.open(ThemeDialogComponent, {
+			data: {
+				theme,
 			},
 			width: "575px",
 			maxHeight: "85vh",
