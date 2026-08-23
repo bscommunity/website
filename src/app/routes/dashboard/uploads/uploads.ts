@@ -47,6 +47,7 @@ import { FilterService } from "@/services/filter.service";
 import { BatchUploadQueueService } from "@/services/publish/batch-upload-queue.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
+import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.component";
 
 @Component({
 	selector: "app-uploads",
@@ -63,6 +64,7 @@ import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass
 		SearchbarComponent,
 		LargePanelComponent,
 		TourpassPreviewComponent,
+		ThemePreviewComponent,
 	],
 	templateUrl: "./uploads.html",
 })
@@ -171,12 +173,6 @@ export class Uploads implements OnInit, OnDestroy {
 			.subscribe({
 				next: (response) => {
 					const items = response.items || [];
-					console.log(
-						"Fetched uploads:",
-						items,
-						"Total count:",
-						response.total,
-					);
 
 					if (append) {
 						this.contentByMonth = this.mergeGroupedContent(

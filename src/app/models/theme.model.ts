@@ -29,11 +29,11 @@ export const Theme = z.object({
 	authorId: z.string().optional().nullable(),
 
 	name: z.string(),
+	coverUrl: z.string(),
+	displayArtUrl: z.string(),
 	replaces: z.string(),
 	originalArtwork: z.string().optional().nullable(),
-	displayArtUrl: z.string().optional().nullable(),
 	previewUrl: z.string().optional().nullable(),
-	coverUrl: z.string().optional().nullable(),
 });
 
 export type ThemeModel = z.infer<typeof Theme>;

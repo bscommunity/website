@@ -130,7 +130,7 @@ export class UserService {
 				})),
 				tap((page) => {
 					if (!isPaginated) {
-						this.cacheService.setQuery("upload", cacheKey, page, "session", 30_000);
+						this.cacheService.setQuery("upload", cacheKey, page, "session", 300_000);
 					}
 					this.cacheService.upsertEntities("upload", page.items);
 				}),

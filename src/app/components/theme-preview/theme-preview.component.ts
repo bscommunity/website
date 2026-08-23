@@ -13,6 +13,7 @@ import { ShareService } from "@/services/share.service";
 
 // Models
 import type { ThemeModel } from "@/models/theme.model";
+import { getBeatstarThemeName } from "@/models/theme/theme-genres";
 
 @Component({
 	selector: "app-theme-preview",
@@ -34,6 +35,10 @@ export class ThemePreviewComponent {
 	);
 
 	private shareService = inject(ShareService);
+
+	readonly replacesName = computed(
+		() => getBeatstarThemeName(this.theme().replaces) ?? this.theme().replaces,
+	);
 
 	onShare(event?: MouseEvent | KeyboardEvent) {
 		if (event) {

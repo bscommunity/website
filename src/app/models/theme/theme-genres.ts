@@ -1,4 +1,4 @@
-import type { ThemeGenre } from "./beatstar-themes";
+import type { BeatstarTheme, ThemeGenre } from "./beatstar-themes";
 import {
 	rock,
 	pop,
@@ -32,7 +32,7 @@ export const THEME_GENRES: ThemeGenre[] = [
 	"country",
 ];
 
-const GENRE_THEME_MAP: Record<ThemeGenre, { id: string; name: string }[]> = {
+const GENRE_THEME_MAP: Record<ThemeGenre, BeatstarTheme[]> = {
 	rock,
 	pop,
 	alternative,
@@ -45,4 +45,25 @@ const GENRE_THEME_MAP: Record<ThemeGenre, { id: string; name: string }[]> = {
 
 export function getThemesByGenre(genre: ThemeGenre): { id: string; name: string }[] {
 	return GENRE_THEME_MAP[genre] ?? [];
+}
+
+function normalizeThemeKey(value: string): string {
+	return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+const THEME_NAME_BY_KEY: Map<string, string> = new Map();
+
+for (const theme of Object.values(GENRE_THEME_MAP).flat()) {
+	for (const key of [theme.id, theme.name, theme.sourceName]) {
+		if (!key) continue;
+		const normalized = normalizeThemeKey(key);
+		if (normalized && !THEME_NAME_BY_KEY.has(normalized)) {
+			THEME_NAME_BY_KEY.set(normalized, theme.name);
+		}
+	}
+}
+
+export function getBeatstarThemeName(id: string): string | undefined {
+	const normalized = normalizeThemeKey(id);
+	return normalized ? THEME_NAME_BY_KEY.get(normalized) : undefined;
 }

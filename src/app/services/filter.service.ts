@@ -77,7 +77,10 @@ export class FilterService {
 		skip(1), // ignore the initial BehaviorSubject emission
 		debounceTime(FILTER_CHANGE_DEBOUNCE_MS),
 		distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-		shareReplay({ bufferSize: 1, refCount: true }),
+		shareReplay({
+			bufferSize: 1,
+			refCount: true,
+		}),
 	);
 
 	// ===== FILTER OPERATIONS =====
