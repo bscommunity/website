@@ -60,13 +60,12 @@ export class FilesSectionComponent {
 		const iconId =
 			getBeatstarTheme(theme.replaces)?.assets.icon ?? theme.replaces;
 
-		return [
+		return this.loadedRows() ?? [
 			{
 				image: theme.coverUrl,
 				file: "Icon",
 				id: iconId,
 			},
-			...this.loadedRows(),
 		];
 	});
 

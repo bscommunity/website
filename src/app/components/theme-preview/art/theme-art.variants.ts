@@ -7,7 +7,7 @@ export const themeArt = cva(
 
 export const themeDisplayArt = cva(
 	// Base classes
-	"object-fit rounded-md mb-2 border-3 border-secondary-container aspect-9/16",
+	"object-fit rounded-md mb-2 border-3 border-secondary-container aspect-9/16 sm:max-w-1/2 md:max-w-full",
 
 	{
 		variants: {
