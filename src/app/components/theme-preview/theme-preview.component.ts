@@ -11,6 +11,9 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 // Services
 import { ShareService } from "@/services/share.service";
 
+// Components
+import { ThemeArtComponent } from "./art/theme-art.component";
+
 // Models
 import type { ThemeModel } from "@/models/theme.model";
 import { getBeatstarThemeName } from "@/models/theme/theme-genres";
@@ -24,6 +27,7 @@ import { getBeatstarThemeName } from "@/models/theme/theme-genres";
 		MatRippleModule,
 		MatTooltipModule,
 		RouterLink,
+		ThemeArtComponent,
 	],
 	templateUrl: "./theme-preview.component.html",
 })

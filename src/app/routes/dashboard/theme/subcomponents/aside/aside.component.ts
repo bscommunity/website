@@ -7,6 +7,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 // Components
 import { AsideSectionComponent } from "@/components/aside-section/aside-section.component";
 import { AsideContainerComponent } from "@/components/aside-container/aside-container.component";
+import { ThemeArtComponent } from "@/components/theme-preview/art/theme-art.component";
 
 // Models
 import { ThemeModel } from "@/models/theme.model";
@@ -17,7 +18,11 @@ import { ThemeService } from "@/services/api/theme.service";
 @Component({
 	selector: "app-aside",
 	templateUrl: "./aside.component.html",
-	imports: [AsideSectionComponent, AsideContainerComponent],
+	imports: [
+		AsideSectionComponent,
+		AsideContainerComponent,
+		ThemeArtComponent,
+	],
 })
 export class AsideComponent {
 	readonly dialog = inject(MatDialog);
