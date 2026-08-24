@@ -9,6 +9,8 @@ import { PublishContributorsComponent } from "@/components/publish/contributors/
 // Models
 import type { ThemeModel } from "@/models/theme.model";
 import type { SimplifiedContributorModel } from "@/models/contributor.model";
+import type { ThemeAssets } from "@/models/theme/beatstar-themes";
+import { getBeatstarTheme } from "@/models/theme/theme-genres";
 
 // Services
 import { ThemeService, type CreateThemePayload } from "@/services/api/theme.service";
@@ -50,6 +52,10 @@ export const initialThemeFormData: ThemeFormData = {
 	perfectLineFile: null,
 	bundleFile: null,
 };
+
+function stripExtension(fileName: string): string {
+	return fileName.replace(/\.[^.]+$/, "");
+}
 
 @Injectable({ providedIn: "root" })
 export class ThemePublishHandler
@@ -106,20 +112,25 @@ export class ThemePublishHandler
 			throw new Error("Top file and perfect bar file are required.");
 		}
 
-		const assetEntries: [string, File][] = [];
-		if (iconFile) assetEntries.push([iconFile.name, iconFile]);
-		if (trackFile) assetEntries.push([trackFile.name, trackFile]);
-		if (topFile) assetEntries.push([topFile.name, topFile]);
-		if (bottomFile) assetEntries.push([bottomFile.name, bottomFile]);
-		if (circleFile) assetEntries.push([circleFile.name, circleFile]);
-		if (perfectBarFile) assetEntries.push([perfectBarFile.name, perfectBarFile]);
-		if (perfectLineFile) assetEntries.push([perfectLineFile.name, perfectLineFile]);
+		const assetEntries: [keyof ThemeAssets, File][] = [];
+		if (iconFile) assetEntries.push(["icon", iconFile]);
+		if (trackFile) assetEntries.push(["track", trackFile]);
+		if (topFile) assetEntries.push(["top", topFile]);
+		if (bottomFile) assetEntries.push(["bottom", bottomFile]);
+		if (circleFile) assetEntries.push(["circle", circleFile]);
+		if (perfectBarFile) assetEntries.push(["perfectBar", perfectBarFile]);
+		if (perfectLineFile)
+			assetEntries.push(["perfectLine", perfectLineFile]);
 
 		let bundleFile: File | null = null;
 		if (assetEntries.length > 0) {
+			const replacedTheme = rest.replaces
+				? getBeatstarTheme(rest.replaces)
+				: undefined;
 			const zip = new JSZip();
-			for (const [name, file] of assetEntries) {
-				zip.file(name.replace(/\.[^.]+$/, ""), file);
+			for (const [assetType, file] of assetEntries) {
+				const uuid = replacedTheme?.assets[assetType] || null;
+				zip.file(uuid ?? stripExtension(file.name), file);
 			}
 			const blob = await zip.generateAsync({ type: "blob" });
 			bundleFile = new File([blob], "theme.zip", { type: "application/zip" });

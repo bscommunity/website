@@ -6,6 +6,7 @@
 		<app-aside
 			[theme]="theme"
 			(themeUpdated)="onThemeUpdated($event)"
+			[replacesName]="replacesName()"
 			class="hidden md:flex md:sticky md:top-8 md:w-72 xl:w-90"
 		></app-aside>
 

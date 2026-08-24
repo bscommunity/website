@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from "@angular/core";
+import { Component, computed, inject, input, output } from "@angular/core";
 
 // Material
 import { MatDialog } from "@angular/material/dialog";
@@ -14,6 +14,8 @@ import { ThemeModel } from "@/models/theme.model";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
+import { NgGlyph } from "@ng-icons/core";
+import { getBeatstarThemeGenre, getThemeGenreIcon } from "@/models/theme/theme-genres";
 
 @Component({
 	selector: "app-aside",
@@ -31,6 +33,14 @@ export class AsideComponent {
 
 	readonly theme = input.required<ThemeModel>();
 	readonly themeUpdated = output<ThemeModel>();
+
+	readonly replacesName = input<string | undefined>(undefined);
+
+	readonly themeIcon = computed<string | null>(() => {
+		const genre = getBeatstarThemeGenre(this.theme().replaces);
+		console.log("Genre for theme", this.theme().name, "is", genre);
+		return genre ? getThemeGenreIcon(genre) : null;
+	});
 
 	async downloadBundle() {
 		try {

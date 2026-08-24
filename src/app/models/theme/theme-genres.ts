@@ -53,16 +53,22 @@ function normalizeThemeKey(value: string): string {
 
 const THEME_NAME_BY_KEY = new Map<string, string>();
 const THEME_BY_KEY = new Map<string, BeatstarTheme>();
+const THEME_GENRE_BY_KEY = new Map<string, ThemeGenre>();
 
-for (const theme of Object.values(GENRE_THEME_MAP).flat()) {
-	for (const key of [theme.id, theme.name, theme.sourceName]) {
-		if (!key) continue;
-		const normalized = normalizeThemeKey(key);
-		if (normalized && !THEME_NAME_BY_KEY.has(normalized)) {
-			THEME_NAME_BY_KEY.set(normalized, theme.name);
-		}
-		if (normalized && !THEME_BY_KEY.has(normalized)) {
-			THEME_BY_KEY.set(normalized, theme);
+for (const [genre, themes] of Object.entries(GENRE_THEME_MAP)) {
+	for (const theme of themes) {
+		for (const key of [theme.id, theme.name, theme.sourceName]) {
+			if (!key) continue;
+			const normalized = normalizeThemeKey(key);
+			if (normalized && !THEME_NAME_BY_KEY.has(normalized)) {
+				THEME_NAME_BY_KEY.set(normalized, theme.name);
+			}
+			if (normalized && !THEME_BY_KEY.has(normalized)) {
+				THEME_BY_KEY.set(normalized, theme);
+			}
+			if (normalized && !THEME_GENRE_BY_KEY.has(normalized)) {
+				THEME_GENRE_BY_KEY.set(normalized, genre as ThemeGenre);
+			}
 		}
 	}
 }
@@ -75,6 +81,11 @@ export function getBeatstarThemeName(id: string): string | undefined {
 export function getBeatstarTheme(id: string): BeatstarTheme | undefined {
 	const normalized = normalizeThemeKey(id);
 	return normalized ? THEME_BY_KEY.get(normalized) : undefined;
+}
+
+export function getBeatstarThemeGenre(id: string): ThemeGenre | undefined {
+	const normalized = normalizeThemeKey(id);
+	return normalized ? THEME_GENRE_BY_KEY.get(normalized) : undefined;
 }
 
 const ASSET_TYPE_LABELS: Record<string, string> = {
@@ -101,4 +112,27 @@ for (const theme of Object.values(GENRE_THEME_MAP).flat()) {
 
 export function getAssetTypeLabel(uuid: string): string | undefined {
 	return ASSET_LABEL_BY_UUID.get(uuid.trim().toLowerCase());
+}
+
+export function getThemeGenreIcon(genre: ThemeGenre): string {
+	switch (genre) {
+		case "rock":
+			return "assets/icons/genres/rock.png";
+		case "pop":
+			return "assets/icons/genres/pop.png";
+		case "alternative":
+			return "assets/icons/genres/alternative.png";
+		case "hipHop":
+			return "assets/icons/genres/hiphop.png";
+		case "universal":
+			return "assets/icons/genres/country.png";
+		case "rnb":
+			return "assets/icons/genres/rnb.png";
+		case "dance":
+			return "assets/icons/genres/dance.png";
+		case "country":
+			return "assets/icons/genres/country.png";
+		default:
+			return "assets/icons/genres/country.png";
+	}
 }

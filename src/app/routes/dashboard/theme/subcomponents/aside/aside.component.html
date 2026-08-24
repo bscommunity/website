@@ -24,18 +24,23 @@
 	</app-aside-section>
 
 	<!-- Theme info -->
-	<app-aside-section title="Theme info" class="w-full">
-		<app-aside-container
-			class="w-full"
-			icon="palette"
-			[info]="theme().replaces"
-		></app-aside-container>
+	<app-aside-section class="w-full">
+		<span class="text-on-surface text-sm font-normal">Replaces</span>
+		<app-aside-container class="w-full">
+			<span class="flex flex-row items-center justify-center gap-2">
+				{{ replacesName() }}
+				<img
+					class="w-4 h-4"
+					[src]="themeIcon()"
+					alt="Theme genre icon"
+				/>
+			</span>
+		</app-aside-container>
 		@if (theme().originalArtwork) {
-			<app-aside-container
-				class="w-full"
-				icon="brush"
-				[info]="theme().originalArtwork!"
-			></app-aside-container>
+			<span class="text-on-surface text-sm font-normal">Inspired by</span>
+			<app-aside-container class="w-full">
+				{{ theme().originalArtwork }}
+			</app-aside-container>
 		}
 	</app-aside-section>
 
