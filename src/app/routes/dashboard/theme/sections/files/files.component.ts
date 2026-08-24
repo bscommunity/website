@@ -60,28 +60,31 @@ export class FilesSectionComponent {
 		const iconId =
 			getBeatstarTheme(theme.replaces)?.assets.icon ?? theme.replaces;
 
-		return this.loadedRows() ?? [
+		return [
 			{
 				image: theme.coverUrl,
 				file: "Icon",
 				id: iconId,
 			},
-		];
+			...this.loadedRows()
+		]
 	});
 
 	filesColumns: TableColumn<ThemeFileRow>[] = [
+		{
+			columnDef: "file",
+			header: "File",
+			cell: (item: ThemeFileRow) => item.file,
+		},
 		{
 			columnDef: "image",
 			header: "Image",
 			cell: (item: ThemeFileRow) =>
 				item.image
-					? `<img class="rounded w-10 h-10 object-cover" src="${item.image}" alt="${item.file}" />`
-					: `<span class="flex items-center justify-center rounded w-10 h-10 bg-surface-container-high text-on-surface-variant"><span class="text-[10px]">?</span></span>`,
-		},
-		{
-			columnDef: "file",
-			header: "File",
-			cell: (item: ThemeFileRow) => item.file,
+					? `<span class="flex w-full py-2 items-center justify-center">
+						<img class="w-12 h-12 object-contain" src="${item.image}" alt="${item.file}" />
+					</span>`
+					: `<span class="flex items-center justify-center rounded w-12 h-12 bg-surface-container-high text-on-surface-variant"><span class="text-[10px]">?</span></span>`,
 		},
 		{
 			columnDef: "id",

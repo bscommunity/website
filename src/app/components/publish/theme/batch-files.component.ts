@@ -344,6 +344,7 @@ export class PublishThemeBatchFilesComponent {
 			}
 		}
 
+		// Set to "true" if we want to skip next step
 		result["assetsFromBatch"] = true;
 
 		this.dialogRef.close(result);

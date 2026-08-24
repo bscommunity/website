@@ -5,16 +5,18 @@
 	<!-- Likes / Bookmarks -->
 	<app-aside-section class="w-full">
 		<div class="flex flex-row items-center justify-center gap-4 w-full">
-			<app-aside-container
-				class="flex-1"
-				icon="favorite"
-				[info]="theme().likesCount + ' likes'"
-			></app-aside-container>
-			<app-aside-container
-				class="flex-1"
-				icon="bookmark"
-				[info]="theme().bookmarksCount + ' bookmarks'"
-			></app-aside-container>
+			<app-aside-container class="flex-1" icon="favorite">
+				<span class="flex flex-row items-center justify-center gap-2">
+					{{ theme().likesCount }}
+					<span class="hidden xl:flex">likes</span>
+				</span>
+			</app-aside-container>
+			<app-aside-container class="flex-1" icon="bookmark">
+				<span class="flex flex-row items-center justify-center gap-2">
+					{{ theme().bookmarksCount }}
+					<span class="hidden xl:flex">bookmarks</span>
+				</span>
+			</app-aside-container>
 		</div>
 		<app-aside-container
 			class="w-full"
