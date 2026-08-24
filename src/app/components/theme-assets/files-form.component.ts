@@ -1,6 +1,7 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	OnInit,
 	computed,
 	inject,
 	input,
@@ -22,23 +23,28 @@ import { FormFieldComponent } from "@/components/form-field/form-field.component
 // Services
 import { FormService, type ValuesToControls } from "@/services/form.service";
 
-interface VersionFilesForm {
-	iconFile: File | null;
-	trackFile: File | null;
-	topFile: File | null;
-	bottomFile: File | null;
-	circleFile: File | null;
-	perfectBarFile: File | null;
-	perfectLineFile: File | null;
-}
+export const THEME_ASSET_FILE_KEYS = [
+	"iconFile",
+	"trackFile",
+	"topFile",
+	"bottomFile",
+	"circleFile",
+	"perfectBarFile",
+	"perfectLineFile",
+] as const;
+
+export type ThemeAssetFileKey = (typeof THEME_ASSET_FILE_KEYS)[number];
+
+export type ThemeAssetFilesValue = Record<ThemeAssetFileKey, File | null>;
 
 /**
- * Individual asset files step of the publish new version flow.
- * Mirrors PublishThemeFilesComponent from the theme publish wizard:
- * only reached when the batch upload step was skipped.
+ * Shared individual asset files form used by both the theme publish
+ * wizard and the publish new version flow. Only reached when the
+ * batch upload step was skipped. Emits the full raw form value so
+ * cleared fields are reported as `null`.
  */
 @Component({
-	selector: "app-publish-version-files",
+	selector: "app-theme-assets-files-form",
 	template: `
 		<h2 mat-dialog-title>Theme assets</h2>
 		<form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -71,7 +77,7 @@ interface VersionFilesForm {
 					type="submit"
 					[disabled]="!hasAtLeastOneFile() || disabled()"
 				>
-					Publish
+					{{ submitLabel() }}
 				</button>
 			</mat-dialog-actions>
 		</form>
@@ -85,13 +91,17 @@ interface VersionFilesForm {
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishVersionFilesComponent {
+export class ThemeAssetsFilesFormComponent implements OnInit {
 	private formService = inject(FormService);
 
 	readonly disabled = input(false);
+	readonly initialValues = input<
+		Partial<Record<ThemeAssetFileKey, File>>
+	>({});
+	readonly submitLabel = input("Continue");
 
 	readonly back = output<void>();
-	readonly submitted = output<Record<string, File>>();
+	readonly submitted = output<ThemeAssetFilesValue>();
 
 	readonly assetFields = [
 		this.formService.createFileField({
@@ -138,14 +148,22 @@ export class PublishVersionFilesComponent {
 		}),
 	] as const;
 
-	form: FormGroup<ValuesToControls<VersionFilesForm>> =
-		this.formService.createFormGroup<VersionFilesForm>(this.assetFields);
+	form!: FormGroup<ValuesToControls<ThemeAssetFilesValue>>;
 
 	getControl = computed(
 		() =>
 			(key: string): FormControl =>
-				this.form.controls[key as keyof VersionFilesForm],
+				this.form.controls[key as ThemeAssetFileKey],
 	);
+
+	ngOnInit(): void {
+		// Built here (not in a field initializer) because input signals
+		// cannot be read before the framework applies the first bindings.
+		this.form = this.formService.createFormGroup<ThemeAssetFilesValue>(
+			this.assetFields,
+			this.initialValues(),
+		);
+	}
 
 	hasAtLeastOneFile(): boolean {
 		return Object.values(this.form.controls).some(
@@ -155,14 +173,6 @@ export class PublishVersionFilesComponent {
 
 	onSubmit() {
 		if (this.form.invalid) return;
-
-		const files: Record<string, File> = {};
-		for (const [key, value] of Object.entries(this.form.getRawValue())) {
-			if (value instanceof File) {
-				files[key] = value;
-			}
-		}
-
-		this.submitted.emit(files);
+		this.submitted.emit(this.form.getRawValue());
 	}
 }

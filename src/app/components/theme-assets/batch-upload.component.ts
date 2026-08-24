@@ -24,20 +24,17 @@ import {
 } from "@/models/theme/theme-asset-upload";
 
 /**
- * Batch upload step of the publish new version flow. Mirrors
- * PublishThemeBatchFilesComponent from the theme publish wizard:
- * users can drop images or a .zip bundle which get identified by
- * their Beatstar UUID filename. Optional - can be skipped entirely.
+ * Shared batch upload step used by both the theme publish wizard and
+ * the publish new version flow. Users drop images or a .zip bundle
+ * which get identified by their Beatstar UUID filename. Optional -
+ * emits `skipped` when the user proceeds without files.
  */
 @Component({
-	selector: "app-publish-version-batch-files",
+	selector: "app-theme-assets-batch-upload",
 	template: `
 		<h2 mat-dialog-title>Batch upload</h2>
 		<mat-dialog-content class="mat-typography">
-			<p class="mb-4">
-				If you already have the files from a previous theme, batch
-				select them or import from a .zip bundle
-			</p>
+			<p class="mb-4">{{ description() }}</p>
 
 			<div
 				class="flex flex-col items-center justify-center gap-2 p-4 border border-dashed rounded-lg transition-colors duration-150"
@@ -146,7 +143,7 @@ import {
 				[disabled]="disabled()"
 				(click)="canceled.emit()"
 			>
-				Cancel
+				{{ cancelLabel() }}
 			</button>
 			@if (hasInsertedFiles) {
 				<button
@@ -156,7 +153,7 @@ import {
 					[disabled]="!canContinue() || disabled()"
 					(click)="submit()"
 				>
-					Publish
+					{{ confirmLabel() }}
 				</button>
 			} @else {
 				<button
@@ -174,10 +171,15 @@ import {
 	imports: [MatDialogModule, MatButtonModule, NgGlyph],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishVersionBatchFilesComponent {
+export class ThemeAssetsBatchUploadComponent {
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
 
 	readonly disabled = input(false);
+	readonly description = input(
+		"If you already have the files from a previous theme, batch select them or import from a .zip bundle",
+	);
+	readonly cancelLabel = input("Back");
+	readonly confirmLabel = input("Continue");
 
 	readonly canceled = output<void>();
 	readonly skipped = output<void>();

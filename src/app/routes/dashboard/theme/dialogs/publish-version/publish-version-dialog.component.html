@@ -1,13 +1,16 @@
 @if (step() === "batch") {
-	<app-publish-version-batch-files
+	<app-theme-assets-batch-upload
 		[disabled]="isLoading()"
+		cancelLabel="Cancel"
+		confirmLabel="Publish"
 		(canceled)="onCancel()"
 		(skipped)="goToFilesStep()"
 		(filesSelected)="onBatchFilesSelected($event)"
 	/>
 } @else {
-	<app-publish-version-files
+	<app-theme-assets-files-form
 		[disabled]="isLoading()"
+		submitLabel="Publish"
 		(back)="goToBatchStep()"
 		(submitted)="onFilesSubmitted($event)"
 	/>

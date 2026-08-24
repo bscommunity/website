@@ -14,8 +14,11 @@ import {
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
-import { PublishVersionBatchFilesComponent } from "./publish-version-batch-files.component";
-import { PublishVersionFilesComponent } from "./publish-version-files.component";
+import { ThemeAssetsBatchUploadComponent } from "@/components/theme-assets/batch-upload.component";
+import {
+	ThemeAssetFilesValue,
+	ThemeAssetsFilesFormComponent,
+} from "@/components/theme-assets/files-form.component";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
@@ -42,8 +45,8 @@ type VersionFiles = Record<string, File>;
 	templateUrl: "./publish-version-dialog.component.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		PublishVersionBatchFilesComponent,
-		PublishVersionFilesComponent,
+		ThemeAssetsBatchUploadComponent,
+		ThemeAssetsFilesFormComponent,
 	],
 })
 export class PublishVersionDialogComponent {
@@ -73,7 +76,14 @@ export class PublishVersionDialogComponent {
 		await this.publish(files);
 	}
 
-	async onFilesSubmitted(files: VersionFiles): Promise<void> {
+	async onFilesSubmitted(value: ThemeAssetFilesValue): Promise<void> {
+		const files: VersionFiles = {};
+		for (const [key, file] of Object.entries(value)) {
+			if (file instanceof File) {
+				files[key] = file;
+			}
+		}
+
 		await this.publish(files);
 	}
 
