@@ -3,7 +3,11 @@
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
 		<!-- Desktop aside -->
-		<app-aside [chart]="chart" class="hidden md:flex md:sticky md:top-8">
+		<app-aside
+			[chart]="chart"
+			(chartUpdated)="onChartUpdated($event)"
+			class="hidden md:flex md:sticky md:top-8"
+		>
 		</app-aside>
 		<div
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
@@ -45,7 +49,11 @@
 				<h2 class="text-3xl">{{ chart.track.artist }}</h2>
 			</div>
 			<!-- Mobile "aside" -->
-			<app-aside [chart]="chart" class="flex w-full md:hidden">
+			<app-aside
+				[chart]="chart"
+				(chartUpdated)="onChartUpdated($event)"
+				class="flex w-full md:hidden"
+			>
 			</app-aside>
 			<app-chart-changelog-section
 				#changelogSection

@@ -5,9 +5,9 @@ import { apiUrl } from "@/lib/api";
 import {
 	Chart,
 	type ChartModel,
-	type MutateChartModel,
 } from "@/models/chart.model";
 import type { Difficulty } from "@/models/enums/difficulty.enum";
+import type { Visibility } from "@/models/enums/visibility.enum";
 import type { Genre } from "@/models/enums/genre.enum";
 import type { StreamingLinkModel } from "@/models/streaming-link.model";
 import type { SimplifiedContributorModel } from "@/models/contributor.model";
@@ -38,6 +38,21 @@ export interface CreateChartPayload {
 }
 
 type CacheScope = "public" | "private";
+
+/**
+ * Mirrors the backend's UpdateChartRequest: flat, all-optional fields.
+ * Omitted fields are left unchanged.
+ */
+export interface UpdateChartPayload {
+	track?: string;
+	artist?: string;
+	album?: string | null;
+	coverUrl?: string | null;
+	difficulty?: Difficulty;
+	isDeluxe?: boolean;
+	isExplicit?: boolean;
+	visibility?: Visibility;
+}
 
 @Injectable({
 	providedIn: "root",
@@ -252,7 +267,7 @@ export class ChartService {
 	}
 
 	// Update
-	async updateChart(id: string, chart: MutateChartModel): Promise<ChartModel> {
+	async updateChart(id: string, chart: UpdateChartPayload): Promise<ChartModel> {
 		const updatedChart = await firstValueFrom(
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);

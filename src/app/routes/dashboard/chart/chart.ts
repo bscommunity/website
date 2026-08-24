@@ -87,4 +87,12 @@ export class Chart implements OnInit {
 			}
 		});
 	}
+
+	onChartUpdated(updated: ChartModel) {
+		this.chart = updated;
+
+		if (updated.difficulty) {
+			this.difficultyIcon = getDifficultyIcon(updated.difficulty);
+		}
+	}
 }
