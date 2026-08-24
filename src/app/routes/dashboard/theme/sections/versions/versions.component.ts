@@ -23,6 +23,7 @@ import { PublishVersionDialogComponent } from "../../dialogs/publish-version/pub
 
 // Models
 import type { VersionModel } from "@/models/version.model";
+import type { ThemeModel } from "@/models/theme.model";
 
 @Component({
 	selector: "app-theme-versions-section",
@@ -37,6 +38,7 @@ import type { VersionModel } from "@/models/version.model";
 })
 export class VersionsSectionComponent {
 	readonly themeId = input.required<string>();
+	readonly theme = input<ThemeModel | undefined>(undefined);
 	readonly versions = input<VersionModel[]>([]);
 
 	private _snackBar = inject(MatSnackBar);
@@ -82,8 +84,9 @@ export class VersionsSectionComponent {
 		this.dialog.open(PublishVersionDialogComponent, {
 			data: {
 				themeId: this.themeId(),
+				theme: this.theme(),
 			},
-			width: "450px",
+			width: "500px",
 		});
 	}
 }

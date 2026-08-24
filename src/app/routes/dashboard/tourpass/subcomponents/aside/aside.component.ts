@@ -56,6 +56,19 @@ export class AsideComponent {
 		});
 	}
 
+	async share() {
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			this._snackBar.open("Link copied to clipboard", "Close", {
+				duration: 3000,
+			});
+		} catch {
+			this._snackBar.open("Could not copy link", "Close", {
+				duration: 3000,
+			});
+		}
+	}
+
 	async downloadBundle() {
 		this._snackBar.open("Bundle download not available yet", "Close", {
 			duration: 3000,

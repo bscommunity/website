@@ -6,51 +6,44 @@ import {
 } from "@angular/core";
 
 // Material
-import { MatButtonModule } from "@angular/material/button";
 import {
 	MAT_DIALOG_DATA,
 	MatDialog,
-	MatDialogActions,
-	MatDialogClose,
-	MatDialogContent,
-	MatDialogTitle,
 	MatDialogRef,
 } from "@angular/material/dialog";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatInputModule } from "@angular/material/input";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { FormsModule } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
-import { FileFieldComponent } from "@/components/file-field/file-field.component";
+import { PublishVersionBatchFilesComponent } from "./publish-version-batch-files.component";
+import { PublishVersionFilesComponent } from "./publish-version-files.component";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
 
+// Models
+import type { ThemeModel } from "@/models/theme.model";
+import type { ThemeAssets } from "@/models/theme/beatstar-themes";
+import { getBeatstarTheme } from "@/models/theme/theme-genres";
+
 // Utils
+import JSZip from "jszip";
 import { getApiErrorMessage } from "@/models/api-error.model";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 export interface PublishVersionDialogData {
 	themeId: string;
+	theme?: ThemeModel;
 }
+
+type VersionFiles = Record<string, File>;
 
 @Component({
 	selector: "app-publish-theme-version-dialog",
 	templateUrl: "./publish-version-dialog.component.html",
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		FormsModule,
-		MatButtonModule,
-		MatDialogTitle,
-		MatDialogContent,
-		MatDialogActions,
-		MatDialogClose,
-		MatFormFieldModule,
-		MatInputModule,
-		MatProgressSpinnerModule,
-		FileFieldComponent,
+		PublishVersionBatchFilesComponent,
+		PublishVersionFilesComponent,
 	],
 })
 export class PublishVersionDialogComponent {
@@ -61,29 +54,39 @@ export class PublishVersionDialogComponent {
 	readonly dialogRef = inject(MatDialogRef<PublishVersionDialogComponent>);
 	readonly data = inject<PublishVersionDialogData>(MAT_DIALOG_DATA);
 
+	readonly step = signal<"batch" | "files">("batch");
 	readonly isLoading = signal(false);
 
-	readonly bundleFile = signal<File | null>(null);
-	changelog = "";
-
-	onBundleChanged(file: File): void {
-		this.bundleFile.set(file);
+	goToFilesStep(): void {
+		this.step.set("files");
 	}
 
-	async onSubmit(): Promise<void> {
-		const bundleFile = this.bundleFile();
-		if (!bundleFile) return;
+	goToBatchStep(): void {
+		this.step.set("batch");
+	}
 
+	onCancel(): void {
+		this.dialogRef.close();
+	}
+
+	async onBatchFilesSelected(files: VersionFiles): Promise<void> {
+		await this.publish(files);
+	}
+
+	async onFilesSubmitted(files: VersionFiles): Promise<void> {
+		await this.publish(files);
+	}
+
+	async publish(files: VersionFiles): Promise<void> {
 		this.dialogRef.disableClose = true;
 		this.isLoading.set(true);
 
 		try {
+			const bundleFile = await this.buildBundle(files);
+
 			const version = await this.themeService.addThemeVersion(
 				this.data.themeId,
-				{
-					bundleFile,
-					changelog: this.changelog,
-				},
+				{ bundleFile },
 			);
 
 			this._snackBar.open(
@@ -116,7 +119,27 @@ export class PublishVersionDialogComponent {
 		}
 	}
 
-	onCancelClick(): void {
-		this.dialogRef.close();
+	/**
+	 * Bundles the uploaded assets into a .zip, naming each entry with
+	 * the UUID of the asset it replaces in the original Beatstar theme
+	 * (same strategy as the theme publish flow).
+	 */
+	private async buildBundle(files: VersionFiles): Promise<File> {
+		const replaces = this.data.theme?.replaces;
+		const replacedTheme = replaces ? getBeatstarTheme(replaces) : undefined;
+
+		function stripExtension(fileName: string): string {
+			return fileName.replace(/\.[^.]+$/, "");
+		}
+
+		const zip = new JSZip();
+		for (const [assetKey, file] of Object.entries(files)) {
+			const assetType = assetKey.replace(/File$/, "") as keyof ThemeAssets;
+			const uuid = replacedTheme?.assets[assetType] || null;
+			zip.file(uuid ?? stripExtension(file.name), file);
+		}
+
+		const blob = await zip.generateAsync({ type: "blob" });
+		return new File([blob], "theme.zip", { type: "application/zip" });
 	}
 }

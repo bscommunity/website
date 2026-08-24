@@ -5,9 +5,11 @@ import {
 	ElementRef,
 	ViewChild,
 	inject,
+	input,
+	output,
 } from "@angular/core";
 
-import { MatDialogModule, MatDialogRef } from "@angular/material/dialog";
+import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { NgGlyph } from "@ng-icons/core";
@@ -21,8 +23,14 @@ import {
 	type IdentifiedFile,
 } from "@/models/theme/theme-asset-upload";
 
+/**
+ * Batch upload step of the publish new version flow. Mirrors
+ * PublishThemeBatchFilesComponent from the theme publish wizard:
+ * users can drop images or a .zip bundle which get identified by
+ * their Beatstar UUID filename. Optional - can be skipped entirely.
+ */
 @Component({
-	selector: "app-publish-theme-batch-files",
+	selector: "app-publish-version-batch-files",
 	template: `
 		<h2 mat-dialog-title>Batch upload</h2>
 		<mat-dialog-content class="mat-typography">
@@ -135,26 +143,28 @@ import {
 				class="w-full md:w-[49%]! mx-0!"
 				mat-button
 				type="button"
-				(click)="dialogRef.close('back')"
+				[disabled]="disabled()"
+				(click)="canceled.emit()"
 			>
-				Back
+				Cancel
 			</button>
 			@if (hasInsertedFiles) {
 				<button
 					class="w-full md:w-[49%]! mx-0!"
 					mat-flat-button
 					type="button"
-					[disabled]="!canContinue()"
-					(click)="onSubmit()"
+					[disabled]="!canContinue() || disabled()"
+					(click)="submit()"
 				>
-					Continue
+					Publish
 				</button>
 			} @else {
 				<button
 					class="w-full md:w-[49%]! mx-0!"
 					mat-flat-button
 					type="button"
-					(click)="onSkip()"
+					[disabled]="disabled()"
+					(click)="skipped.emit()"
 				>
 					Skip
 				</button>
@@ -164,15 +174,18 @@ import {
 	imports: [MatDialogModule, MatButtonModule, NgGlyph],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublishThemeBatchFilesComponent {
+export class PublishVersionBatchFilesComponent {
 	@ViewChild("fileInput") fileInput!: ElementRef<HTMLInputElement>;
+
+	readonly disabled = input(false);
+
+	readonly canceled = output<void>();
+	readonly skipped = output<void>();
+	readonly filesSelected = output<Record<string, File>>();
 
 	isDraggingOver = false;
 	identifiedFiles: IdentifiedFile[] = [];
 
-	dialogRef = inject<
-		MatDialogRef<PublishThemeBatchFilesComponent>
-	>(MatDialogRef);
 	private cdr = inject(ChangeDetectorRef);
 	private snackBar = inject(MatSnackBar);
 	private uuidLookup = buildUuidLookup();
@@ -238,12 +251,8 @@ export class PublishThemeBatchFilesComponent {
 		this.cdr.markForCheck();
 	}
 
-	onSkip(): void {
-		this.dialogRef.close("next");
-	}
-
-	onSubmit(): void {
-		const result: Record<string, File | null | boolean> = {};
+	submit(): void {
+		const result: Record<string, File> = {};
 
 		for (const item of this.identifiedFiles) {
 			if (item.assetType === "unknown") continue;
@@ -253,10 +262,7 @@ export class PublishThemeBatchFilesComponent {
 			}
 		}
 
-		// Set to "true" if we want to skip next step
-		result["assetsFromBatch"] = true;
-
-		this.dialogRef.close(result);
+		this.filesSelected.emit(result);
 	}
 
 	private async processFiles(files: File[]): Promise<void> {

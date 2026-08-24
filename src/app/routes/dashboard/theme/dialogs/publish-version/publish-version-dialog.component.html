@@ -1,46 +1,14 @@
-<h2 mat-dialog-title>Publish new version</h2>
-<mat-dialog-content class="!flex flex-col gap-4">
-	<p>
-		Upload a new bundle for your theme. The .zip must contain each file
-		(without extension) named with the original Beatstar theme UUID it
-		replaces.
-	</p>
-
-	<app-file-field
-		key="bundle"
-		title="Theme bundle (.zip)"
-		[accept]='[".zip"]'
-		[isInvalid]="false"
-		[fileName]="bundleFile()?.name ?? null"
-		(fileChange)="onBundleChanged($event)"
+@if (step() === "batch") {
+	<app-publish-version-batch-files
+		[disabled]="isLoading()"
+		(canceled)="onCancel()"
+		(skipped)="goToFilesStep()"
+		(filesSelected)="onBatchFilesSelected($event)"
 	/>
-
-	<mat-form-field appearance="outline" class="w-full">
-		<mat-label>Changelog</mat-label>
-		<textarea
-			matInput
-			rows="4"
-			[(ngModel)]="changelog"
-			placeholder="Describe what changed in this version"
-		></textarea>
-	</mat-form-field>
-</mat-dialog-content>
-<mat-dialog-actions>
-	<button mat-button mat-dialog-close="cancel" [disabled]="isLoading()">
-		Cancel
-	</button>
-	<button
-		mat-button
-		(click)="onSubmit()"
-		[disabled]="!bundleFile() || isLoading()"
-	>
-		@if (isLoading()) {
-			<mat-progress-spinner
-				[diameter]="16"
-				[mode]="'indeterminate'"
-			></mat-progress-spinner>
-		} @else {
-			Publish
-		}
-	</button>
-</mat-dialog-actions>
+} @else {
+	<app-publish-version-files
+		[disabled]="isLoading()"
+		(back)="goToBatchStep()"
+		(submitted)="onFilesSubmitted($event)"
+	/>
+}
