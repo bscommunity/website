@@ -2,9 +2,11 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	computed,
 	effect,
 	inject,
 	input,
+	signal,
 	viewChild,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -67,6 +69,8 @@ export class VersionsComponent {
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
+	isFetchingBundle = signal(false);
+
 	// Effect to update table when versions input changes
 	// This effect runs when the user creates a new chart from /chart
 	constructor() {
@@ -100,14 +104,15 @@ export class VersionsComponent {
 		},
 	];
 
-	versionsActions: Action<VersionModel>[] = [
+	versionsActions = computed<Action<VersionModel>[]>(() => [
 		{
 			description: "Download",
 			icon: "download",
 			callback: () => {
 				this.downloadBundle();
 			},
-			disabled: () => false,
+			disabled: () => this.isFetchingBundle(),
+			loading: () => this.isFetchingBundle(),
 		},
 		{
 			description: "Switch version",
@@ -137,20 +142,25 @@ export class VersionsComponent {
 				);
 			},
 		},
-	];
+	]);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
 	}
 
 	async downloadBundle() {
+		if (this.isFetchingBundle()) return;
+
 		try {
+			this.isFetchingBundle.set(true);
 			const url = await this.chartService.getBundleUrl(this.chartId());
 			window.open(url, "_blank");
 		} catch {
 			this._snackBar.open("Failed to get download link", "Close", {
 				duration: 2500,
 			});
+		} finally {
+			this.isFetchingBundle.set(false);
 		}
 	}
 
