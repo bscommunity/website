@@ -104,10 +104,10 @@
 							<div
 								class="flex flex-wrap flex-row justify-center items-center gap-2"
 							>
-								@for (
-									contributor of chart.contributors;
-									track contributor.user.id
-								) {
+							@for (
+								contributor of getUniqueContributors(chart);
+								track contributor.user.id
+							) {
 									<span
 										class="text-sm text-on-surface-variant bg-surface-container-high rounded-full pl-1 pr-2 py-0.5 flex flex-row items-center gap-1"
 									>

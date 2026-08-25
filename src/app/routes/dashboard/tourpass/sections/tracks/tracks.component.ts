@@ -78,13 +78,23 @@ export class TracksSectionComponent {
 		});
 	}
 
+	getUniqueContributors(chart: ChartModel) {
+		const seen = new Set<string>();
+		return chart.contributors.filter((contributor) => {
+			if (seen.has(contributor.user.id)) {
+				return false;
+			}
+			seen.add(contributor.user.id);
+			return true;
+		});
+	}
+
 	getContributorsSummary(chart: ChartModel): string {
-		if (!chart.contributors || chart.contributors.length === 0) {
+		const unique = this.getUniqueContributors(chart);
+		if (unique.length === 0) {
 			return "No contributors";
 		}
-		return chart.contributors
-			.map((c) => c.user?.username || "Unknown")
-			.join(", ");
+		return unique.map((c) => c.user?.username || "Unknown").join(", ");
 	}
 
 	navigateToChart(chartId: string) {
