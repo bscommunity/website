@@ -26,10 +26,12 @@ export interface EditChartDialogData {
 	template: `
 		<app-chart-details-form
 			title="Edit chart"
-			description=""
+			description="Track info is defined by the latest uploaded version and cannot be changed here."
 			submitLabel="Save"
 			cancelLabel="Cancel"
 			[initialValues]="initialValues"
+			[inactive]="inactiveFields"
+			[gameplayEditable]="true"
 			[disabled]="isSaving"
 			(canceled)="dialogRef.close()"
 			(submitted)="onSubmitted($event)"
@@ -47,12 +49,21 @@ export class EditChartDialogComponent {
 
 	isSaving = false;
 
+	/** Track metadata is fixed by the latest version submission. */
+	readonly inactiveFields: string[] = [
+		"track",
+		"artist",
+		"difficulty",
+		"isDeluxe",
+	];
+
 	initialValues: Partial<ChartDetailsValue> = {
 		track: this.data.chart.track.title,
 		artist: this.data.chart.track.artist,
 		difficulty: this.data.chart.difficulty,
 		isDeluxe: this.data.chart.isDeluxe,
 		isExplicit: this.data.chart.isExplicit,
+		gameplayUrl: this.data.chart.previewVideoId ?? "",
 	};
 
 	async onSubmitted(value: ChartDetailsValue): Promise<void> {
@@ -62,11 +73,8 @@ export class EditChartDialogComponent {
 			const response = await this.chartService.updateChart(
 				this.data.chart.id,
 				{
-					track: value.track,
-					artist: value.artist,
-					difficulty: value.difficulty,
-					isDeluxe: value.isDeluxe,
 					isExplicit: value.isExplicit,
+					previewVideoId: value.gameplayUrl || null,
 				},
 			);
 

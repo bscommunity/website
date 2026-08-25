@@ -28,6 +28,7 @@ import {
 	FormService,
 	type ValuesToControls,
 } from "@/services/form.service";
+import { ValidationService } from "@/services/validation.service";
 
 export interface ChartDetailsValue {
 	track: string;
@@ -35,6 +36,8 @@ export interface ChartDetailsValue {
 	difficulty: Difficulty;
 	isDeluxe: boolean;
 	isExplicit: boolean;
+	/** YouTube URL/id - only rendered when `gameplayEditable()` is true. */
+	gameplayUrl: string;
 }
 
 /**
@@ -61,6 +64,13 @@ export interface ChartDetailsValue {
 					[control]="form.controls.artist"
 					[config]="fields.artistField"
 				/>
+
+				@if (gameplayEditable()) {
+					<app-form-field
+						[control]="form.controls.gameplayUrl"
+						[config]="fields.gameplayUrlField"
+					/>
+				}
 
 				<div class="flex flex-row items-center justify-between last">
 					<app-form-field
@@ -113,6 +123,7 @@ export interface ChartDetailsValue {
 })
 export class ChartDetailsFormComponent implements OnInit {
 	private formService = inject(FormService);
+	private validationService = inject(ValidationService);
 
 	readonly title = input("Chart details");
 	readonly description = input(
@@ -121,6 +132,8 @@ export class ChartDetailsFormComponent implements OnInit {
 	readonly initialValues = input<Partial<ChartDetailsValue>>({});
 	/** Control keys that should be rendered as disabled/read-only. */
 	readonly inactive = input<string[]>([]);
+	/** Shows the gameplay video field (used by the edit dialog). */
+	readonly gameplayEditable = input(false);
 	readonly submitLabel = input("Continue");
 	readonly cancelLabel = input("Back");
 	readonly disabled = input(false);
@@ -151,6 +164,18 @@ export class ChartDetailsFormComponent implements OnInit {
 			label: "Difficulty",
 			options: this.difficulties,
 		}),
+		gameplayUrlField: this.formService.createTextField({
+			key: "gameplayUrl",
+			label: "Gameplay video",
+			placeholder: "https://youtu.be/BY_XwvKogC8",
+			validators: [this.validationService.getYouTubeValidator()],
+			validationMessages: {
+				invalidVideoUrl:
+					this.validationService.messages.invalidVideoUrl,
+			},
+			onValueProcessed: (value) =>
+				this.validationService.extractYouTubeVideoId(value),
+		}),
 	};
 
 	private readonly allFields = [
@@ -159,12 +184,20 @@ export class ChartDetailsFormComponent implements OnInit {
 		this.fields.difficultyField,
 	] as const;
 
+	private readonly allFieldsWithGameplay = [
+		...this.allFields,
+		this.fields.gameplayUrlField,
+	] as const;
+
 	form: FormGroup<ValuesToControls<ChartDetailsValue>> =
-		this.formService.createFormGroup<ChartDetailsValue>(this.allFields, {
-			track: "",
-			artist: "",
-			difficulty: Difficulty.NORMAL,
-		});
+		this.formService.createFormGroup<ChartDetailsValue>(
+			this.allFieldsWithGameplay,
+			{
+				track: "",
+				artist: "",
+				difficulty: Difficulty.NORMAL,
+			},
+		);
 
 	ngOnInit(): void {
 		this.form.addControl(
@@ -192,6 +225,7 @@ export class ChartDetailsFormComponent implements OnInit {
 			difficulty: values.difficulty ?? Difficulty.NORMAL,
 			isDeluxe: values.isDeluxe ?? false,
 			isExplicit: values.isExplicit ?? false,
+			gameplayUrl: values.gameplayUrl ?? "",
 		});
 
 		for (const key of this.inactive()) {
@@ -202,7 +236,7 @@ export class ChartDetailsFormComponent implements OnInit {
 
 	async onSubmit(): Promise<void> {
 		const result = await this.formService.submitForm<ChartDetailsValue>(
-			this.allFields,
+			this.allFieldsWithGameplay,
 			this.form,
 		);
 
@@ -211,3 +245,4 @@ export class ChartDetailsFormComponent implements OnInit {
 		}
 	}
 }
+

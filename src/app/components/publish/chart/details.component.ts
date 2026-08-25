@@ -57,6 +57,13 @@ export class PublishChartDetailsComponent {
 	};
 
 	onSubmitted(value: ChartDetailsValue): void {
-		this.dialogRef.close(value);
+		// Gameplay is collected later, by the source step
+		this.dialogRef.close({
+			track: value.track,
+			artist: value.artist,
+			difficulty: value.difficulty,
+			isDeluxe: value.isDeluxe,
+			isExplicit: value.isExplicit,
+		});
 	}
 }

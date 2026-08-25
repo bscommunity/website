@@ -52,6 +52,8 @@ export interface UpdateChartPayload {
 	isDeluxe?: boolean;
 	isExplicit?: boolean;
 	visibility?: Visibility;
+	/** YouTube video id shown as the gameplay preview. */
+	previewVideoId?: string | null;
 }
 
 @Injectable({
