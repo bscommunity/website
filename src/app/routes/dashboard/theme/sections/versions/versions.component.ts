@@ -25,6 +25,9 @@ import { PublishVersionDialogComponent } from "../../dialogs/publish-version/pub
 import type { VersionModel } from "@/models/version.model";
 import type { ThemeModel } from "@/models/theme.model";
 
+// Services
+import { ThemeService } from "@/services/api/theme.service";
+
 @Component({
 	selector: "app-theme-versions-section",
 	imports: [
@@ -43,6 +46,7 @@ export class VersionsSectionComponent {
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
+	private themeService = inject(ThemeService);
 
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
@@ -74,11 +78,22 @@ export class VersionsSectionComponent {
 			description: "Download",
 			icon: "download",
 			callback: () => {
-				this.openSnackBar("Not implemented yet.", "Close");
+				this.downloadBundle();
 			},
 			disabled: () => false,
 		},
 	];
+
+	async downloadBundle() {
+		try {
+			const url = await this.themeService.getBundleUrl(this.themeId());
+			window.open(url, "_blank");
+		} catch {
+			this._snackBar.open("Failed to get download link", "Close", {
+				duration: 2500,
+			});
+		}
+	}
 
 	openAddVersionDialog(): void {
 		this.dialog.open(PublishVersionDialogComponent, {

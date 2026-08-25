@@ -24,6 +24,7 @@ import {
 	type VersionModel,
 } from "@/models/version.model";
 import { VersionService } from "@/services/api/version.service";
+import { ChartService } from "@/services/api/chart.service";
 
 // Service
 import {
@@ -60,6 +61,7 @@ export class VersionsComponent {
 	readonly dialog = inject(MatDialog);
 
 	readonly versionService = inject(VersionService);
+	readonly chartService = inject(ChartService);
 	readonly chartPublishHandler = inject(ChartPublishHandler);
 
 	readonly versionTable =
@@ -102,8 +104,10 @@ export class VersionsComponent {
 		{
 			description: "Download",
 			icon: "download",
-			href: () => "",
-			disabled: () => true,
+			callback: () => {
+				this.downloadBundle();
+			},
+			disabled: () => false,
 		},
 		{
 			description: "Switch version",
@@ -137,6 +141,17 @@ export class VersionsComponent {
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
+	}
+
+	async downloadBundle() {
+		try {
+			const url = await this.chartService.getBundleUrl(this.chartId());
+			window.open(url, "_blank");
+		} catch {
+			this._snackBar.open("Failed to get download link", "Close", {
+				duration: 2500,
+			});
+		}
 	}
 
 	openAddVersionDialog(): void {
