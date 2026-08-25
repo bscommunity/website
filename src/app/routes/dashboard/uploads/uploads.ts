@@ -29,9 +29,13 @@ import {
 import { convertStringToMonth } from "@/lib/time";
 import {
 	groupByMonth,
+	isChart,
+	isTheme,
+	isTourPass,
 	mapCategoriesToTypes,
 	type ContentByMonth,
 } from "@/lib/content-grouping";
+import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 // Enums
 import {
@@ -45,6 +49,7 @@ import { AuthService } from "@/services/auth.service";
 import type { WorkshopFilters } from "@/services/filter.service";
 import { FilterService } from "@/services/filter.service";
 import { BatchUploadQueueService } from "@/services/publish/batch-upload-queue.service";
+import { PublishDialogService } from "@/services/publish/publish.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
 import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.component";
@@ -73,6 +78,7 @@ export class Uploads implements OnInit, OnDestroy {
 	private userService = inject(UserService);
 	private authService = inject(AuthService);
 	private batchUploadQueue = inject(BatchUploadQueueService);
+	private publishDialogService = inject(PublishDialogService);
 	private cdr = inject(ChangeDetectorRef);
 
 	private destroy$ = new Subject<void>();
@@ -131,6 +137,12 @@ export class Uploads implements OnInit, OnDestroy {
 			.subscribe(() => {
 				this.currentOffset = 0;
 				this.fetchContent();
+			});
+
+		this.publishDialogService.publishCompleted$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((item) => {
+				this.addPublishedItem(item);
 			});
 
 		this.error$.pipe(takeUntil(this.destroy$)).subscribe((err) => {
@@ -209,6 +221,45 @@ export class Uploads implements OnInit, OnDestroy {
 		if (this.hasMore) {
 			this.fetchContent(false, true);
 		}
+	}
+
+	private addPublishedItem(item: CatalogItemModel): void {
+		if (!item?.id || this.hasActiveFilters()) return;
+
+		const isAlreadyListed = this.contentByMonth.some(
+			(m) =>
+				m.charts.some((c) => c.id === item.id) ||
+				m.tourPasses.some((t) => t.id === item.id) ||
+				m.themes.some((th) => th.id === item.id),
+		);
+		if (isAlreadyListed) return;
+
+		// Same month key as groupByMonth
+		const dateSource = item.updatedAt ?? item.createdAt;
+		const monthName = dateSource
+			? new Date(dateSource).toISOString().slice(0, 7)
+			: "unknown";
+
+		let group = this.contentByMonth.find((m) => m.name === monthName);
+		if (!group) {
+			group = { name: monthName, charts: [], tourPasses: [], themes: [] };
+			this.contentByMonth.push(group);
+			this.contentByMonth.sort((a, b) => b.name.localeCompare(a.name));
+		}
+
+		if (isChart(item)) {
+			group.charts.unshift(item);
+		} else if (isTourPass(item)) {
+			group.tourPasses.unshift(item);
+		} else if (isTheme(item)) {
+			group.themes.unshift(item);
+		} else {
+			return;
+		}
+
+		this.totalCount++;
+		this.currentOffset++;
+		this.cdr.markForCheck();
 	}
 
 	private mergeGroupedContent(

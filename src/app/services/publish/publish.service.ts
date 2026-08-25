@@ -2,7 +2,7 @@ import { Injectable, inject } from "@angular/core";
 // Material
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Components
@@ -15,6 +15,8 @@ import type { PublishHandler } from "./publish-handler.interface";
 import { PublishDialogUploadingComponent } from "@/components/dialogs/uploading/uploading.component";
 
 // Types
+import type { CatalogItemModel } from "@/models/catalog-item.model";
+
 export interface DialogData<TFormData = Record<string, unknown>> {
 	title?: string | null;
 	description?: string | null;
@@ -53,6 +55,10 @@ export class PublishDialogService<
 
 	private currentStepSubject = new BehaviorSubject<number>(0);
 	currentStep$ = this.currentStepSubject.asObservable();
+
+	/** Emits the freshly created item (chart, tour pass or theme). */
+	private publishCompletedSubject = new Subject<CatalogItemModel>();
+	publishCompleted$ = this.publishCompletedSubject.asObservable();
 
 	private handler!: PublishHandler<TFormData, TSuccessData>;
 	private handlersByType: Record<string, PublishHandler<any, any>> | null =
@@ -224,6 +230,11 @@ export class PublishDialogService<
 			if (this.handler.onPostSubmit) {
 				await this.handler.onPostSubmit(this.formData, response);
 			}
+
+			// Let active views (e.g. the uploads page) patch themselves
+			// with the created item — no refetch needed. The create
+			// services already keep the query/entity caches up to date.
+			this.publishCompletedSubject.next(response as CatalogItemModel);
 
 			loadingDialog.close();
 			const successComponent =

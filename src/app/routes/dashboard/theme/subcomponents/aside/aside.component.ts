@@ -50,8 +50,7 @@ export class AsideComponent {
 			data: {
 				theme: this.theme(),
 			},
-			width: "500px",
-			disableClose: true,
+			width: "560px",
 		});
 
 		dialogRef.afterClosed().subscribe((result) => {

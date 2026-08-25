@@ -52,8 +52,7 @@ export class AsideComponent {
 			data: {
 				chart: this.chart(),
 			},
-			width: "500px",
-			disableClose: true,
+			width: "560px",
 		});
 
 		dialogRef.afterClosed().subscribe((result) => {

@@ -24,6 +24,7 @@ import {
 	type ValuesToControls,
 } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
+import { formValuesChanged } from "@/lib/compare";
 
 export interface TourPassDetailsValue {
 	name: string;
@@ -79,7 +80,9 @@ export interface TourPassDetailsValue {
 				<button
 					mat-button
 					type="submit"
-					[disabled]="form.invalid || disabled()"
+					[disabled]="
+						form.invalid || disabled() || (requireDirty() && !hasChanges())
+					"
 				>
 					{{ submitLabel() }}
 				</button>
@@ -108,6 +111,8 @@ export class TourPassDetailsFormComponent implements OnInit {
 	readonly submitLabel = input("Continue");
 	readonly cancelLabel = input("Back");
 	readonly disabled = input(false);
+	/** Disables submit until the user modifies any field (used by edit dialogs). */
+	readonly requireDirty = input(false);
 
 	readonly canceled = output<void>();
 	readonly submitted = output<TourPassDetailsValue>();
@@ -161,6 +166,16 @@ export class TourPassDetailsFormComponent implements OnInit {
 			coverFile: null,
 		});
 
+	private initialValuesSnapshot: Record<string, unknown> = {};
+
+	/** True when any field value differs from the initial snapshot. */
+	hasChanges(): boolean {
+		return formValuesChanged(
+			this.initialValuesSnapshot,
+			this.form.getRawValue(),
+		);
+	}
+
 	ngOnInit(): void {
 		const values = this.initialValues();
 		this.form.patchValue({
@@ -175,6 +190,8 @@ export class TourPassDetailsFormComponent implements OnInit {
 			control.clearValidators();
 			control.updateValueAndValidity();
 		}
+
+		this.initialValuesSnapshot = this.form.getRawValue();
 	}
 
 	async onSubmit(): Promise<void> {

@@ -45,6 +45,8 @@ export const SAMPLE_CHART_1: ChartModel = {
 	isFeatured: false,
 	downloadsSum: 1234,
 	changelog: [],
+	bookmarksCount: 11,
+	likesCount: 24,
 	contributors: [
 		{
 			user: {

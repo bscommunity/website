@@ -45,7 +45,11 @@
 		>
 			Cancel
 		</button>
-		<button mat-flat-button type="submit" [disabled]="form.invalid || isSaving">
+		<button
+			mat-flat-button
+			type="submit"
+			[disabled]="form.invalid || !hasChanges() || isSaving"
+		>
 			@if (isSaving) {
 				<mat-progress-spinner
 					[diameter]="16"

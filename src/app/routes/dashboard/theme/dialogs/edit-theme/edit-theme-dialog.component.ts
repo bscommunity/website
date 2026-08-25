@@ -36,10 +36,12 @@ import { ThemeModel } from "@/models/theme.model";
 import {
 	THEME_GENRES,
 	THEME_GENRE_LABELS,
+	getBeatstarTheme,
 	getBeatstarThemeGenre,
 	getThemesByGenre,
 } from "@/models/theme/theme-genres";
 import { ThemeGenre } from "@/models/theme/beatstar-themes";
+import { formValuesChanged } from "@/lib/compare";
 
 export interface EditThemeDialogData {
 	theme: ThemeModel;
@@ -135,13 +137,25 @@ export class EditThemeDialogComponent implements OnInit {
 		this.formService.createFormGroup<EditThemeForm>(this.allFields, {
 			name: this.data.theme.name,
 			displayFile: null,
-			previewUrl: this.data.theme.previewUrl ?? "",
+			previewUrl: this.data.theme.previewUrl
+				? `https://youtu.be/${this.data.theme.previewUrl}`
+				: "",
 			originalArtwork: this.data.theme.originalArtwork ?? "",
 			genre: getBeatstarThemeGenre(this.data.theme.replaces) ?? null,
-			replaces: this.data.theme.replaces,
+			replaces: getBeatstarTheme(this.data.theme.replaces)?.id ?? this.data.theme.replaces,
 		});
 
 	isSaving = false;
+
+	private initialValuesSnapshot: Record<string, unknown> = {};
+
+	/** True when any field value differs from the initial snapshot. */
+	hasChanges(): boolean {
+		return formValuesChanged(
+			this.initialValuesSnapshot,
+			this.form.getRawValue(),
+		);
+	}
 
 	availableThemes = signal<{ id: string; name: string }[]>([]);
 
@@ -158,6 +172,10 @@ export class EditThemeDialogComponent implements OnInit {
 			// Preserve the current replaces value on initial load
 			this.updateReplacesOptions(genre, true);
 		}
+
+		// Snapshot after normalization so the baseline matches what the user
+		// sees on open.
+		this.initialValuesSnapshot = this.form.getRawValue();
 	}
 
 	updateReplacesOptions(
@@ -194,6 +212,7 @@ export class EditThemeDialogComponent implements OnInit {
 		if (!result.isValid) return;
 
 		this.isSaving = true;
+		this.dialogRef.disableClose = true;
 
 		try {
 			const v = result.formValue;
@@ -230,6 +249,7 @@ export class EditThemeDialogComponent implements OnInit {
 				duration: 3000,
 			});
 			this.isSaving = false;
+			this.dialogRef.disableClose = false;
 		}
 	}
 }

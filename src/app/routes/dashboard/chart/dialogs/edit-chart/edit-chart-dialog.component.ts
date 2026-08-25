@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import {
-	MAT_DIALOG_DATA,
-	MatDialogRef,
-} from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 // Components
@@ -26,13 +23,14 @@ export interface EditChartDialogData {
 	template: `
 		<app-chart-details-form
 			title="Edit chart"
-			description="Track info is defined by the latest uploaded version and cannot be changed here."
+			description="Some info is defined by the latest uploaded version and cannot be changed here."
 			submitLabel="Save"
 			cancelLabel="Cancel"
 			[initialValues]="initialValues"
 			[inactive]="inactiveFields"
 			[gameplayEditable]="true"
 			[disabled]="isSaving"
+			[requireDirty]="true"
 			(canceled)="dialogRef.close()"
 			(submitted)="onSubmitted($event)"
 		/>
@@ -63,11 +61,14 @@ export class EditChartDialogComponent {
 		difficulty: this.data.chart.difficulty,
 		isDeluxe: this.data.chart.isDeluxe,
 		isExplicit: this.data.chart.isExplicit,
-		gameplayUrl: this.data.chart.previewVideoId ?? "",
+		gameplayUrl: this.data.chart.previewVideoId
+			? `https://youtu.be/${this.data.chart.previewVideoId}`
+			: "",
 	};
 
 	async onSubmitted(value: ChartDetailsValue): Promise<void> {
 		this.isSaving = true;
+		this.dialogRef.disableClose = true;
 
 		try {
 			const response = await this.chartService.updateChart(
@@ -89,6 +90,7 @@ export class EditChartDialogComponent {
 				duration: 3000,
 			});
 			this.isSaving = false;
+			this.dialogRef.disableClose = false;
 		}
 	}
 }

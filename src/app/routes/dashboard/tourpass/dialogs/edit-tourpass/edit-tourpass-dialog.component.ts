@@ -32,6 +32,7 @@ export interface EditTourPassDialogData {
 			[coverRequired]="false"
 			[initialValues]="initialValues"
 			[disabled]="isSaving"
+			[requireDirty]="true"
 			(canceled)="dialogRef.close()"
 			(submitted)="onSubmitted($event)"
 		/>
@@ -52,12 +53,15 @@ export class EditTourPassDialogComponent {
 	initialValues: Partial<TourPassDetailsValue> = {
 		name: this.data.tourpass.name,
 		description: this.data.tourpass.description || "",
-		trailerUrl: this.data.tourpass.previewVideoId || "",
+		trailerUrl: this.data.tourpass.previewVideoId
+			? `https://youtu.be/${this.data.tourpass.previewVideoId}`
+			: "",
 		coverFile: null,
 	};
 
 	async onSubmitted(value: TourPassDetailsValue): Promise<void> {
 		this.isSaving = true;
+		this.dialogRef.disableClose = true;
 
 		try {
 			const response = await this.tourPassService.updateTourPass(
@@ -81,6 +85,7 @@ export class EditTourPassDialogComponent {
 				duration: 3000,
 			});
 			this.isSaving = false;
+			this.dialogRef.disableClose = false;
 		}
 	}
 }

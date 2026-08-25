@@ -45,8 +45,7 @@ export class AsideComponent {
 			data: {
 				tourpass: this.tourpass(),
 			},
-			width: "500px",
-			disableClose: true,
+			width: "560px",
 		});
 
 		dialogRef.afterClosed().subscribe((result) => {

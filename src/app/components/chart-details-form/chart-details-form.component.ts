@@ -24,11 +24,10 @@ import { Difficulty, getDifficultyLabel } from "@/models/enums/difficulty.enum";
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
 
 // Services
-import {
-	FormService,
-	type ValuesToControls,
-} from "@/services/form.service";
+import { FormService, type ValuesToControls } from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { formValuesChanged } from "@/lib/compare";
 
 export interface ChartDetailsValue {
 	track: string;
@@ -72,25 +71,32 @@ export interface ChartDetailsValue {
 					/>
 				}
 
-				<div class="flex flex-row items-center justify-between last">
-					<app-form-field
-						class="w-1/3"
-						[control]="form.controls.difficulty"
-						[config]="fields.difficultyField"
-					/>
-					<mat-slide-toggle
-						labelPosition="before"
-						[formControl]="form.controls.isDeluxe"
+				<app-form-field
+					[control]="form.controls.difficulty"
+					[config]="fields.difficultyField"
+				/>
+			<div
+				class="flex flex-row items-center justify-start gap-4 -my-6"
+			>
+					<!-- <mat-slide-toggle
+					labelPosition="before"
+					[formControl]="form.controls.isDeluxe"
 					>
-						Is deluxe?
-					</mat-slide-toggle>
-					<mat-slide-toggle
-						labelPosition="before"
-						[formControl]="form.controls.isExplicit"
-					>
-						Is explicit?
-					</mat-slide-toggle>
+					Deluxe
+				</mat-slide-toggle> -->
+					<mat-checkbox [formControl]="form.controls.isDeluxe">
+						Deluxe
+					</mat-checkbox>
+					<mat-checkbox [formControl]="form.controls.isExplicit">
+						Explicit lyrics
+					</mat-checkbox>
 				</div>
+				<!-- <mat-slide-toggle
+					labelPosition="before"
+					[formControl]="form.controls.isExplicit"
+				>
+					Explicit content
+				</mat-slide-toggle> -->
 			</mat-dialog-content>
 			<mat-dialog-actions align="end">
 				<button
@@ -101,19 +107,22 @@ export interface ChartDetailsValue {
 				>
 					{{ cancelLabel() }}
 				</button>
-				<button
-					mat-button
-					type="submit"
-					[disabled]="form.invalid || disabled()"
-				>
-					{{ submitLabel() }}
-				</button>
+			<button
+				mat-button
+				type="submit"
+				[disabled]="
+					form.invalid || disabled() || (requireDirty() && !hasChanges())
+				"
+			>
+				{{ submitLabel() }}
+			</button>
 			</mat-dialog-actions>
 		</form>
 	`,
 	imports: [
 		MatDialogModule,
 		MatButtonModule,
+		MatCheckboxModule,
 		MatSlideToggleModule,
 		FormsModule,
 		ReactiveFormsModule,
@@ -137,6 +146,8 @@ export class ChartDetailsFormComponent implements OnInit {
 	readonly submitLabel = input("Continue");
 	readonly cancelLabel = input("Back");
 	readonly disabled = input(false);
+	/** Disables submit until the user modifies any field (used by edit dialogs). */
+	readonly requireDirty = input(false);
 
 	readonly canceled = output<void>();
 	readonly submitted = output<ChartDetailsValue>();
@@ -199,11 +210,24 @@ export class ChartDetailsFormComponent implements OnInit {
 			},
 		);
 
+	private initialValuesSnapshot: Record<string, unknown> = {};
+
+	/** True when any field value differs from the initial snapshot. */
+	hasChanges(): boolean {
+		return formValuesChanged(
+			this.initialValuesSnapshot,
+			this.form.getRawValue(),
+		);
+	}
+
 	ngOnInit(): void {
 		this.form.addControl(
 			"isDeluxe",
 			new FormControl(
-				{ value: this.initialValues().isDeluxe ?? false, disabled: false },
+				{
+					value: this.initialValues().isDeluxe ?? false,
+					disabled: false,
+				},
 				{ nonNullable: true },
 			),
 		);
@@ -232,6 +256,10 @@ export class ChartDetailsFormComponent implements OnInit {
 			const control = this.form.get(key);
 			control?.disable();
 		}
+
+		// Snapshot after patching/disabling so the baseline matches what the
+		// user sees on open.
+		this.initialValuesSnapshot = this.form.getRawValue();
 	}
 
 	async onSubmit(): Promise<void> {
@@ -245,4 +273,3 @@ export class ChartDetailsFormComponent implements OnInit {
 		}
 	}
 }
-
