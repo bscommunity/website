@@ -216,7 +216,10 @@ export class PublishDialogService<
 			{
 				disableClose: true,
 				width: "450px",
-				data: { progress$ },
+				data: {
+					progress$,
+					itemLabel: this.handler.getItemLabel?.() ?? "chart",
+				},
 			},
 		);
 

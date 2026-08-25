@@ -49,6 +49,12 @@ export interface PublishHandler<
 	getSuccessComponent?(): Type<unknown>;
 
 	/**
+	 * Human-readable noun for the item being published, used in progress UI
+	 * (e.g. "chart", "tour pass", "theme").
+	 */
+	getItemLabel?(): string;
+
+	/**
 	 * Optional custom validation for the form data.
 	 * @param formData - The data to validate.
 	 * @returns A string with an error message if validation fails, or null if validation passes.

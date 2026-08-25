@@ -32,6 +32,7 @@ export class TourPassService {
 
 	async createTourPass(
 		payload: CreateTourPassModel & { coverFile?: File | null },
+		publishSessionId?: string,
 	): Promise<TourPassModel> {
 		const { coverFile, ...tourpassData } = payload;
 
@@ -42,9 +43,14 @@ export class TourPassService {
 			formData.append("cover", coverFile);
 		}
 
+		const headers: Record<string, string> = {};
+		if (publishSessionId) {
+			headers["X-Publish-Session-Id"] = publishSessionId;
+		}
+
 		const result = TourPass.parse(
 			await firstValueFrom(
-				this.http.post<TourPassModel>(this.apiUrl, formData),
+				this.http.post<TourPassModel>(this.apiUrl, formData, { headers }),
 			),
 		);
 

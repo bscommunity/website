@@ -88,6 +88,10 @@ export class ThemePublishHandler
 		return PublishThemeSuccessComponent;
 	}
 
+	getItemLabel(): string {
+		return "theme";
+	}
+
 	async submit(data: ThemeFormData, publishSessionId?: string): Promise<ThemeModel> {
 		const {
 			iconFile,

@@ -80,6 +80,10 @@ export class ChartPublishHandler
 		return PublishDialogSuccessComponent;
 	}
 
+	getItemLabel(): string {
+		return "chart";
+	}
+
 	async submit(data: ChartFormData, publishSessionId?: string): Promise<ChartModel> {
 		const {
 			chartBundle,

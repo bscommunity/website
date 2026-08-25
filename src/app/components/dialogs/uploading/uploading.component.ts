@@ -45,6 +45,11 @@ const STEP_ICONS: Record<string, string> = {
 	error: "error",
 };
 
+interface UploadingDialogData {
+	progress$?: Observable<PublishEvent>;
+	itemLabel?: string;
+}
+
 @Component({
 	selector: "app-publish-dialog-uploading",
 	templateUrl: "./uploading.component.html",
@@ -52,7 +57,7 @@ const STEP_ICONS: Record<string, string> = {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublishDialogUploadingComponent {
-	currentMessage = signal("Preparing your chart...");
+	currentMessage = signal("Preparing your content...");
 	currentIcon = signal("hourglass_top");
 	showMessage = signal(true);
 
@@ -60,8 +65,10 @@ export class PublishDialogUploadingComponent {
 	private cdr = inject(ChangeDetectorRef);
 
 	constructor() {
-		const data = inject<{ progress$?: Observable<PublishEvent> } | null>(
-			MAT_DIALOG_DATA,
+		const data = inject<UploadingDialogData | null>(MAT_DIALOG_DATA);
+
+		this.currentMessage.set(
+			`Preparing your ${data?.itemLabel ?? "content"}...`,
 		);
 
 		const progress$ =
