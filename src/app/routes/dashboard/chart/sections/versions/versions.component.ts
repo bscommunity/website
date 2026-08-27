@@ -20,7 +20,7 @@ import { PublishVersionChangelogComponent } from "@/components/publish/version/c
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
 // Model
-import { type VersionModel } from "@/models/version.model";
+import { type VersionModel, Version } from "@/models/version.model";
 import { ChartService } from "@/services/api/chart.service";
 import { CacheService } from "@/services/cache.service";
 import { type ChartModel } from "@/models/chart.model";
@@ -211,7 +211,7 @@ export class VersionsComponent {
 			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => [...updated.versions]);
+				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
 			}
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
@@ -252,7 +252,7 @@ export class VersionsComponent {
 			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => [...updated.versions]);
+				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
 			}
 		};
 

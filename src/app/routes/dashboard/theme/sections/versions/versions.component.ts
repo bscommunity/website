@@ -28,7 +28,7 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 
 // Models
-import { type VersionModel } from "@/models/version.model";
+import { type VersionModel, Version } from "@/models/version.model";
 import type { ThemeModel } from "@/models/theme.model";
 import type { ThemeAssets } from "@/models/theme/beatstar-themes";
 import { getBeatstarTheme } from "@/models/theme/theme-genres";
@@ -207,7 +207,7 @@ export class VersionsSectionComponent {
 			const updated = this.cacheService.getEntity<ThemeModel>("theme", this.themeId());
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => [...updated.versions]);
+				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
 			}
 			this._snackBar.open(
 				`Version v${version.versionCode} published with success!`,
