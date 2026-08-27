@@ -151,3 +151,55 @@ export function detect256x256ImageType(
 		img.src = url;
 	});
 }
+
+export function detect512x256ImageType(
+	file: File,
+): Promise<"top" | "bottom" | null> {
+	return new Promise((resolve) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			const canvas = document.createElement("canvas");
+			canvas.width = 512;
+			canvas.height = 256;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) {
+				URL.revokeObjectURL(url);
+				resolve(null);
+				return;
+			}
+
+			ctx.drawImage(img, 0, 0, 512, 256);
+			URL.revokeObjectURL(url);
+
+			const imageData = ctx.getImageData(0, 0, 512, 256);
+			const data = imageData.data;
+
+			const bottomLeft = (255 * 512 * 4) + 3;
+			const bottomRight = (255 * 512 * 4 + 511 * 4) + 3;
+			const topLeft = 3;
+			const topRight = (511 * 4) + 3;
+
+			const bottomTransparent =
+				data[bottomLeft] < 128 && data[bottomRight] < 128;
+			const topTransparent =
+				data[topLeft] < 128 && data[topRight] < 128;
+
+			if (bottomTransparent) {
+				resolve("top");
+			} else if (topTransparent) {
+				resolve("bottom");
+			} else {
+				resolve(null);
+			}
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			resolve(null);
+		};
+
+		img.src = url;
+	});
+}

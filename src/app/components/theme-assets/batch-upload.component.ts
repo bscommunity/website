@@ -18,6 +18,7 @@ import JSZip from "jszip";
 import {
 	buildUuidLookup,
 	detect256x256ImageType,
+	detect512x256ImageType,
 	getAssetLabel,
 	loadImageDimensions,
 	OBLIGATORY_TYPES,
@@ -360,6 +361,45 @@ export class ThemeAssetsBatchUploadComponent {
 							return { file, assetType: candidate.key, dimensions };
 						}
 					}
+				}
+			}
+
+			if (width === 64 && height === 256) {
+				return {
+					file,
+					assetType: "perfectBar",
+					dimensions,
+					heuristicMatch: true,
+				};
+			}
+
+			if (width === 512 && height === 32) {
+				return {
+					file,
+					assetType: "perfectLine",
+					dimensions,
+					heuristicMatch: true,
+				};
+			}
+
+			if (width === 512 && height >= 512 && height <= 2048) {
+				return {
+					file,
+					assetType: "track",
+					dimensions,
+					heuristicMatch: true,
+				};
+			}
+
+			if (width === 512 && height === 256) {
+				const heuristic = await detect512x256ImageType(file);
+				if (heuristic) {
+					return {
+						file,
+						assetType: heuristic,
+						dimensions,
+						heuristicMatch: true,
+					};
 				}
 			}
 
