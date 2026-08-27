@@ -13,6 +13,7 @@ export interface IdentifiedFile {
 	file: File;
 	assetType: string;
 	dimensions: string;
+	heuristicMatch?: boolean;
 }
 
 export interface AssetTypeInfo {
@@ -93,6 +94,60 @@ export function loadImageDimensions(
 			URL.revokeObjectURL(url);
 			reject(new Error(`Could not load image: ${file.name}`));
 		};
+		img.src = url;
+	});
+}
+
+export function detect256x256ImageType(
+	file: File,
+): Promise<"icon" | "circle" | null> {
+	return new Promise((resolve) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			const canvas = document.createElement("canvas");
+			canvas.width = 256;
+			canvas.height = 256;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) {
+				URL.revokeObjectURL(url);
+				resolve(null);
+				return;
+			}
+
+			ctx.drawImage(img, 0, 0, 256, 256);
+			URL.revokeObjectURL(url);
+
+			const imageData = ctx.getImageData(0, 0, 256, 256);
+			const data = imageData.data;
+
+			const corners = [
+				0, // top-left: (0,0)
+				(255 * 4), // top-right: (255,0)
+				(255 * 256 * 4), // bottom-left: (0,255)
+				(255 * 256 * 4 + 255 * 4), // bottom-right: (255,255)
+			];
+
+			const allTransparent = corners.every(
+				(offset) => data[offset + 3] < 128,
+			);
+			const allOpaque = corners.every((offset) => data[offset + 3] >= 128);
+
+			if (allTransparent) {
+				resolve("circle");
+			} else if (allOpaque) {
+				resolve("icon");
+			} else {
+				resolve(null);
+			}
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			resolve(null);
+		};
+
 		img.src = url;
 	});
 }

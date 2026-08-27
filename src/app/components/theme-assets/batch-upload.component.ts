@@ -17,6 +17,7 @@ import JSZip from "jszip";
 
 import {
 	buildUuidLookup,
+	detect256x256ImageType,
 	getAssetLabel,
 	loadImageDimensions,
 	OBLIGATORY_TYPES,
@@ -114,6 +115,11 @@ import {
 										<span class="text-sm text-outline">
 											{{ getAssetLabel(item.assetType) }}
 											({{ item.dimensions }})
+											@if (item.heuristicMatch) {
+												<span class="text-xs italic">
+													auto-detected
+												</span>
+											}
 										</span>
 									}
 								</div>
@@ -332,34 +338,40 @@ export class ThemeAssetsBatchUploadComponent {
 		const nameWithoutExt = file.name.replace(/\.[^.]+$/, "");
 		const uuidCandidates = this.uuidLookup.get(nameWithoutExt);
 
-		if (!uuidCandidates) {
-			return {
-				file,
-				assetType: "unknown",
-				dimensions: "",
-			};
-		}
-
 		try {
 			const { width, height } = await loadImageDimensions(file);
 			const dimensions = `${width}x${height}`;
 
-			for (const candidate of uuidCandidates) {
-				if (candidate.expectedHeight === null) {
-					if (
-						width === candidate.expectedWidth &&
-						height >= 512 &&
-						height <= 2048
-					) {
-						return { file, assetType: candidate.key, dimensions };
+			if (uuidCandidates) {
+				for (const candidate of uuidCandidates) {
+					if (candidate.expectedHeight === null) {
+						if (
+							width === candidate.expectedWidth &&
+							height >= 512 &&
+							height <= 2048
+						) {
+							return { file, assetType: candidate.key, dimensions };
+						}
+					} else {
+						if (
+							width === candidate.expectedWidth &&
+							height === candidate.expectedHeight
+						) {
+							return { file, assetType: candidate.key, dimensions };
+						}
 					}
-				} else {
-					if (
-						width === candidate.expectedWidth &&
-						height === candidate.expectedHeight
-					) {
-						return { file, assetType: candidate.key, dimensions };
-					}
+				}
+			}
+
+			if (width === 256 && height === 256) {
+				const heuristic = await detect256x256ImageType(file);
+				if (heuristic) {
+					return {
+						file,
+						assetType: heuristic,
+						dimensions,
+						heuristicMatch: true,
+					};
 				}
 			}
 
