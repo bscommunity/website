@@ -42,7 +42,7 @@ import { NgGlyph } from "@ng-icons/core";
 })
 export class AsideContainerComponent {
 	readonly icon = input<string>();
-	readonly info = input<string | undefined>(undefined);
+	readonly info = input<string | number | undefined>(undefined);
 	readonly asideContainerClass = input("");
 	readonly isLoading = input(false);
 }

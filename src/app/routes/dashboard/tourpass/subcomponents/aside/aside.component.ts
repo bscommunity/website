@@ -14,6 +14,7 @@ import { TourPassModel } from "@/models/tour-pass.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
+import { abbreviateNumber } from "@/lib/number";
 
 @Component({
 	selector: "app-aside",
@@ -28,6 +29,7 @@ export class AsideComponent {
 	readonly tourPassUpdated = output<TourPassModel>();
 
 	transformDuration = transformDuration;
+	abbreviateNumber = abbreviateNumber;
 
 	get totalDuration(): number {
 		return this.tourpass().charts.reduce(

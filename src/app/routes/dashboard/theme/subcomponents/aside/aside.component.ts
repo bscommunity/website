@@ -19,6 +19,7 @@ import {
 	getBeatstarThemeGenre,
 	getThemeGenreIcon,
 } from "@/models/theme/theme-genres";
+import { abbreviateNumber } from "@/lib/number";
 
 @Component({
 	selector: "app-aside",
@@ -38,6 +39,8 @@ export class AsideComponent {
 	readonly themeUpdated = output<ThemeModel>();
 
 	readonly replacesName = input<string | undefined>(undefined);
+
+	abbreviateNumber = abbreviateNumber;
 
 	readonly themeIcon = computed<string | null>(() => {
 		const genre = getBeatstarThemeGenre(this.theme().replaces);

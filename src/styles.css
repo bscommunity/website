@@ -129,10 +129,6 @@ ng-glyph .mdc-icon-button {
 	margin-right: 0.5rem !important;
 }
 
-.mat-mdc-dialog-content {
-	max-height: unset !important;
-}
-
 ng-glyph {
 	user-select: none;
 	pointer-events: none;

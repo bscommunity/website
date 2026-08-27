@@ -21,6 +21,7 @@ import { ChartModel } from "@/models/chart.model";
 import { transformDuration } from "@/lib/time";
 import { NgGlyph } from "@ng-icons/core";
 import { Visibility } from "@/models/enums/visibility.enum";
+import { abbreviateNumber } from "@/lib/number";
 
 @Component({
 	selector: "app-aside",
@@ -43,7 +44,9 @@ export class AsideComponent {
 	readonly chartUpdated = output<ChartModel>();
 
 	visibility = Visibility;
+
 	transformDuration = transformDuration;
+	abbreviateNumber = abbreviateNumber;
 
 	isFetchingBundle = signal(false);
 
