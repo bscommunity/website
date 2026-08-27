@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from "@angular/core";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
 // Modules
@@ -41,27 +41,21 @@ export class Theme implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 
-	set theme(value: ThemeModel) {
-		this._theme = value;
-	}
+	readonly theme = signal<ThemeModel | null>(null);
 
-	get theme(): ThemeModel {
-		return this._theme;
-	}
-
-	private _theme!: ThemeModel;
-
-	readonly replacesName = computed(
-		() => getBeatstarThemeName(this._theme.replaces) ?? this._theme.replaces,
-	);
+	readonly replacesName = computed(() => {
+		const replaces = this.theme()?.replaces;
+		return (replaces ? getBeatstarThemeName(replaces) : undefined) ?? replaces ?? "";
+	});
 
 	ngOnInit(): void {
 		this.route.params.subscribe(() => {
-			this.theme = this.route.snapshot.data["theme"];
+			const data = this.route.snapshot.data["theme"];
+			this.theme.set(data);
 
-			console.log("Theme data:", this.theme);
+			console.log("Theme data:", data);
 
-			if (!this.theme) {
+			if (!data) {
 				this.router.navigate(["error"], {
 					state: { error: "Theme data is incomplete" },
 				});
@@ -70,6 +64,6 @@ export class Theme implements OnInit {
 	}
 
 	onThemeUpdated(updated: ThemeModel) {
-		this.theme = updated;
+		this.theme.set(updated);
 	}
 }

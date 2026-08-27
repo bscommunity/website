@@ -2,7 +2,6 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	computed,
-	effect,
 	inject,
 	input,
 	signal,
@@ -65,18 +64,6 @@ export class VersionsComponent {
 
 	isFetchingBundle = signal(false);
 	saving = signal(false);
-
-	// Effect to update table when versions input changes (e.g. on re-resolve)
-	constructor() {
-		effect(() => {
-			const versions = this.versions();
-			const table = this.versionTable();
-
-			if (table) {
-				table.updateTableData(() => [...versions]);
-			}
-		});
-	}
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{

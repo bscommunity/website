@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from "@angular/core";
+import { Component, OnInit, inject, signal } from "@angular/core";
 import {
 	ActivatedRoute,
 	Router,
@@ -24,25 +24,26 @@ import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Enums
 import { getDifficultyIcon } from "@/models/enums/difficulty.enum";
+import { Visibility } from "@/models/enums/visibility.enum";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
 
 @Component({
 	selector: "app-chart",
-		imports: [
-			FormsModule,
-			MatButtonModule,
-			NgIcon,
-			NgGlyph,
-			MatTooltipModule,
-			RouterLink,
-			AsideComponent,
-			ContributorsComponent,
-			DangerZoneComponent,
-			VersionsComponent,
-			PageError,
-		],
+	imports: [
+		FormsModule,
+		MatButtonModule,
+		NgIcon,
+		NgGlyph,
+		MatTooltipModule,
+		RouterLink,
+		AsideComponent,
+		ContributorsComponent,
+		DangerZoneComponent,
+		VersionsComponent,
+		PageError,
+	],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
 	templateUrl: "./chart.html",
 })
@@ -50,47 +51,42 @@ export class Chart implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 
-	set chart(value: ChartModel) {
-		this._chart = value;
-	}
-
-	get chart(): ChartModel {
-		return this._chart;
-	}
-
-	private _chart!: ChartModel;
-
-	difficultyIcon: string | null = null;
-	tourPassId: string | null = history.state?.tourPassId ?? null;
+	readonly chart = signal<ChartModel | null>(null);
+	readonly difficultyIcon = signal<string | null>(null);
+	readonly tourPassId = signal<string | null>(
+		history.state?.tourPassId ?? null,
+	);
 
 	ngOnInit(): void {
-		// Listen to route parameter changes to reload the chart
 		this.route.params.subscribe(() => {
-			// Access resolved data
-			this.chart = this.route.snapshot.data["chart"];
-			console.warn("Chart data", this.chart);
+			const data = this.route.snapshot.data["chart"];
+			this.chart.set(data);
+			console.warn("Chart data", data);
 
-			// Update tourPassId from navigation state (may change on re-navigation)
-			this.tourPassId = history.state?.tourPassId ?? null;
+			this.tourPassId.set(history.state?.tourPassId ?? null);
 
-			if (!this.chart.contributors) {
-				console.error("Chart data is incomplete", this.chart);
+			if (!data.contributors) {
+				console.error("Chart data is incomplete", data);
 				this.router.navigate(["error"], {
 					state: { error: "Chart data is incomplete" },
 				});
 			}
 
-			if (this.chart.difficulty) {
-				this.difficultyIcon = getDifficultyIcon(this.chart.difficulty);
+			if (data.difficulty) {
+				this.difficultyIcon.set(getDifficultyIcon(data.difficulty));
 			}
 		});
 	}
 
 	onChartUpdated(updated: ChartModel) {
-		this.chart = updated;
+		this.chart.set(updated);
 
 		if (updated.difficulty) {
-			this.difficultyIcon = getDifficultyIcon(updated.difficulty);
+			this.difficultyIcon.set(getDifficultyIcon(updated.difficulty));
 		}
+	}
+
+	onVisibilityChanged(visibility: Visibility) {
+		this.chart.update((c) => (c ? { ...c, visibility } : c));
 	}
 }

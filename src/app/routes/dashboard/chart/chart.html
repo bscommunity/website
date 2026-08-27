@@ -1,10 +1,10 @@
-@if (chart && chart.latestVersion && chart.contributors) {
+@if (chart() && chart()!.latestVersion && chart()!.contributors) {
 	<main
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
 		<!-- Desktop aside -->
 		<app-aside
-			[chart]="chart"
+			[chart]="chart()!"
 			(chartUpdated)="onChartUpdated($event)"
 			class="hidden md:flex md:sticky md:top-8"
 		>
@@ -12,10 +12,10 @@
 		<div
 			class="flex flex-col items-start justify-start gap-9 max-md:w-full flex-1"
 		>
-			@if (tourPassId) {
+			@if (tourPassId()) {
 				<a
 					mat-stroked-button
-					[routerLink]="['/dashboard/tourpass', tourPassId]"
+					[routerLink]="['/dashboard/tourpass', tourPassId()]"
 					class="back-to-tourpass"
 				>
 					<ng-glyph name="arrow_back" />
@@ -24,19 +24,19 @@
 			}
 			<div class="flex flex-col items-start justify-start gap-2 relative">
 				<h1 class="font-medium text-5xl leading-tight">
-					<span class="mr-4">{{ chart.track.title }}</span>
+					<span class="mr-4">{{ chart()!.track.title }}</span>
 					<span class="relative inline-flex gap-4 text-2xl h-full">
-						@if (difficultyIcon) {
+						@if (difficultyIcon()) {
 							<img
 								class="w-8 h-8 flex md:hidden"
-								[src]="difficultyIcon"
+								[src]="difficultyIcon()!"
 								alt="Difficulty badge icon"
 							/>
 						}
-						@if (chart.isExplicit) {
+						@if (chart()!.isExplicit) {
 							<ng-glyph name="explicit" class="filled-icon" />
 						}
-						@if (chart.isDeluxe) {
+						@if (chart()!.isDeluxe) {
 							<ng-icon
 								name="deluxe"
 								size="32"
@@ -46,11 +46,11 @@
 						}
 					</span>
 				</h1>
-				<h2 class="text-3xl">{{ chart.track.artist }}</h2>
+				<h2 class="text-3xl">{{ chart()!.track.artist }}</h2>
 			</div>
 			<!-- Mobile "aside" -->
 			<app-aside
-				[chart]="chart"
+				[chart]="chart()!"
 				(chartUpdated)="onChartUpdated($event)"
 				class="flex w-full md:hidden"
 			>
@@ -58,23 +58,23 @@
 			<app-chart-contributors-section
 				#contributorsSection
 				class="w-full"
-				[chartId]="chart.id"
-				[contributors]="chart.contributors"
+				[chartId]="chart()!.id"
+				[contributors]="chart()!.contributors"
 			></app-chart-contributors-section>
 			<app-chart-versions-section
 				#versionsSection
 				class="w-full"
-				[chartId]="chart.id"
-				[chart]="chart"
-				[versions]="chart.versions"
+				[chartId]="chart()!.id"
+				[chart]="chart()!"
+				[versions]="chart()!.versions"
 			></app-chart-versions-section>
 			<app-chart-danger-zone-section
 				#dangerZoneSection
 				class="w-full"
-				[chartId]="chart.id"
-				[chartName]="chart.track.title"
-				[visibility]="chart.visibility"
-				(visibilityChanged)="chart.visibility = $event"
+				[chartId]="chart()!.id"
+				[chartName]="chart()!.track.title"
+				[visibility]="chart()!.visibility"
+				(visibilityChanged)="onVisibilityChanged($event)"
 			></app-chart-danger-zone-section>
 		</div>
 	</main>
