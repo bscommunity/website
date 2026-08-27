@@ -21,12 +21,26 @@ export function getApiErrorMessage(
 	message?: string;
 	statusCode?: number;
 } {
-	if (isApiError(error)) {
-		return {
-			error: error.error,
-			message: error.message,
-			statusCode: error.statusCode,
-		};
+	if (typeof error === "object" && error !== null) {
+		const err = error as Record<string, unknown>;
+		const status = (err["status"] ?? err["statusCode"]) as number | undefined;
+
+		// Angular HttpErrorResponse: error.error is the parsed backend body
+		if ("error" in err && typeof err["error"] === "object" && err["error"] !== null) {
+			const body = err["error"] as Record<string, unknown>;
+			if (typeof body["message"] === "string") {
+				return { error: body["message"], message: body["message"], statusCode: status };
+			}
+		}
+
+		// Direct ApiError shape: { error: string, message?: string }
+		if (typeof err["error"] === "string") {
+			return {
+				error: err["error"] as string,
+				message: typeof err["message"] === "string" ? (err["message"] as string) : undefined,
+				statusCode: status,
+			};
+		}
 	}
 
 	return {

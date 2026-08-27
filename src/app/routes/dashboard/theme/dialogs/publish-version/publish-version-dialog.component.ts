@@ -19,6 +19,7 @@ import {
 	ThemeAssetFilesValue,
 	ThemeAssetsFilesFormComponent,
 } from "@/components/theme-assets/files-form.component";
+import { PublishVersionChangelogComponent } from "@/components/publish/version/changelog.component";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
@@ -60,6 +61,8 @@ export class PublishVersionDialogComponent {
 	readonly step = signal<"batch" | "files">("batch");
 	readonly isLoading = signal(false);
 
+	private pendingFiles: VersionFiles = {};
+
 	goToFilesStep(): void {
 		this.step.set("files");
 	}
@@ -73,7 +76,7 @@ export class PublishVersionDialogComponent {
 	}
 
 	async onBatchFilesSelected(files: VersionFiles): Promise<void> {
-		await this.publish(files);
+		this.openChangelogDialog(files);
 	}
 
 	async onFilesSubmitted(value: ThemeAssetFilesValue): Promise<void> {
@@ -84,19 +87,39 @@ export class PublishVersionDialogComponent {
 			}
 		}
 
-		await this.publish(files);
+		this.openChangelogDialog(files);
 	}
 
-	async publish(files: VersionFiles): Promise<void> {
+	private openChangelogDialog(files: VersionFiles): void {
+		this.pendingFiles = files;
+
+		const changelogDialog = this.dialog.open(
+			PublishVersionChangelogComponent,
+			{
+				width: "500px",
+				disableClose: true,
+				data: {
+					formData: {},
+				},
+			},
+		);
+
+		changelogDialog.afterClosed().subscribe((result) => {
+			if (!result || result === "back") return;
+			this.publish(result.changelog ?? "");
+		});
+	}
+
+	async publish(changelog: string): Promise<void> {
 		this.dialogRef.disableClose = true;
 		this.isLoading.set(true);
 
 		try {
-			const bundleFile = await this.buildBundle(files);
+			const bundleFile = await this.buildBundle(this.pendingFiles);
 
 			const version = await this.themeService.addThemeVersion(
 				this.data.themeId,
-				{ bundleFile },
+				{ bundleFile, changelog },
 			);
 
 			this._snackBar.open(

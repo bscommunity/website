@@ -2,7 +2,7 @@
 	<app-theme-assets-batch-upload
 		[disabled]="isLoading()"
 		cancelLabel="Cancel"
-		confirmLabel="Publish"
+		confirmLabel="Next"
 		(canceled)="onCancel()"
 		(skipped)="goToFilesStep()"
 		(filesSelected)="onBatchFilesSelected($event)"
@@ -10,7 +10,7 @@
 } @else {
 	<app-theme-assets-files-form
 		[disabled]="isLoading()"
-		submitLabel="Publish"
+		submitLabel="Next"
 		(back)="goToBatchStep()"
 		(submitted)="onFilesSubmitted($event)"
 	/>

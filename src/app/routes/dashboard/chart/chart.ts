@@ -14,7 +14,6 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 
 // Components
 import { AsideComponent } from "./subcomponents/aside/aside.component";
-import { ChangelogComponent } from "./sections/changelog/changelog.component";
 import { ContributorsComponent } from "./sections/contributors/contributors.component";
 import { DangerZoneComponent } from "./sections/danger-zone/danger-zone.component";
 import { PageError } from "../../error/error";
@@ -31,20 +30,19 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 
 @Component({
 	selector: "app-chart",
-	imports: [
-		FormsModule,
-		MatButtonModule,
-		NgIcon,
-		NgGlyph,
-		MatTooltipModule,
-		RouterLink,
-		AsideComponent,
-		ChangelogComponent,
-		ContributorsComponent,
-		DangerZoneComponent,
-		VersionsComponent,
-		PageError,
-	],
+		imports: [
+			FormsModule,
+			MatButtonModule,
+			NgIcon,
+			NgGlyph,
+			MatTooltipModule,
+			RouterLink,
+			AsideComponent,
+			ContributorsComponent,
+			DangerZoneComponent,
+			VersionsComponent,
+			PageError,
+		],
 	providers: [{ provide: TitleStrategy, useClass: ChartTitleStrategy }],
 	templateUrl: "./chart.html",
 })

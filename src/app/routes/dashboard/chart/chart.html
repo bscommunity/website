@@ -55,12 +55,6 @@
 				class="flex w-full md:hidden"
 			>
 			</app-aside>
-			<app-chart-changelog-section
-				#changelogSection
-				class="w-full"
-				[chartId]="chart.id"
-				[entries]="chart.changelog"
-			></app-chart-changelog-section>
 			<app-chart-contributors-section
 				#contributorsSection
 				class="w-full"
@@ -71,6 +65,7 @@
 				#versionsSection
 				class="w-full"
 				[chartId]="chart.id"
+				[chart]="chart"
 				[versions]="[chart.latestVersion]"
 			></app-chart-versions-section>
 			<app-chart-danger-zone-section

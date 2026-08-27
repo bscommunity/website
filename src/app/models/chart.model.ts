@@ -7,7 +7,6 @@ import { Difficulty } from "./enums/difficulty.enum";
 import { Visibility } from "./enums/visibility.enum";
 
 // Models
-import { Changelog } from "./changelog.model";
 import { Contributor } from "./contributor.model";
 import { Track } from "./track.model";
 import { Version } from "./version.model";
@@ -39,7 +38,6 @@ export const Chart = z.object({
 	effectsAmount: z.number().int(),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
-	changelog: z.array(Changelog).default([]),
 	latestVersion: Version.nullable(),
 });
 
@@ -66,7 +64,6 @@ export const CreateChart = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
-	changelog: true,
 }).extend({
 	chartBundle: z.instanceof(File).optional(),
 });
@@ -91,6 +88,5 @@ export const MutateChartSchema = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
-	changelog: true,
 }).partial();
 export type MutateChartModel = z.infer<typeof MutateChartSchema>;

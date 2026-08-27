@@ -1,6 +1,5 @@
 import {
 	ChangeDetectionStrategy,
-	ChangeDetectorRef,
 	Component,
 	computed,
 	effect,
@@ -17,6 +16,8 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 // Components
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
+import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+import { PublishVersionChangelogComponent } from "@/components/publish/version/changelog.component";
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
 // Model
@@ -29,11 +30,7 @@ import { VersionService } from "@/services/api/version.service";
 import { ChartService } from "@/services/api/chart.service";
 
 // Service
-import {
-	type ChartFormData,
-	ChartPublishHandler,
-	initialChartFormData,
-} from "@/services/publish/handlers/chart-publish.handler";
+import { initialChartFormData, ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
 import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 import {
 	type Action,
@@ -56,9 +53,9 @@ import {
 })
 export class VersionsComponent {
 	readonly chartId = input.required<string>();
+	readonly chart = input<any>(undefined);
 	readonly versions = input<VersionModel[]>([]);
 
-	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
@@ -124,7 +121,8 @@ export class VersionsComponent {
 				// Check if this is the latest version by comparing with the versions signal
 				const versions = this.versions();
 				return (
-					versions.length === 0 || item.id === versions[versions.length - 1].id
+					versions.length === 0 ||
+					item.id === versions[versions.length - 1].id
 				);
 			},
 		},
@@ -165,7 +163,7 @@ export class VersionsComponent {
 	}
 
 	openAddVersionDialog(): void {
-		const dialogRef = this.dialog.open(
+		const sourceDialog = this.dialog.open(
 			this.chartPublishHandler.getStepComponents()[2],
 			{
 				data: {
@@ -179,18 +177,83 @@ export class VersionsComponent {
 			},
 		);
 
-		dialogRef
-			.afterClosed()
-			.subscribe(async (result: ChartFormData | "back" | undefined) => {
-				if (result == "back" || result == undefined) return;
+		sourceDialog.afterClosed().subscribe((sourceResult) => {
+			if (!sourceResult || sourceResult === "back") return;
 
-				/* const data =
-					await this.chartPublishHandler.preprocessFormData(result);
+			const changelogDialog = this.dialog.open(
+				PublishVersionChangelogComponent,
+				{
+					width: "500px",
+					disableClose: true,
+					data: { formData: {} },
+				},
+			);
+
+			changelogDialog.afterClosed().subscribe((changelogResult) => {
+				if (!changelogResult || changelogResult === "back") return;
 
 				this.dialog.open(PublishDialogLoadingComponent);
 
-				this.addVersion(data); */
+				const chartData = this.chart();
+				const versionData: CreateVersionModel = {
+					track: chartData?.track?.title ?? "",
+					artist: chartData?.track?.artist ?? "",
+					duration: chartData?.track?.duration ?? 0,
+					notesAmount: chartData?.notesAmount ?? 0,
+					effectsAmount: chartData?.effectsAmount ?? 0,
+					bpm: chartData?.track?.bpm ?? 0,
+					difficulty: chartData?.difficulty ?? "NORMAL",
+					isDeluxe: chartData?.isDeluxe ?? false,
+					isExplicit: chartData?.isExplicit ?? false,
+					fileSizeBytes: 0,
+					bundleUrl: sourceResult.bundleUrl ?? "",
+					changelog: changelogResult.changelog ?? "",
+					chartBundle: sourceResult.chartBundle ?? undefined,
+				};
+
+				this.addVersion(versionData);
 			});
+		});
+	}
+
+	async addVersion(version: CreateVersionModel) {
+		try {
+			const response = await this.versionService.addVersion(
+				this.chartId(),
+				version,
+			);
+
+			if (!response) {
+				this.dialog.closeAll();
+				this.dialog.open(ErrorDialogComponent, {
+					data: {
+						message: "Failed to submit chart.",
+						error: "No response from server.",
+					},
+				});
+				return;
+			}
+
+			this.addVersionToTable(Version.parse(response));
+			this._snackBar.open("Version added with success!", "Close");
+			this.dialog.closeAll();
+		} catch (error: unknown) {
+			console.error("Failed to add new version:", error);
+
+			const errorMessage = getApiErrorMessage(
+				error,
+				"An error occurred while adding the new version.",
+			);
+
+			this.dialog.closeAll();
+			this.dialog.open(ErrorDialogComponent, {
+				data: {
+					title: "Failed to add new version",
+					message: errorMessage.message,
+					error: errorMessage.error,
+				},
+			});
+		}
 	}
 
 	openRemoveVersionDialog(_: number, version: VersionModel): void {
@@ -218,49 +281,6 @@ export class VersionsComponent {
 				operation,
 			},
 		});
-	}
-
-	async addVersion(version: CreateVersionModel) {
-		try {
-			const response = await this.versionService.addVersion(
-				this.chartId(),
-				version,
-			);
-
-			if (!response) {
-				this.dialog.closeAll();
-				this.dialog.open(ErrorDialogComponent, {
-					data: {
-						message: "Failed to submit chart.",
-						error: "No response from server.",
-					},
-				});
-				return;
-			}
-
-			console.log("Version added with success", response);
-
-			this.addVersionToTable(Version.parse(response));
-
-			this._snackBar.open("Version added with success!", "Close");
-			this.dialog.closeAll();
-		} catch (error: unknown) {
-			console.error("Failed to add new version:", error);
-
-			const errorMessage = getApiErrorMessage(
-				error,
-				"An error occurred while adding the new version.",
-			);
-
-			this.dialog.closeAll();
-			this.dialog.open(ErrorDialogComponent, {
-				data: {
-					title: "Failed to add new version",
-					message: errorMessage.message,
-					error: errorMessage.error,
-				},
-			});
-		}
 	}
 
 	addVersionToTable(version: VersionModel) {

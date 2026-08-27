@@ -18,7 +18,7 @@ export class VersionService {
 	private cacheService = inject(CacheService);
 	private http = inject(HttpClient);
 
-	private readonly apiUrl = `${apiUrl}/charts`;
+	private readonly apiUrl = `${apiUrl}/versions`;
 
 	// Add
 	async addVersion(
@@ -40,7 +40,7 @@ export class VersionService {
 
 		const response = await firstValueFrom(
 			this.http.post<VersionModel>(
-				`${this.apiUrl}/${chartId}/versions`,
+				`${this.apiUrl}/${chartId}`,
 				formData,
 			),
 		);
@@ -60,9 +60,9 @@ export class VersionService {
 
 		try {
 			await firstValueFrom(
-				this.http.delete<VersionModel>(
-					`${this.apiUrl}/versions/${versionId}`,
-				),
+			this.http.delete<VersionModel>(
+				`${this.apiUrl}/${versionId}`,
+			),
 			);
 
 			this.cacheService.removeEntity("chart", chartId);
