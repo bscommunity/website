@@ -88,7 +88,7 @@ export class PublishDialogService<
 
 	open() {
 		if (!this.handler) throw new Error("No handler set for publish dialog");
-		this.currentStepSubject.next(0);
+		this.reset();
 		this.openCurrentStep();
 	}
 
@@ -153,6 +153,11 @@ export class PublishDialogService<
 			if (result === "back") {
 				this.moveToStep(this.currentStepSubject.value - 1);
 			} else if (result === "next") {
+				// Clear the batch flag when skipping so the files step isn't permanently skipped
+				const fd = this.formData as Record<string, unknown>;
+				if ("assetsFromBatch" in fd) {
+					fd["assetsFromBatch"] = false;
+				}
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
 				if (

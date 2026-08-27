@@ -32,12 +32,7 @@ import { ThemeService } from "@/services/api/theme.service";
 
 @Component({
 	selector: "app-theme-versions-section",
-	imports: [
-		NgGlyph,
-		MatButtonModule,
-		ChartSectionComponent,
-		TableComponent,
-	],
+	imports: [NgGlyph, MatButtonModule, ChartSectionComponent, TableComponent],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	templateUrl: "./versions.component.html",
 })
@@ -111,7 +106,7 @@ export class VersionsSectionComponent {
 				themeId: this.themeId(),
 				theme: this.theme(),
 			},
-			width: "500px",
+			width: "600px",
 		});
 	}
 }
