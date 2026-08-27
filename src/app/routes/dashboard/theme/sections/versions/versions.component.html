@@ -10,7 +10,7 @@
 		sortDirection="desc"
 	/>
 	<span class="flex items-center justify-end w-full gap-4">
-		<button mat-stroked-button (click)="openAddVersionDialog()">
+		<button mat-stroked-button (click)="openAddVersionDialog()" [disabled]="saving()">
 			<ng-glyph name="publish" />
 			Publish new version
 		</button>

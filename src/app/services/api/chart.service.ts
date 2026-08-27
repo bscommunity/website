@@ -2,10 +2,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { firstValueFrom, type Observable, of, shareReplay, tap } from "rxjs";
 import { apiUrl } from "@/lib/api";
-import {
-	Chart,
-	type ChartModel,
-} from "@/models/chart.model";
+import { Chart, type ChartModel } from "@/models/chart.model";
 import type { Difficulty } from "@/models/enums/difficulty.enum";
 import type { Visibility } from "@/models/enums/visibility.enum";
 import type { Genre } from "@/models/enums/genre.enum";
@@ -14,6 +11,8 @@ import type { SimplifiedContributorModel } from "@/models/contributor.model";
 import type { QueryPage, STORAGE } from "../cache.service";
 import { CacheService } from "../cache.service";
 import type { WorkshopFilters } from "../filter.service";
+import type { VersionModel } from "@/models/version.model";
+import { Version } from "@/models/version.model";
 
 export interface CreateChartPayload {
 	artist: string;
@@ -31,8 +30,6 @@ export interface CreateChartPayload {
 	bpm?: number | null;
 	difficulty: Difficulty;
 	isDeluxe: boolean;
-	bundleUrl?: string;
-	fileSizeBytes?: number;
 	chartBundle?: File;
 	contributors?: SimplifiedContributorModel[];
 }
@@ -66,7 +63,10 @@ export class ChartService {
 	private readonly apiUrl = `${apiUrl}/charts`;
 
 	// Create
-	async createChart(chart: CreateChartPayload, publishSessionId?: string): Promise<ChartModel> {
+	async createChart(
+		chart: CreateChartPayload,
+		publishSessionId?: string,
+	): Promise<ChartModel> {
 		const formData = new FormData();
 
 		// Append the chart data as a JSON string under the "chart" key
@@ -96,7 +96,10 @@ export class ChartService {
 		return createdChart;
 	}
 
-	buildChartData(chart: CreateChartPayload, publishSessionId?: string): { formData: FormData; headers: Record<string, string> } {
+	buildChartData(
+		chart: CreateChartPayload,
+		publishSessionId?: string,
+	): { formData: FormData; headers: Record<string, string> } {
 		const formData = new FormData();
 		const { chartBundle, ...chartData } = chart;
 		formData.append("chart", JSON.stringify(chartData));
@@ -155,10 +158,14 @@ export class ChartService {
 		},
 	): Observable<QueryPage<ChartModel>> {
 		const isDashboardRequest = options?.isDashboard ?? false;
-		const cacheScope: CacheScope = isDashboardRequest ? "private" : "public";
-		const cacheType = cacheScope === "private" ? "chart:dashboard" : "chart:workshop";
+		const cacheScope: CacheScope = isDashboardRequest
+			? "private"
+			: "public";
+		const cacheType =
+			cacheScope === "private" ? "chart:dashboard" : "chart:workshop";
 		const cacheStorage: STORAGE =
-			options?.storage ?? (cacheScope === "public" ? "session" : "persistent");
+			options?.storage ??
+			(cacheScope === "public" ? "session" : "persistent");
 		const cacheKey = this.generateCacheKey(filters);
 		const canReadCache = !options?.disableCache;
 		const isPaginated = Boolean(options?.limit);
@@ -168,7 +175,11 @@ export class ChartService {
 				: undefined;
 
 		if (canReadCache) {
-			const cachedPayload = this.cacheService.getQuery<ChartModel>(cacheType, cacheKey, cacheStorage);
+			const cachedPayload = this.cacheService.getQuery<ChartModel>(
+				cacheType,
+				cacheKey,
+				cacheStorage,
+			);
 
 			if (cachedPayload) {
 				return of(cachedPayload);
@@ -202,7 +213,8 @@ export class ChartService {
 			params = params.set("sortBy", filters.sortBy);
 		}
 
-		if (options?.limit) params = params.set("limit", options.limit.toString());
+		if (options?.limit)
+			params = params.set("limit", options.limit.toString());
 		if (options?.offset)
 			params = params.set("offset", options.offset.toString());
 		if (options?.isDashboard) {
@@ -215,40 +227,52 @@ export class ChartService {
 			params = params.set("myCharts", "true");
 		}
 
-		return this.http.get<QueryPage<ChartModel>>(this.apiUrl, { params }).pipe(
-			tap((page) => {
-				if (!isPaginated) {
-					this.cacheService.setQuery(cacheType, cacheKey, page, cacheStorage, 30_000);
-				} else {
-					this.cacheService.setQuery(cacheType, `${cacheKey}|page=${pageKey}`, page, cacheStorage, 30_000);
-				}
-				this.cacheService.upsertEntities("chart", page.items);
-			}),
-			shareReplay({ bufferSize: 1, refCount: true }),
-		);
+		return this.http
+			.get<QueryPage<ChartModel>>(this.apiUrl, { params })
+			.pipe(
+				tap((page) => {
+					if (!isPaginated) {
+						this.cacheService.setQuery(
+							cacheType,
+							cacheKey,
+							page,
+							cacheStorage,
+							30_000,
+						);
+					} else {
+						this.cacheService.setQuery(
+							cacheType,
+							`${cacheKey}|page=${pageKey}`,
+							page,
+							cacheStorage,
+							30_000,
+						);
+					}
+					this.cacheService.upsertEntities("chart", page.items);
+				}),
+				shareReplay({ bufferSize: 1, refCount: true }),
+			);
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
+		// Cache-first: if versions are already populated (from uploads list), return immediately
 		const cachedChart = this.cacheService.getEntity<ChartModel>("chart", id);
-
 		if (cachedChart) {
 			try {
-				return Chart.parse(cachedChart);
+				const parsed = Chart.parse(cachedChart);
+				if (parsed.versions.length > 0) return parsed;
 			} catch (error) {
-				console.error(
-					"Failed to parse cached chart, fetching from remote:",
-					error,
-				);
+				console.error("Failed to parse cached chart, fetching from remote:", error);
 			}
 		}
 
-		const response = await firstValueFrom(this.fetchChartFromRemote(id));
-		console.log("Fetched chart from API:", response);
+		// API fallback: fetch chart (versions are included in the response)
+		const chart = Chart.parse(
+			await firstValueFrom(this.fetchChartFromRemote(id)),
+		);
 
-		const parsedChart = Chart.parse(response);
-
-		this.cacheService.upsertEntities("chart", [parsedChart]);
-		return parsedChart;
+		this.cacheService.upsertEntities("chart", [chart]);
+		return chart;
 	}
 
 	getSuggestions(query: string): Observable<string[]> {
@@ -269,7 +293,10 @@ export class ChartService {
 	}
 
 	// Update
-	async updateChart(id: string, chart: UpdateChartPayload): Promise<ChartModel> {
+	async updateChart(
+		id: string,
+		chart: UpdateChartPayload,
+	): Promise<ChartModel> {
 		const updatedChart = await firstValueFrom(
 			this.http.put<ChartModel>(`${this.apiUrl}/${id}`, chart),
 		);
@@ -296,5 +323,63 @@ export class ChartService {
 		}
 	}
 
+	// --- Versions ---
 
+	async addVersion(
+		chartId: string,
+		changelog: string,
+		chartBundle: File,
+	): Promise<VersionModel> {
+		const formData = new FormData();
+
+		formData.append("version", JSON.stringify({ changelog }));
+		formData.append("bundle", chartBundle);
+
+		const response = await firstValueFrom(
+			this.http.post<VersionModel>(
+				`${this.apiUrl}/${chartId}/versions`,
+				formData,
+			),
+		);
+
+		this.cacheService.updateEntity<ChartModel>(
+			"chart",
+			chartId,
+			(chart) => ({
+				...(chart ?? ({} as ChartModel)),
+				latestVersion: Version.parse(response),
+				versionsCount: (chart?.versionsCount ?? 0) + 1,
+				versions: [...(chart?.versions ?? []), Version.parse(response)],
+			}),
+		);
+
+		return Version.parse(response);
+	}
+
+	async deleteVersion(chartId: string, versionId: string): Promise<boolean> {
+		try {
+			await firstValueFrom(
+				this.http.delete(
+					`${this.apiUrl}/${chartId}/versions/${versionId}`,
+				),
+			);
+
+			this.cacheService.updateEntity<ChartModel>(
+				"chart",
+				chartId,
+				(chart) => ({
+					...(chart ?? ({} as ChartModel)),
+					versionsCount: Math.max((chart?.versionsCount ?? 1) - 1, 0),
+					versions: (chart?.versions ?? []).filter(
+						(v) => v.id !== versionId,
+					),
+				}),
+			);
+
+			return true;
+		} catch (error) {
+			console.error("Failed to delete version:", error);
+			return false;
+		}
+	}
 }

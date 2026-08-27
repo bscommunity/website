@@ -3,7 +3,6 @@ import {
 	Component,
 	OnInit,
 	inject,
-	Input,
 	computed,
 } from "@angular/core";
 
@@ -41,14 +40,11 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 
-interface SourceDialogData extends DialogData {
-	mode?: "linking" | "uploading";
-}
+interface SourceDialogData extends DialogData {}
 
 interface ChartSourceFormValues {
 	chartBundle: File | null;
 	previewUrl: string;
-	bundleUrl: string;
 }
 
 @Component({
@@ -113,7 +109,6 @@ export class PublishChartSourceComponent implements OnInit {
 	private validationService = inject(ValidationService);
 
 	form!: FormGroup<ValuesToControls<ChartSourceFormValues>>;
-	@Input() mode: "linking" | "uploading" = "linking";
 
 	getControl = computed(() => (key: string): FormControl => {
 		return this.form.controls[key as keyof ChartSourceFormValues];
@@ -136,44 +131,20 @@ export class PublishChartSourceComponent implements OnInit {
 			required: false,
 			onValueProcessed: this.validationService.extractYouTubeVideoId,
 		}),
-		bundleUrlField: this.formService.createTextField({
-			key: "bundleUrl",
-			label: "Bundle",
-			inputType: "url",
-			placeholder: "https://example.com/chart.zip",
-			hint: "Must be a direct link to the .zip file",
-			required: true,
-			urlFileExtension: "zip",
-		}),
 	};
 
-	// Form modes configuration
-	private readonly formModes = {
-		linking: {
-			title: "Linking",
-			description: "Provide the URL to your chart bundle.",
-			fields: [this.FIELDS.bundleUrlField, this.FIELDS.gameplayUrlField],
-		},
-		uploading: {
-			title: "Uploading",
-			description: "Upload your chart bundle to Discord's workshop.",
-			fields: [this.FIELDS.chartBundleField, this.FIELDS.gameplayUrlField],
-		},
+	// Form configuration
+	private readonly formConfig = {
+		title: "Uploading",
+		description: "Upload your chart bundle to Discord's workshop.",
+		fields: [this.FIELDS.chartBundleField, this.FIELDS.gameplayUrlField],
 	};
 
 	get formMode() {
-		return this.formModes[this.mode];
+		return this.formConfig;
 	}
 
 	ngOnInit() {
-		// Initialize form controls based on the provided data
-		if (
-			this.data.mode &&
-			(this.data.mode === "linking" || this.data.mode === "uploading")
-		) {
-			this.mode = this.data.mode;
-		}
-
 		this.form =
 			this.formService.createFormGroup<ChartSourceFormValues>(
 				this.formMode.fields,

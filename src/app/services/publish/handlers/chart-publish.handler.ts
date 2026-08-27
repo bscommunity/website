@@ -104,7 +104,7 @@ export class ChartPublishHandler
 			contributors,
 		} = data;
 
-		const extra = data as ChartFormData & { previewUrl?: string; bundleUrl?: string };
+		const extra = data as ChartFormData & { previewUrl?: string };
 
 		const payload: CreateChartPayload = {
 			artist,

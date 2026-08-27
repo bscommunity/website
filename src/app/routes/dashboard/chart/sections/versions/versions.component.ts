@@ -21,13 +21,10 @@ import { PublishVersionChangelogComponent } from "@/components/publish/version/c
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
 // Model
-import {
-	type CreateVersionModel,
-	Version,
-	type VersionModel,
-} from "@/models/version.model";
-import { VersionService } from "@/services/api/version.service";
+import { type VersionModel } from "@/models/version.model";
 import { ChartService } from "@/services/api/chart.service";
+import { CacheService } from "@/services/cache.service";
+import { type ChartModel } from "@/models/chart.model";
 
 // Service
 import { initialChartFormData, ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
@@ -59,26 +56,24 @@ export class VersionsComponent {
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
-	readonly versionService = inject(VersionService);
 	readonly chartService = inject(ChartService);
+	private cacheService = inject(CacheService);
 	readonly chartPublishHandler = inject(ChartPublishHandler);
 
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
 	isFetchingBundle = signal(false);
+	saving = signal(false);
 
-	// Effect to update table when versions input changes
-	// This effect runs when the user creates a new chart from /chart
+	// Effect to update table when versions input changes (e.g. on re-resolve)
 	constructor() {
 		effect(() => {
 			const versions = this.versions();
 			const table = this.versionTable();
 
-			if (table && versions.length > 0) {
-				// The table data is automatically updated through the [data]="versions()" binding
-				// We just need to trigger change detection
-				// TODO: Manually trigger change detection?
+			if (table) {
+				table.updateTableData(() => [...versions]);
 			}
 		});
 	}
@@ -194,36 +189,27 @@ export class VersionsComponent {
 
 				this.dialog.open(PublishDialogLoadingComponent);
 
-				const chartData = this.chart();
-				const versionData: CreateVersionModel = {
-					track: chartData?.track?.title ?? "",
-					artist: chartData?.track?.artist ?? "",
-					duration: chartData?.track?.duration ?? 0,
-					notesAmount: chartData?.notesAmount ?? 0,
-					effectsAmount: chartData?.effectsAmount ?? 0,
-					bpm: chartData?.track?.bpm ?? 0,
-					difficulty: chartData?.difficulty ?? "NORMAL",
-					isDeluxe: chartData?.isDeluxe ?? false,
-					isExplicit: chartData?.isExplicit ?? false,
-					fileSizeBytes: 0,
-					bundleUrl: sourceResult.bundleUrl ?? "",
-					changelog: changelogResult.changelog ?? "",
-					chartBundle: sourceResult.chartBundle ?? undefined,
-				};
+				const chartBundle = sourceResult.chartBundle;
+				if (!chartBundle) return;
 
-				this.addVersion(versionData);
+				this.addVersion(changelogResult.changelog ?? "", chartBundle);
 			});
 		});
 	}
 
-	async addVersion(version: CreateVersionModel) {
+	async addVersion(changelog: string, chartBundle: File) {
+		if (this.saving()) return;
+		this.saving.set(true);
+
 		try {
-			const response = await this.versionService.addVersion(
+			const response = await this.chartService.addVersion(
 				this.chartId(),
-				version,
+				changelog,
+				chartBundle,
 			);
 
 			if (!response) {
+				this.saving.set(false);
 				this.dialog.closeAll();
 				this.dialog.open(ErrorDialogComponent, {
 					data: {
@@ -234,7 +220,12 @@ export class VersionsComponent {
 				return;
 			}
 
-			this.addVersionToTable(Version.parse(response));
+			// Cache is updated by chartService.addVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() => [...updated.versions]);
+			}
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
 		} catch (error: unknown) {
@@ -253,6 +244,7 @@ export class VersionsComponent {
 					error: errorMessage.error,
 				},
 			});
+			this.saving.set(false);
 		}
 	}
 
@@ -260,7 +252,7 @@ export class VersionsComponent {
 		console.log("Removing version", version);
 
 		const operation = async () => {
-			const result = await this.versionService.deleteVersion(
+			const result = await this.chartService.deleteVersion(
 				this.chartId(),
 				version.id,
 			);
@@ -269,7 +261,12 @@ export class VersionsComponent {
 				throw new Error("An error occurred");
 			}
 
-			this.removeVersionFromTable(version);
+			// Cache is updated by chartService.deleteVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() => [...updated.versions]);
+			}
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {
@@ -281,28 +278,5 @@ export class VersionsComponent {
 				operation,
 			},
 		});
-	}
-
-	addVersionToTable(version: VersionModel) {
-		this.versionTable().addData(version);
-		this.openSnackBar("Version added with success!", "Close");
-		// TODO: Manually trigger change detection?
-	}
-
-	removeVersionFromTable(version: VersionModel) {
-		this.versionTable().removeData(version);
-
-		// Decrement index for versions with higher index than the removed one
-		this.versionTable().updateTableData((items) =>
-			items.map(
-				(item) =>
-					item.versionCode > version.versionCode
-						? { ...item, versionCode: item.versionCode - 1 }
-						: item, // Keep other items unchanged
-			),
-		);
-
-		// TODO: Manually trigger change detection?
-		this.openSnackBar("Version removed with success!", "Close");
 	}
 }

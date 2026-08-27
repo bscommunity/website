@@ -74,6 +74,7 @@ export const SAMPLE_CHART_1: ChartModel = {
 	discordChannelId: null,
 	discordMessageId: null,
 	authorId: null,
+	versions: [fakeVersion],
 
 	track: fakeTrack,
 	versionsCount: 1,

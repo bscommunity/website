@@ -110,6 +110,7 @@ export class UserService {
 		if (params.versions) httpParams["versions"] = params.versions;
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
+		httpParams["includeVersions"] = "true";
 
 		const cacheKey = this.buildUploadsCacheKey(httpParams);
 		const isPaginated = (params.offset ?? 0) > 0;

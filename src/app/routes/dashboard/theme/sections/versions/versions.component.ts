@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	computed,
+	effect,
 	inject,
 	input,
 	signal,
@@ -28,13 +29,14 @@ import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
 
 // Models
-import type { VersionModel } from "@/models/version.model";
+import { type VersionModel } from "@/models/version.model";
 import type { ThemeModel } from "@/models/theme.model";
 import type { ThemeAssets } from "@/models/theme/beatstar-themes";
 import { getBeatstarTheme } from "@/models/theme/theme-genres";
 
 // Services
 import { ThemeService } from "@/services/api/theme.service";
+import { CacheService } from "@/services/cache.service";
 
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
@@ -56,11 +58,25 @@ export class VersionsSectionComponent {
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 	private themeService = inject(ThemeService);
+	private cacheService = inject(CacheService);
 
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
 	isFetchingBundle = signal(false);
+	saving = signal(false);
+
+	// Effect to update table when versions input changes (e.g. on re-resolve)
+	constructor() {
+		effect(() => {
+			const versions = this.versions();
+			const table = this.versionTable();
+
+			if (table) {
+				table.updateTableData(() => [...versions]);
+			}
+		});
+	}
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -182,17 +198,30 @@ export class VersionsSectionComponent {
 		return files;
 	}
 
-	async publishVersion(files: VersionFiles, changelog: string): Promise<void> {
+	async publishVersion(
+		files: VersionFiles,
+		changelog: string,
+	): Promise<void> {
+		if (this.saving()) return;
+		this.saving.set(true);
+
 		this.dialog.open(PublishDialogLoadingComponent);
 
 		try {
 			const bundleFile = await this.buildBundle(files);
 
-			const version = await this.themeService.addThemeVersion(
+			const version = await this.themeService.addVersion(
 				this.themeId(),
-				{ bundleFile, changelog },
+				changelog,
+				bundleFile,
 			);
 
+			// Cache is updated by themeService.addVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ThemeModel>("theme", this.themeId());
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() => [...updated.versions]);
+			}
 			this._snackBar.open(
 				`Version v${version.versionCode} published with success!`,
 				"Close",
@@ -200,7 +229,6 @@ export class VersionsSectionComponent {
 			);
 
 			this.dialog.closeAll();
-			window.location.reload();
 		} catch (error: unknown) {
 			console.error("Failed to publish new version:", error);
 
@@ -217,6 +245,7 @@ export class VersionsSectionComponent {
 					error: errorMessage.error,
 				},
 			});
+			this.saving.set(false);
 		}
 	}
 
@@ -230,7 +259,10 @@ export class VersionsSectionComponent {
 
 		const zip = new JSZip();
 		for (const [assetKey, file] of Object.entries(files)) {
-			const assetType = assetKey.replace(/File$/, "") as keyof ThemeAssets;
+			const assetType = assetKey.replace(
+				/File$/,
+				"",
+			) as keyof ThemeAssets;
 			const uuid = replacedTheme?.assets[assetType] || null;
 			zip.file(uuid ?? stripExtension(file.name), file);
 		}

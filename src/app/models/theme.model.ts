@@ -37,6 +37,7 @@ export const Theme = z.object({
 	previewUrl: z.string().optional().nullable(),
 
 	versionsCount: z.number().int().default(0),
+	versions: z.array(Version).default([]),
 	latestVersion: Version.nullable().optional(),
 });
 
@@ -65,6 +66,7 @@ export const CreateTheme = Theme.omit({
 	displayArtUrl: true,
 	coverUrl: true,
 	versionsCount: true,
+	versions: true,
 	latestVersion: true,
 }).extend({
 	previewUrl: z.string().optional().nullable(),

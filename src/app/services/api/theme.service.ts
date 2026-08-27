@@ -28,11 +28,20 @@ export class ThemeService {
 	private readonly apiUrl = `${apiUrl}/themes`;
 
 	async getThemeById(id: string, disableCache = false): Promise<ThemeModel> {
+		// Cache-first: if versions are already populated (from uploads list), return immediately
 		if (!disableCache) {
 			const cached = this.cacheService.getEntity<ThemeModel>("theme", id);
-			if (cached) return Theme.parse(cached);
+			if (cached) {
+				try {
+					const parsed = Theme.parse(cached);
+					if (parsed.versions.length > 0) return parsed;
+				} catch (error) {
+					console.error("Failed to parse cached theme, fetching from remote:", error);
+				}
+			}
 		}
 
+		// API fallback: fetch theme (versions are included in the response)
 		const theme = Theme.parse(
 			await firstValueFrom(
 				this.http.get<ThemeModel>(`${this.apiUrl}/${id}`),
@@ -141,28 +150,28 @@ export class ThemeService {
 		).then((buffer) => new Blob([buffer], { type: "application/zip" }));
 	}
 
-	async addThemeVersion(
+	async addVersion(
 		id: string,
-		payload: { changelog?: string; bundleFile: File },
+		changelog: string,
+		bundleFile: File,
 	): Promise<VersionModel> {
 		const formData = new FormData();
 
-		formData.append(
-			"version",
-			JSON.stringify({
-				changelog: payload.changelog ?? "",
-			}),
-		);
-		formData.append("bundle", payload.bundleFile);
+		formData.append("version", JSON.stringify({ changelog }));
+		formData.append("bundle", bundleFile);
 
 		const response = await firstValueFrom(
-			this.http.post<VersionModel>(`${this.apiUrl}/${id}/versions`, formData),
+			this.http.post<VersionModel>(
+				`${this.apiUrl}/${id}/versions`,
+				formData,
+			),
 		);
 
 		this.cacheService.updateEntity<ThemeModel>("theme", id, (theme) => ({
 			...(theme ?? ({} as ThemeModel)),
 			latestVersion: Version.parse(response),
 			versionsCount: (theme?.versionsCount ?? 0) + 1,
+			versions: [...(theme?.versions ?? []), Version.parse(response)],
 		}));
 
 		return Version.parse(response);

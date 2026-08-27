@@ -33,6 +33,7 @@ export const Chart = z.object({
 
 	track: Track,
 	versionsCount: z.number().int(),
+	versions: z.array(Version).default([]),
 	difficulty: z.enum(Difficulty),
 	notesAmount: z.number().int(),
 	effectsAmount: z.number().int(),
@@ -51,6 +52,7 @@ export const CreateChart = Chart.omit({
 	status: true,
 	visibility: true,
 	latestVersion: true,
+	versions: true,
 	downloadsSum: true,
 	likesCount: true,
 	bookmarksCount: true,
@@ -75,6 +77,7 @@ export const MutateChartSchema = Chart.omit({
 	isFeatured: true,
 	contributors: true,
 	latestVersion: true,
+	versions: true,
 	downloadsSum: true,
 	likesCount: true,
 	bookmarksCount: true,
