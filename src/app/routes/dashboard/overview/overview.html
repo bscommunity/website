@@ -1,21 +1,317 @@
-<main
-	class="flex flex-col items-center justify-center gap-9 w-full min-h-[calc(100vh-7rem)] px-wrapper"
->
-	<h1 class="font-bold text-4xl">Work in progress!</h1>
-	<p class="text-center max-md:max-w-3/4">
-		This page still needs some work. Please check back later.
-	</p>
-	<span class="flex flex-col md:flex-row items-center justify-center gap-2">
-		<ng-glyph name="code" class="text-on-primary-container" />
-		<p class="text-center max-md:max-w-3/4">
-			You can always
-			<a
-				class="underline text-on-primary-container"
-				href="https://github.com/bscommunity/website"
-				target="_blank"
-				>contribute</a
-			>
-			and make the project better.
-		</p>
-	</span>
+<main class="flex flex-col items-start w-full px-wrapper pt-9 pb-14 gap-7">
+
+	<!-- Page Header -->
+	<div class="flex flex-col md:flex-row items-start md:items-end justify-between w-full gap-4">
+		<div>
+			<h1 class="text-2xl font-bold tracking-tight">Welcome back, &#64;{{ username() }}</h1>
+			<p class="text-on-surface-variant text-sm mt-1">Here's how your charts, tour passes and themes are doing.</p>
+		</div>
+		<div class="flex items-center gap-1 bg-surface-container rounded-lg p-1 border border-outline-variant">
+			@for (range of ranges; track range.value) {
+				<button
+					mat-button
+					[class]="selectedRange() === range.value
+						? 'bg-surface-container-high text-on-surface font-semibold'
+						: 'text-on-surface-variant'"
+					(click)="selectRange(range.value)"
+				>
+					{{ range.label }}
+				</button>
+			}
+		</div>
+	</div>
+
+	<!-- Type Legend -->
+	<div class="flex items-center gap-5 text-xs text-on-surface-variant font-medium">
+		<span class="flex items-center gap-2">
+			<span class="w-2 h-2 rounded-full bg-primary"></span>
+			Charts
+		</span>
+		<span class="flex items-center gap-2">
+			<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+			Tour passes
+		</span>
+		<span class="flex items-center gap-2">
+			<span class="w-2 h-2 rounded-full bg-secondary"></span>
+			Themes
+		</span>
+	</div>
+
+	@if (loading()) {
+		<!-- Loading skeleton -->
+		<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
+			@for (i of [1,2,3,4]; track i) {
+				<div class="bg-surface-container-low rounded-2xl p-5 animate-pulse">
+					<div class="h-4 w-24 bg-surface-container-high rounded mb-4"></div>
+					<div class="h-7 w-16 bg-surface-container-high rounded mb-4"></div>
+					<div class="space-y-2 pt-3.5 border-t border-outline-variant">
+						<div class="h-3 w-full bg-surface-container-high rounded"></div>
+						<div class="h-3 w-3/4 bg-surface-container-high rounded"></div>
+					</div>
+				</div>
+			}
+		</div>
+	} @else if (error()) {
+		<!-- Error state -->
+		<div class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full">
+			<div class="flex flex-col items-center justify-center gap-4">
+				<ng-glyph name="deployed_code_alert" size="60" />
+				<h1 class="text-xl text-center">Failed to load overview data</h1>
+				<p class="text-on-surface-variant text-center max-w-md">{{ error() }}</p>
+			</div>
+			<button mat-stroked-button (click)="fetchOverview()">
+				<ng-glyph name="refresh" class="mr-2" />
+				Retry
+			</button>
+		</div>
+	} @else if (data(); as d) {
+		<!-- Stats Grid -->
+		<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
+
+			<!-- Published Card -->
+			<div class="bg-surface-container-low rounded-2xl p-5 flex flex-col">
+				<div class="flex items-center justify-between mb-4">
+					<span class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
+						<ng-glyph name="article" size="16" class="opacity-80" />
+						Published
+					</span>
+					@if (d.published.trend) {
+						<span class="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-primary-container text-on-primary-container">
+							{{ d.published.trend.value }}
+						</span>
+					}
+				</div>
+				<div class="text-2xl font-bold tracking-tight">{{ d.published.total }} <span class="text-xs font-medium text-on-surface-variant">items</span></div>
+				<div class="flex flex-col gap-2 mt-auto pt-3.5 border-t border-outline-variant">
+					<div class="flex items-center justify-between">
+						<span class="flex items-center gap-2 text-xs text-on-surface-variant">
+							<span class="w-2 h-2 rounded-full bg-primary"></span>
+							Charts
+						</span>
+						<span class="text-xs font-semibold">{{ d.published.byType.charts }}</span>
+					</div>
+					<div class="flex items-center justify-between">
+						<span class="flex items-center gap-2 text-xs text-on-surface-variant">
+							<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+							Tour passes
+						</span>
+						<span class="text-xs font-semibold">{{ d.published.byType.tourPasses }}</span>
+					</div>
+					<div class="flex items-center justify-between">
+						<span class="flex items-center gap-2 text-xs text-on-surface-variant">
+							<span class="w-2 h-2 rounded-full bg-secondary"></span>
+							Themes
+						</span>
+						<span class="text-xs font-semibold">{{ d.published.byType.themes }}</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Contributed Card -->
+			<div class="bg-surface-container-low rounded-2xl p-5 flex flex-col">
+				<div class="flex items-center justify-between mb-4">
+					<span class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
+						<ng-glyph name="group" size="16" class="opacity-80" />
+						Contributed
+					</span>
+				</div>
+				<div class="text-2xl font-bold tracking-tight">{{ d.contributed.total }} <span class="text-xs font-medium text-on-surface-variant">items</span></div>
+				<div class="mt-auto pt-3.5 border-t border-outline-variant">
+					@if (d.contributed.total > 0) {
+						<div class="flex w-full h-2 rounded-full overflow-hidden bg-surface-container-high mb-2.5">
+							@if (d.contributed.byType.charts > 0) {
+								<div class="bg-primary" [style.width.%]="getBreakdownPercent(d.contributed.byType.charts, d.contributed.total)"></div>
+							}
+							@if (d.contributed.byType.tourPasses > 0) {
+								<div class="bg-tertiary" [style.width.%]="getBreakdownPercent(d.contributed.byType.tourPasses, d.contributed.total)"></div>
+							}
+							@if (d.contributed.byType.themes > 0) {
+								<div class="bg-secondary" [style.width.%]="getBreakdownPercent(d.contributed.byType.themes, d.contributed.total)"></div>
+							}
+						</div>
+						<div class="flex flex-wrap gap-x-3.5 gap-y-1">
+							@if (d.contributed.byType.charts > 0) {
+								<span class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+									<span class="w-2 h-2 rounded-full bg-primary"></span>
+									Charts <b class="text-on-surface font-semibold">{{ getBreakdownPercent(d.contributed.byType.charts, d.contributed.total) }}%</b>
+								</span>
+							}
+							@if (d.contributed.byType.tourPasses > 0) {
+								<span class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+									<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+									Tour passes <b class="text-on-surface font-semibold">{{ getBreakdownPercent(d.contributed.byType.tourPasses, d.contributed.total) }}%</b>
+								</span>
+							}
+							@if (d.contributed.byType.themes > 0) {
+								<span class="flex items-center gap-1.5 text-xs text-on-surface-variant">
+									<span class="w-2 h-2 rounded-full bg-secondary"></span>
+									Themes <b class="text-on-surface font-semibold">{{ getBreakdownPercent(d.contributed.byType.themes, d.contributed.total) }}%</b>
+								</span>
+							}
+						</div>
+					} @else {
+						<p class="text-xs text-on-surface-variant">No contributions yet</p>
+					}
+				</div>
+			</div>
+
+			<!-- Updates Card -->
+			<div class="bg-surface-container-low rounded-2xl p-5 flex flex-col">
+				<div class="flex items-center justify-between mb-4">
+					<span class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
+						<ng-glyph name="bolt" size="16" class="opacity-80" />
+						Updates
+					</span>
+				</div>
+				<div class="text-2xl font-bold tracking-tight">{{ d.updates.total }} <span class="text-xs font-medium text-on-surface-variant">items</span></div>
+				<div class="mt-auto pt-3.5 border-t border-outline-variant">
+					@if (d.updates.total > 0) {
+						<div class="flex gap-2 mb-2.5">
+							@if (d.updates.byType.charts > 0) {
+								<span class="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1.5 rounded-lg text-xs font-semibold">
+									<span class="w-2 h-2 rounded-full bg-primary"></span>
+									{{ d.updates.byType.charts }}
+								</span>
+							}
+							@if (d.updates.byType.tourPasses > 0) {
+								<span class="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1.5 rounded-lg text-xs font-semibold">
+									<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+									{{ d.updates.byType.tourPasses }}
+								</span>
+							}
+							@if (d.updates.byType.themes > 0) {
+								<span class="flex items-center gap-1.5 bg-surface-container-high px-2.5 py-1.5 rounded-lg text-xs font-semibold">
+									<span class="w-2 h-2 rounded-full bg-secondary"></span>
+									{{ d.updates.byType.themes }}
+								</span>
+							}
+						</div>
+					}
+					@if (d.updates.latestUpdate; as latest) {
+						<p class="text-xs text-on-surface-variant leading-relaxed">
+							Latest: <b class="text-on-surface font-semibold">v{{ latest.versionCode }}</b> published on {{ latest.name }} &middot; {{ convertDateTimeToHumanReadable(latest.publishedAt) }}
+						</p>
+					}
+				</div>
+			</div>
+
+			<!-- Downloads Card -->
+			<div class="bg-surface-container-low rounded-2xl p-5 flex flex-col">
+				<div class="flex items-center justify-between mb-4">
+					<span class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
+						<ng-glyph name="download" size="16" class="opacity-80" />
+						Downloads
+					</span>
+					@if (d.downloads.trendPercent !== null && d.downloads.trendPercent !== undefined) {
+						<span class="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+							[class]="d.downloads.trendPercent >= 0
+								? 'bg-primary-container text-on-primary-container'
+								: 'bg-error-container text-on-error-container'">
+							{{ d.downloads.trendPercent >= 0 ? '+' : '' }}{{ d.downloads.trendPercent }}%
+						</span>
+					}
+				</div>
+				<div class="text-2xl font-bold tracking-tight">{{ abbreviateNumber(d.downloads.total) }}</div>
+				<div class="mt-auto pt-3.5 border-t border-outline-variant">
+					<p class="text-xs text-on-surface-variant">
+						<b class="text-on-surface font-semibold">{{ abbreviateNumber(d.downloads.byType.charts) }}</b> charts &middot;
+						<b class="text-on-surface font-semibold">{{ abbreviateNumber(d.downloads.byType.tourPasses) }}</b> tour passes &middot;
+						<b class="text-on-surface font-semibold">{{ abbreviateNumber(d.downloads.byType.themes) }}</b> themes
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Two Column Layout -->
+		<div class="grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-3.5 w-full items-start">
+
+			<!-- Activity Feed Panel -->
+			<div class="bg-surface-container-low rounded-2xl overflow-hidden">
+				<div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant">
+					<h3 class="text-sm font-semibold">Recent Activity</h3>
+				</div>
+
+				@if (d.activityFeed.length > 0) {
+					<ul class="list-none py-2 px-2.5">
+						@for (item of d.activityFeed; track item.id) {
+							<li class="flex gap-3 px-3 py-3 rounded-xl hover:bg-surface-container transition-colors">
+								<div class="w-[30px] h-[30px] rounded-lg bg-surface-container-high flex items-center justify-center shrink-0"
+									[class]="getContentTypeColor(item.contentType)">
+									<ng-glyph [name]="getFeedIcon(item)" size="15" />
+								</div>
+								<div class="flex-1 min-w-0">
+									<div class="flex items-center gap-2 mb-0.5">
+										<span class="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+											[class]="getContentTypeColor(item.contentType)">
+											{{ getContentTypeLabel(item.contentType) }}
+										</span>
+									</div>
+									<p class="text-[13px] leading-snug">
+										<b class="font-semibold">{{ item.contentName }}</b> {{ getFeedVerb(item) }}
+									</p>
+									<span class="text-[11px] text-on-surface-variant">{{ convertDateTimeToHumanReadable(item.createdAt) }}</span>
+								</div>
+							</li>
+						}
+					</ul>
+				} @else {
+					<div class="flex flex-col items-center justify-center py-12 px-5">
+						<ng-glyph name="history" size="40" class="text-on-surface-variant opacity-40 mb-3" />
+						<p class="text-sm text-on-surface-variant">No recent activity</p>
+					</div>
+				}
+			</div>
+
+			<!-- Feedback Panel -->
+			<div class="bg-surface-container-low rounded-2xl overflow-hidden">
+				<div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant">
+					<h3 class="text-sm font-semibold">Feedback</h3>
+				</div>
+
+				<!-- Likes & Bookmarks -->
+				<div class="px-5 py-4 border-b border-outline-variant">
+					<div class="flex gap-6">
+						<div>
+							<div class="text-xs text-on-surface-variant font-medium mb-1">Likes</div>
+							<div class="text-xl font-bold">{{ d.feedback.totalLikes }}</div>
+						</div>
+						<div>
+							<div class="text-xs text-on-surface-variant font-medium mb-1">Bookmarks</div>
+							<div class="text-xl font-bold">{{ d.feedback.totalBookmarks }}</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Top Content -->
+				@if (d.feedback.topContent.length > 0) {
+					<div class="px-5 py-4">
+						<div class="text-xs text-on-surface-variant font-medium mb-3">Top content</div>
+						<div class="flex flex-col gap-3.5">
+							@for (item of d.feedback.topContent; track item.catalogItemId) {
+								<div class="flex gap-3 items-center">
+									<div class="w-[38px] h-[38px] rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+										<ng-glyph
+											[name]="item.type === CatalogItemType.CHART ? 'music_note' : item.type === CatalogItemType.TOUR_PASS ? 'confirmation_number' : 'palette'"
+											size="18"
+											class="text-on-surface-variant"
+										/>
+									</div>
+									<div class="min-w-0">
+										<div class="text-sm font-semibold truncate">{{ item.name }}</div>
+										<div class="text-[11px] text-on-surface-variant flex items-center gap-1.5">
+											<span class="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+												[class]="getContentTypeColor(item.type)">
+												{{ getContentTypeLabel(item.type) }}
+											</span>
+											{{ abbreviateNumber(item.downloads) }} downloads
+										</div>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
 </main>

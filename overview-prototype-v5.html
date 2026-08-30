@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>bscm — Overview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  /* ---- your MD3 dark scheme, converted to plain hex (source: dark.css) ----
+     primary                  #B8CF84   on-primary                #253500
+     primary-container        #3A4D10   on-primary-container      #D4EC9E
+     secondary                #C2CAAA   on-secondary              #2C331D
+     secondary-container      #424A31   on-secondary-container    #DEE6C5
+     tertiary                 #A0D0C8   on-tertiary                #013732
+     tertiary-container       #204E48   on-tertiary-container     #BCECE4
+     background / surface     #12140D   on-background / on-surface #E3E3D7
+     surface-variant          #45483C   on-surface-variant        #C6C8B9
+     outline                  #909284   outline-variant           #45483C
+     surface-container-low    #1A1C15
+     surface-container        #1E2019
+     surface-container-high   #292B23
+     surface-container-highest#34362E                                        */
+  :root{
+    --bg: #12140D;
+    --surface: #1A1C15;
+    --surface-2: #1E2019;
+    --surface-3: #292B23;
+    --border: #45483C;
+    --text: #E3E3D7;
+    --text-muted: #C6C8B9;
+    --text-faint: #909284;
+
+    /* Charts -> primary, Tour passes -> tertiary, Themes -> secondary */
+    --chart: #B8CF84;
+    --on-chart: #253500;
+    --chart-container: #3A4D10;
+    --on-chart-container: #D4EC9E;
+
+    --tourpass: #A0D0C8;
+    --on-tourpass: #013732;
+    --tourpass-container: #204E48;
+    --on-tourpass-container: #BCECE4;
+
+    --theme: #C2CAAA;
+    --on-theme: #2C331D;
+    --theme-container: #424A31;
+    --on-theme-container: #DEE6C5;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  body{ padding:32px 40px 80px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+
+  /* ---- NAV ---- */
+  nav{ display:flex; align-items:center; justify-content:space-between; max-width:1240px; margin:0 auto 44px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:15px; letter-spacing:.02em; }
+  .brand .mark{ width:26px; height:26px; background:var(--text); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--bg); font-size:14px; font-weight:800; }
+  .pills{ display:flex; gap:6px; background:var(--surface); padding:4px; border-radius:99px; border:1px solid var(--border); }
+  .pill{ padding:8px 18px; border-radius:99px; font-size:13.5px; font-weight:500; color:var(--text-muted); cursor:default; }
+  .pill.active{ background:var(--chart); color:var(--on-chart); }
+  .pill.submit{ display:flex; align-items:center; gap:6px; }
+  .nav-right{ display:flex; align-items:center; gap:10px; }
+  .icon-btn{ width:36px; height:36px; border-radius:99px; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-muted); }
+  .avatar{ width:32px; height:32px; border-radius:99px; background:linear-gradient(135deg, var(--chart-container), var(--tourpass-container)); border:1px solid var(--border); }
+
+  main{ max-width:1240px; margin:0 auto; }
+
+  /* ---- HEADER ---- */
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:24px; flex-wrap:wrap; }
+  .page-head h1{ font-size:28px; font-weight:700; letter-spacing:-.01em; }
+  .page-head p{ color:var(--text-muted); font-size:14.5px; margin-top:6px; }
+  .range-toggle{ display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:3px; }
+  .range-toggle span{ padding:7px 14px; font-size:12.5px; color:var(--text-muted); border-radius:7px; }
+  .range-toggle span.active{ background:var(--surface-3); color:var(--text); font-weight:600; }
+
+  /* ---- TYPE LEGEND ---- */
+  .legend{ display:flex; gap:18px; margin-bottom:28px; padding:2px; }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-muted); font-weight:500; }
+  .dot{ width:8px; height:8px; border-radius:99px; flex-shrink:0; }
+  .dot.chart{ background:var(--chart); }
+  .dot.tourpass{ background:var(--tourpass); }
+  .dot.theme{ background:var(--theme); }
+
+  /* ---- SECTION LABEL ---- */
+  .section-label{ font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin:0 0 12px 2px; }
+
+  /* ---- STAT GRID ---- */
+  .grid{ display:grid; gap:14px; margin-bottom:32px; }
+  .grid.cols-4{ grid-template-columns:repeat(4,1fr); }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px 22px; }
+  .stat-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .stat-label{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); font-weight:500; }
+  .stat-label svg{ width:15px; height:15px; opacity:.85; }
+  .trend{ font-size:11.5px; padding:3px 8px; border-radius:99px; font-weight:600; background:var(--chart-container); color:var(--on-chart-container); }
+  .stat-value{ font-size:28px; font-weight:700; letter-spacing:-.01em; }
+  .stat-value .unit{ font-size:13px; font-weight:500; color:var(--text-muted); }
+
+  .breakdown{ display:flex; flex-direction:column; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .breakdown-row{ display:flex; align-items:center; justify-content:space-between; }
+  .breakdown-row .k{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-muted); }
+  .breakdown-row .n{ font-size:13px; font-weight:600; }
+
+  /* card body variants — same header/value on top, different footer treatment,
+     margin-top:auto pins each to the card bottom so the row still lines up
+     even though the grid stretches every card to the tallest one's height */
+  .card{ display:flex; flex-direction:column; }
+  .card-footer{ margin-top:auto; padding-top:14px; border-top:1px solid var(--border); }
+
+  /* segmented proportion bar (Contributed) */
+  .seg-bar{ display:flex; width:100%; height:8px; border-radius:99px; overflow:hidden; background:var(--surface-3); margin-bottom:10px; }
+  .seg-bar .seg.chart{ background:var(--chart); }
+  .seg-bar .seg.tourpass{ background:var(--tourpass); }
+  .seg-bar .seg.theme{ background:var(--theme); }
+  .seg-labels{ display:flex; flex-wrap:wrap; gap:5px 14px; }
+  .seg-labels span{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); }
+  .seg-labels b{ color:var(--text); font-weight:600; }
+
+  /* horizontal chip row (Updates) */
+  .chip-row{ display:flex; gap:8px; margin-bottom:10px; }
+  .mini-chip{ display:flex; align-items:center; gap:6px; background:var(--surface-3); padding:6px 10px; border-radius:8px; font-size:12.5px; font-weight:600; }
+  .footnote{ font-size:12px; color:var(--text-faint); line-height:1.4; }
+
+  /* sparkline (Downloads) */
+  .spark-wrap{ display:flex; align-items:flex-end; gap:10px; }
+  .spark{ flex:1; height:38px; }
+  .spark-caption{ font-size:12px; color:var(--text-muted); margin-top:8px; }
+  .spark-caption b{ color:var(--text); font-weight:600; }
+
+  /* ---- TWO COL ---- */
+  .split{ display:grid; grid-template-columns:1.55fr 1fr; gap:14px; margin-bottom:32px; align-items:start; }
+
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border); }
+  .panel-head h3{ font-size:14.5px; font-weight:600; }
+  .panel-head a{ font-size:12.5px; color:var(--chart); text-decoration:none; font-weight:500; }
+
+  .chart-wrap{ padding:20px 22px 6px; }
+  .chart-meta{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .chart-meta .big{ font-size:24px; font-weight:700; }
+  .chart-meta .lbl{ font-size:12.5px; color:var(--text-muted); }
+  #stackChart rect{ shape-rendering:crispEdges; }
+  .chart-legend{ display:flex; gap:16px; padding:10px 0 4px; }
+
+  .type-chips{ display:flex; gap:6px; }
+  .chip{ display:flex; align-items:center; gap:6px; font-size:12px; padding:6px 11px; border-radius:99px; border:1px solid var(--border); color:var(--text-muted); font-weight:500; }
+  .chip.active{ background:var(--surface-3); color:var(--text); border-color:transparent; }
+
+  .feed{ list-style:none; padding:8px 10px 14px; }
+  .feed li{ display:flex; gap:12px; padding:12px 12px; border-radius:10px; }
+  .feed li:hover{ background:var(--surface-2); }
+  .feed .dot-icon{ width:30px; height:30px; border-radius:9px; background:var(--surface-3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .feed .dot-icon svg{ width:15px; height:15px; }
+  .feed .dot-icon.chart{ color:var(--chart); }
+  .feed .dot-icon.tourpass{ color:var(--tourpass); }
+  .feed .dot-icon.theme{ color:var(--theme); }
+  .feed .body{ flex:1; min-width:0; }
+  .feed .body-top{ display:flex; align-items:center; gap:8px; margin-bottom:3px; }
+  .type-tag{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:5px; flex-shrink:0; }
+  .type-tag.chart{ background:var(--chart-container); color:var(--on-chart-container); }
+  .type-tag.tourpass{ background:var(--tourpass-container); color:var(--on-tourpass-container); }
+  .type-tag.theme{ background:var(--theme-container); color:var(--on-theme-container); }
+  .feed .body p{ font-size:13.5px; line-height:1.4; }
+  .feed .body p b{ font-weight:600; }
+  .feed .body span{ font-size:11.5px; color:var(--text-faint); }
+
+  .rail-item{ padding:16px 20px; border-bottom:1px solid var(--border); }
+  .rail-item:last-child{ border-bottom:none; }
+  .rail-title{ font-size:12px; color:var(--text-faint); font-weight:500; margin-bottom:6px; }
+  .rail-num{ font-size:20px; font-weight:700; }
+  .rail-quote{ font-size:13px; line-height:1.5; color:var(--text-muted); font-style:italic; margin:6px 0 8px; }
+  .rail-quote-by{ font-size:11.5px; color:var(--chart); }
+
+  .top-row{ display:flex; gap:12px; align-items:center; }
+  .top-row + .top-row{ margin-top:14px; }
+  .top-row img{ width:38px; height:38px; border-radius:8px; background:var(--surface-3); flex-shrink:0; }
+  .top-row .t{ font-size:13px; font-weight:600; }
+  .top-row .a{ font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+
+  /* ---- BANNER ---- */
+  .banner{ display:flex; align-items:center; justify-content:space-between; gap:20px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin-bottom:40px; flex-wrap:wrap; }
+  .banner-left{ display:flex; align-items:center; gap:14px; }
+  .banner-left .ico{ width:36px; height:36px; border-radius:10px; background:var(--surface-3); display:flex; align-items:center; justify-content:center; color:var(--chart); flex-shrink:0; }
+  .banner-left p{ font-size:14px; font-weight:500; }
+  .banner-left span{ display:block; font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .btn{ background:var(--chart); color:var(--on-chart); border:none; padding:10px 18px; border-radius:99px; font-size:13px; font-weight:600; white-space:nowrap; }
+
+  footer{ display:flex; justify-content:space-between; align-items:flex-start; padding-top:24px; border-top:1px solid var(--border); flex-wrap:wrap; gap:24px; }
+  footer .brand-small{ font-size:12.5px; color:var(--text-faint); }
+  .foot-cols{ display:flex; gap:56px; }
+  .foot-cols h4{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:10px; }
+  .foot-cols a{ display:block; font-size:13px; color:var(--text-muted); text-decoration:none; margin-bottom:8px; }
+
+  @media (max-width: 980px){
+    .grid.cols-4{ grid-template-columns:repeat(2,1fr); }
+    .split{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><div class="mark">B</div>COMMUNITY</div>
+  <div class="pills">
+    <div class="pill active">Overview</div>
+    <div class="pill">Uploads</div>
+    <div class="pill submit">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0-12l-4 4m4-4l4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      Submit
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="icon-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="avatar"></div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="page-head">
+    <div>
+      <h1>Welcome back, @meninocoiso</h1>
+      <p>Here's how your charts, tour passes and themes are doing.</p>
+    </div>
+    <div class="range-toggle">
+      <span>7d</span><span class="active">30d</span><span>All time</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot chart"></span>Charts</div>
+    <div class="legend-item"><span class="dot tourpass"></span>Tour passes</div>
+    <div class="legend-item"><span class="dot theme"></span>Themes</div>
+  </div>
+
+  <div class="section-label">Your activity</div>
+  <div class="grid cols-4">
+    <div class="card">
+      <div class="stat-top">
+        <div class="stat-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          Published
+        </div>
+        <div class="trend">+2 this week</div>
+      </div>
+      <div class="stat-value">20 <span class="unit">items</span></div>
+      <div class="breakdown card-footer">
+        <div class="breakdown-row"><span class="k"><span class="dot chart"></span>Charts</span><span class="n">15</span></div>
+        <div class="breakdown-row"><span class="k"><span class="dot tourpass"></span>Tour passes</span><span class="n">3</span></div>
+        <div class="breakdown-row"><span class="k"><span class="dot theme"></span>Themes</span><span class="n">2</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stat-top">
+        <div class="stat-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Contributed
+        </div>
+      </div>
+      <div class="stat-value">9 <span class="unit">items</span></div>
+      <div class="card-footer">
+        <div class="seg-bar">
+          <div class="seg chart" style="width:78%"></div>
+          <div class="seg tourpass" style="width:22%"></div>
+        </div>
+        <div class="seg-labels">
+          <span><span class="dot chart"></span>Charts <b>78%</b></span>
+          <span><span class="dot tourpass"></span>Tour passes <b>22%</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stat-top">
+        <div class="stat-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Updates
+        </div>
+      </div>
+      <div class="stat-value">10 <span class="unit">items</span></div>
+      <div class="card-footer">
+        <div class="chip-row">
+          <div class="mini-chip"><span class="dot chart"></span>7</div>
+          <div class="mini-chip"><span class="dot tourpass"></span>2</div>
+          <div class="mini-chip"><span class="dot theme"></span>1</div>
+        </div>
+        <div class="footnote">Latest: <b style="color:var(--text)">v3</b> published on We Live Forever · 4 days ago</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stat-top">
+        <div class="stat-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Downloads
+        </div>
+        <div class="trend">+18%</div>
+      </div>
+      <div class="stat-value">750</div>
+      <div class="card-footer">
+        <div class="spark-wrap">
+          <svg class="spark" viewBox="0 0 160 38" preserveAspectRatio="none">
+            <polyline points="0,30 12,28 24,31 36,24 48,26 60,18 72,21 84,14 96,17 108,10 120,13 132,7 144,9 160,3"
+              fill="none" stroke="#B8CF84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="spark-caption"><b>590</b> charts · <b>160</b> tour passes · <b>320</b> theme applies</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Downloads, last 30 days</h3>
+        <div class="type-chips">
+          <div class="chip active">All</div>
+          <div class="chip"><span class="dot chart"></span>Charts</div>
+          <div class="chip"><span class="dot tourpass"></span>Tour passes</div>
+          <div class="chip"><span class="dot theme"></span>Themes</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-meta"><span class="big">750</span><span class="lbl">total across all content · peak day 62</span></div>
+        <svg id="stackChart" width="100%" height="90" viewBox="0 0 480 90" preserveAspectRatio="none"></svg>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="dot chart"></span>Charts</div>
+          <div class="legend-item"><span class="dot tourpass"></span>Tour passes</div>
+          <div class="legend-item"><span class="dot theme"></span>Themes</div>
+        </div>
+      </div>
+      <ul class="feed">
+        <li>
+          <div class="dot-icon chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.09 6.26L20 9l-5 4.14L16.18 20 12 16.6 7.82 20 9 13.14 4 9l5.91-.74z"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag chart">Chart</span></div>
+            <p><b>We Live Forever</b> hit Top 100 for 30 days straight</p><span>2 hours ago</span>
+          </div>
+        </li>
+        <li>
+          <div class="dot-icon tourpass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag tourpass">Tour pass</span></div>
+            <p><b>Heaven's Rhythm</b> passed 1.8K downloads</p><span>3 hours ago</span>
+          </div>
+        </li>
+        <li>
+          <div class="dot-icon chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag chart">Chart</span></div>
+            <p>New bug report on <b>We Live Forever</b> — unsynced section after drop</p><span>5 hours ago</span>
+          </div>
+        </li>
+        <li>
+          <div class="dot-icon theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag theme">Theme</span></div>
+            <p><b>Chrome Skull</b> crossed 320 applies</p><span>1 day ago</span>
+          </div>
+        </li>
+        <li>
+          <div class="dot-icon chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag chart">Chart</span></div>
+            <p><b>v3</b> of <b>We Live Forever</b> published — 1.5K downloads so far</p><span>4 days ago</span>
+          </div>
+        </li>
+        <li>
+          <div class="dot-icon tourpass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="body">
+            <div class="body-top"><span class="type-tag tourpass">Tour pass</span></div>
+            <p><b>@artbyjane</b> was added as a contributor on <b>Heaven's Rhythm</b></p><span>6 days ago</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Feedback</h3><a href="#">See all →</a></div>
+      <div class="rail-item">
+        <div style="display:flex; gap:24px;">
+          <div><div class="rail-title">Likes</div><div class="rail-num">235</div></div>
+          <div><div class="rail-title">Bug reports</div><div class="rail-num">12</div></div>
+        </div>
+      </div>
+      <div class="rail-item">
+        <div class="body-top" style="margin-bottom:4px;"><span class="type-tag chart">Chart</span></div>
+        <div class="rail-quote">"I think adding a MegaDrop effect after the second verse breakdown would be a good idea."</div>
+        <div class="rail-quote-by">@meninocoiso on We Live Forever</div>
+      </div>
+      <div class="rail-item">
+        <div class="rail-title" style="margin-bottom:12px;">Top content, by type</div>
+        <div class="top-row">
+          <img />
+          <div><div class="t">We Live Forever</div><div class="a"><span class="type-tag chart" style="margin-right:6px;">Chart</span>1.8K downloads</div></div>
+        </div>
+        <div class="top-row">
+          <img />
+          <div><div class="t">Heaven's Rhythm</div><div class="a"><span class="type-tag tourpass" style="margin-right:6px;">Tour pass</span>1.8K downloads</div></div>
+        </div>
+        <div class="top-row">
+          <img />
+          <div><div class="t">Chrome Skull</div><div class="a"><span class="type-tag theme" style="margin-right:6px;">Theme</span>320 applies</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-left">
+      <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+      <div>
+        <p>Give a try at the upcoming Beatstar Community Studio</p>
+        <span>Sync and preview charts before you publish them</span>
+      </div>
+    </div>
+    <button class="btn">Join waitlist</button>
+  </div>
+
+  <footer>
+    <div class="brand-small">© 2025 bscm. Made with ❤ by players, for players.</div>
+    <div class="foot-cols">
+      <div><h4>Resources</h4><a href="#">Documentation</a><a href="#">Release Notes</a></div>
+      <div><h4>Help</h4><a href="#">Support</a><a href="#">Contact</a></div>
+      <div><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  const days = 24;
+  const svg = document.getElementById('stackChart');
+  const ns = 'http://www.w3.org/2000/svg';
+  const w = 480, h = 90, gap = 4;
+  const barW = (w / days) - gap;
+  const colors = { chart: '#B8CF84', tourpass: '#A0D0C8', theme: '#C2CAAA' };
+
+  let seed = 7;
+  function rand(){ seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+
+  for (let i = 0; i < days; i++) {
+    const chartV = 18 + rand() * 26;
+    const tourV = 4 + rand() * 12;
+    const themeV = 2 + rand() * 8;
+    const scale = 82 / 70;
+    let y = h - 4;
+    const x = i * (barW + gap);
+
+    [['chart', chartV], ['tourpass', tourV], ['theme', themeV]].forEach(([type, v]) => {
+      const bh = v * scale;
+      y -= bh;
+      const r = document.createElementNS(ns, 'rect');
+      r.setAttribute('x', x.toFixed(1));
+      r.setAttribute('y', y.toFixed(1));
+      r.setAttribute('width', barW.toFixed(1));
+      r.setAttribute('height', bh.toFixed(1));
+      r.setAttribute('fill', colors[type]);
+      r.setAttribute('rx', '1.5');
+      svg.appendChild(r);
+    });
+  }
+</script>
+
+</body>
+</html>

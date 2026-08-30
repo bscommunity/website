@@ -83,16 +83,16 @@ export const routes: Routes = [
 				(m) => m.DashboardLayoutComponent,
 			),
 		children: [
-			{ path: "", redirectTo: "uploads", pathMatch: "full" },
-			/* {
-				path: "",
+			{ path: "", redirectTo: "overview", pathMatch: "full" },
+			{
+				path: "overview",
 				loadComponent: () =>
 					import("./routes/dashboard/overview/overview").then(
 						(m) => m.OverviewComponent,
 					),
 				canActivate: [isAuthenticatedGuard],
 				title: "Overview",
-			}, */
+			},
 			{
 				path: "uploads",
 				loadComponent: () =>

@@ -15,16 +15,15 @@
 		</a>
 
 		<ul class="hidden flex-row items-center justify-center gap-4 md:flex">
-			<li>
-				<a
-					mat-stroked-button
-					[routerLink]="['/dashboard']"
-					[routerLinkActiveOptions]="{ exact: true }"
-					disabled
-					routerLinkActive="!bg-primary !text-on-primary !border-primary"
-					>Overview
-				</a>
-			</li>
+		<li>
+			<a
+				mat-stroked-button
+				[routerLink]="['/dashboard/overview']"
+				[routerLinkActiveOptions]="{ exact: true }"
+				routerLinkActive="!bg-primary !text-on-primary !border-primary"
+				>Overview
+			</a>
+		</li>
 			<li>
 				<a
 					mat-stroked-button
@@ -100,7 +99,7 @@
 			<a
 				class="w-full!"
 				mat-stroked-button
-				[routerLink]="['/dashboard']"
+				[routerLink]="['/dashboard/overview']"
 				[routerLinkActiveOptions]="{ exact: true }"
 				routerLinkActive="!bg-primary !text-on-primary !border-primary"
 				>Overview
