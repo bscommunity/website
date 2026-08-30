@@ -8,16 +8,15 @@ import {
 	signal,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
-import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { NgGlyph } from "@ng-icons/core";
 import { Subject, takeUntil } from "rxjs";
 
 import { AuthService } from "@/services/auth.service";
 import { OverviewService } from "@/services/api/overview.service";
+import { PublishDialogService } from "@/services/publish/publish.service";
 import {
 	type OverviewResponseModel,
 	type OverviewFeedItemModel,
-	type TopContentItemModel,
 } from "@/models/overview.model";
 import { CatalogItemType } from "@/models/enums/catalog-item-type.enum";
 import { abbreviateNumber } from "@/lib/number";
@@ -27,13 +26,14 @@ type RangeOption = "7d" | "30d" | "all";
 
 @Component({
 	selector: "app-overview",
-	imports: [NgGlyph, MatButtonModule, MatButtonToggleModule],
+	imports: [NgGlyph, MatButtonModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	templateUrl: "./overview.html",
 })
 export class OverviewComponent implements OnInit, OnDestroy {
 	private overviewService = inject(OverviewService);
 	private authService = inject(AuthService);
+	private publishDialogService = inject(PublishDialogService);
 	private cdr = inject(ChangeDetectorRef);
 
 	private destroy$ = new Subject<void>();
@@ -61,6 +61,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
 			this.username.set("");
 		}
 		this.fetchOverview();
+
+		this.publishDialogService.publishCompleted$
+			.pipe(takeUntil(this.destroy$))
+			.subscribe(() => {
+				this.overviewService.invalidateCache();
+				this.fetchOverview();
+			});
 	}
 
 	ngOnDestroy(): void {
@@ -68,12 +75,12 @@ export class OverviewComponent implements OnInit, OnDestroy {
 		this.destroy$.complete();
 	}
 
-	fetchOverview(): void {
+	fetchOverview(disableCache = false): void {
 		this.loading.set(true);
 		this.error.set(null);
 
 		this.overviewService
-			.getOverview(this.selectedRange())
+			.getOverview(this.selectedRange(), disableCache)
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
@@ -152,17 +159,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	getItemContentName(item: TopContentItemModel): string {
-		return item.name;
-	}
-
 	getBreakdownPercent(value: number, total: number): number {
 		if (total === 0) return 0;
 		return Math.round((value / total) * 100);
-	}
-
-	getTrendClass(trendPercent: number | null | undefined): string {
-		if (trendPercent === null || trendPercent === undefined) return "";
-		return trendPercent >= 0 ? "text-primary" : "text-error";
 	}
 }
