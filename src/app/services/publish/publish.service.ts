@@ -2,7 +2,7 @@ import { Injectable, inject } from "@angular/core";
 // Material
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 
 // Components
@@ -15,6 +15,8 @@ import type { PublishHandler } from "./publish-handler.interface";
 import { PublishDialogUploadingComponent } from "@/components/dialogs/uploading/uploading.component";
 
 // Types
+import type { CatalogItemModel } from "@/models/catalog-item.model";
+
 export interface DialogData<TFormData = Record<string, unknown>> {
 	title?: string | null;
 	description?: string | null;
@@ -54,6 +56,10 @@ export class PublishDialogService<
 	private currentStepSubject = new BehaviorSubject<number>(0);
 	currentStep$ = this.currentStepSubject.asObservable();
 
+	/** Emits the freshly created item (chart, tour pass or theme). */
+	private publishCompletedSubject = new Subject<CatalogItemModel>();
+	publishCompleted$ = this.publishCompletedSubject.asObservable();
+
 	private handler!: PublishHandler<TFormData, TSuccessData>;
 	private handlersByType: Record<string, PublishHandler<any, any>> | null =
 		null;
@@ -82,7 +88,7 @@ export class PublishDialogService<
 
 	open() {
 		if (!this.handler) throw new Error("No handler set for publish dialog");
-		this.currentStepSubject.next(0);
+		this.reset();
 		this.openCurrentStep();
 	}
 
@@ -92,8 +98,21 @@ export class PublishDialogService<
 	}
 
 	private moveToStep(step: number) {
-		if (step < 0 || step >= this.getTotalSteps()) {
-			if (step === this.getTotalSteps()) {
+		const total = this.getTotalSteps();
+
+		if (this.handler.shouldSkipStep) {
+			const direction = step >= this.currentStepSubject.value ? 1 : -1;
+			while (
+				((direction === 1 && step < total) ||
+					(direction === -1 && step > 0)) &&
+				this.handler.shouldSkipStep(step, this.formData)
+			) {
+				step += direction;
+			}
+		}
+
+		if (step < 0 || step >= total) {
+			if (step === total) {
 				this.submitForm();
 				return;
 			}
@@ -134,6 +153,11 @@ export class PublishDialogService<
 			if (result === "back") {
 				this.moveToStep(this.currentStepSubject.value - 1);
 			} else if (result === "next") {
+				// Clear the batch flag when skipping so the files step isn't permanently skipped
+				const fd = this.formData as Record<string, unknown>;
+				if ("assetsFromBatch" in fd) {
+					fd["assetsFromBatch"] = false;
+				}
 				this.moveToStep(this.currentStepSubject.value + 1);
 			} else {
 				if (
@@ -197,7 +221,10 @@ export class PublishDialogService<
 			{
 				disableClose: true,
 				width: "450px",
-				data: { progress$ },
+				data: {
+					progress$,
+					itemLabel: this.handler.getItemLabel?.() ?? "chart",
+				},
 			},
 		);
 
@@ -211,6 +238,11 @@ export class PublishDialogService<
 			if (this.handler.onPostSubmit) {
 				await this.handler.onPostSubmit(this.formData, response);
 			}
+
+			// Let active views (e.g. the uploads page) patch themselves
+			// with the created item — no refetch needed. The create
+			// services already keep the query/entity caches up to date.
+			this.publishCompletedSubject.next(response as CatalogItemModel);
 
 			loadingDialog.close();
 			const successComponent =

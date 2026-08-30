@@ -3,14 +3,18 @@
 		#versionTable
 		class="w-full"
 		[columns]="versionsColumns"
-		[data]="versions()"
-		[actions]="versionsActions"
+		[data]="currentVersions()"
+		[actions]="versionsActions()"
 		hasSorting="true"
 		initialSortColumn="index"
 		sortDirection="desc"
 	/>
 	<span class="flex items-center justify-end w-full gap-4">
-		<button mat-stroked-button (click)="openAddVersionDialog()">
+		<button
+			mat-stroked-button
+			(click)="openAddVersionDialog()"
+			[disabled]="saving()"
+		>
 			<ng-glyph name="publish" />
 			Publish new version
 		</button>

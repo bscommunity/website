@@ -1,0 +1,22 @@
+<app-chart-section class="w-full" title="Danger Zone">
+	<ul
+		class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container/50 overflow-hidden"
+	>
+		<app-danger-zone-list-item
+			class="w-full"
+			title="Transfer ownership"
+			description="Transfer this theme to another user."
+			buttonLabel="Transfer"
+			[buttonAction]="noop"
+			[disabled]="true"
+		></app-danger-zone-list-item>
+		<div class="w-full h-[1px] bg-error-container/50"></div>
+		<app-danger-zone-list-item
+			class="w-full"
+			title="Delete this theme"
+			description="Permanently delete this theme and all associated data."
+			buttonLabel="Delete this theme"
+			[buttonAction]="openDeleteDialog.bind(this)"
+		></app-danger-zone-list-item>
+	</ul>
+</app-chart-section>

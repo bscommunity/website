@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from "@angular/core";
+import { Component, inject, input, output, signal } from "@angular/core";
 import { Router } from "@angular/router";
 
 // Material
@@ -9,6 +9,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { AsideSectionComponent } from "@/components/aside-section/aside-section.component";
 import { AsideContainerComponent } from "@/components/aside-container/aside-container.component";
 import { DifficultyMarkComponent } from "@/components/difficulty-mark/difficulty-mark.component";
+import { EditChartDialogComponent } from "../../dialogs/edit-chart/edit-chart-dialog.component";
 
 // Services
 import { ChartService } from "@/services/api/chart.service";
@@ -20,6 +21,7 @@ import { ChartModel } from "@/models/chart.model";
 import { transformDuration } from "@/lib/time";
 import { NgGlyph } from "@ng-icons/core";
 import { Visibility } from "@/models/enums/visibility.enum";
+import { abbreviateNumber } from "@/lib/number";
 
 @Component({
 	selector: "app-aside",
@@ -39,11 +41,42 @@ export class AsideComponent {
 	readonly chartService = inject(ChartService);
 
 	readonly chart = input.required<ChartModel>();
+	readonly chartUpdated = output<ChartModel>();
 
 	visibility = Visibility;
+
 	transformDuration = transformDuration;
+	abbreviateNumber = abbreviateNumber;
 
 	isFetchingBundle = signal(false);
+
+	openEditDialog() {
+		const dialogRef = this.dialog.open(EditChartDialogComponent, {
+			data: {
+				chart: this.chart(),
+			},
+			width: "560px",
+		});
+
+		dialogRef.afterClosed().subscribe((result) => {
+			if (result && result !== "back") {
+				this.chartUpdated.emit(result);
+			}
+		});
+	}
+
+	async share() {
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			this._snackBar.open("Link copied to clipboard", "Close", {
+				duration: 3000,
+			});
+		} catch {
+			this._snackBar.open("Could not copy link", "Close", {
+				duration: 3000,
+			});
+		}
+	}
 
 	async downloadBundle() {
 		try {

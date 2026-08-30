@@ -57,7 +57,14 @@ export class TourPassPublishHandler implements PublishHandler<
 		return PublishTourPassSuccessComponent;
 	}
 
-	async submit(data: TourPassFormData): Promise<TourPassModel> {
+	getItemLabel(): string {
+		return "tour pass";
+	}
+
+	async submit(
+		data: TourPassFormData,
+		publishSessionId?: string,
+	): Promise<TourPassModel> {
 		const { contentType, coverFile, trailerUrl, selectedCharts, ...rest } =
 			data as TourPassFormData & { contentType?: string };
 
@@ -68,6 +75,6 @@ export class TourPassPublishHandler implements PublishHandler<
 			coverFile: coverFile ?? null,
 		};
 
-		return this.tourPassService.createTourPass(payload);
+		return this.tourPassService.createTourPass(payload, publishSessionId);
 	}
 }

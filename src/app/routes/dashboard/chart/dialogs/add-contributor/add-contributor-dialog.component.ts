@@ -34,6 +34,7 @@ import { ContributorService } from "@/services/api/contributor.service";
 export interface DialogData {
 	chartId: string;
 	usersIds: string[];
+	availableRoles?: ContributorRole[];
 }
 
 @Component({
@@ -64,7 +65,7 @@ export class AddContributorDialogComponent {
 		new Map(),
 	);
 
-	readonly availableRoles = CHART_CONTRIBUTOR_ROLES;
+	readonly availableRoles = this.data.availableRoles ?? CHART_CONTRIBUTOR_ROLES;
 
 	readonly poolUsers = signal<SimplifiedUserModel[]>([]);
 

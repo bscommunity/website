@@ -1,0 +1,81 @@
+<aside class="flex flex-col items-start justify-start gap-6 w-full">
+	<!-- Images -->
+	<app-theme-art [theme]="theme()" size="lg" />
+
+	<!-- Actions -->
+	<app-aside-section class="w-full">
+		<app-aside-container
+			class="w-full cursor-pointer"
+			asideContainerClass="hover:bg-surface-container-high transition-colors"
+			icon="edit"
+			info="Edit theme"
+			(click)="openEditDialog()"
+		></app-aside-container>
+		<app-aside-container
+			class="w-full cursor-pointer flex md:hidden"
+			asideContainerClass="hover:bg-surface-container-high transition-colors"
+			icon="share"
+			info="Share"
+			(click)="share()"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Likes / Bookmarks -->
+	<app-aside-section title="Stats" class="w-full">
+		<div class="flex flex-row items-center justify-center gap-2 w-full">
+			<app-aside-container
+				class="flex-1"
+				icon="favorite"
+				[info]="abbreviateNumber(theme().likesCount)"
+			></app-aside-container>
+			<app-aside-container
+				class="flex-1"
+				icon="bookmark"
+				[info]="abbreviateNumber(theme().bookmarksCount)"
+			></app-aside-container>
+		</div>
+		<app-aside-container
+			class="w-full"
+			icon="download"
+			[info]="abbreviateNumber(theme().downloadsSum)"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Theme info -->
+	<app-aside-section class="w-full">
+		<span class="text-on-surface text-sm font-normal">Replaces</span>
+		<app-aside-container class="w-full">
+			<span class="flex flex-row items-center justify-center gap-2">
+				{{ replacesName() }}
+				<img
+					class="w-4 h-4"
+					[src]="themeIcon()"
+					alt="Theme genre icon"
+				/>
+			</span>
+		</app-aside-container>
+		@if (theme().originalArtwork) {
+			<span class="text-on-surface text-sm font-normal">Inspired by</span>
+			<app-aside-container class="w-full">
+				{{ theme().originalArtwork }}
+			</app-aside-container>
+		}
+	</app-aside-section>
+
+	<!-- Files -->
+	<app-aside-section title="Files" class="w-full">
+		<a
+			class="w-full cursor-pointer"
+			tabindex="-1"
+			(click)="downloadBundle()"
+			(keypress)="downloadBundle()"
+		>
+			<app-aside-container
+				class="w-full"
+				asideContainerClass="hover:bg-surface-container-low cursor-pointer"
+				icon="download"
+				info="Download bundle"
+			></app-aside-container>
+		</a>
+	</app-aside-section>
+</aside>

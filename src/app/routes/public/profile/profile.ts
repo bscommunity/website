@@ -35,6 +35,7 @@ import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.
 import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
 import { TourPassDialogComponent } from "@/components/dialogs/tourpass/tourpass-dialog.component";
+import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.component";
 
 // Lib
 import { convertDateTimeToHumanReadable } from "@/lib/time";
@@ -42,6 +43,7 @@ import { convertDateTimeToHumanReadable } from "@/lib/time";
 // Models & Services
 import { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
+import type { ThemeModel } from "@/models/theme.model";
 import { type SimplifiedUserModel, UserProfileResponseModel } from "@/models/user.model";
 import { ActivityType } from "@/models/enums/activity-type.enum";
 import type { UserActivityItem } from "@/models/user.model";
@@ -87,7 +89,6 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		value: "themes",
 		icon: "palette",
 		showLabel: true,
-		disabled: true,
 	},
 ];
 
@@ -109,6 +110,7 @@ const DESKTOP_TABS: Tab<HistoryItem>[] = [
 		UserHistoryComponent,
 		ChartPreviewComponent,
 		TourpassPreviewComponent,
+		ThemePreviewComponent,
 	],
 	providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntl }],
 	styles: [
@@ -164,7 +166,14 @@ export class Profile implements OnInit, OnDestroy {
 	tourPassesPageSize = 20;
 	currentTourPassesPage = signal(0);
 	isTourPassesLoading = signal(false);
-	// groupedThemes = signal<HistoryItem[] | undefined | null>(undefined);
+
+	themes = signal<ThemeModel[]>([]);
+	totalThemes = signal(0);
+	themesPageSize = 20;
+	currentThemesPage = signal(0);
+	isThemesLoading = signal(false);
+
+	private readonly themesCache = new Map<number, ThemeModel[]>();
 
 	mobileTabs = MOBILE_TABS;
 	desktopTabs = DESKTOP_TABS;
@@ -184,8 +193,6 @@ export class Profile implements OnInit, OnDestroy {
 			year: "numeric",
 		}).format(date);
 	}
-
-	themes: HistoryItem[] = [];
 
 	ngOnInit(): void {
 		this.routeParamSubscription = this.route.paramMap.subscribe(
@@ -214,6 +221,7 @@ export class Profile implements OnInit, OnDestroy {
 
 		this.isChartsLoading.set(true);
 		this.isTourPassesLoading.set(true);
+		this.isThemesLoading.set(true);
 
 		// Check for cached profile data
 		const cachedProfile = this.profileCacheService.getProfile(username);
@@ -292,6 +300,13 @@ export class Profile implements OnInit, OnDestroy {
 								offset: 0,
 							},
 						),
+						themesPage: this.userService.getUserThemes(
+							profile.user.id,
+							{
+								limit: 20,
+								offset: 0,
+							},
+						).pipe(catchError(() => of(null))),
 						activity: this.userService
 							.getUserActivity(profile.user.id, {
 								limit: 20,
@@ -302,7 +317,7 @@ export class Profile implements OnInit, OnDestroy {
 				}),
 			)
 			.subscribe({
-				next: ({ chartsPage, tourPassesPage, activity }) => {
+				next: ({ chartsPage, tourPassesPage, themesPage, activity }) => {
 					// Process charts
 					const initialCharts = chartsPage.items ?? [];
 					this.chartsCache.set(0, initialCharts);
@@ -331,6 +346,14 @@ export class Profile implements OnInit, OnDestroy {
 						total: this.totalTourPasses(),
 					});
 
+					// Process themes
+					const initialThemes = themesPage?.items ?? [];
+					this.themesCache.set(0, initialThemes);
+					this.themes.set(initialThemes);
+					this.totalThemes.set(
+						themesPage?.counts?.themes ?? initialThemes.length,
+					);
+
 					const profile = this.profile();
 					const activityTimeline = this.buildActivityTimelineFromApi(
 						activity,
@@ -346,16 +369,20 @@ export class Profile implements OnInit, OnDestroy {
 
 					this.isChartsLoading.set(false);
 					this.isTourPassesLoading.set(false);
+					this.isThemesLoading.set(false);
 				},
 				error: (err) => {
 					this.profile.set(null);
 					this.groupedCharts.set(null);
 					this.groupedTourPasses.set(null);
+					this.themes.set([]);
 					this.userActivity.set(null);
 					this.isChartsLoading.set(false);
 					this.isTourPassesLoading.set(false);
+					this.isThemesLoading.set(false);
 					this.totalCharts.set(0);
 					this.totalTourPasses.set(0);
+					this.totalThemes.set(0);
 					this.currentChartsPage.set(0);
 					this.currentTourPassesPage.set(0);
 					this.isFollowing.set(false);
@@ -369,17 +396,22 @@ export class Profile implements OnInit, OnDestroy {
 		this.profile.set(undefined);
 		this.groupedCharts.set(undefined);
 		this.groupedTourPasses.set(undefined);
+		this.themes.set([]);
 		this.userActivity.set(undefined);
 		this.isChartsLoading.set(true);
 		this.isTourPassesLoading.set(true);
+		this.isThemesLoading.set(true);
 		this.totalCharts.set(0);
 		this.totalTourPasses.set(0);
+		this.totalThemes.set(0);
 		this.currentChartsPage.set(0);
 		this.currentTourPassesPage.set(0);
+		this.currentThemesPage.set(0);
 		this.isFollowing.set(false);
 		this.isOwnProfile.set(false);
 		this.chartsCache.clear();
 		this.tourPassesCache.clear();
+		this.themesCache.clear();
 	}
 
 	private scrollToTop(): void {
@@ -559,6 +591,47 @@ export class Profile implements OnInit, OnDestroy {
 			});
 	}
 
+	onThemesPageChange(event: PageEvent): void {
+		const pageIndex = event.pageIndex;
+		this.currentThemesPage.set(pageIndex);
+
+		const cached = this.themesCache.get(pageIndex);
+		if (cached) {
+			this.themes.set(cached);
+			return;
+		}
+
+		const profile = this.profile();
+		if (!profile) {
+			return;
+		}
+
+		this.isThemesLoading.set(true);
+		this.userService
+			.getUserThemes(profile.user.id, {
+				limit: this.themesPageSize,
+				offset: pageIndex * this.themesPageSize,
+			})
+			.subscribe({
+				next: (themesPage) => {
+					const themes = themesPage.items ?? [];
+					this.themesCache.set(pageIndex, themes);
+					if (pageIndex === 0) {
+						this.totalThemes.set(
+							themesPage.counts?.themes ?? themes.length,
+						);
+					}
+					this.themes.set(themes);
+
+					this.isThemesLoading.set(false);
+				},
+				error: () => {
+					this.themes.set([]);
+					this.isThemesLoading.set(false);
+				},
+			});
+	}
+
 	openChartDialog(chart: ChartModel): void {
 		this.dialog.open(ChartDialogComponent, {
 			data: { chart },
@@ -594,6 +667,11 @@ export class Profile implements OnInit, OnDestroy {
 	get totalTourPassPages(): number {
 		const total = this.totalTourPasses();
 		return total > 0 ? Math.ceil(total / this.tourPassesPageSize) : 0;
+	}
+
+	get totalThemesPages(): number {
+		const total = this.totalThemes();
+		return total > 0 ? Math.ceil(total / this.themesPageSize) : 0;
 	}
 
 	private applyChartGroups(charts: ChartModel[]): void {

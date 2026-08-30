@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Delete theme permanently</h2>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-full">
+	<mat-dialog-content class="!flex flex-col items-start gap-4">
+		<p>
+			Are you sure you want to delete the theme
+			<strong>{{ this.data.name }}</strong
+			>? <br />
+			This action cannot be undone.
+		</p>
+		<p>
+			Please type <strong>{{ this.data.name }}</strong> to confirm.
+		</p>
+		<app-form-field
+			class="w-full"
+			[control]="form.controls.confirmName"
+			[config]="confirmField"
+		/>
+	</mat-dialog-content>
+	<mat-dialog-actions>
+		<button mat-button mat-dialog-close="cancel" [disabled]="isLoading()">
+			Cancel
+		</button>
+		<button
+			type="submit"
+			mat-button
+			[disabled]="
+				isLoading() || !form.controls.confirmName.value || form.invalid
+			"
+		>
+			@if (isLoading()) {
+				<mat-progress-spinner
+					[diameter]="16"
+					[mode]="'indeterminate'"
+				></mat-progress-spinner>
+			} @else {
+				I'm sure
+			}
+		</button>
+	</mat-dialog-actions>
+</form>

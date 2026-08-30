@@ -146,13 +146,18 @@ export class ValidationService {
 	}
 
 	/**
-	 * Validador de URL de vídeo YouTube usando extração de ID.
+	 * YouTube URL validator using ID extraction. Returns `invalidVideoUrl`
+	 * instead of throwing when the value is not a YouTube URL.
 	 */
 	getYouTubeValidator = (): ValidatorFn => {
 		return (control: AbstractControl): ValidationErrors | null => {
 			if (!control.value) return null;
-			const id = this.extractYouTubeVideoId(control.value);
-			return id ? null : { [ValidationErrorKey.invalidVideoUrl]: true };
+			try {
+				this.extractYouTubeVideoId(control.value);
+				return null;
+			} catch {
+				return { [ValidationErrorKey.invalidVideoUrl]: true };
+			}
 		};
 	};
 }

@@ -14,6 +14,7 @@ import { TourPassModel } from "@/models/tour-pass.model";
 
 // Libs
 import { transformDuration } from "@/lib/time";
+import { abbreviateNumber } from "@/lib/number";
 
 @Component({
 	selector: "app-aside",
@@ -28,6 +29,7 @@ export class AsideComponent {
 	readonly tourPassUpdated = output<TourPassModel>();
 
 	transformDuration = transformDuration;
+	abbreviateNumber = abbreviateNumber;
 
 	get totalDuration(): number {
 		return this.tourpass().charts.reduce(
@@ -45,8 +47,7 @@ export class AsideComponent {
 			data: {
 				tourpass: this.tourpass(),
 			},
-			width: "500px",
-			disableClose: true,
+			width: "560px",
 		});
 
 		dialogRef.afterClosed().subscribe((result) => {
@@ -54,6 +55,19 @@ export class AsideComponent {
 				this.tourPassUpdated.emit(result);
 			}
 		});
+	}
+
+	async share() {
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			this._snackBar.open("Link copied to clipboard", "Close", {
+				duration: 3000,
+			});
+		} catch {
+			this._snackBar.open("Could not copy link", "Close", {
+				duration: 3000,
+			});
+		}
 	}
 
 	async downloadBundle() {

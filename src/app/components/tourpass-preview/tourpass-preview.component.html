@@ -72,26 +72,22 @@
 			<div class="flex flex-col items-end justify-start gap-0">
 				<div class="flex flex-row items-center justify-start gap-2">
 					<ng-glyph name="timer" />
-					<span class="line-clamp-1">{{
-						transformDuration(
-							this.tourpass().charts.reduce(
-								(acc, chart) =>
-									acc + (chart.track.duration || 0),
-								0
+					<span class="line-clamp-1"
+						>~{{
+							transformDuration(
+								this.tourpass().charts.reduce(
+									(acc, chart) =>
+										acc + (chart.track.duration || 0),
+									0
+								)
 							)
-						)
-					}}</span>
+						}}</span
+					>
 				</div>
 				<div class="flex flex-row items-center justify-start gap-2">
 					<ng-glyph name="music_note" />
 					<span class="line-clamp-1"
-						>{{
-							this.tourpass().charts.reduce(
-								(acc, chart) => acc + (chart.notesAmount || 0),
-								0
-							)
-						}}
-						notes</span
+						>{{ this.tourpass().charts.length }} tracks</span
 					>
 				</div>
 			</div>

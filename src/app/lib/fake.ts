@@ -44,7 +44,8 @@ export const SAMPLE_CHART_1: ChartModel = {
 	visibility: Visibility.PUBLIC,
 	isFeatured: false,
 	downloadsSum: 1234,
-	changelog: [],
+	bookmarksCount: 11,
+	likesCount: 24,
 	contributors: [
 		{
 			user: {
@@ -73,6 +74,7 @@ export const SAMPLE_CHART_1: ChartModel = {
 	discordChannelId: null,
 	discordMessageId: null,
 	authorId: null,
+	versions: [fakeVersion],
 
 	track: fakeTrack,
 	versionsCount: 1,

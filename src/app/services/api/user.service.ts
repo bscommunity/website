@@ -10,11 +10,14 @@ import {
 } from "@/models/user.model";
 import type { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
+import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 
 import { apiUrl } from "@/lib/api";
 import type { QueryPage } from "../cache.service";
 import { CacheService } from "../cache.service";
+
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 @Injectable({
 	providedIn: "root",
@@ -71,6 +74,19 @@ export class UserService {
 		);
 	}
 
+	getUserThemes(
+		userId: string,
+		params: {
+			limit?: number;
+			offset?: number;
+		} = {},
+	): Observable<ItemsPageModel<ThemeModel>> {
+		return this.http.get<ItemsPageModel<ThemeModel>>(
+			`${this.apiUrl}/${userId}/themes`,
+			{ params },
+		);
+	}
+
 	getMyUploads(
 		params: {
 			types?: string;
@@ -89,41 +105,58 @@ export class UserService {
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
 		if (params.genres) httpParams["genres"] = params.genres;
-		if (params.difficulties) httpParams["difficulties"] = params.difficulties;
+		if (params.difficulties)
+			httpParams["difficulties"] = params.difficulties;
 		if (params.versions) httpParams["versions"] = params.versions;
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
+		httpParams["includeVersions"] = "true";
 
 		const cacheKey = this.buildUploadsCacheKey(httpParams);
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.cacheService.getQuery<CatalogItemModel>("upload", cacheKey, "session");
+			const cached = this.cacheService.getQuery<CatalogItemModel>(
+				"upload",
+				cacheKey,
+				"session",
+			);
 			if (cached) {
 				return of(cached);
 			}
 		}
 
 		return this.http
-			.get<ItemsPageModel<CatalogItemModel>>(`${this.meUrl}/uploads`, { params: httpParams })
+			.get<
+				ItemsPageModel<CatalogItemModel>
+			>(`${this.meUrl}/uploads`, { params: httpParams })
 			.pipe(
 				map((res) => ({
 					items: res.items,
-					total:
-						res.counts
-							? (res.counts.charts ?? 0) + (res.counts.tourPasses ?? 0) + (res.counts.themes ?? 0)
-							: null,
+					total: res.counts
+						? (res.counts.charts ?? 0) +
+							(res.counts.tourPasses ?? 0) +
+							(res.counts.themes ?? 0)
+						: null,
 				})),
 				tap((page) => {
 					if (!isPaginated) {
-						this.cacheService.setQuery("upload", cacheKey, page, "session", 30_000);
+						this.cacheService.setQuery(
+							"upload",
+							cacheKey,
+							page,
+							"session",
+							CACHE_TTL,
+						);
 					}
 					this.cacheService.upsertEntities("upload", page.items);
 				}),
 			);
 	}
 
-	private buildUploadsCacheKey(params: Record<string, string | number>): string {
+	private buildUploadsCacheKey(
+		params: Record<string, string | number>,
+	): string {
 		const parts = [
 			params["types"] || "all",
 			params["query"] || "",
@@ -156,26 +189,39 @@ export class UserService {
 		const isPaginated = (params.offset ?? 0) > 0;
 
 		if (!params.disableCache && !isPaginated) {
-			const cached = this.cacheService.getQuery<TourPassModel>("tourpass", cacheKey, "session");
+			const cached = this.cacheService.getQuery<TourPassModel>(
+				"tourpass",
+				cacheKey,
+				"session",
+			);
 			if (cached) {
 				return of(cached);
 			}
 		}
 
 		return this.http
-			.get<[TourPassModel[], number | null]>(`${apiUrl}/tourpasses`, { params: httpParams })
+			.get<
+				QueryPage<TourPassModel>
+			>(`${apiUrl}/tourpasses`, { params: httpParams })
 			.pipe(
-				map((res) => ({ items: res[0], total: res[1] })),
 				tap((page) => {
 					if (!isPaginated) {
-						this.cacheService.setQuery("tourpass", cacheKey, page, "session", 30_000);
+						this.cacheService.setQuery(
+							"tourpass",
+							cacheKey,
+							page,
+							"session",
+							30_000,
+						);
 					}
 					this.cacheService.upsertEntities("tourpass", page.items);
 				}),
 			);
 	}
 
-	private buildTourPassesCacheKey(params: Record<string, string | number | boolean>): string {
+	private buildTourPassesCacheKey(
+		params: Record<string, string | number | boolean>,
+	): string {
 		const parts = [
 			params["query"] || "",
 			params["sortBy"] || "",
@@ -192,7 +238,7 @@ export class UserService {
 			offset?: number;
 			count?: boolean;
 		} = {},
-	): Observable<[CatalogItemModel[], number | null]> {
+	): Observable<QueryPage<ThemeModel>> {
 		const httpParams: Record<string, string | number | boolean> = {};
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
@@ -200,10 +246,9 @@ export class UserService {
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 		if (params.count) httpParams["count"] = true;
 
-		return this.http.get<[CatalogItemModel[], number | null]>(
-			`${apiUrl}/themes`,
-			{ params: httpParams },
-		);
+		return this.http.get<QueryPage<ThemeModel>>(`${apiUrl}/themes`, {
+			params: httpParams,
+		});
 	}
 
 	getUserActivity(

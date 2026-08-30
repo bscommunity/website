@@ -31,14 +31,18 @@ import { NgGlyph } from "@ng-icons/core";
 							class="leading-none align-middle"
 					/></span>
 				}
-				<span>{{ info() }}</span>
+				@if (info()) {
+					<span>{{ info() }}</span>
+				} @else {
+					<ng-content />
+				}
 			}
 		</li>
 	`,
 })
 export class AsideContainerComponent {
 	readonly icon = input<string>();
-	readonly info = input("N/A");
+	readonly info = input<string | number | undefined>(undefined);
 	readonly asideContainerClass = input("");
 	readonly isLoading = input(false);
 }

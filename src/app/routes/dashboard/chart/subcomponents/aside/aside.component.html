@@ -27,6 +27,45 @@
 			class="flex md:hidden absolute bottom-0 left-0 h-24 w-full bg-linear-to-b from-transparent to-background"
 		></div>
 	</div>
+	<!-- Actions -->
+	<app-aside-section class="w-full">
+		<app-aside-container
+			class="w-full cursor-pointer"
+			asideContainerClass="hover:bg-surface-container-high transition-colors"
+			icon="edit"
+			info="Edit chart"
+			(click)="openEditDialog()"
+		></app-aside-container>
+		<app-aside-container
+			class="w-full cursor-pointer flex md:hidden"
+			asideContainerClass="hover:bg-surface-container-high transition-colors"
+			icon="share"
+			info="Share"
+			(click)="share()"
+		></app-aside-container>
+	</app-aside-section>
+
+	<!-- Likes / Bookmarks -->
+	<app-aside-section title="Stats" class="w-full">
+		<div class="flex flex-row items-center justify-center gap-2 w-full">
+			<app-aside-container
+				class="flex-1"
+				icon="favorite"
+				[info]="abbreviateNumber(chart().likesCount)"
+			></app-aside-container>
+			<app-aside-container
+				class="flex-1"
+				icon="bookmark"
+				[info]="abbreviateNumber(chart().bookmarksCount)"
+			></app-aside-container>
+		</div>
+		<app-aside-container
+			class="w-full"
+			icon="download"
+			[info]="abbreviateNumber(chart().downloadsSum)"
+		></app-aside-container>
+	</app-aside-section>
+
 	<app-aside-section title="Chart Info" class="w-full">
 		<app-aside-container
 			class="w-full"

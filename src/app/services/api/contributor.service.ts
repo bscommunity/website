@@ -24,6 +24,33 @@ export class ContributorService {
 
 	private readonly apiUrl = `${apiUrl}/contributors`;
 
+	/**
+	 * Contributors can hang off any catalog item (charts and themes),
+	 * so every mutation must be mirrored into each entity cache that
+	 * actually exists for the item id. Detail pages resolve their data
+	 * from these entries (e.g. ThemeResolver -> getThemeById reads the
+	 * "theme" entity), so missing one leaves the UI stale after reload.
+	 */
+	private updateCachedContributors(
+		catalogItemId: string,
+		updater: (currentContributors: ContributorModel[]) => ContributorModel[],
+	): void {
+		for (const entityType of ["chart", "theme"] as const) {
+			if (this.cacheService.getEntity(entityType, catalogItemId) === null) {
+				continue;
+			}
+
+			this.cacheService.updateEntity<ChartModel>(
+				entityType,
+				catalogItemId,
+				(item) => ({
+					...(item ?? ({} as ChartModel)),
+					contributors: updater(item?.contributors ?? []),
+				}),
+			);
+		}
+	}
+
 	// Add
 	async addContributors(
 		chartId: string,
@@ -39,16 +66,12 @@ export class ContributorService {
 			),
 		);
 
-		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
-			const currentContributors = (chart?.contributors) || [];
+		this.updateCachedContributors(chartId, (currentContributors) => {
 			const updatedUserIds = new Set(response.map((c) => c.user.id));
 			const filtered = currentContributors.filter(
 				(c) => !updatedUserIds.has(c.user.id),
 			);
-			return {
-				...(chart ?? ({} as ChartModel)),
-				contributors: [...filtered, ...response],
-			};
+			return [...filtered, ...response];
 		});
 		console.log("Contributors added successfully!", response);
 	}
@@ -69,16 +92,12 @@ export class ContributorService {
 			),
 		);
 
-		this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => {
-			const currentContributors = (chart?.contributors) || [];
+		this.updateCachedContributors(chartId, (currentContributors) => {
 			const updatedUserIds = new Set(updatedContributors.map((c) => c.user.id));
 			const filtered = currentContributors.filter(
 				(c) => !updatedUserIds.has(c.user.id),
 			);
-			return {
-				...(chart ?? ({} as ChartModel)),
-				contributors: [...filtered, ...updatedContributors],
-			};
+			return [...filtered, ...updatedContributors];
 		});
 		return updatedContributors;
 	}
@@ -101,15 +120,14 @@ export class ContributorService {
 				),
 			);
 
-			this.cacheService.updateEntity<ChartModel>("chart", chartId, (chart) => ({
-				...(chart ?? ({} as ChartModel)),
-				contributors: ((chart?.contributors) || []).filter(
+			this.updateCachedContributors(chartId, (currentContributors) =>
+				currentContributors.filter(
 					(contributor) =>
 						role
 							? !(contributor.user.id === id && contributor.role === role)
 							: contributor.user.id !== id,
 				),
-			}));
+			);
 
 			return true;
 		} catch (error) {

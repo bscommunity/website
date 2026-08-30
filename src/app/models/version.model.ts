@@ -13,12 +13,7 @@ export const Version = z.object({
 
 export type VersionModel = z.infer<typeof Version>;
 
-export const CreateVersion = Version.omit({
-	id: true,
-	downloadsAmount: true,
-	createdAt: true,
-	discordAttachmentId: true,
-}).extend({
-	chartBundle: z.instanceof(File).optional(),
+export const CreateVersion = z.object({
+	changelog: z.string().optional().default(""),
 });
 export type CreateVersionModel = z.infer<typeof CreateVersion>;

@@ -32,4 +32,26 @@ function elementToKey<T>(element: T): string {
 	return `${element}`;
 }
 
+function valuesEqual(a: unknown, b: unknown): boolean {
+	if (a === b) return true;
+	// Treat null and undefined as interchangeable form values
+	if (a == null && b == null) return true;
+	return false;
+}
+
+/**
+ * Returns true when any value in `current` differs from the matching
+ * entry in `initial`. Used to detect real changes against a snapshot of
+ * the form's initial values (unlike FormGroup.pristine, reverting a
+ * field to its original value counts as unchanged).
+ */
+export function formValuesChanged(
+	initial: Record<string, unknown>,
+	current: Record<string, unknown>,
+): boolean {
+	return Object.keys(initial).some(
+		(key) => !valuesEqual(current[key], initial[key]),
+	);
+}
+
 export { compareArrays, compareMaps, elementToKey };

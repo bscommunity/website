@@ -7,7 +7,6 @@ import { Difficulty } from "./enums/difficulty.enum";
 import { Visibility } from "./enums/visibility.enum";
 
 // Models
-import { Changelog } from "./changelog.model";
 import { Contributor } from "./contributor.model";
 import { Track } from "./track.model";
 import { Version } from "./version.model";
@@ -19,6 +18,8 @@ export const Chart = z.object({
 	visibility: z.enum(Visibility),
 	isFeatured: z.boolean(),
 	downloadsSum: z.number().min(0).default(0),
+	likesCount: z.number().min(0).default(0),
+	bookmarksCount: z.number().min(0).default(0),
 	contributors: z.array(Contributor).default([]),
 	createdAt: z.coerce.date(),
 	publishedAt: z.coerce.date().optional().nullable(),
@@ -32,12 +33,12 @@ export const Chart = z.object({
 
 	track: Track,
 	versionsCount: z.number().int(),
+	versions: z.array(Version).default([]),
 	difficulty: z.enum(Difficulty),
 	notesAmount: z.number().int(),
 	effectsAmount: z.number().int(),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
-	changelog: z.array(Changelog).default([]),
 	latestVersion: Version.nullable(),
 });
 
@@ -51,7 +52,10 @@ export const CreateChart = Chart.omit({
 	status: true,
 	visibility: true,
 	latestVersion: true,
+	versions: true,
 	downloadsSum: true,
+	likesCount: true,
+	bookmarksCount: true,
 	createdAt: true,
 	publishedAt: true,
 	updatedAt: true,
@@ -62,7 +66,6 @@ export const CreateChart = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
-	changelog: true,
 }).extend({
 	chartBundle: z.instanceof(File).optional(),
 });
@@ -74,7 +77,10 @@ export const MutateChartSchema = Chart.omit({
 	isFeatured: true,
 	contributors: true,
 	latestVersion: true,
+	versions: true,
 	downloadsSum: true,
+	likesCount: true,
+	bookmarksCount: true,
 	createdAt: true,
 	publishedAt: true,
 	updatedAt: true,
@@ -85,6 +91,5 @@ export const MutateChartSchema = Chart.omit({
 	discordMessageId: true,
 	authorId: true,
 	versionsCount: true,
-	changelog: true,
 }).partial();
 export type MutateChartModel = z.infer<typeof MutateChartSchema>;

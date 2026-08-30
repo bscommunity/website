@@ -125,6 +125,10 @@ ng-glyph .mdc-icon-button {
 	gap: 0.75rem;
 }
 
+.mdc-label {
+	margin-right: 0.5rem !important;
+}
+
 ng-glyph {
 	user-select: none;
 	pointer-events: none;

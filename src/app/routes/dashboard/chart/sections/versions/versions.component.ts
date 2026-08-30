@@ -1,10 +1,11 @@
 import {
 	ChangeDetectionStrategy,
-	ChangeDetectorRef,
 	Component,
+	computed,
 	effect,
 	inject,
 	input,
+	signal,
 	viewChild,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
@@ -15,21 +16,20 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 // Components
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
+import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+import { PublishVersionChangelogComponent } from "@/components/publish/version/changelog.component";
 // Utils
 import { getApiErrorMessage } from "@/models/api-error.model";
 // Model
-import {
-	type CreateVersionModel,
-	Version,
-	type VersionModel,
-} from "@/models/version.model";
-import { VersionService } from "@/services/api/version.service";
+import { type VersionModel, Version } from "@/models/version.model";
+import { ChartService } from "@/services/api/chart.service";
+import { CacheService } from "@/services/cache.service";
+import { type ChartModel } from "@/models/chart.model";
 
 // Service
 import {
-	type ChartFormData,
-	ChartPublishHandler,
 	initialChartFormData,
+	ChartPublishHandler,
 } from "@/services/publish/handlers/chart-publish.handler";
 import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 import {
@@ -53,32 +53,26 @@ import {
 })
 export class VersionsComponent {
 	readonly chartId = input.required<string>();
+	readonly chart = input<any>(undefined);
 	readonly versions = input<VersionModel[]>([]);
 
-	private cdr = inject(ChangeDetectorRef);
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 
-	readonly versionService = inject(VersionService);
+	readonly chartService = inject(ChartService);
+	private cacheService = inject(CacheService);
 	readonly chartPublishHandler = inject(ChartPublishHandler);
 
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
-	// Effect to update table when versions input changes
-	// This effect runs when the user creates a new chart from /chart
-	constructor() {
-		effect(() => {
-			const versions = this.versions();
-			const table = this.versionTable();
+	private readonly _versionsSync = effect(() => {
+		this.currentVersions.set(this.versions());
+	});
 
-			if (table && versions.length > 0) {
-				// The table data is automatically updated through the [data]="versions()" binding
-				// We just need to trigger change detection
-				// TODO: Manually trigger change detection?
-			}
-		});
-	}
+	isFetchingBundle = signal(false);
+	saving = signal(false);
+	currentVersions = signal<VersionModel[]>([]);
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
@@ -98,12 +92,15 @@ export class VersionsComponent {
 		},
 	];
 
-	versionsActions: Action<VersionModel>[] = [
+	versionsActions = computed<Action<VersionModel>[]>(() => [
 		{
 			description: "Download",
 			icon: "download",
-			href: () => "",
-			disabled: () => true,
+			callback: () => {
+				this.downloadBundle();
+			},
+			disabled: () => this.isFetchingBundle(),
+			loading: () => this.isFetchingBundle(),
 		},
 		{
 			description: "Switch version",
@@ -112,10 +109,10 @@ export class VersionsComponent {
 				this.openSnackBar("Not implemented yet.", "Close");
 			},
 			disabled: (index, item) => {
-				// Check if this is the latest version by comparing with the versions signal
-				const versions = this.versions();
+				const versions = this.currentVersions();
 				return (
-					versions.length === 0 || item.id === versions[versions.length - 1].id
+					versions.length === 0 ||
+					item.id === versions[versions.length - 1].id
 				);
 			},
 		},
@@ -125,7 +122,7 @@ export class VersionsComponent {
 			callback: this.openRemoveVersionDialog.bind(this),
 			// We only allow deleting the latest version (except for the first version)
 			disabled: (_, item) => {
-				const versions = this.versions();
+				const versions = this.currentVersions();
 				return (
 					versions.length === 0 ||
 					item.id !== versions[versions.length - 1].id ||
@@ -133,14 +130,30 @@ export class VersionsComponent {
 				);
 			},
 		},
-	];
+	]);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
 	}
 
+	async downloadBundle() {
+		if (this.isFetchingBundle()) return;
+
+		try {
+			this.isFetchingBundle.set(true);
+			const url = await this.chartService.getBundleUrl(this.chartId());
+			window.open(url, "_blank");
+		} catch {
+			this._snackBar.open("Failed to get download link", "Close", {
+				duration: 2500,
+			});
+		} finally {
+			this.isFetchingBundle.set(false);
+		}
+	}
+
 	openAddVersionDialog(): void {
-		const dialogRef = this.dialog.open(
+		const sourceDialog = this.dialog.open(
 			this.chartPublishHandler.getStepComponents()[2],
 			{
 				data: {
@@ -154,55 +167,46 @@ export class VersionsComponent {
 			},
 		);
 
-		dialogRef
-			.afterClosed()
-			.subscribe(async (result: ChartFormData | "back" | undefined) => {
-				if (result == "back" || result == undefined) return;
+		sourceDialog.afterClosed().subscribe((sourceResult) => {
+			if (!sourceResult || sourceResult === "back") return;
 
-				/* const data =
-					await this.chartPublishHandler.preprocessFormData(result);
-
-				this.dialog.open(PublishDialogLoadingComponent);
-
-				this.addVersion(data); */
-			});
-	}
-
-	openRemoveVersionDialog(_: number, version: VersionModel): void {
-		console.log("Removing version", version);
-
-		const operation = async () => {
-			const result = await this.versionService.deleteVersion(
-				this.chartId(),
-				version.id,
+			const changelogDialog = this.dialog.open(
+				PublishVersionChangelogComponent,
+				{
+					width: "500px",
+					disableClose: true,
+					data: { formData: {} },
+				},
 			);
 
-			if (!result) {
-				throw new Error("An error occurred");
-			}
+			changelogDialog.afterClosed().subscribe((changelogResult) => {
+				if (!changelogResult || changelogResult === "back") return;
 
-			this.removeVersionFromTable(version);
-		};
+				this.dialog.open(PublishDialogLoadingComponent, {
+					disableClose: true,
+				});
 
-		this.dialog.open(ConfirmationDialogComponent, {
-			data: {
-				title: "Remove Version",
-				description:
-					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
-				success: "Version removed with success!",
-				operation,
-			},
+				const chartBundle = sourceResult.chartBundle;
+				if (!chartBundle) return;
+
+				this.addVersion(changelogResult.changelog ?? "", chartBundle);
+			});
 		});
 	}
 
-	async addVersion(version: CreateVersionModel) {
+	async addVersion(changelog: string, chartBundle: File) {
+		if (this.saving()) return;
+		this.saving.set(true);
+
 		try {
-			const response = await this.versionService.addVersion(
+			const response = await this.chartService.addVersion(
 				this.chartId(),
-				version,
+				changelog,
+				chartBundle,
 			);
 
 			if (!response) {
+				this.saving.set(false);
 				this.dialog.closeAll();
 				this.dialog.open(ErrorDialogComponent, {
 					data: {
@@ -213,10 +217,21 @@ export class VersionsComponent {
 				return;
 			}
 
-			console.log("Version added with success", response);
-
-			this.addVersionToTable(Version.parse(response));
-
+			// Cache is updated by chartService.addVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ChartModel>(
+				"chart",
+				this.chartId(),
+			);
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(
+					updated.versions.map((v) => Version.parse(v)),
+				);
+			}
+			this.saving.set(false);
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
 		} catch (error: unknown) {
@@ -235,29 +250,47 @@ export class VersionsComponent {
 					error: errorMessage.error,
 				},
 			});
+			this.saving.set(false);
 		}
 	}
 
-	addVersionToTable(version: VersionModel) {
-		this.versionTable().addData(version);
-		this.openSnackBar("Version added with success!", "Close");
-		// TODO: Manually trigger change detection?
-	}
+	openRemoveVersionDialog(_: number, version: VersionModel): void {
+		console.log("Removing version", version);
 
-	removeVersionFromTable(version: VersionModel) {
-		this.versionTable().removeData(version);
+		const operation = async () => {
+			const result = await this.chartService.deleteVersion(
+				this.chartId(),
+				version.id,
+			);
 
-		// Decrement index for versions with higher index than the removed one
-		this.versionTable().updateTableData((items) =>
-			items.map(
-				(item) =>
-					item.versionCode > version.versionCode
-						? { ...item, versionCode: item.versionCode - 1 }
-						: item, // Keep other items unchanged
-			),
-		);
+			if (!result) {
+				throw new Error("An error occurred");
+			}
 
-		// TODO: Manually trigger change detection?
-		this.openSnackBar("Version removed with success!", "Close");
+			// Cache is updated by chartService.deleteVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ChartModel>(
+				"chart",
+				this.chartId(),
+			);
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(
+					updated.versions.map((v) => Version.parse(v)),
+				);
+			}
+		};
+
+		this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Version",
+				description:
+					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+				success: "Version removed with success!",
+				operation,
+			},
+		});
 	}
 }

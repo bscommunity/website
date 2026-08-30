@@ -4,6 +4,7 @@ import {
 	OnInit,
 	Pipe,
 	PipeTransform,
+	effect,
 	input,
 	model,
 	inject,
@@ -15,6 +16,7 @@ import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 import { NgGlyph } from "@ng-icons/core";
 import { MatTableDataSource, MatTableModule } from "@angular/material/table";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatRippleModule } from "@angular/material/core";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -34,6 +36,7 @@ export interface Action<T> {
 	description: string;
 	icon: string;
 	disabled: (index: number, item: T) => boolean;
+	loading?: (index: number, item: T) => boolean;
 	callback?: (index: number, item: T) => void;
 	href?: (index: number, item: T) => string;
 }
@@ -58,6 +61,7 @@ export class SafeHtmlPipe implements PipeTransform {
 		MatSortModule,
 		NgGlyph,
 		MatTooltipModule,
+		MatProgressSpinnerModule,
 		MatRippleModule,
 		SafeHtmlPipe,
 	],
@@ -82,6 +86,17 @@ export class TableComponent<T> implements OnInit, AfterViewInit {
 
 	displayedColumns: string[] = [];
 	dataSource!: MatTableDataSource<T>;
+
+	constructor() {
+		// Keep the material data source in sync whenever the [data] binding
+		// emits a new array (guarded until ngOnInit creates the data source).
+		effect(() => {
+			const data = this.data();
+			if (this.dataSource) {
+				this.dataSource.data = data;
+			}
+		});
+	}
 
 	ngOnInit() {
 		this.displayedColumns = this.columns().map((c) => c.columnDef);

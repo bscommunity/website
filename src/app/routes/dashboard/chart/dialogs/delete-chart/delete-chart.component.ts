@@ -1,11 +1,6 @@
 import { Router } from "@angular/router";
 import { Component, inject, signal } from "@angular/core";
-import {
-	FormControl,
-	FormGroup,
-	ReactiveFormsModule,
-	Validators,
-} from "@angular/forms";
+import { FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
 // Material
 import { MatButtonModule } from "@angular/material/button";
@@ -17,18 +12,27 @@ import {
 	MatDialogRef,
 	MatDialogTitle,
 } from "@angular/material/dialog";
-import { MatFormField } from "@angular/material/form-field";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatInputModule } from "@angular/material/input";
 import { MatSnackBar } from "@angular/material/snack-bar";
 
+// Components
+import { FormFieldComponent } from "@/components/form-field/form-field.component";
+
 // Services
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
 import { ChartService } from "@/services/api/chart.service";
 import { ViewportScroller } from "@angular/common";
 
 interface DeleteChartDialogData {
 	id: string;
 	name: string;
+}
+
+interface ConfirmDeleteForm {
+	confirmName: string;
 }
 
 @Component({
@@ -39,10 +43,9 @@ interface DeleteChartDialogData {
 		MatDialogContent,
 		MatDialogActions,
 		MatDialogClose,
-		MatInputModule,
 		MatProgressSpinnerModule,
-		MatFormField,
 		ReactiveFormsModule,
+		FormFieldComponent,
 	],
 	templateUrl: "./delete-chart.component.html",
 })
@@ -50,18 +53,31 @@ export class DeleteChartComponent {
 	private chartService = inject(ChartService);
 	private router = inject(Router);
 	private viewportScroller = inject(ViewportScroller);
+	private formService = inject(FormService);
 
 	readonly _matSnackBar = inject(MatSnackBar);
 	readonly dialogRef = inject(MatDialogRef<DeleteChartComponent>);
 
 	readonly data = inject<DeleteChartDialogData>(MAT_DIALOG_DATA);
 
-	form = new FormGroup({
-		chartName: new FormControl("", [
-			Validators.required,
+	confirmField = this.formService.createTextField({
+		key: "confirmName",
+		label: "Chart name",
+		placeholder: "Type chart name",
+		required: true,
+		validators: [
 			Validators.pattern(new RegExp(escapeRegExp(this.data.name))),
-		]),
+		],
+		validationMessages: {
+			pattern: "Name must match exactly",
+		},
 	});
+
+	form: FormGroup<ValuesToControls<ConfirmDeleteForm>> =
+		this.formService.createFormGroup<ConfirmDeleteForm>(
+			[this.confirmField],
+			{},
+		);
 
 	readonly isLoading = signal(false);
 

@@ -13,7 +13,7 @@ import {
 	ValidationErrors,
 } from "@angular/forms";
 
-interface InvalidControlInfo {
+export interface InvalidControlInfo {
 	errors: ValidationErrors;
 	invalid: boolean;
 	value?: unknown;
@@ -24,6 +24,7 @@ interface BaseFieldConfig {
 	label: string;
 	required?: boolean;
 	hint?: string;
+	disabled?: boolean;
 	validators?: ValidatorFn[];
 	validationMessages?: Record<string, string>;
 }
@@ -32,6 +33,8 @@ export interface TextFieldConfig extends BaseFieldConfig {
 	readonly type: "text";
 	placeholder?: string;
 	inputType?: TextInputType;
+	/** Renders a <textarea> instead of an <input>. */
+	multiline?: boolean;
 	onValueProcessed?: (value: string) => Promise<void> | string;
 	urlFileExtension?: string;
 }
@@ -42,30 +45,81 @@ export interface FileFieldConfig extends BaseFieldConfig {
 	onFileSelected?: (data: File) => void;
 }
 
-export type FormFieldConfig = TextFieldConfig | FileFieldConfig;
+export interface SelectOption<V = unknown> {
+	value: V;
+	label: string;
+}
 
-export interface FormSubmissionConfig {
-	onValidSubmit?: (
-		formValue: Record<string, unknown>,
-	) => Promise<void> | void;
+export interface SelectFieldConfig<V = unknown> extends BaseFieldConfig {
+	readonly type: "select";
+	options: SelectOption<V>[];
+	placeholder?: string;
+	onChange?: (value: V | null) => void;
+}
+
+export type FormFieldConfig =
+	| TextFieldConfig
+	| FileFieldConfig
+	| SelectFieldConfig<any>;
+
+/**
+ * Constrains a fields array so every field's `key` must be a string key of the
+ * values interface `V`. A typo'd or unknown key is a compile-time error:
+ *
+ * ```ts
+ * createFormGroup<DetailsForm>(fields) // fields: readonly FieldsFor<DetailsForm>[]
+ * ```
+ */
+export type FieldsFor<V extends object> = {
+	[K in keyof V & string]: FormFieldConfig & { key: K };
+}[keyof V & string];
+
+/**
+ * Maps a form values interface to a typed `FormGroup` controls map.
+ * Declare your form's values as an interface and pass it as the generic:
+ *
+ * ```ts
+ * interface DetailsForm { name: string; genre: Genre | null; }
+ * form = formService.createFormGroup<DetailsForm>(fields, initial);
+ * // form.controls.name -> FormControl<string>, form.value -> DetailsForm
+ * ```
+ */
+export type ValuesToControls<T extends object> = {
+	[K in keyof T]: FormControl<T[K]>;
+};
+
+export type FormSubmissionResult<V> =
+	| { readonly isValid: true; readonly formValue: V }
+	| {
+			readonly isValid: false;
+			readonly invalidControls?: Record<string, InvalidControlInfo>;
+			readonly error?: Error;
+		};
+
+interface FormSubmissionConfig<
+	V extends object = Record<string, unknown>,
+> {
+	onValidSubmit?: (formValue: V) => Promise<void> | void;
 	onInvalidSubmit?: (
 		invalidControls: Record<string, InvalidControlInfo>,
 	) => void;
 	enableDebugLogging?: boolean;
 }
 
-export interface FormSubmissionResult {
-	isValid: boolean;
-	formValue?: Record<string, unknown>;
-	invalidControls?: Record<string, InvalidControlInfo>;
-	error?: Error;
-}
-
 @Injectable({ providedIn: "root" })
 export class FormService {
 	private validationService = inject(ValidationService);
 
-	createTextField(config: Omit<TextFieldConfig, "type">): TextFieldConfig {
+	/**
+	 * `const C` keeps the literal `key` type so `FieldsFor<V>` can validate it
+	 * at compile time. For new factories: never pair an explicit value generic
+	 * with `const C` — explicit type args disable literal inference for
+	 * non-literal properties (e.g. `options` from a `.map()` call), silently
+	 * widening the key back to `string`.
+	 */
+	createTextField<const C extends Omit<TextFieldConfig, "type">>(
+		config: C,
+	): TextFieldConfig & C {
 		const validators: ValidatorFn[] = config.validators
 			? [...config.validators]
 			: [];
@@ -104,10 +158,12 @@ export class FormService {
 			inputType: config.inputType || "text",
 			validators,
 			validationMessages: messages,
-		} as const;
+		} as TextFieldConfig & C;
 	}
 
-	createFileField(config: Omit<FileFieldConfig, "type">): FileFieldConfig {
+	createFileField<const C extends Omit<FileFieldConfig, "type">>(
+		config: C,
+	): FileFieldConfig & C {
 		const validators: ValidatorFn[] = config.validators
 			? [...config.validators]
 			: [];
@@ -130,105 +186,133 @@ export class FormService {
 			type: "file",
 			validators,
 			validationMessages: messages,
-		} as const;
+		} as FileFieldConfig & C;
 	}
 
-	createFormGroup(
-		fields: FormFieldConfig[],
-		initialData: object = {},
-	): FormGroup {
-		const group: Record<string, FormControl> = {};
-		for (const [key, value] of Object.entries(initialData)) {
-			group[key] = new FormControl(value);
+	createSelectField<
+		V,
+		const C extends Omit<SelectFieldConfig<V>, "type"> = Omit<
+			SelectFieldConfig<V>,
+			"type"
+		>,
+	>(
+		config: C,
+	): SelectFieldConfig<V> & C {
+		const validators: ValidatorFn[] = config.validators
+			? [...config.validators]
+			: [];
+		const messages: Record<string, string> = {
+			...config.validationMessages,
+		};
+
+		if (config.required) {
+			validators.push(Validators.required);
+			messages[ValidationErrorKey.required] =
+				this.validationService.messages.required(config.label);
 		}
+
+		return {
+			...config,
+			type: "select",
+			validators,
+			validationMessages: messages,
+		};
+	}
+
+	createFormGroup<V extends object>(
+		fields: readonly FieldsFor<V>[],
+		initialData: Partial<V> = {},
+	): FormGroup<ValuesToControls<V>> {
+		const controls: Record<string, FormControl> = {};
 		for (const field of fields) {
-			const control = group[field.key] || new FormControl(null);
-			control.setValidators(field.validators || null);
-			group[field.key] = control;
+			const control = new FormControl(initialData[field.key] ?? null, {
+				validators: field.validators?.length
+					? field.validators
+					: null,
+			});
+			if (field.disabled) control.disable();
+			controls[field.key] = control;
 		}
-		return new FormGroup(group);
+		return new FormGroup(controls as ValuesToControls<V>);
 	}
 
-	async processTextFieldValues(
-		form: FormGroup,
-		fields: FormFieldConfig[],
+	private async processTextFieldValues<V extends object>(
+		form: FormGroup<ValuesToControls<V>>,
+		fields: readonly FormFieldConfig[],
 	): Promise<void> {
 		for (const field of fields) {
 			if (field.type === "text" && field.onValueProcessed) {
-				const control = form.get(field.key);
-				if (control instanceof FormControl) {
-					const value = control.value as string;
-					// Skip processing if the field is empty (optional field with no input)
-					if (value == null || value === "") continue;
-					const processedValue = await field.onValueProcessed(value);
-					if (processedValue) control.setValue(processedValue);
-				}
+				const control = (form.controls as Record<string, FormControl>)[
+					field.key
+				];
+				const value = control.value as string;
+				if (value == null || value === "") continue;
+				const processedValue = await field.onValueProcessed(value);
+				if (processedValue) control.setValue(processedValue);
 			}
 		}
 	}
 
-	async processFileFieldValues(
-		form: FormGroup,
-		fields: FormFieldConfig[],
+	private async processFileFieldValues<V extends object>(
+		form: FormGroup<ValuesToControls<V>>,
+		fields: readonly FormFieldConfig[],
 	): Promise<void> {
 		for (const field of fields) {
 			if (field.type === "file" && field.onFileSelected) {
-				const control = form.get(field.key);
-				if (control instanceof FormControl) {
-					const file = control.value;
-					if (file) field.onFileSelected(file);
-				}
+				const control = (form.controls as Record<string, FormControl>)[
+					field.key
+				];
+				const file = control.value as File | null;
+				if (file) field.onFileSelected(file);
 			}
 		}
 	}
 
-	// YouTube ID extraction agora centralizada em ValidationService.extractYouTubeVideoId
+	private collectInvalidControls<V extends object>(
+		form: FormGroup<ValuesToControls<V>>,
+	): Record<string, InvalidControlInfo> {
+		const invalidControls: Record<string, InvalidControlInfo> = {};
+		for (const key of Object.keys(form.controls)) {
+			const control = (form.controls as Record<string, FormControl>)[key];
+			control.markAsTouched();
+			control.markAsDirty();
+			if (control.errors) {
+				invalidControls[key] = {
+					errors: control.errors,
+					invalid: control.invalid,
+					value: control.value,
+				};
+			}
+		}
+		return invalidControls;
+	}
 
-	async handleFormSubmission(
-		form: FormGroup,
-		fields: FormFieldConfig[],
-		config: FormSubmissionConfig = {},
-	): Promise<FormSubmissionResult> {
+	private async handleFormSubmission<
+		V extends object,
+	>(
+		form: FormGroup<ValuesToControls<V>>,
+		fields: readonly FormFieldConfig[],
+		config: FormSubmissionConfig<V> = {},
+	): Promise<FormSubmissionResult<V>> {
 		const {
 			onValidSubmit,
 			onInvalidSubmit,
 			enableDebugLogging = false,
 		} = config;
-		if (enableDebugLogging) console.log("Trying to submit form");
 		try {
 			if (form.valid) {
-				if (enableDebugLogging)
-					console.log("Form is valid, submitting...");
-				await this.processTextFieldValues(form, fields);
-				await this.processFileFieldValues(form, fields);
-				if (onValidSubmit) await onValidSubmit(form.value);
-				const formValue = { ...form.value };
+				await this.processTextFieldValues<V>(form, fields);
+				await this.processFileFieldValues<V>(form, fields);
+				const formValue = form.getRawValue() as V;
+				if (onValidSubmit) await onValidSubmit(formValue);
 				if (enableDebugLogging)
 					console.log("Form value to submit:", formValue);
 				return { isValid: true, formValue };
 			} else {
-				const invalidControls: Record<string, InvalidControlInfo> = {};
-				Object.keys(form.controls).forEach((key) => {
-					const control = form.get(key);
-					control?.markAsTouched();
-					control?.markAsDirty();
-					if (control?.errors) {
-						invalidControls[key] = {
-							errors: control.errors,
-							invalid: control.invalid,
-							value: control.value,
-						};
-						if (enableDebugLogging)
-							console.log(
-								`${key}: errors:`,
-								control.errors,
-								control.invalid,
-							);
-					}
-				});
+				const invalidControls = this.collectInvalidControls<V>(form);
+				if (onInvalidSubmit) onInvalidSubmit(invalidControls);
 				if (enableDebugLogging)
 					console.error("Form is invalid, cannot submit.");
-				if (onInvalidSubmit) onInvalidSubmit(invalidControls);
 				return { isValid: false, invalidControls };
 			}
 		} catch (error) {
@@ -238,39 +322,12 @@ export class FormService {
 		}
 	}
 
-	getInvalidControls(form: FormGroup): Record<string, InvalidControlInfo> {
-		const invalidControls: Record<string, InvalidControlInfo> = {};
-		Object.keys(form.controls).forEach((key) => {
-			const control = form.get(key);
-			if (control?.errors) {
-				invalidControls[key] = {
-					errors: control.errors,
-					invalid: control.invalid,
-					value: control.value,
-				};
-			}
-		});
-		return invalidControls;
-	}
-
-	async submitForm(
-		form: FormGroup,
-		fields: FormFieldConfig[],
+	async submitForm<V extends object>(
+		fields: readonly FieldsFor<V>[],
+		form: FormGroup<ValuesToControls<V>>,
 		enableDebugLogging = false,
-	): Promise<FormSubmissionResult> {
-		return this.handleFormSubmission(form, fields, { enableDebugLogging });
-	}
-
-	async submitFormWithValidation(
-		form: FormGroup,
-		fields: FormFieldConfig[],
-		validationCallback: (
-			formValue: Record<string, unknown>,
-		) => Promise<void> | void,
-		enableDebugLogging = false,
-	): Promise<FormSubmissionResult> {
-		return this.handleFormSubmission(form, fields, {
-			onValidSubmit: validationCallback,
+	): Promise<FormSubmissionResult<V>> {
+		return this.handleFormSubmission<V>(form, fields, {
 			enableDebugLogging,
 		});
 	}

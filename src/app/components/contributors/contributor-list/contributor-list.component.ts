@@ -21,6 +21,7 @@ import { WritableSignal } from "@angular/core";
 			<ul class="flex flex-col items-center justify-start w-full gap-4">
 				@for (user of users(); track user.id) {
 					<app-contributor-item
+						class="w-full"
 						[user]="user"
 						[roles]="roles()"
 						[availableRoles]="availableRoles()"
@@ -38,17 +39,17 @@ import { WritableSignal } from "@angular/core";
 			</div>
 		}
 	`,
-	imports: [
-		NgGlyph,
-		ContributorItemComponent,
-	],
+	imports: [NgGlyph, ContributorItemComponent],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContributorListComponent {
 	readonly users = input.required<SimplifiedUserModel[]>();
-	readonly roles = input.required<WritableSignal<Map<string, ContributorRole[]>>>();
+	readonly roles =
+		input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 	readonly availableRoles = input.required<ContributorRole[]>();
 	readonly canRemove = input(false, { transform: booleanAttribute });
-	readonly emptyMessage = input("No contributors added. Start adding members for them to appear here!");
+	readonly emptyMessage = input(
+		"No contributors added. Start adding members for them to appear here!",
+	);
 	readonly userRemoved = output<string>();
 }

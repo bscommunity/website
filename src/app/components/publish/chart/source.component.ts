@@ -3,7 +3,6 @@ import {
 	Component,
 	OnInit,
 	inject,
-	Input,
 	computed,
 } from "@angular/core";
 
@@ -26,12 +25,14 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatFormFieldModule } from "@angular/material/form-field";
 
 // Services
-import { FormService, type FormFieldConfig } from "@/services/form.service";
+import {
+	FormService,
+	type ValuesToControls,
+} from "@/services/form.service";
 import { ValidationService } from "@/services/validation.service";
 
 // Components
 import { FormFieldComponent } from "@/components/form-field/form-field.component";
-import { PanelComponent } from "@/components/panel/panel.component";
 
 // Data
 import { initialChartFormData } from "@/services/publish/handlers/chart-publish.handler";
@@ -39,14 +40,11 @@ import { initialChartFormData } from "@/services/publish/handlers/chart-publish.
 // Types
 import { type DialogData } from "@/services/publish/publish.service";
 
-interface SourceDialogData extends DialogData {
-	mode?: "linking" | "uploading";
-}
+interface SourceDialogData extends DialogData {}
 
-interface FormMode {
-	title: string;
-	description: string;
-	fields: FormFieldConfig[];
+interface ChartSourceFormValues {
+	chartBundle: File | null;
+	previewUrl: string;
 }
 
 @Component({
@@ -69,12 +67,6 @@ interface FormMode {
 						[config]="field"
 					/>
 				}
-
-				<!-- Disclaimer -->
-				<!-- <app-panel>
-					Your chart will be published into the Discord server and
-					made publicly visible.
-				</app-panel> -->
 			</mat-dialog-content>
 			<mat-dialog-actions align="center" class="gap-2">
 				<button
@@ -116,15 +108,10 @@ export class PublishChartSourceComponent implements OnInit {
 	private formService = inject(FormService);
 	private validationService = inject(ValidationService);
 
-	form!: FormGroup;
-	@Input() mode: "linking" | "uploading" = "linking";
+	form!: FormGroup<ValuesToControls<ChartSourceFormValues>>;
 
 	getControl = computed(() => (key: string): FormControl => {
-		const control = this.form.get(key) as FormControl | null;
-		if (!(control instanceof FormControl)) {
-			throw new Error(`Control with key "${key}" is not a FormControl`);
-		}
-		return control;
+		return this.form.controls[key as keyof ChartSourceFormValues];
 	});
 
 	private readonly FIELDS = {
@@ -146,62 +133,34 @@ export class PublishChartSourceComponent implements OnInit {
 		}),
 	};
 
-	// Form modes configuration
-	private readonly formModes: Record<string, FormMode> = {
-		linking: {
-			title: "Linking",
-			description: "Provide the URL to your chart bundle.",
-			fields: [
-				this.formService.createTextField({
-					key: "bundleUrl",
-					label: "Bundle",
-					inputType: "url",
-					placeholder: "https://example.com/chart.zip",
-					hint: "Must be a direct link to the .zip file",
-					required: true,
-					urlFileExtension: "zip",
-				}),
-				this.FIELDS.gameplayUrlField,
-			],
-		},
-		uploading: {
-			title: "Uploading",
-			description: "Upload your chart bundle to Discord's workshop.",
-			fields: [
-				this.FIELDS.chartBundleField,
-				this.FIELDS.gameplayUrlField,
-			],
-		},
+	// Form configuration
+	private readonly formConfig = {
+		title: "Uploading",
+		description: "Upload your chart bundle to Discord's workshop.",
+		fields: [this.FIELDS.chartBundleField, this.FIELDS.gameplayUrlField],
 	};
 
-	get formMode(): FormMode {
-		return this.formModes[this.mode];
+	get formMode() {
+		return this.formConfig;
 	}
 
 	ngOnInit() {
-		// Initialize form controls based on the provided data
-		if (
-			this.data.mode &&
-			(this.data.mode === "linking" || this.data.mode === "uploading")
-		) {
-			this.mode = this.data.mode;
-		}
-
-		this.form = this.formService.createFormGroup(
-			this.formMode.fields,
-			initialChartFormData,
-		);
+		this.form =
+			this.formService.createFormGroup<ChartSourceFormValues>(
+				this.formMode.fields,
+				initialChartFormData,
+			);
 
 		this.form.patchValue(this.data.formData);
 	}
 
 	async onSubmit() {
-		const result = await this.formService.submitForm(
-			this.form,
+		const result = await this.formService.submitForm<ChartSourceFormValues>(
 			this.formMode.fields,
+			this.form,
 		);
 
-		if (result.isValid && result.formValue) {
+		if (result.isValid) {
 			console.log(
 				"Form submitted successfully with value:",
 				result.formValue,

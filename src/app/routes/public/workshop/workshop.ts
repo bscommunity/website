@@ -32,14 +32,17 @@ import { SearchbarComponent } from "@/components/searchbar/searchbar.component";
 import { PanelComponent } from "@/components/panel/panel.component";
 import { ChartPreviewComponent } from "@/components/chart-preview/chart-preview.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
+import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.component";
 
 // Dialogs
 import { ChartDialogComponent } from "@/components/dialogs/chart/chart-dialog.component";
 import { TourPassDialogComponent } from "@/components/dialogs/tourpass/tourpass-dialog.component";
+import { ThemeDialogComponent } from "@/components/dialogs/theme/theme-dialog.component";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
+import type { ThemeModel } from "@/models/theme.model";
 import {
 	getSortOptionLabel,
 	SortOption,
@@ -59,6 +62,7 @@ import {
 		PanelComponent,
 		ChartPreviewComponent,
 		TourpassPreviewComponent,
+		ThemePreviewComponent,
 	],
 	templateUrl: "./workshop.html",
 })
@@ -90,6 +94,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	// Current data
 	charts: ChartModel[] | undefined = undefined;
 	tourPasses: TourPassModel[] | undefined = [];
+	themes: ThemeModel[] | undefined = [];
 	totalItems = 0;
 	currentPage = 1;
 	pageSize = 20;
@@ -137,6 +142,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		if (!append) {
 			this.charts = undefined;
 			this.tourPasses = [];
+			this.themes = [];
 		}
 		this.filterService.setLoading(true);
 		this.filterService.setError(null);
@@ -148,6 +154,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		const selectedCategories = filters.categories;
 		const showCharts = selectedCategories.includes("Charts");
 		const showTourPasses = selectedCategories.includes("Tourpasses");
+		const showThemes = selectedCategories.includes("Themes");
 
 		if (showCharts) {
 			// Load charts
@@ -224,7 +231,43 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 			this.tourPasses = [];
 		}
 
-		if (!showCharts && !showTourPasses) {
+		if (showThemes) {
+			this.userService
+				.getPublicThemes({
+					limit: this.pageSize,
+					offset,
+					count: true,
+				})
+				.pipe(takeUntil(this.destroy$))
+				.subscribe({
+					next: (response) => {
+						if (append) {
+							this.themes = [...(this.themes ?? []), ...response.items];
+						} else {
+							this.themes = response.items;
+						}
+						if (response.total !== null) {
+							this.totalItems = Math.max(this.totalItems, response.total);
+						}
+						this.filterService.setLoading(false);
+						this.cdr.markForCheck();
+					},
+					error: (error) => {
+						console.error("Error loading themes:", error);
+						const errorMessage =
+							error.error?.message ||
+							"Failed to load themes. Please try again.";
+						this.filterService.setError(errorMessage);
+						this.themes = [];
+						this.filterService.setLoading(false);
+						this.cdr.markForCheck();
+					},
+				});
+		} else {
+			this.themes = [];
+		}
+
+		if (!showCharts && !showTourPasses && !showThemes) {
 			this.filterService.setLoading(false);
 		}
 	}
@@ -285,6 +328,19 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	/**
+	 * Open theme dialog
+	 */
+	openThemeDialog(theme: ThemeModel): void {
+		this.dialog.open(ThemeDialogComponent, {
+			data: {
+				theme,
+			},
+			width: "575px",
+			maxHeight: "85vh",
+		});
+	}
+
+	/**
 	 * Handle scroll for infinite scroll
 	 */
 	@HostListener("window:scroll")
@@ -293,7 +349,7 @@ export class WorkshopComponent implements OnInit, OnDestroy, AfterViewInit {
 		const documentHeight = document.documentElement.scrollHeight;
 
 		const loadedCount =
-			(this.charts?.length ?? 0) + (this.tourPasses?.length ?? 0);
+			(this.charts?.length ?? 0) + (this.tourPasses?.length ?? 0) + (this.themes?.length ?? 0);
 
 		if (
 			scrollPosition >= documentHeight - 200 &&
