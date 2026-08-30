@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	computed,
+	effect,
 	inject,
 	input,
 	signal,
@@ -26,6 +27,7 @@ import { PublishThemeFilesComponent } from "@/components/publish/theme/files.com
 import { PublishVersionChangelogComponent } from "@/components/publish/version/changelog.component";
 import { ErrorDialogComponent } from "@/components/dialogs/error.component";
 import { PublishDialogLoadingComponent } from "@/components/dialogs/loading.component";
+import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/confirmation-dialog.component";
 
 // Models
 import { type VersionModel, Version } from "@/models/version.model";
@@ -62,8 +64,13 @@ export class VersionsSectionComponent {
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
+	private readonly _versionsSync = effect(() => {
+		this.currentVersions.set(this.versions());
+	});
+
 	isFetchingBundle = signal(false);
 	saving = signal(false);
+	currentVersions = signal<VersionModel[]>([]);
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);
@@ -96,6 +103,19 @@ export class VersionsSectionComponent {
 			},
 			disabled: () => this.isFetchingBundle(),
 			loading: () => this.isFetchingBundle(),
+		},
+		{
+			description: "Delete version",
+			icon: "delete_forever",
+			callback: this.openRemoveVersionDialog.bind(this),
+			disabled: (_, item) => {
+				const versions = this.currentVersions();
+				return (
+					versions.length === 0 ||
+					item.id !== versions[versions.length - 1].id ||
+					item.versionCode <= 1
+				);
+			},
 		},
 	]);
 
@@ -192,7 +212,9 @@ export class VersionsSectionComponent {
 		if (this.saving()) return;
 		this.saving.set(true);
 
-		this.dialog.open(PublishDialogLoadingComponent);
+		this.dialog.open(PublishDialogLoadingComponent, {
+			disableClose: true,
+		});
 
 		try {
 			const bundleFile = await this.buildBundle(files);
@@ -204,11 +226,18 @@ export class VersionsSectionComponent {
 			);
 
 			// Cache is updated by themeService.addVersion; sync the table from cache
-			const updated = this.cacheService.getEntity<ThemeModel>("theme", this.themeId());
+			const updated = this.cacheService.getEntity<ThemeModel>(
+				"theme",
+				this.themeId(),
+			);
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(updated.versions.map((v) => Version.parse(v)));
 			}
+			this.saving.set(false);
 			this._snackBar.open(
 				`Version v${version.versionCode} published with success!`,
 				"Close",
@@ -234,6 +263,42 @@ export class VersionsSectionComponent {
 			});
 			this.saving.set(false);
 		}
+	}
+
+	openRemoveVersionDialog(_: number, version: VersionModel): void {
+		const operation = async () => {
+			const result = await this.themeService.deleteVersion(
+				this.themeId(),
+				version.id,
+			);
+
+			if (!result) {
+				throw new Error("An error occurred");
+			}
+
+			// Cache is updated by themeService.deleteVersion; sync the table from cache
+			const updated = this.cacheService.getEntity<ThemeModel>(
+				"theme",
+				this.themeId(),
+			);
+			if (updated) {
+				const table = this.versionTable();
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(updated.versions.map((v) => Version.parse(v)));
+			}
+		};
+
+		this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove Version",
+				description:
+					"Are you sure you want to remove this version? It will not be available for download or rollback anymore.",
+				success: "Version removed with success!",
+				operation,
+			},
+		});
 	}
 
 	private async buildBundle(files: VersionFiles): Promise<File> {

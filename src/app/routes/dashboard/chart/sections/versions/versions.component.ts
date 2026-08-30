@@ -2,6 +2,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	computed,
+	effect,
 	inject,
 	input,
 	signal,
@@ -26,7 +27,10 @@ import { CacheService } from "@/services/cache.service";
 import { type ChartModel } from "@/models/chart.model";
 
 // Service
-import { initialChartFormData, ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
+import {
+	initialChartFormData,
+	ChartPublishHandler,
+} from "@/services/publish/handlers/chart-publish.handler";
 import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
 import {
 	type Action,
@@ -62,8 +66,13 @@ export class VersionsComponent {
 	readonly versionTable =
 		viewChild.required<TableComponent<VersionModel>>("versionTable");
 
+	private readonly _versionsSync = effect(() => {
+		this.currentVersions.set(this.versions());
+	});
+
 	isFetchingBundle = signal(false);
 	saving = signal(false);
+	currentVersions = signal<VersionModel[]>([]);
 
 	versionsColumns: TableColumn<VersionModel>[] = [
 		{
@@ -100,8 +109,7 @@ export class VersionsComponent {
 				this.openSnackBar("Not implemented yet.", "Close");
 			},
 			disabled: (index, item) => {
-				// Check if this is the latest version by comparing with the versions signal
-				const versions = this.versions();
+				const versions = this.currentVersions();
 				return (
 					versions.length === 0 ||
 					item.id === versions[versions.length - 1].id
@@ -114,7 +122,7 @@ export class VersionsComponent {
 			callback: this.openRemoveVersionDialog.bind(this),
 			// We only allow deleting the latest version (except for the first version)
 			disabled: (_, item) => {
-				const versions = this.versions();
+				const versions = this.currentVersions();
 				return (
 					versions.length === 0 ||
 					item.id !== versions[versions.length - 1].id ||
@@ -174,7 +182,9 @@ export class VersionsComponent {
 			changelogDialog.afterClosed().subscribe((changelogResult) => {
 				if (!changelogResult || changelogResult === "back") return;
 
-				this.dialog.open(PublishDialogLoadingComponent);
+				this.dialog.open(PublishDialogLoadingComponent, {
+					disableClose: true,
+				});
 
 				const chartBundle = sourceResult.chartBundle;
 				if (!chartBundle) return;
@@ -208,11 +218,20 @@ export class VersionsComponent {
 			}
 
 			// Cache is updated by chartService.addVersion; sync the table from cache
-			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
+			const updated = this.cacheService.getEntity<ChartModel>(
+				"chart",
+				this.chartId(),
+			);
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(
+					updated.versions.map((v) => Version.parse(v)),
+				);
 			}
+			this.saving.set(false);
 			this._snackBar.open("Version added with success!", "Close");
 			this.dialog.closeAll();
 		} catch (error: unknown) {
@@ -249,10 +268,18 @@ export class VersionsComponent {
 			}
 
 			// Cache is updated by chartService.deleteVersion; sync the table from cache
-			const updated = this.cacheService.getEntity<ChartModel>("chart", this.chartId());
+			const updated = this.cacheService.getEntity<ChartModel>(
+				"chart",
+				this.chartId(),
+			);
 			if (updated) {
 				const table = this.versionTable();
-				table.updateTableData(() => updated.versions.map((v) => Version.parse(v)));
+				table.updateTableData(() =>
+					updated.versions.map((v) => Version.parse(v)),
+				);
+				this.currentVersions.set(
+					updated.versions.map((v) => Version.parse(v)),
+				);
 			}
 		};
 

@@ -176,4 +176,31 @@ export class ThemeService {
 
 		return Version.parse(response);
 	}
+
+	async deleteVersion(themeId: string, versionId: string): Promise<boolean> {
+		try {
+			await firstValueFrom(
+				this.http.delete(
+					`${this.apiUrl}/${themeId}/versions/${versionId}`,
+				),
+			);
+
+			this.cacheService.updateEntity<ThemeModel>(
+				"theme",
+				themeId,
+				(theme) => ({
+					...(theme ?? ({} as ThemeModel)),
+					versionsCount: Math.max((theme?.versionsCount ?? 1) - 1, 0),
+					versions: (theme?.versions ?? []).filter(
+						(v) => v.id !== versionId,
+					),
+				}),
+			);
+
+			return true;
+		} catch (error) {
+			console.error("Failed to delete version:", error);
+			return false;
+		}
+	}
 }
