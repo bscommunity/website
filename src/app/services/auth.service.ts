@@ -226,6 +226,40 @@ export class AuthService {
 		}
 	}
 
+	async testLogin(username: string) {
+		try {
+			const response = await firstValueFrom(
+				this.http.post<AuthResponse>(`${apiUrl}/auth/test-login`, {
+					username,
+				}),
+			);
+
+			this.setTokens(
+				response.accessToken,
+				response.refreshToken,
+				response.expiresIn,
+			);
+
+			this.cookieService.set(
+				this.USER_OBJECT_NAME,
+				JSON.stringify(response.user),
+				{
+					expires: new Date(Date.now() + response.expiresIn * 1000),
+					path: "/",
+				},
+			);
+
+			this._isLoggedIn$.next(true);
+
+			return true;
+		} catch (error) {
+			this._isLoggedIn$.next(false);
+
+			console.error("Failed to test login:", error);
+			throw error;
+		}
+	}
+
 	logout() {
 		if (isPlatformBrowser(this.platformId)) {
 			console.log("Logging out...");

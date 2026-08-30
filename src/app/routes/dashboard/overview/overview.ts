@@ -8,6 +8,7 @@ import {
 	signal,
 } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { NgGlyph } from "@ng-icons/core";
 import { Subject, takeUntil } from "rxjs";
 
@@ -26,7 +27,7 @@ type RangeOption = "7d" | "30d" | "all";
 
 @Component({
 	selector: "app-overview",
-	imports: [NgGlyph, MatButtonModule],
+	imports: [NgGlyph, MatButtonModule, MatButtonToggleModule],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	templateUrl: "./overview.html",
 })

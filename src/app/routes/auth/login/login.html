@@ -38,6 +38,42 @@
 				</a>
 			}
 		</div>
+
+		@if (devMode) {
+			<div class="flex flex-col items-center justify-center gap-6 w-full">
+				<div class="flex w-1/4 h-[1px] bg-on-surface-variant"></div>
+				<h2 class="font-medium text-sm text-on-surface-variant">
+					Dev Mode — Test Login
+				</h2>
+				<mat-form-field appearance="outline" class="w-full">
+					<mat-label>Select a user</mat-label>
+					<mat-select [(ngModel)]="testUsername" [disabled]="testLoading">
+						@for (user of seededUsers; track user) {
+							<mat-option [value]="user">{{ user }}</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
+				@if (testError) {
+					<p class="text-error text-xs">{{ testError }}</p>
+				}
+				<button
+					(click)="onTestLogin()"
+					[disabled]="!testUsername || testLoading"
+					class="w-full !py-6"
+					mat-stroked-button
+				>
+					@if (testLoading) {
+						<mat-progress-spinner
+							diameter="20"
+							mode="indeterminate"
+						></mat-progress-spinner>
+					} @else {
+						Test Login
+					}
+				</button>
+			</div>
+		}
+
 		<div class="flex flex-col items-center justify-center gap-6 w-full">
 			<div class="flex w-1/4 h-[1px] bg-on-surface-variant"></div>
 			<p class="font-normal text-xs text-center">bscm &#64; 2026</p>

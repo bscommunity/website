@@ -20,7 +20,7 @@
 			(change)="selectRange($event.value)"
 		>
 			@for (range of ranges; track range.value) {
-				<mat-button-toggle [value]="range.value" class="px-3">
+				<mat-button-toggle [value]="range.value" class="px-2">
 					{{ range.label }}
 				</mat-button-toggle>
 			}

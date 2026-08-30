@@ -6,6 +6,7 @@ require("dotenv").config({ path: ".env" });
 
 const envFile = `export const environment = {
     PRODUCTION: ${process.env.PRODUCTION},
+    DEV_MODE: ${process.env.DEV_MODE},
     API_URL: '${process.env.API_URL}',
 	DISCORD_CLIENT_ID: '${process.env.DISCORD_CLIENT_ID}',
 	REDIRECT_URI: '${process.env.REDIRECT_URI}',
