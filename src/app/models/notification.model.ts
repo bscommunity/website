@@ -16,3 +16,11 @@ export interface NotificationsResponse {
 	items: NotificationModel[];
 	unreadCount: number;
 }
+
+export interface UnreadCountResponse {
+	unreadCount: number;
+}
+
+export interface DeleteAllResponse {
+	deleted: number;
+}

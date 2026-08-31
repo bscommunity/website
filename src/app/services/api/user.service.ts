@@ -15,6 +15,8 @@ import type { CatalogItemModel } from "@/models/catalog-item.model";
 import type {
 	NotificationModel,
 	NotificationsResponse,
+	UnreadCountResponse,
+	DeleteAllResponse,
 } from "@/models/notification.model";
 
 import { apiUrl } from "@/lib/api";
@@ -297,8 +299,8 @@ export class UserService {
 		);
 	}
 
-	getUnreadNotificationCount(): Observable<{ unreadCount: number }> {
-		return this.http.get<{ unreadCount: number }>(
+	getUnreadNotificationCount(): Observable<UnreadCountResponse> {
+		return this.http.get<UnreadCountResponse>(
 			`${this.meUrl}/notifications/unread-count`,
 		);
 	}
@@ -309,8 +311,8 @@ export class UserService {
 		);
 	}
 
-	markAllNotificationsRead(): Observable<{ deleted: number }> {
-		return this.http.post<{ deleted: number }>(
+	markAllNotificationsRead(): Observable<DeleteAllResponse> {
+		return this.http.post<DeleteAllResponse>(
 			`${this.meUrl}/notifications/read-all`,
 			null,
 		);
