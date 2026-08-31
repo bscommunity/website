@@ -28,13 +28,11 @@ export class ThemeService {
 	private readonly apiUrl = `${apiUrl}/themes`;
 
 	async getThemeById(id: string, disableCache = false): Promise<ThemeModel> {
-		// Cache-first: if versions are already populated (from uploads list), return immediately
 		if (!disableCache) {
 			const cached = this.cacheService.getEntity<ThemeModel>("theme", id);
 			if (cached) {
 				try {
-					const parsed = Theme.parse(cached);
-					if (parsed.versions.length > 0) return parsed;
+					return Theme.parse(cached);
 				} catch (error) {
 					console.error("Failed to parse cached theme, fetching from remote:", error);
 				}

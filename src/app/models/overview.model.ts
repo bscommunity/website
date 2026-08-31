@@ -10,7 +10,8 @@ export const TypeBreakdown = z.object({
 export type TypeBreakdownModel = z.infer<typeof TypeBreakdown>;
 
 export const TrendIndicator = z.object({
-	value: z.string(),
+	delta: z.number().int(),
+	period: z.string(),
 });
 
 export type TrendIndicatorModel = z.infer<typeof TrendIndicator>;

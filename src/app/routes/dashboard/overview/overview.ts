@@ -18,12 +18,19 @@ import { PublishDialogService } from "@/services/publish/publish.service";
 import {
 	type OverviewResponseModel,
 	type OverviewFeedItemModel,
+	type TrendIndicatorModel,
 } from "@/models/overview.model";
 import { CatalogItemType } from "@/models/enums/catalog-item-type.enum";
 import { abbreviateNumber } from "@/lib/number";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
 
 type RangeOption = "7d" | "30d" | "all";
+
+const PERIOD_LABELS: Record<string, string> = {
+	week: "this week",
+	month: "this month",
+	day: "today",
+};
 
 @Component({
 	selector: "app-overview",
@@ -85,6 +92,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
 			.pipe(takeUntil(this.destroy$))
 			.subscribe({
 				next: (response) => {
+					console.log("Overview data fetched:", response);
 					this.data.set(response);
 					this.loading.set(false);
 					this.cdr.markForCheck();
@@ -113,7 +121,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
 			case "created_chart":
 			case "created_tour_pass":
 			case "created_theme":
-				return "add_circle";
+				return "upload";
 			case "liked_chart":
 			case "liked_tour_pass":
 			case "liked_theme":
@@ -163,5 +171,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
 	getBreakdownPercent(value: number, total: number): number {
 		if (total === 0) return 0;
 		return Math.round((value / total) * 100);
+	}
+
+	formatTrend(trend: TrendIndicatorModel): string {
+		const sign = trend.delta > 0 ? "+" : "";
+		const period = PERIOD_LABELS[trend.period] ?? trend.period;
+		return `${sign}${trend.delta} ${period}`;
 	}
 }
