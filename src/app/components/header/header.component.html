@@ -15,15 +15,15 @@
 		</a>
 
 		<ul class="hidden flex-row items-center justify-center gap-4 md:flex">
-		<li>
-			<a
-				mat-stroked-button
-				[routerLink]="['/dashboard/overview']"
-				[routerLinkActiveOptions]="{ exact: true }"
-				routerLinkActive="!bg-primary !text-on-primary !border-primary"
-				>Overview
-			</a>
-		</li>
+			<li>
+				<a
+					mat-stroked-button
+					[routerLink]="['/dashboard/overview']"
+					[routerLinkActiveOptions]="{ exact: true }"
+					routerLinkActive="!bg-primary !text-on-primary !border-primary"
+					>Overview
+				</a>
+			</li>
 			<li>
 				<a
 					mat-stroked-button
@@ -46,11 +46,41 @@
 		>
 			<button
 				mat-ripple
-				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 opacity-50"
-				(click)="openWarning()"
+				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10"
+				[matMenuTriggerFor]="notificationsMenu"
 			>
 				<ng-glyph name="notifications" size="16" />
 			</button>
+			<mat-menu
+				#notificationsMenu="matMenu"
+				xPosition="before"
+				class="mt-2 w-120 max-w-3/4"
+			>
+				<div
+					class="pl-4 w-full py-3 text-on-surface font-medium text-sm border-b border-b-outline-variant"
+				>
+					Notifications
+				</div>
+				<div class="flex items-center gap-4 px-4 py-3 w-full">
+					<app-avatar
+						[src]="this.user?.avatarUrl"
+						[alt]="this.user?.username"
+					></app-avatar>
+					<div>
+						<p
+							class="text-on-surface hover:underline hover:cursor-pointer"
+						>
+							@oCosmo55 shared a chart (Alien - AViVA) with you
+						</p>
+						<span class="text-sm text-on-surface-variant"
+							>há 2 dias</span
+						>
+					</div>
+					<button mat-icon-button>
+						<ng-glyph name="close" size="16" />
+					</button>
+				</div>
+			</mat-menu>
 
 			<button
 				class="flex flex-row items-center justify-end pl-2 gap-2 bg-secondary-container h-10 rounded-full"
