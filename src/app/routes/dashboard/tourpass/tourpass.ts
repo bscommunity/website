@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from "@angular/core";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
 import { ActivatedRoute, Router, TitleStrategy } from "@angular/router";
 
 // Modules
@@ -19,6 +19,9 @@ import { TourPassModel } from "@/models/tour-pass.model";
 // Providers
 import { TourpassTitleStrategy } from "./tourpass-title.strategy";
 
+// Services
+import { AuthService } from "@/services/auth.service";
+
 @Component({
 	selector: "app-tourpass",
 	imports: [
@@ -36,24 +39,37 @@ import { TourpassTitleStrategy } from "./tourpass-title.strategy";
 export class TourPass implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
+	private authService = inject(AuthService);
 
-	set tourpass(value: TourPassModel) {
-		this._tourpass = value;
-	}
+	readonly tourpass = signal<TourPassModel | null>(null);
 
-	get tourpass(): TourPassModel {
-		return this._tourpass;
-	}
+	readonly isOwner = computed(() => {
+		const t = this.tourpass();
+		if (!t) return false;
+		const currentUserId = this.authService.user?.id;
+		if (!currentUserId) return false;
+		return t.authorId === currentUserId;
+	});
 
-	private _tourpass!: TourPassModel;
+	readonly isContributor = computed(() => {
+		const t = this.tourpass();
+		if (!t) return false;
+		const currentUserId = this.authService.user?.id;
+		if (!currentUserId) return false;
+		if (this.isOwner()) return false;
+		return t.contributors.some(
+			(contrib) => contrib.user.id === currentUserId,
+		);
+	});
 
 	ngOnInit(): void {
 		this.route.params.subscribe(() => {
-			this.tourpass = this.route.snapshot.data["tourpass"];
+			const data = this.route.snapshot.data["tourpass"];
+			this.tourpass.set(data);
 
-			console.log("Tourpass data:", this.tourpass);
+			console.log("Tourpass data:", data);
 
-			if (!this.tourpass) {
+			if (!data) {
 				this.router.navigate(["error"], {
 					state: { error: "Tour pass data is incomplete" },
 				});
@@ -62,6 +78,12 @@ export class TourPass implements OnInit {
 	}
 
 	onTourPassUpdated(updated: TourPassModel) {
-		this.tourpass = updated;
+		this.tourpass.set(updated);
+	}
+
+	onChartsChanged(charts: import("@/models/chart.model").ChartModel[]) {
+		this.tourpass.update((tp) =>
+			tp ? { ...tp, charts } : tp,
+		);
 	}
 }

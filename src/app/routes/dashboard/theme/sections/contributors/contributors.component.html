@@ -3,15 +3,17 @@
 		class="w-full"
 		[columns]="contributorsColumns"
 		[data]="groupedContributors()"
-		[actions]="contributorsActions"
+		[actions]="isOwner() ? contributorsActions : []"
 	 />
-	<span class="flex items-center justify-end w-full">
-		<button
-			mat-stroked-button
-			(click)="openAddContributorConfirmationDialog()"
-		>
-			<ng-glyph name="add" />
-			Add new contributor
-		</button>
-	</span>
+	@if (isOwner()) {
+		<span class="flex items-center justify-end w-full">
+			<button
+				mat-stroked-button
+				(click)="openAddContributorConfirmationDialog()"
+			>
+				<ng-glyph name="add" />
+				Add new contributor
+			</button>
+		</span>
+	}
 </app-chart-section>

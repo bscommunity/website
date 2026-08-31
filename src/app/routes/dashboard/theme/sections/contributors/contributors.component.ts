@@ -53,6 +53,7 @@ interface GroupedContributor {
 export class ContributorsSectionComponent {
 	readonly themeId = input<string>("");
 	readonly contributors = input<ContributorModel[] | undefined>([]);
+	readonly isOwner = input<boolean>(true);
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);

@@ -48,6 +48,7 @@
 				class="w-full"
 				[themeId]="theme()!.id"
 				[contributors]="theme()!.contributors"
+				[isOwner]="isOwner()"
 			></app-theme-contributors-section>
 
 			<!-- Versions section -->
@@ -63,6 +64,8 @@
 				class="w-full"
 				[themeId]="theme()!.id"
 				[themeName]="theme()!.name"
+				[isOwner]="isOwner()"
+				[isContributor]="isContributor()"
 			></app-theme-danger-zone-section>
 		</div>
 	</main>

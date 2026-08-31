@@ -134,6 +134,10 @@ ng-glyph .mdc-icon-button {
 	gap: 1rem;
 }
 
+.mdc-tab-indicator__content {
+	border-radius: 0.25rem 0.25rem 0 0 !important;
+}
+
 .mdc-label {
 	margin-right: 0.5rem !important;
 }

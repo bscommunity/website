@@ -46,10 +46,17 @@
 		>
 			<button
 				mat-ripple
-				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10"
+				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 relative"
 				[matMenuTriggerFor]="notificationsMenu"
 			>
 				<ng-glyph name="notifications" size="16" />
+				@if (unreadCount > 0) {
+					<span
+						class="absolute -top-1 -right-1 flex items-center justify-center bg-error text-on-error text-[10px] font-medium rounded-full min-w-[18px] h-[18px] px-1"
+					>
+						{{ unreadCount > 99 ? '99+' : unreadCount }}
+					</span>
+				}
 			</button>
 			<mat-menu
 				#notificationsMenu="matMenu"
@@ -57,29 +64,46 @@
 				class="mt-2 w-120 max-w-3/4"
 			>
 				<div
-					class="pl-4 w-full py-3 text-on-surface font-medium text-sm border-b border-b-outline-variant"
+					class="flex items-center justify-between pl-4 w-full py-3 text-on-surface font-medium text-sm border-b border-b-outline-variant"
 				>
-					Notifications
+					<span>Notifications</span>
+					@if (notifications.length > 0) {
+						<button
+							mat-menu-item
+							(click)="markAllAsRead()"
+							class="text-xs!"
+						>
+							Clear all
+						</button>
+					}
 				</div>
-				<div class="flex items-center gap-4 px-4 py-3 w-full">
-					<app-avatar
-						[src]="this.user?.avatarUrl"
-						[alt]="this.user?.username"
-					></app-avatar>
-					<div>
-						<p
-							class="text-on-surface hover:underline hover:cursor-pointer"
-						>
-							@oCosmo55 shared a chart (Alien - AViVA) with you
-						</p>
-						<span class="text-sm text-on-surface-variant"
-							>há 2 dias</span
-						>
+				@if (notifications.length === 0) {
+					<div class="flex flex-col items-center justify-center py-8 text-on-surface-variant text-sm">
+						<ng-glyph name="notifications_none" size="32" class="mb-2 opacity-50" />
+						<p>No notifications yet</p>
 					</div>
-					<button mat-icon-button>
-						<ng-glyph name="close" size="16" />
-					</button>
-				</div>
+				}
+				@for (notification of notifications; track notification.id) {
+					<div class="flex items-center gap-4 px-4 py-3 w-full">
+						<app-avatar
+							[src]="notification.actor.avatarUrl"
+							[alt]="notification.actor.username"
+						></app-avatar>
+						<div class="flex-1 min-w-0">
+							<p
+								class="text-on-surface hover:underline hover:cursor-pointer"
+							>
+								{{ notification.message }}
+							</p>
+							<span class="text-sm text-on-surface-variant"
+								>{{ convertDateTimeToHumanReadable(notification.createdAt) }}</span
+							>
+						</div>
+						<button mat-icon-button (click)="deleteNotification(notification.id, $event)">
+							<ng-glyph name="close" size="16" />
+						</button>
+					</div>
+				}
 			</mat-menu>
 
 			<button

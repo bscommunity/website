@@ -12,6 +12,10 @@ import type { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
 import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
+import type {
+	NotificationModel,
+	NotificationsResponse,
+} from "@/models/notification.model";
 
 import { apiUrl } from "@/lib/api";
 import type { QueryPage } from "../cache.service";
@@ -89,6 +93,7 @@ export class UserService {
 
 	getMyUploads(
 		params: {
+			view?: "owned" | "shared";
 			types?: string;
 			query?: string;
 			sortBy?: string;
@@ -101,6 +106,7 @@ export class UserService {
 		} = {},
 	): Observable<QueryPage<CatalogItemModel>> {
 		const httpParams: Record<string, string | number> = {};
+		if (params.view) httpParams["view"] = params.view;
 		if (params.types) httpParams["types"] = params.types;
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
@@ -158,6 +164,7 @@ export class UserService {
 		params: Record<string, string | number>,
 	): string {
 		const parts = [
+			params["view"] || "owned",
 			params["types"] || "all",
 			params["query"] || "",
 			params["sortBy"] || "",
@@ -271,5 +278,41 @@ export class UserService {
 		return this.http.delete(`${this.apiUrl}/${userId}/follow`, {
 			responseType: "text",
 		});
+	}
+
+	// ---------------------------------------------------------------------------
+	// Notifications
+	// ---------------------------------------------------------------------------
+
+	getNotifications(
+		params: { limit?: number; offset?: number } = {},
+	): Observable<NotificationsResponse> {
+		const httpParams: Record<string, number> = {};
+		if (params.limit !== undefined) httpParams["limit"] = params.limit;
+		if (params.offset !== undefined) httpParams["offset"] = params.offset;
+
+		return this.http.get<NotificationsResponse>(
+			`${this.meUrl}/notifications`,
+			{ params: httpParams },
+		);
+	}
+
+	getUnreadNotificationCount(): Observable<{ unreadCount: number }> {
+		return this.http.get<{ unreadCount: number }>(
+			`${this.meUrl}/notifications/unread-count`,
+		);
+	}
+
+	deleteNotification(id: number): Observable<void> {
+		return this.http.delete<void>(
+			`${this.meUrl}/notifications/${id}`,
+		);
+	}
+
+	markAllNotificationsRead(): Observable<{ deleted: number }> {
+		return this.http.post<{ deleted: number }>(
+			`${this.meUrl}/notifications/read-all`,
+			null,
+		);
 	}
 }

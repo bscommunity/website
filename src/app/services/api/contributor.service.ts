@@ -135,4 +135,24 @@ export class ContributorService {
 			return false;
 		}
 	}
+
+	// Self-removal
+	async removeSelfAsContributor(catalogItemId: string): Promise<boolean> {
+		console.log("Removing self as contributor from", catalogItemId);
+
+		try {
+			await firstValueFrom(
+				this.http.delete<void>(`${this.apiUrl}/${catalogItemId}/self`),
+			);
+
+			this.updateCachedContributors(catalogItemId, (currentContributors) =>
+				currentContributors,
+			);
+
+			return true;
+		} catch (error) {
+			console.error("Failed to remove self as contributor:", error);
+			return false;
+		}
+	}
 }

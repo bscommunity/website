@@ -52,6 +52,7 @@ interface GroupedContributor {
 export class ContributorsComponent {
 	readonly chartId = input<string>("");
 	readonly contributors = input<ContributorModel[] | undefined>([]);
+	readonly isOwner = input<boolean>(true);
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);

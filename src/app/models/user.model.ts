@@ -8,6 +8,8 @@ import { UserRole } from "./enums/role.enum";
 import { Badge } from "./badge.model";
 import type { ChartModel } from "./chart.model";
 
+export type ContributorInvitePolicy = "EVERYONE" | "FOLLOWING" | "NOBODY";
+
 export const User = z.object({
 	id: z.string(),
 	username: z.string(),
@@ -25,6 +27,10 @@ export const User = z.object({
 	followerCount: z.number().int(),
 	followingCount: z.number().int(),
 	badges: z.array(Badge).optional().nullable(),
+	allowContributorInvitesFrom: z
+		.enum(["EVERYONE", "FOLLOWING", "NOBODY"])
+		.default("EVERYONE")
+		.optional(),
 });
 
 export type UserModel = z.infer<typeof User>;

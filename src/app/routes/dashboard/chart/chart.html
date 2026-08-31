@@ -60,6 +60,7 @@
 				class="w-full"
 				[chartId]="chart()!.id"
 				[contributors]="chart()!.contributors"
+				[isOwner]="isOwner()"
 			></app-chart-contributors-section>
 			<app-chart-versions-section
 				#versionsSection
@@ -74,6 +75,8 @@
 				[chartId]="chart()!.id"
 				[chartName]="chart()!.track.title"
 				[visibility]="chart()!.visibility"
+				[isOwner]="isOwner()"
+				[isContributor]="isContributor()"
 				(visibilityChanged)="onVisibilityChanged($event)"
 			></app-chart-danger-zone-section>
 		</div>
