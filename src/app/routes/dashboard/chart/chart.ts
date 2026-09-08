@@ -85,15 +85,14 @@ export class Chart implements OnInit {
 		this.route.params.subscribe(() => {
 			const data = this.route.snapshot.data["chart"];
 			this.chart.set(data);
-			console.warn("Chart data", data);
 
 			this.tourPassId.set(history.state?.tourPassId ?? null);
 
-			if (!data.contributors) {
-				console.error("Chart data is incomplete", data);
+			if (!data) {
 				this.router.navigate(["error"], {
 					state: { error: "Chart data is incomplete" },
 				});
+				return;
 			}
 
 			if (data.difficulty) {

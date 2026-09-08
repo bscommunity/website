@@ -138,6 +138,8 @@ export class ContributorSearchComponent {
 
 		this.userService.searchUsers(value).subscribe({
 			next: (response) => {
+				console.log("Fetched users:", response);
+
 				const filtered = response.filter(
 					(user) =>
 						user.username !== this.username &&
@@ -148,6 +150,8 @@ export class ContributorSearchComponent {
 				for (const user of filtered) {
 					this.userLookup.set(user.username, user);
 				}
+
+				console.log("Filtered users:", filtered);
 
 				this.queryResults.set(filtered);
 			},

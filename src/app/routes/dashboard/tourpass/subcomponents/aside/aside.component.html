@@ -1,13 +1,15 @@
 <aside class="flex flex-col items-start justify-start gap-6 w-full">
 	<!-- Actions -->
 	<app-aside-section class="w-full">
-		<app-aside-container
-			class="w-full cursor-pointer"
-			asideContainerClass="hover:bg-surface-container-high transition-colors"
-			icon="edit"
-			info="Edit tour pass"
-			(click)="openEditDialog()"
-		></app-aside-container>
+		@if (isOwner()) {
+			<app-aside-container
+				class="w-full cursor-pointer"
+				asideContainerClass="hover:bg-surface-container-high transition-colors"
+				icon="edit"
+				info="Edit tour pass"
+				(click)="openEditDialog()"
+			></app-aside-container>
+		}
 		<app-aside-container
 			class="w-full cursor-pointer flex md:hidden"
 			asideContainerClass="hover:bg-surface-container-high transition-colors"

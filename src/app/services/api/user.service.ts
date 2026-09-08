@@ -15,7 +15,6 @@ import type { CatalogItemModel } from "@/models/catalog-item.model";
 import type {
 	NotificationModel,
 	NotificationsResponse,
-	UnreadCountResponse,
 	DeleteAllResponse,
 } from "@/models/notification.model";
 
@@ -296,12 +295,6 @@ export class UserService {
 		return this.http.get<NotificationsResponse>(
 			`${this.meUrl}/notifications`,
 			{ params: httpParams },
-		);
-	}
-
-	getUnreadNotificationCount(): Observable<UnreadCountResponse> {
-		return this.http.get<UnreadCountResponse>(
-			`${this.meUrl}/notifications/unread-count`,
 		);
 	}
 

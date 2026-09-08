@@ -1,10 +1,11 @@
-@if (chart() && chart()!.latestVersion && chart()!.contributors) {
+@if (chart() && chart()!.contributors) {
 	<main
 		class="flex flex-col md:flex-row items-start justify-center w-full min-h-[calc(100vh-7rem)] px-wrapper pt-9 pb-14 gap-9 md:gap-16 relative"
 	>
 		<!-- Desktop aside -->
 		<app-aside
 			[chart]="chart()!"
+			[isOwner]="isOwner()"
 			(chartUpdated)="onChartUpdated($event)"
 			class="hidden md:flex md:sticky md:top-8"
 		>
@@ -51,6 +52,7 @@
 			<!-- Mobile "aside" -->
 			<app-aside
 				[chart]="chart()!"
+				[isOwner]="isOwner()"
 				(chartUpdated)="onChartUpdated($event)"
 				class="flex w-full md:hidden"
 			>
@@ -67,7 +69,12 @@
 				class="w-full"
 				[chartId]="chart()!.id"
 				[chart]="chart()!"
-				[versions]="chart()!.versions"
+				[versions]="
+					chart()!.versions.length > 0
+						? chart()!.versions
+						: [chart()!.latestVersion]
+				"
+				[isOwner]="isOwner()"
 			></app-chart-versions-section>
 			<app-chart-danger-zone-section
 				#dangerZoneSection

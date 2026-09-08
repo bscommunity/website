@@ -55,6 +55,7 @@ export class VersionsComponent {
 	readonly chartId = input.required<string>();
 	readonly chart = input<any>(undefined);
 	readonly versions = input<VersionModel[]>([]);
+	readonly isOwner = input<boolean>(false);
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
@@ -92,45 +93,47 @@ export class VersionsComponent {
 		},
 	];
 
-	versionsActions = computed<Action<VersionModel>[]>(() => [
-		{
-			description: "Download",
-			icon: "download",
-			callback: () => {
-				this.downloadBundle();
+	versionsActions = computed<Action<VersionModel>[]>(() => {
+		if (!this.isOwner()) return [];
+		return [
+			{
+				description: "Download",
+				icon: "download",
+				callback: () => {
+					this.downloadBundle();
+				},
+				disabled: () => this.isFetchingBundle(),
+				loading: () => this.isFetchingBundle(),
 			},
-			disabled: () => this.isFetchingBundle(),
-			loading: () => this.isFetchingBundle(),
-		},
-		{
-			description: "Switch version",
-			icon: "swap_horiz",
-			callback: () => {
-				this.openSnackBar("Not implemented yet.", "Close");
+			{
+				description: "Switch version",
+				icon: "swap_horiz",
+				callback: () => {
+					this.openSnackBar("Not implemented yet.", "Close");
+				},
+				disabled: (index, item) => {
+					const versions = this.currentVersions();
+					return (
+						versions.length === 0 ||
+						item.id === versions[versions.length - 1].id
+					);
+				},
 			},
-			disabled: (index, item) => {
-				const versions = this.currentVersions();
-				return (
-					versions.length === 0 ||
-					item.id === versions[versions.length - 1].id
-				);
+			{
+				description: "Delete version",
+				icon: "delete_forever",
+				callback: this.openRemoveVersionDialog.bind(this),
+				disabled: (_, item) => {
+					const versions = this.currentVersions();
+					return (
+						versions.length === 0 ||
+						item.id !== versions[versions.length - 1].id ||
+						item.versionCode <= 1
+					);
+				},
 			},
-		},
-		{
-			description: "Delete version",
-			icon: "delete_forever",
-			callback: this.openRemoveVersionDialog.bind(this),
-			// We only allow deleting the latest version (except for the first version)
-			disabled: (_, item) => {
-				const versions = this.currentVersions();
-				return (
-					versions.length === 0 ||
-					item.id !== versions[versions.length - 1].id ||
-					item.versionCode <= 1
-				);
-			},
-		},
-	]);
+		];
+	});
 
 	openSnackBar(message: string, action: string) {
 		this._snackBar.open(message, action);

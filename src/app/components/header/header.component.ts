@@ -3,7 +3,6 @@ import {
 	Component,
 	inject,
 	OnInit,
-	OnDestroy,
 } from "@angular/core";
 
 import { RouterLink, RouterLinkActive } from "@angular/router";
@@ -32,8 +31,6 @@ import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.h
 import { TourPassPublishHandler } from "@/services/publish/handlers/tourpass-publish.handler";
 import { ThemePublishHandler } from "@/services/publish/handlers/theme-publish.handler";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
-import { Subject, interval } from "rxjs";
-import { takeUntil, switchMap } from "rxjs/operators";
 
 @Component({
 	selector: "app-header",
@@ -50,7 +47,7 @@ import { takeUntil, switchMap } from "rxjs/operators";
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
 	private userService = inject(UserService);
 	private chartPublishHandler = inject(ChartPublishHandler);
@@ -59,8 +56,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
-
-	private destroy$ = new Subject<void>();
 
 	user: UserModel | null = null;
 	notifications: NotificationModel[] = [];
@@ -81,24 +76,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 		);
 
 		this.loadNotifications();
-
-		// Poll for unread count every 30 seconds
-		interval(30000)
-			.pipe(
-				takeUntil(this.destroy$),
-				switchMap(() => this.userService.getUnreadNotificationCount()),
-			)
-			.subscribe({
-				next: (res) => {
-					this.unreadCount = res.unreadCount;
-				},
-				error: () => {},
-			});
-	}
-
-	ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	loadNotifications() {
@@ -115,7 +92,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 		event.stopPropagation();
 		this.userService.deleteNotification(id).subscribe({
 			next: () => {
-				this.notifications = this.notifications.filter((n) => n.id !== id);
+				this.notifications = this.notifications.filter(
+					(n) => n.id !== id,
+				);
 				this.unreadCount = Math.max(0, this.unreadCount - 1);
 			},
 			error: () => {},
@@ -148,6 +127,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
 			horizontalPosition: "right",
 			verticalPosition: "bottom",
 		});
+	} */
+
+	/* redirectFromNotification(notification: NotificationModel) {
+		if (notification.catalogItemId) {
+			switch (notification.type) {
+				case "CONTRIBUTOR_ADDED":
+					window.location.href = `/chart/${notification.catalogItemId}`;
+					break;
+				default:
+					window.location.href = `/${notification.type}/${notification.catalogItemId}`;
+					break;
+			}
+		}
 	} */
 
 	openUploadDialog() {

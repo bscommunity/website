@@ -38,7 +38,7 @@ export const Theme = z.object({
 
 	versionsCount: z.number().int().default(0),
 	versions: z.array(Version).default([]),
-	latestVersion: Version.nullable().optional(),
+	latestVersion: Version,
 });
 
 export type ThemeModel = z.infer<typeof Theme>;

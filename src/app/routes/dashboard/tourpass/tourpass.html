@@ -5,6 +5,7 @@
 		<!-- Desktop aside -->
 		<app-aside
 			[tourpass]="tourpass()!"
+			[isOwner]="isOwner()"
 			(tourPassUpdated)="onTourPassUpdated($event)"
 			class="hidden md:flex md:sticky md:top-8 md:w-72 xl:w-96"
 		></app-aside>
@@ -35,20 +36,22 @@
 				</div>
 			</div>
 
-			<!-- Mobile aside -->
-			<app-aside
-				[tourpass]="tourpass()!"
-				(tourPassUpdated)="onTourPassUpdated($event)"
-				class="flex w-full md:hidden"
-			></app-aside>
+		<!-- Mobile aside -->
+		<app-aside
+			[tourpass]="tourpass()!"
+			[isOwner]="isOwner()"
+			(tourPassUpdated)="onTourPassUpdated($event)"
+			class="flex w-full md:hidden"
+		></app-aside>
 
-			<!-- Tracks section -->
-			<app-tourpass-tracks-section
-				class="w-full"
-				[tourPassId]="tourpass()!.id"
-				[charts]="tourpass()!.charts"
-				(chartsChanged)="onChartsChanged($event)"
-			></app-tourpass-tracks-section>
+		<!-- Tracks section -->
+		<app-tourpass-tracks-section
+			class="w-full"
+			[tourPassId]="tourpass()!.id"
+			[charts]="tourpass()!.charts"
+			[isOwner]="isOwner()"
+			(chartsChanged)="onChartsChanged($event)"
+		></app-tourpass-tracks-section>
 
 			<!-- Danger Zone -->
 			<app-tourpass-danger-zone-section

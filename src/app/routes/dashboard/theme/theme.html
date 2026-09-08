@@ -5,6 +5,7 @@
 		<!-- Desktop aside -->
 		<app-aside
 			[theme]="theme()!"
+			[isOwner]="isOwner()"
 			(themeUpdated)="onThemeUpdated($event)"
 			[replacesName]="replacesName()"
 			class="hidden md:flex md:sticky md:top-8 md:w-72 xl:w-90"
@@ -33,6 +34,7 @@
 			<!-- Mobile aside -->
 			<app-aside
 				[theme]="theme()!"
+				[isOwner]="isOwner()"
 				(themeUpdated)="onThemeUpdated($event)"
 				class="flex w-full md:hidden"
 			></app-aside>
@@ -56,7 +58,12 @@
 				class="w-full"
 				[themeId]="theme()!.id"
 				[theme]="theme()!"
-				[versions]="theme()!.versions"
+				[versions]="
+					theme()!.versions.length > 0
+						? theme()!.versions
+						: [theme()!.latestVersion]
+				"
+				[isOwner]="isOwner()"
 			></app-theme-versions-section>
 
 			<!-- Danger Zone -->

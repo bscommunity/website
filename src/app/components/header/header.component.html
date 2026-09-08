@@ -44,42 +44,49 @@
 		<div
 			class="flex flex-row items-center justify-end gap-2 md:gap-4 min-w-40"
 		>
-			<button
-				mat-ripple
-				class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 relative"
-				[matMenuTriggerFor]="notificationsMenu"
-			>
-				<ng-glyph name="notifications" size="16" />
+			<div class="relative">
+				<button
+					mat-ripple
+					class="flex items-center justify-center aspect-square rounded-full bg-secondary-container h-10 relative"
+					[matMenuTriggerFor]="notificationsMenu"
+				>
+					<ng-glyph name="notifications" size="16" />
+				</button>
 				@if (unreadCount > 0) {
 					<span
-						class="absolute -top-1 -right-1 flex items-center justify-center bg-error text-on-error text-[10px] font-medium rounded-full min-w-[18px] h-[18px] px-1"
+						class="absolute -top-1 -right-1 flex items-center justify-center bg-error text-on-error text-[10px] font-medium rounded-full min-w-4.5 h-4.5 px-1"
 					>
-						{{ unreadCount > 99 ? '99+' : unreadCount }}
+						{{ unreadCount > 99 ? "99+" : unreadCount }}
 					</span>
 				}
-			</button>
+			</div>
 			<mat-menu
 				#notificationsMenu="matMenu"
 				xPosition="before"
 				class="mt-2 w-120 max-w-3/4"
 			>
 				<div
-					class="flex items-center justify-between pl-4 w-full py-3 text-on-surface font-medium text-sm border-b border-b-outline-variant"
+					class="flex items-center justify-between px-4 w-full py-3 text-on-surface font-medium text-sm border-b border-b-outline-variant"
 				>
 					<span>Notifications</span>
 					@if (notifications.length > 0) {
 						<button
-							mat-menu-item
 							(click)="markAllAsRead()"
-							class="text-xs!"
+							class="text-xs text-on-surface-variant hover:underline"
 						>
 							Clear all
 						</button>
 					}
 				</div>
 				@if (notifications.length === 0) {
-					<div class="flex flex-col items-center justify-center py-8 text-on-surface-variant text-sm">
-						<ng-glyph name="notifications_none" size="32" class="mb-2 opacity-50" />
+					<div
+						class="flex flex-col items-center justify-center py-8 text-on-surface-variant text-sm"
+					>
+						<ng-glyph
+							name="notifications_none"
+							size="32"
+							class="mb-2 opacity-50"
+						/>
 						<p>No notifications yet</p>
 					</div>
 				}
@@ -95,11 +102,18 @@
 							>
 								{{ notification.message }}
 							</p>
-							<span class="text-sm text-on-surface-variant"
-								>{{ convertDateTimeToHumanReadable(notification.createdAt) }}</span
-							>
+							<span class="text-sm text-on-surface-variant">{{
+								convertDateTimeToHumanReadable(
+									notification.createdAt
+								)
+							}}</span>
 						</div>
-						<button mat-icon-button (click)="deleteNotification(notification.id, $event)">
+						<button
+							mat-icon-button
+							(click)="
+								deleteNotification(notification.id, $event)
+							"
+						>
 							<ng-glyph name="close" size="16" />
 						</button>
 					</div>
