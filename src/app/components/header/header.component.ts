@@ -145,7 +145,10 @@ export class HeaderComponent implements OnInit {
 		if (typeof type !== "string") return "You have a new notification";
 
 		const handler = (
-			NOTIFICATION_MESSAGES as Record<string, ((msg: never) => string) | undefined>
+			NOTIFICATION_MESSAGES as Record<
+				string,
+				((msg: never) => string) | undefined
+			>
 		)[type];
 		if (!handler) return "You have a new notification";
 
@@ -167,25 +170,25 @@ export class HeaderComponent implements OnInit {
 		);
 	}
 
-	/* openProfile() {
-		this._snackBar.open("Profile page is not implemented yet!", "Ok", {
-			horizontalPosition: "right",
-			verticalPosition: "bottom",
-		});
-	} */
-
-	/* redirectFromNotification(notification: NotificationModel) {
+	redirectFromNotification(notification: NotificationModel) {
 		if (notification.catalogItemId) {
 			switch (notification.type) {
 				case "CONTRIBUTOR_ADDED":
-					window.location.href = `/chart/${notification.catalogItemId}`;
-					break;
-				default:
-					window.location.href = `/${notification.type}/${notification.catalogItemId}`;
+					switch (notification.message.itemType) {
+						case "CHART":
+							window.location.href = `/dashboard/chart/${notification.catalogItemId}`;
+							break;
+						case "TOURPASS":
+							window.location.href = `/dashboard/tourpass/${notification.catalogItemId}`;
+							break;
+						case "THEME":
+							window.location.href = `/dashboard/theme/${notification.catalogItemId}`;
+							break;
+					}
 					break;
 			}
 		}
-	} */
+	}
 
 	openUploadDialog() {
 		this.uploadDialog.open();

@@ -98,9 +98,14 @@
 						></app-avatar>
 						<div class="flex-1 min-w-0">
 							<p
+								(click)="redirectFromNotification(notification)"
 								class="text-on-surface hover:underline hover:cursor-pointer"
 							>
-								{{ renderNotificationMessage(notification.message) }}
+								{{
+									renderNotificationMessage(
+										notification.message
+									)
+								}}
 							</p>
 							<span class="text-sm text-on-surface-variant">{{
 								convertDateTimeToHumanReadable(
