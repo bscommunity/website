@@ -16,6 +16,7 @@ import { PageError } from "../../error/error";
 
 // Models
 import { ThemeModel } from "@/models/theme.model";
+import { ContributorModel } from "@/models/contributor.model";
 
 // Providers
 import { ThemeTitleStrategy } from "./theme-title.strategy";
@@ -88,5 +89,9 @@ export class Theme implements OnInit {
 
 	onThemeUpdated(updated: ThemeModel) {
 		this.theme.set(updated);
+	}
+
+	onContributorsChanged(contributors: ContributorModel[]) {
+		this.theme.update((t) => (t ? { ...t, contributors } : t));
 	}
 }

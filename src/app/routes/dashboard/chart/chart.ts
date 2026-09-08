@@ -20,6 +20,7 @@ import { PageError } from "../../error/error";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
+import { ContributorModel } from "@/models/contributor.model";
 import { ContributorRole } from "@/models/enums/role.enum";
 import { VersionsComponent } from "./sections/versions/versions.component";
 
@@ -111,5 +112,9 @@ export class Chart implements OnInit {
 
 	onVisibilityChanged(visibility: Visibility) {
 		this.chart.update((c) => (c ? { ...c, visibility } : c));
+	}
+
+	onContributorsChanged(contributors: ContributorModel[]) {
+		this.chart.update((c) => (c ? { ...c, contributors } : c));
 	}
 }

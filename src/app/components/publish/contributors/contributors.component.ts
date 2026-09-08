@@ -55,7 +55,6 @@ interface ContributorsDialogData extends DialogData {
 				[users]="poolUsers()"
 				[roles]="roles"
 				[availableRoles]="availableRoles"
-				[canRemove]="true"
 				(userRemoved)="removeContributor($event)"
 				[emptyMessage]="'No contributors added yet.
 Search for users above to add them.'"

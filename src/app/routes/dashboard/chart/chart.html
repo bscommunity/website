@@ -63,6 +63,7 @@
 				[chartId]="chart()!.id"
 				[contributors]="chart()!.contributors"
 				[isOwner]="isOwner()"
+				(contributorsChanged)="onContributorsChanged($event)"
 			></app-chart-contributors-section>
 			<app-chart-versions-section
 				#versionsSection

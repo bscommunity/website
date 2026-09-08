@@ -1,4 +1,12 @@
-import { Component, computed, inject, input, viewChild } from "@angular/core";
+import {
+	Component,
+	computed,
+	effect,
+	inject,
+	input,
+	output,
+	signal,
+} from "@angular/core";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
@@ -20,9 +28,11 @@ import { EditContributorDialogComponent } from "../../../chart/dialogs/edit-cont
 
 // Services
 import { ContributorService } from "@/services/api/contributor.service";
+import { CacheService } from "@/services/cache.service";
 
 // Models
 import { ContributorModel } from "@/models/contributor.model";
+import { ThemeModel } from "@/models/theme.model";
 import { SimplifiedUserModel } from "@/models/user.model";
 import {
 	ContributorRole,
@@ -36,6 +46,31 @@ interface GroupedContributor {
 	catalogItemId: string;
 	joinedAt: Date;
 	isOwner: boolean;
+}
+
+function groupContributors(list: ContributorModel[]): GroupedContributor[] {
+	const userMap = new Map<string, GroupedContributor>();
+
+	for (const c of list) {
+		const existing = userMap.get(c.user.id);
+		if (existing) {
+			existing.roles.push(c.role);
+		} else {
+			userMap.set(c.user.id, {
+				user: c.user,
+				roles: [c.role],
+				catalogItemId: c.catalogItemId,
+				joinedAt: c.joinedAt,
+				isOwner: c.role === ContributorRole.AUTHOR,
+			});
+		}
+	}
+
+	return Array.from(userMap.values()).sort((a, b) => {
+		if (a.isOwner && !b.isOwner) return -1;
+		if (!a.isOwner && b.isOwner) return 1;
+		return a.user.username.localeCompare(b.user.username);
+	});
 }
 
 @Component({
@@ -55,54 +90,54 @@ export class ContributorsSectionComponent {
 	readonly contributors = input<ContributorModel[] | undefined>([]);
 	readonly isOwner = input<boolean>(true);
 
+	readonly contributorsChanged = output<ContributorModel[]>();
+
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
 	readonly contributorService = inject(ContributorService);
+	private cacheService = inject(CacheService);
 
-	readonly contributorTable =
-		viewChild.required<TableComponent<GroupedContributor>>(
-			"contributorTable",
-		);
+	/**
+	 * Local source of truth for the table. Mirrors the `contributors`
+	 * input but is updated immediately after every mutation so the
+	 * table and the add-dialog exclusion list stay in sync without a
+	 * page reload. See the chart contributors section for details.
+	 */
+	readonly currentContributors = signal<ContributorModel[]>([]);
 
-	readonly groupedContributors = computed(() => {
-		const list = this.contributors();
-		if (!list) return [];
-
-		const userMap = new Map<string, GroupedContributor>();
-
-		for (const c of list) {
-			const existing = userMap.get(c.user.id);
-			if (existing) {
-				existing.roles.push(c.role);
-			} else {
-				userMap.set(c.user.id, {
-					user: c.user,
-					roles: [c.role],
-					catalogItemId: c.catalogItemId,
-					joinedAt: c.joinedAt,
-					isOwner: c.role === ContributorRole.AUTHOR,
-				});
-			}
-		}
-
-		return Array.from(userMap.values()).sort((a, b) => {
-			if (a.isOwner && !b.isOwner) return -1;
-			if (!a.isOwner && b.isOwner) return 1;
-			return a.user.username.localeCompare(b.user.username);
-		});
+	private readonly _contributorsSync = effect(() => {
+		this.currentContributors.set(this.contributors() ?? []);
 	});
 
+	readonly groupedContributors = computed(() =>
+		groupContributors(this.currentContributors()),
+	);
+
+	private syncFromCache(): void {
+		const updated = this.cacheService.getEntity<ThemeModel>(
+			"theme",
+			this.themeId(),
+		);
+		if (!updated) return;
+		this.currentContributors.set(updated.contributors ?? []);
+		this.contributorsChanged.emit(updated.contributors ?? []);
+	}
+
 	openAddContributorConfirmationDialog(): void {
-		const contributors = this.contributors();
-		this.dialog.open(AddContributorDialogComponent, {
+		const dialogRef = this.dialog.open(AddContributorDialogComponent, {
 			data: {
 				chartId: this.themeId(),
-				usersIds: contributors
-					? contributors.map((contributor) => contributor.user.id)
-					: [],
+				usersIds: this.currentContributors().map(
+					(contributor) => contributor.user.id,
+				),
 				availableRoles: THEME_CONTRIBUTOR_ROLES,
 			},
 			width: "450px",
+		});
+
+		dialogRef.afterClosed().subscribe((result) => {
+			if (!result) return;
+			this.syncFromCache();
 		});
 	}
 
@@ -110,7 +145,7 @@ export class ContributorsSectionComponent {
 		_: number,
 		contributor: GroupedContributor,
 	): void {
-		this.dialog.open(EditContributorDialogComponent, {
+		const dialogRef = this.dialog.open(EditContributorDialogComponent, {
 			data: {
 				chartId: this.themeId(),
 				user: contributor.user,
@@ -118,6 +153,11 @@ export class ContributorsSectionComponent {
 				availableRoles: THEME_CONTRIBUTOR_ROLES,
 			},
 			width: "450px",
+		});
+
+		dialogRef.afterClosed().subscribe((result) => {
+			if (!result) return;
+			this.syncFromCache();
 		});
 	}
 
@@ -131,11 +171,11 @@ export class ContributorsSectionComponent {
 				contributor.user.id,
 			);
 
-			this.contributorTable().removeData(contributor);
-
 			if (!result) {
 				throw new Error("An error occurred");
 			}
+
+			this.syncFromCache();
 		};
 
 		this.dialog.open(ConfirmationDialogComponent, {

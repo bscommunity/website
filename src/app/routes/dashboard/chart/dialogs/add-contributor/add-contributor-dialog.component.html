@@ -1,5 +1,5 @@
 <h2 mat-dialog-title>Add contributor</h2>
-<mat-dialog-content class="!flex flex-col gap-4">
+<mat-dialog-content class="flex! flex-col gap-4">
 	<p>Tag some creators to add them to your chart credits</p>
 	<app-contributor-search
 		[existingUserIds]="[...data.usersIds, ...poolUsers().map((u) => u.id)]"
@@ -9,7 +9,7 @@
 		[users]="poolUsers()"
 		[roles]="roles"
 		[availableRoles]="availableRoles"
-		[canRemove]="true"
+		[disabled]="isLoading()"
 		(userRemoved)="removeContributor($event)"
 	/>
 </mat-dialog-content>

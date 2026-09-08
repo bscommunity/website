@@ -80,17 +80,15 @@ export class EditContributorDialogComponent {
 			this.isLoading.update(() => true);
 
 			const selectedRoles = this.roles().get(this.data.user.id) || [];
-			await this.contributorService.updateContributor(
+			const updated = await this.contributorService.updateContributor(
 				this.data.chartId,
 				this.data.user.id,
 				selectedRoles,
 			);
 
-			this.dialogRef.close();
+			this.dialogRef.close(updated);
 
-			window.location.reload();
-
-			console.log("Updated contributor. Now reloading page...");
+			console.log("Updated contributor.");
 		} catch (error) {
 			console.error(error);
 			this._matSnackBar.open("Failed to update contributor", "Close", {

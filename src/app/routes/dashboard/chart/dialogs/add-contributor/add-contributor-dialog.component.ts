@@ -89,7 +89,7 @@ export class AddContributorDialogComponent {
 		try {
 			this.isLoading.update(() => true);
 
-			await this.contributorService.addContributors(
+			const added = await this.contributorService.addContributors(
 				this.data.chartId,
 				this.poolUsers().flatMap((user) =>
 					(this.roles().get(user.id) || []).map((role) => ({
@@ -99,7 +99,7 @@ export class AddContributorDialogComponent {
 				),
 			);
 
-			this.dialogRef.close();
+			this.dialogRef.close(added);
 
 			console.log("Contributors added successfully");
 		} catch (error) {

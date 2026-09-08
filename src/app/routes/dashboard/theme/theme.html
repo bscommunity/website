@@ -51,6 +51,7 @@
 				[themeId]="theme()!.id"
 				[contributors]="theme()!.contributors"
 				[isOwner]="isOwner()"
+				(contributorsChanged)="onContributorsChanged($event)"
 			></app-theme-contributors-section>
 
 			<!-- Versions section -->

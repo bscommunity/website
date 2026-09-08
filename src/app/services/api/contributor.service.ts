@@ -55,7 +55,7 @@ export class ContributorService {
 	async addContributors(
 		chartId: string,
 		contributors: SimplifiedContributorModel[],
-	): Promise<void> {
+	): Promise<ContributorModel[]> {
 		console.log(`Adding ${contributors.length} contributors to ${chartId}`);
 		const response = await firstValueFrom(
 			this.http.post<ContributorModel[]>(
@@ -74,6 +74,7 @@ export class ContributorService {
 			return [...filtered, ...response];
 		});
 		console.log("Contributors added successfully!", response);
+		return response;
 	}
 
 	// Update
