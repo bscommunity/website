@@ -13,24 +13,17 @@ import { TourPassModel } from "@/models/tour-pass.model";
 import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
 import type {
-	NotificationModel,
 	NotificationsResponse,
 	DeleteAllResponse,
 } from "@/models/notification.model";
 
 import { apiUrl } from "@/lib/api";
-import type { QueryPage } from "../cache.service";
-import { CacheService } from "../cache.service";
-import { StorageService } from "../storage.service";
+import { CacheService, type QueryPage } from "@/services/cache.service";
+import { DocumentCacheService } from "@/services/document-cache.service";
 
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
 const NOTIFICATIONS_CACHE_TTL = 60 * 1000; // 1 minute in milliseconds
 const NOTIFICATIONS_CACHE_PREFIX = "notifications:";
-
-interface NotificationsCacheEntry {
-	data: NotificationsResponse;
-	cachedAt: number;
-}
 
 @Injectable({
 	providedIn: "root",
@@ -38,7 +31,7 @@ interface NotificationsCacheEntry {
 export class UserService {
 	private http = inject(HttpClient);
 	private cacheService = inject(CacheService);
-	private storageService = inject(StorageService);
+	private documentCache = inject(DocumentCacheService);
 
 	private readonly apiUrl = `${apiUrl}/users`;
 	private readonly meUrl = `${apiUrl}/me`;
@@ -295,29 +288,32 @@ export class UserService {
 	// ---------------------------------------------------------------------------
 
 	getNotifications(
-		params: { limit?: number; offset?: number; disableCache?: boolean } = {},
+		params: {
+			limit?: number;
+			offset?: number;
+			disableCache?: boolean;
+		} = {},
 	): Observable<NotificationsResponse> {
 		const httpParams: Record<string, number> = {};
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 
-		const isPaginated = (params.offset ?? 0) > 0;
-		const cacheKey = this.buildNotificationsCacheKey(params.limit);
+		const source = this.http.get<NotificationsResponse>(
+			`${this.meUrl}/notifications`,
+			{ params: httpParams },
+		);
 
-		if (!params.disableCache && !isPaginated) {
-			const cached = this.getNotificationsFromCache(cacheKey);
-			if (cached) return of(cached);
-		}
+		// Only the first page is cached; paginated requests always hit the API.
+		if ((params.offset ?? 0) > 0) return source;
 
-		return this.http
-			.get<NotificationsResponse>(`${this.meUrl}/notifications`, {
-				params: httpParams,
-			})
-			.pipe(
-				tap((res) => {
-					if (!isPaginated) this.setNotificationsCache(cacheKey, res);
-				}),
-			);
+		return this.documentCache.fetch(
+			this.buildNotificationsCacheKey(params.limit),
+			source,
+			{
+				ttlMs: NOTIFICATIONS_CACHE_TTL,
+				disableCache: params.disableCache,
+			},
+		);
 	}
 
 	deleteNotification(id: number): Observable<void> {
@@ -336,58 +332,21 @@ export class UserService {
 	}
 
 	invalidateNotificationsCache(): void {
-		const keys = this.storageService.getKeysWithPrefix(
-			NOTIFICATIONS_CACHE_PREFIX,
-			true,
-		);
-		for (const key of keys) {
-			this.storageService.removeItem(key, true);
-		}
+		this.documentCache.invalidate(NOTIFICATIONS_CACHE_PREFIX);
 	}
 
 	private buildNotificationsCacheKey(limit?: number): string {
 		return `${NOTIFICATIONS_CACHE_PREFIX}limit=${limit ?? 20}`;
 	}
 
-	private getNotificationsFromCache(
-		cacheKey: string,
-	): NotificationsResponse | null {
-		const raw = this.storageService.getItem(cacheKey, true);
-		if (!raw) return null;
-
-		try {
-			const entry = JSON.parse(raw) as NotificationsCacheEntry;
-			if (Date.now() - entry.cachedAt > NOTIFICATIONS_CACHE_TTL) {
-				this.storageService.removeItem(cacheKey, true);
-				return null;
-			}
-			return entry.data;
-		} catch {
-			this.storageService.removeItem(cacheKey, true);
-			return null;
-		}
-	}
-
-	private setNotificationsCache(
-		cacheKey: string,
-		data: NotificationsResponse,
-	): void {
-		const entry: NotificationsCacheEntry = {
-			data,
-			cachedAt: Date.now(),
-		};
-		this.storageService.setItem(cacheKey, JSON.stringify(entry), true);
-	}
-
 	private removeNotificationFromCache(id: number): void {
-		const keys = this.storageService.getKeysWithPrefix(
-			NOTIFICATIONS_CACHE_PREFIX,
-			true,
-		);
-		for (const key of keys) {
-			const cached = this.getNotificationsFromCache(key);
+		for (const key of this.documentCache.keys(NOTIFICATIONS_CACHE_PREFIX)) {
+			const cached = this.documentCache.get<NotificationsResponse>(
+				key,
+				NOTIFICATIONS_CACHE_TTL,
+			);
 			if (!cached) continue;
-			this.setNotificationsCache(key, {
+			this.documentCache.set(key, {
 				items: cached.items.filter((n) => n.id !== id),
 				unreadCount: Math.max(0, cached.unreadCount - 1),
 			});

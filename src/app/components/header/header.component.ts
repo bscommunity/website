@@ -96,13 +96,13 @@ export class HeaderComponent implements OnInit {
 		this.userService
 			.getNotifications({ limit: 20, disableCache })
 			.subscribe({
-			next: (res) => {
-				this.notifications = res.items;
-				this.unreadCount = res.unreadCount;
-				this.cdr.markForCheck();
-			},
-			error: () => {},
-		});
+				next: (res) => {
+					this.notifications = res.items;
+					this.unreadCount = res.unreadCount;
+					this.cdr.markForCheck();
+				},
+				error: () => {},
+			});
 	}
 
 	deleteNotification(id: number, event: Event) {
