@@ -21,8 +21,16 @@ import type {
 import { apiUrl } from "@/lib/api";
 import type { QueryPage } from "../cache.service";
 import { CacheService } from "../cache.service";
+import { StorageService } from "../storage.service";
 
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const NOTIFICATIONS_CACHE_TTL = 60 * 1000; // 1 minute in milliseconds
+const NOTIFICATIONS_CACHE_PREFIX = "notifications:";
+
+interface NotificationsCacheEntry {
+	data: NotificationsResponse;
+	cachedAt: number;
+}
 
 @Injectable({
 	providedIn: "root",
@@ -30,6 +38,7 @@ const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
 export class UserService {
 	private http = inject(HttpClient);
 	private cacheService = inject(CacheService);
+	private storageService = inject(StorageService);
 
 	private readonly apiUrl = `${apiUrl}/users`;
 	private readonly meUrl = `${apiUrl}/me`;
@@ -286,28 +295,102 @@ export class UserService {
 	// ---------------------------------------------------------------------------
 
 	getNotifications(
-		params: { limit?: number; offset?: number } = {},
+		params: { limit?: number; offset?: number; disableCache?: boolean } = {},
 	): Observable<NotificationsResponse> {
 		const httpParams: Record<string, number> = {};
 		if (params.limit !== undefined) httpParams["limit"] = params.limit;
 		if (params.offset !== undefined) httpParams["offset"] = params.offset;
 
-		return this.http.get<NotificationsResponse>(
-			`${this.meUrl}/notifications`,
-			{ params: httpParams },
-		);
+		const isPaginated = (params.offset ?? 0) > 0;
+		const cacheKey = this.buildNotificationsCacheKey(params.limit);
+
+		if (!params.disableCache && !isPaginated) {
+			const cached = this.getNotificationsFromCache(cacheKey);
+			if (cached) return of(cached);
+		}
+
+		return this.http
+			.get<NotificationsResponse>(`${this.meUrl}/notifications`, {
+				params: httpParams,
+			})
+			.pipe(
+				tap((res) => {
+					if (!isPaginated) this.setNotificationsCache(cacheKey, res);
+				}),
+			);
 	}
 
 	deleteNotification(id: number): Observable<void> {
-		return this.http.delete<void>(
-			`${this.meUrl}/notifications/${id}`,
-		);
+		return this.http
+			.delete<void>(`${this.meUrl}/notifications/${id}`)
+			.pipe(tap(() => this.removeNotificationFromCache(id)));
 	}
 
 	markAllNotificationsRead(): Observable<DeleteAllResponse> {
-		return this.http.post<DeleteAllResponse>(
-			`${this.meUrl}/notifications/read-all`,
-			null,
+		return this.http
+			.post<DeleteAllResponse>(
+				`${this.meUrl}/notifications/read-all`,
+				null,
+			)
+			.pipe(tap(() => this.invalidateNotificationsCache()));
+	}
+
+	invalidateNotificationsCache(): void {
+		const keys = this.storageService.getKeysWithPrefix(
+			NOTIFICATIONS_CACHE_PREFIX,
+			true,
 		);
+		for (const key of keys) {
+			this.storageService.removeItem(key, true);
+		}
+	}
+
+	private buildNotificationsCacheKey(limit?: number): string {
+		return `${NOTIFICATIONS_CACHE_PREFIX}limit=${limit ?? 20}`;
+	}
+
+	private getNotificationsFromCache(
+		cacheKey: string,
+	): NotificationsResponse | null {
+		const raw = this.storageService.getItem(cacheKey, true);
+		if (!raw) return null;
+
+		try {
+			const entry = JSON.parse(raw) as NotificationsCacheEntry;
+			if (Date.now() - entry.cachedAt > NOTIFICATIONS_CACHE_TTL) {
+				this.storageService.removeItem(cacheKey, true);
+				return null;
+			}
+			return entry.data;
+		} catch {
+			this.storageService.removeItem(cacheKey, true);
+			return null;
+		}
+	}
+
+	private setNotificationsCache(
+		cacheKey: string,
+		data: NotificationsResponse,
+	): void {
+		const entry: NotificationsCacheEntry = {
+			data,
+			cachedAt: Date.now(),
+		};
+		this.storageService.setItem(cacheKey, JSON.stringify(entry), true);
+	}
+
+	private removeNotificationFromCache(id: number): void {
+		const keys = this.storageService.getKeysWithPrefix(
+			NOTIFICATIONS_CACHE_PREFIX,
+			true,
+		);
+		for (const key of keys) {
+			const cached = this.getNotificationsFromCache(key);
+			if (!cached) continue;
+			this.setNotificationsCache(key, {
+				items: cached.items.filter((n) => n.id !== id),
+				unreadCount: Math.max(0, cached.unreadCount - 1),
+			});
+		}
 	}
 }

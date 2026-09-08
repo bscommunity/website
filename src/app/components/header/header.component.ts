@@ -92,8 +92,10 @@ export class HeaderComponent implements OnInit {
 		this.loadNotifications();
 	}
 
-	loadNotifications() {
-		this.userService.getNotifications({ limit: 20 }).subscribe({
+	loadNotifications(disableCache = false) {
+		this.userService
+			.getNotifications({ limit: 20, disableCache })
+			.subscribe({
 			next: (res) => {
 				this.notifications = res.items;
 				this.unreadCount = res.unreadCount;
