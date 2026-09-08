@@ -108,14 +108,14 @@ export class Uploads implements OnInit, OnDestroy {
 
 	selectedTab = 0;
 
-	error: string | undefined = undefined;
+	ownedError: string | undefined = undefined;
+	sharedError: string | undefined = undefined;
 
 	placeholders = Array(20);
 
 	// Expose observables
 	filters$ = this.filterService.filters$;
 	isLoading$ = this.filterService.isLoading$;
-	error$ = this.filterService.error$;
 
 	ngOnInit(): void {
 		const initialFilters = this.filterService.getFilters();
@@ -150,11 +150,6 @@ export class Uploads implements OnInit, OnDestroy {
 			.subscribe((item) => {
 				this.addPublishedItem(item);
 			});
-
-		this.error$.pipe(takeUntil(this.destroy$)).subscribe((err) => {
-			this.error = err || undefined;
-			this.cdr.markForCheck();
-		});
 	}
 
 	ngOnDestroy(): void {
@@ -164,7 +159,11 @@ export class Uploads implements OnInit, OnDestroy {
 
 	fetchContent(disableCache = false, append = false) {
 		const filters: WorkshopFilters = this.filterService.getFilters();
-		this.error = undefined;
+		if (this.selectedTab === 1) {
+			this.sharedError = undefined;
+		} else {
+			this.ownedError = undefined;
+		}
 		this.filterService.setLoading(true);
 
 		const types = mapCategoriesToTypes(filters.categories);
@@ -227,7 +226,11 @@ export class Uploads implements OnInit, OnDestroy {
 					}
 
 					this.filterService.setLoading(false);
-					this.filterService.setError(null);
+					if (this.selectedTab === 1) {
+						this.sharedError = undefined;
+					} else {
+						this.ownedError = undefined;
+					}
 					this.cdr.markForCheck();
 				},
 				error: (error) => {
@@ -236,7 +239,11 @@ export class Uploads implements OnInit, OnDestroy {
 						error?.error?.message ||
 						error?.error ||
 						"Failed to refresh uploads. Please try again.";
-					this.filterService.setError(msg);
+					if (this.selectedTab === 1) {
+						this.sharedError = msg;
+					} else {
+						this.ownedError = msg;
+					}
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},

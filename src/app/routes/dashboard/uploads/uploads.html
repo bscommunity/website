@@ -70,43 +70,7 @@
 			</div>
 		}
 
-		@if (error$ | async) {
-			@let error = error$ | async;
-			<div
-				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-			>
-				<div class="flex flex-col items-center justify-center gap-4">
-					<ng-glyph name="deployed_code_alert" size="60" />
-					<h1 class="text-2xl text-center">
-						Oops, something went wrong while fetching your content
-					</h1>
-					<div
-						class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
-					>
-						{{ error }} <br />
-						<p>
-							Please try again later or check Discord if the
-							problem persists
-						</p>
-						<button
-							mat-stroked-button
-							(click)="refresh()"
-							(keypress)="refresh()"
-							[disabled]="isLoading$ | async"
-							aria-label="Refresh"
-						>
-							<ng-glyph name="refresh" class="mx-2!" />
-
-							@if (isLoading$ | async) {
-								<p>Refreshing...</p>
-							} @else {
-								<p>Refresh</p>
-							}
-						</button>
-					</div>
-				</div>
-			</div>
-		} @else if (
+		@if (
 			hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)
 		) {
 			<div
@@ -164,7 +128,7 @@
 			</div>
 		}
 
-		@if (hasAnyContent || hasAnySharedContent || (isLoading$ | async)) {
+		@if (hasAnyContent || hasAnySharedContent || (isLoading$ | async) || ownedError || sharedError) {
 			<mat-tab-group class="w-full" dynamicHeight fitInkBarToContent (selectedIndexChange)="onTabChange($event)">
 				<mat-tab label="Your content">
 					<div
@@ -174,6 +138,47 @@
 							(isLoading$ | async) ? 'none' : 'auto'
 						"
 					>
+						@if (!hasAnyContent && !(isLoading$ | async)) {
+							@if (ownedError) {
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="deployed_code_alert" size="60" />
+										<h1 class="text-2xl text-center">
+											Oops, something went wrong while fetching your content
+										</h1>
+										<div
+											class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+										>
+											{{ ownedError }} <br />
+											<p>
+												Please try again later or check Discord if the
+												problem persists
+											</p>
+											<button
+												mat-stroked-button
+												(click)="refresh()"
+												(keypress)="refresh()"
+												[disabled]="isLoading$ | async"
+												aria-label="Refresh"
+											>
+												<ng-glyph name="refresh" class="mx-2!" />
+
+												@if (isLoading$ | async) {
+													<p>Refreshing...</p>
+												} @else {
+													<p>Refresh</p>
+												}
+											</button>
+										</div>
+									</div>
+								</div>
+							}
+						}
+
 						@for (month of contentByMonth; track month.name) {
 							<app-list-section
 								class="w-full"
@@ -299,21 +304,60 @@
 						"
 					>
 						@if (!hasAnySharedContent && !(isLoading$ | async)) {
-							<div
-								class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-							>
+							@if (sharedError) {
 								<div
-									class="flex flex-col items-center justify-center gap-4"
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
 								>
-									<ng-glyph name="group" size="60" />
-									<h1 class="text-2xl">
-										No shared content yet
-									</h1>
-									<p class="max-w-[65%] text-center text-on-surface-variant">
-										When someone adds you as a contributor to a chart, tour pass or theme, it will appear here.
-									</p>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="deployed_code_alert" size="60" />
+										<h1 class="text-2xl text-center">
+											Oops, something went wrong while fetching your content
+										</h1>
+										<div
+											class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+										>
+											{{ sharedError }} <br />
+											<p>
+												Please try again later or check Discord if the
+												problem persists
+											</p>
+											<button
+												mat-stroked-button
+												(click)="refresh()"
+												(keypress)="refresh()"
+												[disabled]="isLoading$ | async"
+												aria-label="Refresh"
+											>
+												<ng-glyph name="refresh" class="mx-2!" />
+
+												@if (isLoading$ | async) {
+													<p>Refreshing...</p>
+												} @else {
+													<p>Refresh</p>
+												}
+											</button>
+										</div>
+									</div>
 								</div>
-							</div>
+							} @else {
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="group" size="60" />
+										<h1 class="text-2xl">
+											No shared content yet
+										</h1>
+										<p class="max-w-[65%] text-center text-on-surface-variant">
+											When someone adds you as a contributor to a chart, tour pass or theme, it will appear here.
+										</p>
+									</div>
+								</div>
+							}
 						}
 
 						@for (month of sharedContentByMonth; track month.name) {

@@ -1,5 +1,6 @@
 import {
 	ChangeDetectionStrategy,
+	ChangeDetectorRef,
 	Component,
 	inject,
 	OnInit,
@@ -21,7 +22,10 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 
 // Types
 import type { UserModel } from "@/models/user.model";
-import type { NotificationModel } from "@/models/notification.model";
+import type {
+	NotificationModel,
+	NotificationMessage,
+} from "@/models/notification.model";
 
 // Services
 import { AuthService } from "@/services/auth.service";
@@ -31,6 +35,15 @@ import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.h
 import { TourPassPublishHandler } from "@/services/publish/handlers/tourpass-publish.handler";
 import { ThemePublishHandler } from "@/services/publish/handlers/theme-publish.handler";
 import { convertDateTimeToHumanReadable } from "@/lib/time";
+
+const NOTIFICATION_MESSAGES: {
+	[K in NotificationMessage["type"]]: (
+		msg: Extract<NotificationMessage, { type: K }>,
+	) => string;
+} = {
+	contributor_added: (m) =>
+		`${m.actorName} shared a ${m.itemType.toLowerCase().replace(/_/g, " ")} (${m.itemName}) with you`,
+};
 
 @Component({
 	selector: "app-header",
@@ -56,6 +69,7 @@ export class HeaderComponent implements OnInit {
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
+	private cdr = inject(ChangeDetectorRef);
 
 	user: UserModel | null = null;
 	notifications: NotificationModel[] = [];
@@ -83,6 +97,7 @@ export class HeaderComponent implements OnInit {
 			next: (res) => {
 				this.notifications = res.items;
 				this.unreadCount = res.unreadCount;
+				this.cdr.markForCheck();
 			},
 			error: () => {},
 		});
@@ -96,6 +111,7 @@ export class HeaderComponent implements OnInit {
 					(n) => n.id !== id,
 				);
 				this.unreadCount = Math.max(0, this.unreadCount - 1);
+				this.cdr.markForCheck();
 			},
 			error: () => {},
 		});
@@ -106,9 +122,38 @@ export class HeaderComponent implements OnInit {
 			next: () => {
 				this.notifications = [];
 				this.unreadCount = 0;
+				this.cdr.markForCheck();
 			},
 			error: () => {},
 		});
+	}
+
+	renderNotificationMessage(
+		message: NotificationMessage | string | null | undefined,
+	): string {
+		if (!message) return "";
+		if (typeof message === "string") {
+			const raw = message;
+			try {
+				message = JSON.parse(raw) as NotificationMessage;
+			} catch {
+				return raw;
+			}
+		}
+
+		const type = (message as { type?: unknown }).type;
+		if (typeof type !== "string") return "You have a new notification";
+
+		const handler = (
+			NOTIFICATION_MESSAGES as Record<string, ((msg: never) => string) | undefined>
+		)[type];
+		if (!handler) return "You have a new notification";
+
+		try {
+			return handler(message as never);
+		} catch {
+			return "You have a new notification";
+		}
 	}
 
 	openWarning() {

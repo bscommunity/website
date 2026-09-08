@@ -100,7 +100,7 @@
 							<p
 								class="text-on-surface hover:underline hover:cursor-pointer"
 							>
-								{{ notification.message }}
+								{{ renderNotificationMessage(notification.message) }}
 							</p>
 							<span class="text-sm text-on-surface-variant">{{
 								convertDateTimeToHumanReadable(
