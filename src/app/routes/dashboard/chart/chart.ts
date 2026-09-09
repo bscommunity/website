@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from "@angular/core";
+import { Component, OnInit, computed, inject, signal } from "@angular/core";
 import {
 	ActivatedRoute,
 	Router,
@@ -20,6 +20,8 @@ import { PageError } from "../../error/error";
 
 // Models
 import { ChartModel } from "@/models/chart.model";
+import { ContributorModel } from "@/models/contributor.model";
+import { ContributorRole } from "@/models/enums/role.enum";
 import { VersionsComponent } from "./sections/versions/versions.component";
 
 // Enums
@@ -28,6 +30,9 @@ import { Visibility } from "@/models/enums/visibility.enum";
 
 // Providers
 import { ChartTitleStrategy } from "./chart-title.strategy";
+
+// Services
+import { AuthService } from "@/services/auth.service";
 
 @Component({
 	selector: "app-chart",
@@ -50,6 +55,7 @@ import { ChartTitleStrategy } from "./chart-title.strategy";
 export class Chart implements OnInit {
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
+	private authService = inject(AuthService);
 
 	readonly chart = signal<ChartModel | null>(null);
 	readonly difficultyIcon = signal<string | null>(null);
@@ -57,19 +63,37 @@ export class Chart implements OnInit {
 		history.state?.tourPassId ?? null,
 	);
 
+	readonly isOwner = computed(() => {
+		const c = this.chart();
+		if (!c) return false;
+		const currentUserId = this.authService.user?.id;
+		if (!currentUserId) return false;
+		return c.authorId === currentUserId;
+	});
+
+	readonly isContributor = computed(() => {
+		const c = this.chart();
+		if (!c) return false;
+		const currentUserId = this.authService.user?.id;
+		if (!currentUserId) return false;
+		if (this.isOwner()) return false;
+		return c.contributors.some(
+			(contrib) => contrib.user.id === currentUserId,
+		);
+	});
+
 	ngOnInit(): void {
 		this.route.params.subscribe(() => {
 			const data = this.route.snapshot.data["chart"];
 			this.chart.set(data);
-			console.warn("Chart data", data);
 
 			this.tourPassId.set(history.state?.tourPassId ?? null);
 
-			if (!data.contributors) {
-				console.error("Chart data is incomplete", data);
+			if (!data) {
 				this.router.navigate(["error"], {
 					state: { error: "Chart data is incomplete" },
 				});
+				return;
 			}
 
 			if (data.difficulty) {
@@ -88,5 +112,9 @@ export class Chart implements OnInit {
 
 	onVisibilityChanged(visibility: Visibility) {
 		this.chart.update((c) => (c ? { ...c, visibility } : c));
+	}
+
+	onContributorsChanged(contributors: ContributorModel[]) {
+		this.chart.update((c) => (c ? { ...c, contributors } : c));
 	}
 }

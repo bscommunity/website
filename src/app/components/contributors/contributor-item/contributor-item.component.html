@@ -7,13 +7,22 @@
 			></app-avatar>
 			<span class="text-base font-medium">{{ user().username }}</span>
 		</span>
-		@if (canRemove()) {
-			<button mat-icon-button (click)="remove.emit(user().id)">
+		@if (!disabled()) {
+			<button
+				mat-icon-button
+				(click)="remove.emit(user().id)"
+				[disabled]="disabled()"
+			>
 				<ng-glyph name="close" />
 			</button>
 		}
 	</div>
-	<div class="flex w-full h-[1px] rounded-full bg-outline-variant mb-3"></div>
-	<app-contributor-tags [userId]="user().id" [roles]="roles()" [availableRoles]="availableRoles()">
+	<div class="flex w-full h-px rounded-full bg-outline-variant mb-3"></div>
+	<app-contributor-tags
+		[userId]="user().id"
+		[roles]="roles()"
+		[availableRoles]="availableRoles()"
+		[disabled]="disabled()"
+	>
 	</app-contributor-tags>
 </li>

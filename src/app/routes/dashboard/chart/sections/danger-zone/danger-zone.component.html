@@ -2,22 +2,32 @@
 	<ul
 		class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container/50 overflow-hidden"
 	>
-		<app-danger-zone-list-item
-			class="w-full"
-			title="Change visibility of this chart"
-			description="The chart is currently <strong>{{
-				visibilityLabels[visibility()]
-			}}</strong>. Changing the visibility will affect all users."
-			buttonLabel="Change visibility"
-			[buttonAction]="openVisibilityDialog.bind(this)"
-		></app-danger-zone-list-item>
-		<div class="w-full h-[1px] bg-error-container/50"></div>
-		<app-danger-zone-list-item
-			class="w-full"
-			title="Delete this chart"
-			description="Once you delete a chart, there is no going back. Please be certain."
-			buttonLabel="Delete this chart"
-			[buttonAction]="openDeleteDialog.bind(this)"
-		></app-danger-zone-list-item>
+		@if (isOwner()) {
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Change visibility of this chart"
+				description="The chart is currently <strong>{{
+					visibilityLabels[visibility()]
+				}}</strong>. Changing the visibility will affect all users."
+				buttonLabel="Change visibility"
+				[buttonAction]="openVisibilityDialog.bind(this)"
+			></app-danger-zone-list-item>
+			<div class="w-full h-[1px] bg-error-container/50"></div>
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Delete this chart"
+				description="Once you delete a chart, there is no going back. Please be certain."
+				buttonLabel="Delete this chart"
+				[buttonAction]="openDeleteDialog.bind(this)"
+			></app-danger-zone-list-item>
+		} @else if (isContributor()) {
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Remove yourself as contributor"
+				description="Remove yourself as a contributor from this chart. You will lose access to the chart data."
+				buttonLabel="Remove yourself"
+				[buttonAction]="openRemoveSelfDialog.bind(this)"
+			></app-danger-zone-list-item>
+		}
 	</ul>
 </app-chart-section>

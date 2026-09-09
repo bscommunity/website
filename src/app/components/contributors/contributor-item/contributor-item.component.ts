@@ -27,8 +27,9 @@ import { ContributorRole } from "@/models/enums/role.enum";
 })
 export class ContributorItemComponent {
 	readonly user = input.required<SimplifiedUserModel>();
-	readonly roles = input.required<WritableSignal<Map<string, ContributorRole[]>>>();
+	readonly roles =
+		input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 	readonly availableRoles = input.required<ContributorRole[]>();
-	readonly canRemove = input(false, { transform: booleanAttribute });
+	readonly disabled = input(false, { transform: booleanAttribute });
 	readonly remove = output<string>();
 }

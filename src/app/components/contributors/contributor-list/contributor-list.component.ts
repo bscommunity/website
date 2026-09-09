@@ -25,7 +25,7 @@ import { WritableSignal } from "@angular/core";
 						[user]="user"
 						[roles]="roles()"
 						[availableRoles]="availableRoles()"
-						[canRemove]="canRemove()"
+						[disabled]="disabled()"
 						(remove)="userRemoved.emit($event)"
 					/>
 				}
@@ -47,7 +47,7 @@ export class ContributorListComponent {
 	readonly roles =
 		input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 	readonly availableRoles = input.required<ContributorRole[]>();
-	readonly canRemove = input(false, { transform: booleanAttribute });
+	readonly disabled = input(false, { transform: booleanAttribute });
 	readonly emptyMessage = input(
 		"No contributors added. Start adding members for them to appear here!",
 	);

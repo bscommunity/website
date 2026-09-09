@@ -2,21 +2,31 @@
 	<ul
 		class="flex flex-col items-start justify-start w-full rounded-lg border border-error-container/50 overflow-hidden"
 	>
-		<app-danger-zone-list-item
-			class="w-full"
-			title="Transfer ownership"
-			description="Transfer this tour pass to another user."
-			buttonLabel="Transfer"
-			[buttonAction]="noop"
-			[disabled]="true"
-		></app-danger-zone-list-item>
-		<div class="w-full h-[1px] bg-error-container/50"></div>
-		<app-danger-zone-list-item
-			class="w-full"
-			title="Delete this tour pass"
-			description="Deleting a tour pass does not cascade into its setlist charts."
-			buttonLabel="Delete this tour pass"
-			[buttonAction]="openDeleteDialog.bind(this)"
-		></app-danger-zone-list-item>
+		@if (isOwner()) {
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Transfer ownership"
+				description="Transfer this tour pass to another user."
+				buttonLabel="Transfer"
+				[buttonAction]="noop"
+				[disabled]="true"
+			></app-danger-zone-list-item>
+			<div class="w-full h-[1px] bg-error-container/50"></div>
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Delete this tour pass"
+				description="Deleting a tour pass does not cascade into its setlist charts."
+				buttonLabel="Delete this tour pass"
+				[buttonAction]="openDeleteDialog.bind(this)"
+			></app-danger-zone-list-item>
+		} @else if (isContributor()) {
+			<app-danger-zone-list-item
+				class="w-full"
+				title="Remove yourself as contributor"
+				description="Remove yourself as a contributor from this tour pass. You will lose access to the tour pass data."
+				buttonLabel="Remove yourself"
+				[buttonAction]="openRemoveSelfDialog.bind(this)"
+			></app-danger-zone-list-item>
+		}
 	</ul>
 </app-chart-section>

@@ -39,7 +39,7 @@ export const Chart = z.object({
 	effectsAmount: z.number().int(),
 	isDeluxe: z.boolean().default(false),
 	isExplicit: z.boolean().default(false),
-	latestVersion: Version.nullable(),
+	latestVersion: Version,
 });
 
 export type ChartModel = z.infer<typeof Chart>;

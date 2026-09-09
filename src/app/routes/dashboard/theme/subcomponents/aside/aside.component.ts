@@ -36,6 +36,7 @@ export class AsideComponent {
 	private themeService = inject(ThemeService);
 
 	readonly theme = input.required<ThemeModel>();
+	readonly isOwner = input<boolean>(false);
 	readonly themeUpdated = output<ThemeModel>();
 
 	readonly replacesName = input<string | undefined>(undefined);

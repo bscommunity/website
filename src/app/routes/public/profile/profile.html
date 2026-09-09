@@ -18,11 +18,11 @@
 				Profile not found. Please check the username and try again.
 			</p>
 			<button mat-stroked-button class="mt-6" (click)="onReturn()">
-			<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
+				<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
 				Return to {{ this.source }}
-		</button>
-	</div>
-} @else {
+			</button>
+		</div>
+	} @else {
 		<header class="flex flex-col items-start justify-start gap-6 w-full">
 			<button mat-stroked-button (click)="onReturn()">
 				<ng-glyph name="arrow_left_alt" class="align-middle mr-2" />
@@ -34,7 +34,7 @@
 				class="flex flex-col items-start justify-start w-full bg-surface-container rounded-3xl"
 			>
 				<div
-					class="flex flex-col w-full relative bg-surface-container-high min-h-64 rounded-3xl"
+					class="flex flex-col w-full relative bg-surface-container-high max-h-64 rounded-3xl overflow-hidden"
 				>
 					@if (profile()!.user.bannerUrl) {
 						<img
@@ -42,7 +42,7 @@
 							[alt]="
 								'Banner image for ' + profile()!.user.username
 							"
-							class="object-cover"
+							class="object-cover h-64"
 						/>
 					}
 					<svg
@@ -152,7 +152,11 @@
 								[disabled]="isFollowLoading()"
 							>
 								<ng-glyph
-									[name]="isFollowing() ? 'person_remove' : 'person_add'"
+									[name]="
+										isFollowing()
+											? 'person_remove'
+											: 'person_add'
+									"
 									class="align-middle mr-2"
 								/>
 								{{ isFollowing() ? "Unfollow" : "Follow" }}
@@ -192,7 +196,10 @@
 					<mat-tab [disabled]="tab.disabled">
 						<ng-template mat-tab-label>
 							@if (tab.icon) {
-								<ng-glyph [name]="tab.icon" class="align-middle" />
+								<ng-glyph
+									[name]="tab.icon"
+									class="align-middle"
+								/>
 							}
 							@if (tab.label && tab.showLabel) {
 								<span class="ml-4">{{ tab.label }}</span>
@@ -201,21 +208,21 @@
 						<section
 							class="flex flex-col items-center justify-start w-full"
 						>
-							@if (tab.value === 'charts') {
+							@if (tab.value === "charts") {
 								<ng-container
 									*ngTemplateOutlet="
 										chartsSection;
 										context: { isDesktop: true }
 									"
 								></ng-container>
-							} @else if (tab.value === 'tour_passes') {
+							} @else if (tab.value === "tour_passes") {
 								<ng-container
 									*ngTemplateOutlet="
 										tourPassesSection;
 										context: { isDesktop: true }
 									"
 								></ng-container>
-							} @else if (tab.value === 'themes') {
+							} @else if (tab.value === "themes") {
 								<ng-container
 									*ngTemplateOutlet="
 										themesSection;
@@ -252,7 +259,11 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<ng-glyph name="error_outline" size="36" class="text-error" />
+							<ng-glyph
+								name="error_outline"
+								size="36"
+								class="text-error"
+							/>
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -263,7 +274,11 @@
 						<div
 							class="flex flex-col items-center justify-center w-full py-8 gap-4"
 						>
-							<ng-glyph name="history" size="36" class="text-on-surface-variant" />
+							<ng-glyph
+								name="history"
+								size="36"
+								class="text-on-surface-variant"
+							/>
 							<p
 								class="text-sm text-on-surface-variant text-center"
 							>
@@ -279,40 +294,50 @@
 					}
 				</ng-template>
 
-			<div class="relative w-full overflow-hidden">
-				<mat-tab-nav-panel #tabPanel class="w-full">
-					@for (tab of mobileTabs; track tab.value) {
-						<div
-							class="mobile-tab-collapse"
-							[class.open]="currentTab === tab.value"
-						>
-							<div class="mobile-tab-collapse-inner">
-								<app-tab-content-wrapper class="w-full flex">
-									@if (tab.value === 'history') {
-										<ng-container
-											*ngTemplateOutlet="activityContent"
-										></ng-container>
-									} @else if (tab.value === 'charts') {
-										<ng-container
-											*ngTemplateOutlet="
-												chartsSection;
-												context: { isDesktop: false }
-											"
-										></ng-container>
-									} @else if (tab.value === 'tour_passes') {
-										<ng-container
-											*ngTemplateOutlet="
-												tourPassesSection;
-												context: { isDesktop: false }
-											"
-										></ng-container>
-									}
-								</app-tab-content-wrapper>
+				<div class="relative w-full overflow-hidden">
+					<mat-tab-nav-panel #tabPanel class="w-full">
+						@for (tab of mobileTabs; track tab.value) {
+							<div
+								class="mobile-tab-collapse"
+								[class.open]="currentTab === tab.value"
+							>
+								<div class="mobile-tab-collapse-inner">
+									<app-tab-content-wrapper
+										class="w-full flex"
+									>
+										@if (tab.value === "history") {
+											<ng-container
+												*ngTemplateOutlet="
+													activityContent
+												"
+											></ng-container>
+										} @else if (tab.value === "charts") {
+											<ng-container
+												*ngTemplateOutlet="
+													chartsSection;
+													context: {
+														isDesktop: false,
+													}
+												"
+											></ng-container>
+										} @else if (
+											tab.value === "tour_passes"
+										) {
+											<ng-container
+												*ngTemplateOutlet="
+													tourPassesSection;
+													context: {
+														isDesktop: false,
+													}
+												"
+											></ng-container>
+										}
+									</app-tab-content-wrapper>
+								</div>
 							</div>
-						</div>
-					}
-				</mat-tab-nav-panel>
-			</div>
+						}
+					</mat-tab-nav-panel>
+				</div>
 			</section>
 		</div>
 
@@ -350,7 +375,11 @@
 								@for (chart of item.data; track $index) {
 									<app-chart-preview
 										[chart]="chart"
-										[showItems]="['contributors', 'shareActions', 'data']"
+										[showItems]="[
+											'contributors',
+											'shareActions',
+											'data',
+										]"
 										(click)="openChartDialog(chart)"
 										(keydown.enter)="openChartDialog(chart)"
 										(keydown.space)="openChartDialog(chart)"
@@ -461,10 +490,18 @@
 								@for (tourpass of item.data; track $index) {
 									<app-tourpass-preview
 										[tourpass]="tourpass"
-										[showItems]="['contributors', 'shareActions', 'data']"
+										[showItems]="[
+											'contributors',
+											'shareActions',
+											'data',
+										]"
 										(click)="openTourPassDialog(tourpass)"
-										(keydown.enter)="openTourPassDialog(tourpass)"
-										(keydown.space)="openTourPassDialog(tourpass)"
+										(keydown.enter)="
+											openTourPassDialog(tourpass)
+										"
+										(keydown.space)="
+											openTourPassDialog(tourpass)
+										"
 									/>
 								}
 							</div>
@@ -473,8 +510,12 @@
 								<app-tourpass-preview
 									[tourpass]="tourpass"
 									(click)="openTourPassDialog(tourpass)"
-									(keydown.enter)="openTourPassDialog(tourpass)"
-									(keydown.space)="openTourPassDialog(tourpass)"
+									(keydown.enter)="
+										openTourPassDialog(tourpass)
+									"
+									(keydown.space)="
+										openTourPassDialog(tourpass)
+									"
 								/>
 							}
 						}
@@ -491,7 +532,9 @@
 						diameter="36"
 					></mat-progress-spinner>
 				</div>
-			} @else if (groupedTourPasses() && groupedTourPasses()!.length > 0) {
+			} @else if (
+				groupedTourPasses() && groupedTourPasses()!.length > 0
+			) {
 				<ng-container
 					*ngTemplateOutlet="
 						tourPassesList;
@@ -529,7 +572,9 @@
 				>
 					<div class="flex flex-col items-center justify-center">
 						<ng-glyph name="music_video" size="48" />
-						<h1 class="text-xl text-center">No tour passes available</h1>
+						<h1 class="text-xl text-center">
+							No tour passes available
+						</h1>
 						<p class="text-center px-8 mt-4">
 							This user hasn't created any tour passes yet. <br />
 							Check back later or explore the workshop!
@@ -548,13 +593,9 @@
 					></mat-progress-spinner>
 				</div>
 			} @else if (themes().length > 0) {
-				<div
-					class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-6"
-				>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-6">
 					@for (theme of themes(); track theme.id) {
-						<app-theme-preview
-							[theme]="theme"
-						></app-theme-preview>
+						<app-theme-preview [theme]="theme"></app-theme-preview>
 					}
 				</div>
 				@if (totalThemesPages > 1) {

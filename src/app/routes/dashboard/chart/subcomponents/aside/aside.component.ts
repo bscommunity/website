@@ -41,6 +41,7 @@ export class AsideComponent {
 	readonly chartService = inject(ChartService);
 
 	readonly chart = input.required<ChartModel>();
+	readonly isOwner = input<boolean>(false);
 	readonly chartUpdated = output<ChartModel>();
 
 	visibility = Visibility;

@@ -26,6 +26,7 @@ export class AsideComponent {
 	readonly _snackBar = inject(MatSnackBar);
 
 	readonly tourpass = input.required<TourPassModel>();
+	readonly isOwner = input<boolean>(false);
 	readonly tourPassUpdated = output<TourPassModel>();
 
 	transformDuration = transformDuration;

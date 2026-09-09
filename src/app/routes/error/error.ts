@@ -15,7 +15,7 @@ export class PageError {
 	private location = inject(Location);
 	private router = inject(Router);
 
-	error = "undefined";
+	error = "";
 
 	constructor() {
 		const navigation = this.router.currentNavigation();

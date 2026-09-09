@@ -55,7 +55,7 @@ export class ContributorService {
 	async addContributors(
 		chartId: string,
 		contributors: SimplifiedContributorModel[],
-	): Promise<void> {
+	): Promise<ContributorModel[]> {
 		console.log(`Adding ${contributors.length} contributors to ${chartId}`);
 		const response = await firstValueFrom(
 			this.http.post<ContributorModel[]>(
@@ -74,6 +74,7 @@ export class ContributorService {
 			return [...filtered, ...response];
 		});
 		console.log("Contributors added successfully!", response);
+		return response;
 	}
 
 	// Update
@@ -132,6 +133,26 @@ export class ContributorService {
 			return true;
 		} catch (error) {
 			console.error("Failed to delete contributor:", error);
+			return false;
+		}
+	}
+
+	// Self-removal
+	async removeSelfAsContributor(catalogItemId: string): Promise<boolean> {
+		console.log("Removing self as contributor from", catalogItemId);
+
+		try {
+			await firstValueFrom(
+				this.http.delete<void>(`${this.apiUrl}/${catalogItemId}/self`),
+			);
+
+			this.updateCachedContributors(catalogItemId, (currentContributors) =>
+				currentContributors,
+			);
+
+			return true;
+		} catch (error) {
+			console.error("Failed to remove self as contributor:", error);
 			return false;
 		}
 	}

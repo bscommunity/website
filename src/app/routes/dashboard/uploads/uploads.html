@@ -70,43 +70,7 @@
 			</div>
 		}
 
-		@if (error$ | async) {
-			@let error = error$ | async;
-			<div
-				class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
-			>
-				<div class="flex flex-col items-center justify-center gap-4">
-					<ng-glyph name="deployed_code_alert" size="60" />
-					<h1 class="text-2xl text-center">
-						Oops, something went wrong while fetching your content
-					</h1>
-					<div
-						class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
-					>
-						{{ error }} <br />
-						<p>
-							Please try again later or check Discord if the
-							problem persists
-						</p>
-						<button
-							mat-stroked-button
-							(click)="refresh()"
-							(keypress)="refresh()"
-							[disabled]="isLoading$ | async"
-							aria-label="Refresh"
-						>
-							<ng-glyph name="refresh" class="mx-2!" />
-
-							@if (isLoading$ | async) {
-								<p>Refreshing...</p>
-							} @else {
-								<p>Refresh</p>
-							}
-						</button>
-					</div>
-				</div>
-			</div>
-		} @else if (
+		@if (
 			hasActiveFilters() && !hasAnyContent && !(isLoading$ | async)
 		) {
 			<div
@@ -164,106 +128,355 @@
 			</div>
 		}
 
-		@if (hasAnyContent) {
-			<div
-				class="flex flex-col items-start justify-start w-full gap-9"
-				[class.animate-pulse]="isLoading$ | async"
-				[style.pointerEvents]="(isLoading$ | async) ? 'none' : 'auto'"
-			>
-				@for (month of contentByMonth; track month.name) {
-					<app-list-section
-						class="w-full"
-						[title]="convertStringToMonth(month.name)"
+		@if (hasAnyContent || hasAnySharedContent || (isLoading$ | async) || ownedError || sharedError) {
+			<mat-tab-group class="w-full" dynamicHeight fitInkBarToContent (selectedIndexChange)="onTabChange($event)">
+				<mat-tab label="Your content">
+					<div
+						class="flex flex-col items-start justify-start w-full gap-9 mt-9"
+						[class.animate-pulse]="isLoading$ | async"
+						[style.pointerEvents]="
+							(isLoading$ | async) ? 'none' : 'auto'
+						"
 					>
-						@if (month.charts.length > 0) {
-							<section
-								class="flex flex-col items-start justify-start w-full gap-4"
-							>
-								<h5 class="text-lg font-medium">Charts</h5>
-								<div class="flex flex-wrap gap-4 w-full">
-									@for (item of month.charts; track item.id) {
-										<app-chart-preview
-											[chart]="item"
-											[routerLink]="[
-												'/dashboard/chart',
-												item.id,
-											]"
-											[showItems]="['data', 'visibility']"
-											class="w-full md:w-[calc(50%-0.5rem)]"
-										></app-chart-preview>
-									}
+						@if (!hasAnyContent && !(isLoading$ | async)) {
+							@if (ownedError) {
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="deployed_code_alert" size="60" />
+										<h1 class="text-2xl text-center">
+											Oops, something went wrong while fetching your content
+										</h1>
+										<div
+											class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+										>
+											{{ ownedError }} <br />
+											<p>
+												Please try again later or check Discord if the
+												problem persists
+											</p>
+											<button
+												mat-stroked-button
+												(click)="refresh()"
+												(keypress)="refresh()"
+												[disabled]="isLoading$ | async"
+												aria-label="Refresh"
+											>
+												<ng-glyph name="refresh" class="mx-2!" />
+
+												@if (isLoading$ | async) {
+													<p>Refreshing...</p>
+												} @else {
+													<p>Refresh</p>
+												}
+											</button>
+										</div>
+									</div>
 								</div>
-							</section>
+							}
 						}
 
-						@if (month.tourPasses.length > 0) {
-							<section
-								class="flex flex-col items-start justify-start w-full gap-4"
+						@for (month of contentByMonth; track month.name) {
+							<app-list-section
+								class="w-full"
+								[title]="convertStringToMonth(month.name)"
 							>
-								<h5 class="text-lg font-medium">Tour Passes</h5>
-								<div class="flex flex-wrap gap-4 w-full">
-									@for (
-										item of month.tourPasses;
-										track item.id
-									) {
-										<app-tourpass-preview
-											[tourpass]="item"
-											[routerLink]="[
-												'/dashboard/tourpass',
-												item.id,
-											]"
-											class="w-full md:w-[calc(50%-0.5rem)]"
-										/>
-									}
-								</div>
-							</section>
-						}
+								@if (month.charts.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Charts
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.charts;
+												track item.id
+											) {
+												<app-chart-preview
+													[chart]="item"
+													[routerLink]="[
+														'/dashboard/chart',
+														item.id,
+													]"
+													[showItems]="[
+														'data',
+														'visibility',
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)]"
+												></app-chart-preview>
+											}
+										</div>
+									</section>
+								}
 
-						@if (month.themes.length > 0) {
-							<section
-								class="flex flex-col items-start justify-start w-full gap-4"
+								@if (month.tourPasses.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Tour Passes
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.tourPasses;
+												track item.id
+											) {
+												<app-tourpass-preview
+													[tourpass]="item"
+													[routerLink]="[
+														'/dashboard/tourpass',
+														item.id,
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)]"
+												/>
+											}
+										</div>
+									</section>
+								}
+
+								@if (month.themes.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Themes
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.themes;
+												track item.id
+											) {
+												<app-theme-preview
+													[theme]="item"
+													[routerLink]="[
+														'/dashboard/theme',
+														item.id,
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+												/>
+											}
+										</div>
+									</section>
+								}
+							</app-list-section>
+						}
+					</div>
+
+					@if (hasMore) {
+						<div class="flex items-center justify-center w-full">
+							<button
+								mat-stroked-button
+								(click)="loadMore()"
+								(keypress)="loadMore()"
+								[disabled]="isLoading$ | async"
+								class="min-w-50"
 							>
-								<h5 class="text-lg font-medium">Themes</h5>
-								<div class="flex flex-wrap gap-4 w-full">
-									@for (item of month.themes; track item.id) {
-										<app-theme-preview
-											[theme]="item"
-											[routerLink]="[
-												'/dashboard/theme',
-												item.id,
-											]"
-											class="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
-										/>
-									}
-								</div>
-							</section>
-						}
-					</app-list-section>
-				}
-			</div>
-
-			@if (hasMore) {
-				<div class="flex items-center justify-center w-full">
-					<button
-						mat-stroked-button
-						(click)="loadMore()"
-						(keypress)="loadMore()"
-						[disabled]="isLoading$ | async"
-						class="min-w-50"
+								@if (isLoading$ | async) {
+									<mat-progress-spinner
+										diameter="16"
+										mode="indeterminate"
+										class="mr-2"
+									></mat-progress-spinner>
+									Loading...
+								} @else {
+									Load more
+								}
+							</button>
+						</div>
+					}
+				</mat-tab>
+				<mat-tab label="Shared with you" class="w-full">
+					<div
+						class="flex flex-col items-start justify-start w-full gap-9 mt-9"
+						[class.animate-pulse]="isLoading$ | async"
+						[style.pointerEvents]="
+							(isLoading$ | async) ? 'none' : 'auto'
+						"
 					>
-						@if (isLoading$ | async) {
-							<mat-progress-spinner
-								diameter="16"
-								mode="indeterminate"
-								class="mr-2"
-							></mat-progress-spinner>
-							Loading...
-						} @else {
-							Load more
+						@if (!hasAnySharedContent && !(isLoading$ | async)) {
+							@if (sharedError) {
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="deployed_code_alert" size="60" />
+										<h1 class="text-2xl text-center">
+											Oops, something went wrong while fetching your content
+										</h1>
+										<div
+											class="flex flex-col items-center justify-center gap-4 max-w-[85%] text-center"
+										>
+											{{ sharedError }} <br />
+											<p>
+												Please try again later or check Discord if the
+												problem persists
+											</p>
+											<button
+												mat-stroked-button
+												(click)="refresh()"
+												(keypress)="refresh()"
+												[disabled]="isLoading$ | async"
+												aria-label="Refresh"
+											>
+												<ng-glyph name="refresh" class="mx-2!" />
+
+												@if (isLoading$ | async) {
+													<p>Refreshing...</p>
+												} @else {
+													<p>Refresh</p>
+												}
+											</button>
+										</div>
+									</div>
+								</div>
+							} @else {
+								<div
+									class="flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-2xl p-9 w-full"
+								>
+									<div
+										class="flex flex-col items-center justify-center gap-4"
+									>
+										<ng-glyph name="group" size="60" />
+										<h1 class="text-2xl">
+											No shared content yet
+										</h1>
+										<p class="max-w-[65%] text-center text-on-surface-variant">
+											When someone adds you as a contributor to a chart, tour pass or theme, it will appear here.
+										</p>
+									</div>
+								</div>
+							}
 						}
-					</button>
-				</div>
-			}
+
+						@for (month of sharedContentByMonth; track month.name) {
+							<app-list-section
+								class="w-full"
+								[title]="convertStringToMonth(month.name)"
+							>
+								@if (month.charts.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Charts
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.charts;
+												track item.id
+											) {
+												<app-chart-preview
+													[chart]="item"
+													[routerLink]="[
+														'/dashboard/chart',
+														item.id,
+													]"
+													[showItems]="[
+														'data',
+														'visibility',
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)]"
+												></app-chart-preview>
+											}
+										</div>
+									</section>
+								}
+
+								@if (month.tourPasses.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Tour Passes
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.tourPasses;
+												track item.id
+											) {
+												<app-tourpass-preview
+													[tourpass]="item"
+													[routerLink]="[
+														'/dashboard/tourpass',
+														item.id,
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)]"
+												/>
+											}
+										</div>
+									</section>
+								}
+
+								@if (month.themes.length > 0) {
+									<section
+										class="flex flex-col items-start justify-start w-full gap-4"
+									>
+										<h5 class="text-lg font-medium">
+											Themes
+										</h5>
+										<div
+											class="flex flex-wrap gap-4 w-full"
+										>
+											@for (
+												item of month.themes;
+												track item.id
+											) {
+												<app-theme-preview
+													[theme]="item"
+													[routerLink]="[
+														'/dashboard/theme',
+														item.id,
+													]"
+													class="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+												/>
+											}
+										</div>
+									</section>
+								}
+							</app-list-section>
+						}
+					</div>
+
+					@if (sharedHasMore) {
+						<div class="flex items-center justify-center w-full">
+							<button
+								mat-stroked-button
+								(click)="loadMore()"
+								(keypress)="loadMore()"
+								[disabled]="isLoading$ | async"
+								class="min-w-50"
+							>
+								@if (isLoading$ | async) {
+									<mat-progress-spinner
+										diameter="16"
+										mode="indeterminate"
+										class="mr-2"
+									></mat-progress-spinner>
+									Loading...
+								} @else {
+									Load more
+								}
+							</button>
+						</div>
+					}
+				</mat-tab>
+			</mat-tab-group>
 		}
 	</div>
 </main>

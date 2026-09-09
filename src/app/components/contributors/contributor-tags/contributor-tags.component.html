@@ -2,6 +2,7 @@
 	@for (role of availableRoles(); track role) {
 		<mat-chip-option
 			[selected]="isRoleSelected(role)"
+			[disabled]="disabled()"
 			(selectionChange)="toggleRole($event, role)"
 		>
 			{{ getRoleLabel(role) }}

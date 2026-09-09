@@ -10,6 +10,7 @@ import { ConfirmationDialogComponent } from "@/components/dialogs/confirmation/c
 import { Visibility } from "@/models/enums/visibility.enum";
 // Services
 import { ChartService } from "@/services/api/chart.service";
+import { ContributorService } from "@/services/api/contributor.service";
 import { DeleteChartComponent } from "../../dialogs/delete-chart/delete-chart.component";
 // Components
 import { ChartSectionComponent } from "@/components/chart-section/chart-section.component";
@@ -42,9 +43,12 @@ export class DangerZoneComponent {
 	chartId = input.required<string>();
 	chartName = input.required<string>();
 	visibility = input.required<Visibility>();
+	isOwner = input<boolean>(true);
+	isContributor = input<boolean>(false);
 	visibilityChanged = output<Visibility>();
 
 	readonly chartService = inject(ChartService);
+	readonly contributorService = inject(ContributorService);
 	readonly dialog = inject(MatDialog);
 	readonly _snackBar = inject(MatSnackBar);
 
@@ -93,6 +97,33 @@ export class DangerZoneComponent {
 				description: `Are you sure you want to update the chart visibility to <b>${VISIBILITY_LABELS[newVisibility]}</b>? ${VISIBILITY_DESCRIPTIONS[newVisibility]}`,
 				success: "Chart visibility updated",
 				error: "An error occurred while updating the chart visibility",
+				operation,
+			},
+		});
+	}
+
+	openRemoveSelfDialog() {
+		const operation = async () => {
+			const result =
+				await this.contributorService.removeSelfAsContributor(
+					this.chartId(),
+				);
+
+			if (!result) {
+				throw new Error("An error occurred");
+			}
+
+			// Navigate away after self-removal
+			window.location.href = "/dashboard/uploads";
+		};
+
+		this.dialog.open(ConfirmationDialogComponent, {
+			data: {
+				title: "Remove yourself as contributor",
+				description:
+					"Are you sure you want to remove yourself as a contributor? You will lose access to this chart.",
+				success: "Removed as contributor",
+				error: "An error occurred while removing you as contributor",
 				operation,
 			},
 		});

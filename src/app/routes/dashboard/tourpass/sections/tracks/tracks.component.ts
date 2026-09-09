@@ -47,6 +47,7 @@ export class TracksSectionComponent {
 
 	readonly tourPassId = input.required<string>();
 	readonly charts = input.required<ChartModel[]>();
+	readonly isOwner = input<boolean>(false);
 	readonly chartsChanged = output<ChartModel[]>();
 
 	viewMode = signal<"list" | "grid">("list");

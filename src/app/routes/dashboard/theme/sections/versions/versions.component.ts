@@ -55,6 +55,7 @@ export class VersionsSectionComponent {
 	readonly themeId = input.required<string>();
 	readonly theme = input<ThemeModel | undefined>(undefined);
 	readonly versions = input<VersionModel[]>([]);
+	readonly isOwner = input<boolean>(false);
 
 	private _snackBar = inject(MatSnackBar);
 	readonly dialog = inject(MatDialog);
@@ -94,30 +95,33 @@ export class VersionsSectionComponent {
 		},
 	];
 
-	versionsActions = computed<Action<VersionModel>[]>(() => [
-		{
-			description: "Download",
-			icon: "download",
-			callback: () => {
-				this.downloadBundle();
+	versionsActions = computed<Action<VersionModel>[]>(() => {
+		if (!this.isOwner()) return [];
+		return [
+			{
+				description: "Download",
+				icon: "download",
+				callback: () => {
+					this.downloadBundle();
+				},
+				disabled: () => this.isFetchingBundle(),
+				loading: () => this.isFetchingBundle(),
 			},
-			disabled: () => this.isFetchingBundle(),
-			loading: () => this.isFetchingBundle(),
-		},
-		{
-			description: "Delete version",
-			icon: "delete_forever",
-			callback: this.openRemoveVersionDialog.bind(this),
-			disabled: (_, item) => {
-				const versions = this.currentVersions();
-				return (
-					versions.length === 0 ||
-					item.id !== versions[versions.length - 1].id ||
-					item.versionCode <= 1
-				);
+			{
+				description: "Delete version",
+				icon: "delete_forever",
+				callback: this.openRemoveVersionDialog.bind(this),
+				disabled: (_, item) => {
+					const versions = this.currentVersions();
+					return (
+						versions.length === 0 ||
+						item.id !== versions[versions.length - 1].id ||
+						item.versionCode <= 1
+					);
+				},
 			},
-		},
-	]);
+		];
+	});
 
 	async downloadBundle() {
 		if (this.isFetchingBundle()) return;

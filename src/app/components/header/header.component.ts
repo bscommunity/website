@@ -1,5 +1,6 @@
 import {
 	ChangeDetectionStrategy,
+	ChangeDetectorRef,
 	Component,
 	inject,
 	OnInit,
@@ -21,13 +22,28 @@ import { AvatarComponent } from "@/components/avatar/avatar.component";
 
 // Types
 import type { UserModel } from "@/models/user.model";
+import type {
+	NotificationModel,
+	NotificationMessage,
+} from "@/models/notification.model";
 
 // Services
 import { AuthService } from "@/services/auth.service";
+import { UserService } from "@/services/api/user.service";
 import { PublishDialogService } from "@/services/publish/publish.service";
 import { ChartPublishHandler } from "@/services/publish/handlers/chart-publish.handler";
 import { TourPassPublishHandler } from "@/services/publish/handlers/tourpass-publish.handler";
 import { ThemePublishHandler } from "@/services/publish/handlers/theme-publish.handler";
+import { convertDateTimeToHumanReadable } from "@/lib/time";
+
+const NOTIFICATION_MESSAGES: {
+	[K in NotificationMessage["type"]]: (
+		msg: Extract<NotificationMessage, { type: K }>,
+	) => string;
+} = {
+	contributor_added: (m) =>
+		`${m.actorName} shared a ${m.itemType.toLowerCase().replace(/_/g, " ")} (${m.itemName}) with you`,
+};
 
 @Component({
 	selector: "app-header",
@@ -46,24 +62,23 @@ import { ThemePublishHandler } from "@/services/publish/handlers/theme-publish.h
 })
 export class HeaderComponent implements OnInit {
 	private authService = inject(AuthService);
+	private userService = inject(UserService);
 	private chartPublishHandler = inject(ChartPublishHandler);
 	private tourPassPublishHandler = inject(TourPassPublishHandler);
 	private themePublishHandler = inject(ThemePublishHandler);
 
 	private _snackBar = inject(MatSnackBar);
 	private uploadDialog = inject(PublishDialogService);
+	private cdr = inject(ChangeDetectorRef);
 
 	user: UserModel | null = null;
+	notifications: NotificationModel[] = [];
+	unreadCount = 0;
+
+	convertDateTimeToHumanReadable = convertDateTimeToHumanReadable;
 
 	ngOnInit(): void {
 		this.user = this.authService.user;
-		/* this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
-			if (isLoggedIn) {
-				this.user = this.authService.user;
-			} else {
-				this.user = null;
-			}
-		}); */
 
 		this.uploadDialog.setHandlers(
 			{
@@ -73,6 +88,100 @@ export class HeaderComponent implements OnInit {
 			},
 			"Chart",
 		);
+
+		this.loadNotifications();
+	}
+
+	loadNotifications(disableCache = false) {
+		this.userService
+			.getNotifications({ limit: 20, disableCache })
+			.subscribe({
+				next: (res) => {
+					this.notifications = res.items;
+					this.unreadCount = res.unreadCount;
+					this.cdr.markForCheck();
+				},
+				error: () => {},
+			});
+	}
+
+	deleteNotification(id: number, event: Event) {
+		event.stopPropagation();
+		const removed = this.notifications.find((n) => n.id === id);
+		if (!removed) return;
+
+		const previousNotifications = this.notifications;
+		const previousUnreadCount = this.unreadCount;
+
+		// Optimistic update: reflect removal immediately.
+		this.notifications = previousNotifications.filter(
+			(n) => n.id !== id,
+		);
+		this.unreadCount = Math.max(0, previousUnreadCount - 1);
+		this.cdr.markForCheck();
+
+		// API call in background; rollback on failure.
+		this.userService.deleteNotification(id).subscribe({
+			next: () => {},
+			error: () => {
+				this.notifications = previousNotifications;
+				this.unreadCount = previousUnreadCount;
+				this.cdr.markForCheck();
+			},
+		});
+	}
+
+	markAllAsRead() {
+		if (this.notifications.length === 0 && this.unreadCount === 0) return;
+
+		const previousNotifications = this.notifications;
+		const previousUnreadCount = this.unreadCount;
+
+		// Optimistic update: clear immediately.
+		this.notifications = [];
+		this.unreadCount = 0;
+		this.cdr.markForCheck();
+
+		// API call in background; rollback on failure.
+		this.userService.markAllNotificationsRead().subscribe({
+			next: () => {},
+			error: () => {
+				this.notifications = previousNotifications;
+				this.unreadCount = previousUnreadCount;
+				this.cdr.markForCheck();
+			},
+		});
+	}
+
+	renderNotificationMessage(
+		message: NotificationMessage | string | null | undefined,
+	): string {
+		if (!message) return "";
+		if (typeof message === "string") {
+			const raw = message;
+			try {
+				message = JSON.parse(raw) as NotificationMessage;
+			} catch {
+				return raw;
+			}
+		}
+
+		const type = (message as { type?: unknown }).type;
+		if (typeof type !== "string") return "You have a new notification";
+
+		const handler = (
+			NOTIFICATION_MESSAGES as Record<
+				string,
+				((msg: never) => string) | undefined
+			>
+		)[type];
+		if (!handler) return "You have a new notification";
+
+		try {
+			return handler(message as never);
+		} catch {
+			return "You have a new notification";
+		}
 	}
 
 	openWarning() {
@@ -86,12 +195,25 @@ export class HeaderComponent implements OnInit {
 		);
 	}
 
-	/* openProfile() {
-		this._snackBar.open("Profile page is not implemented yet!", "Ok", {
-			horizontalPosition: "right",
-			verticalPosition: "bottom",
-		});
-	} */
+	redirectFromNotification(notification: NotificationModel) {
+		if (notification.catalogItemId) {
+			switch (notification.type) {
+				case "CONTRIBUTOR_ADDED":
+					switch (notification.message.itemType) {
+						case "CHART":
+							window.location.href = `/dashboard/chart/${notification.catalogItemId}`;
+							break;
+						case "TOURPASS":
+							window.location.href = `/dashboard/tourpass/${notification.catalogItemId}`;
+							break;
+						case "THEME":
+							window.location.href = `/dashboard/theme/${notification.catalogItemId}`;
+							break;
+					}
+					break;
+			}
+		}
+	}
 
 	openUploadDialog() {
 		this.uploadDialog.open();

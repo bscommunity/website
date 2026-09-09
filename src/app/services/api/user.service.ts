@@ -12,12 +12,18 @@ import type { ChartModel } from "@/models/chart.model";
 import { TourPassModel } from "@/models/tour-pass.model";
 import type { ThemeModel } from "@/models/theme.model";
 import type { CatalogItemModel } from "@/models/catalog-item.model";
+import type {
+	NotificationsResponse,
+	DeleteAllResponse,
+} from "@/models/notification.model";
 
 import { apiUrl } from "@/lib/api";
-import type { QueryPage } from "../cache.service";
-import { CacheService } from "../cache.service";
+import { CacheService, type QueryPage } from "@/services/cache.service";
+import { DocumentCacheService } from "@/services/document-cache.service";
 
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const NOTIFICATIONS_CACHE_TTL = 60 * 1000; // 1 minute in milliseconds
+const NOTIFICATIONS_CACHE_PREFIX = "notifications:";
 
 @Injectable({
 	providedIn: "root",
@@ -25,6 +31,7 @@ const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
 export class UserService {
 	private http = inject(HttpClient);
 	private cacheService = inject(CacheService);
+	private documentCache = inject(DocumentCacheService);
 
 	private readonly apiUrl = `${apiUrl}/users`;
 	private readonly meUrl = `${apiUrl}/me`;
@@ -89,6 +96,7 @@ export class UserService {
 
 	getMyUploads(
 		params: {
+			view?: "owned" | "shared";
 			types?: string;
 			query?: string;
 			sortBy?: string;
@@ -101,6 +109,7 @@ export class UserService {
 		} = {},
 	): Observable<QueryPage<CatalogItemModel>> {
 		const httpParams: Record<string, string | number> = {};
+		if (params.view) httpParams["view"] = params.view;
 		if (params.types) httpParams["types"] = params.types;
 		if (params.query) httpParams["query"] = params.query;
 		if (params.sortBy) httpParams["sortBy"] = params.sortBy;
@@ -158,6 +167,7 @@ export class UserService {
 		params: Record<string, string | number>,
 	): string {
 		const parts = [
+			params["view"] || "owned",
 			params["types"] || "all",
 			params["query"] || "",
 			params["sortBy"] || "",
@@ -271,5 +281,75 @@ export class UserService {
 		return this.http.delete(`${this.apiUrl}/${userId}/follow`, {
 			responseType: "text",
 		});
+	}
+
+	// ---------------------------------------------------------------------------
+	// Notifications
+	// ---------------------------------------------------------------------------
+
+	getNotifications(
+		params: {
+			limit?: number;
+			offset?: number;
+			disableCache?: boolean;
+		} = {},
+	): Observable<NotificationsResponse> {
+		const httpParams: Record<string, number> = {};
+		if (params.limit !== undefined) httpParams["limit"] = params.limit;
+		if (params.offset !== undefined) httpParams["offset"] = params.offset;
+
+		const source = this.http.get<NotificationsResponse>(
+			`${this.meUrl}/notifications`,
+			{ params: httpParams },
+		);
+
+		// Only the first page is cached; paginated requests always hit the API.
+		if ((params.offset ?? 0) > 0) return source;
+
+		return this.documentCache.fetch(
+			this.buildNotificationsCacheKey(params.limit),
+			source,
+			{
+				ttlMs: NOTIFICATIONS_CACHE_TTL,
+				disableCache: params.disableCache,
+			},
+		);
+	}
+
+	deleteNotification(id: number): Observable<void> {
+		return this.http
+			.delete<void>(`${this.meUrl}/notifications/${id}`)
+			.pipe(tap(() => this.removeNotificationFromCache(id)));
+	}
+
+	markAllNotificationsRead(): Observable<DeleteAllResponse> {
+		return this.http
+			.post<DeleteAllResponse>(
+				`${this.meUrl}/notifications/read-all`,
+				null,
+			)
+			.pipe(tap(() => this.invalidateNotificationsCache()));
+	}
+
+	invalidateNotificationsCache(): void {
+		this.documentCache.invalidate(NOTIFICATIONS_CACHE_PREFIX);
+	}
+
+	private buildNotificationsCacheKey(limit?: number): string {
+		return `${NOTIFICATIONS_CACHE_PREFIX}limit=${limit ?? 20}`;
+	}
+
+	private removeNotificationFromCache(id: number): void {
+		for (const key of this.documentCache.keys(NOTIFICATIONS_CACHE_PREFIX)) {
+			const cached = this.documentCache.get<NotificationsResponse>(
+				key,
+				NOTIFICATIONS_CACHE_TTL,
+			);
+			if (!cached) continue;
+			this.documentCache.set(key, {
+				items: cached.items.filter((n) => n.id !== id),
+				unreadCount: Math.max(0, cached.unreadCount - 1),
+			});
+		}
 	}
 }

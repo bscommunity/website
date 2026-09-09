@@ -255,12 +255,10 @@ export class ChartService {
 	}
 
 	async getChartById(id: string): Promise<ChartModel> {
-		// Cache-first: if versions are already populated (from uploads list), return immediately
 		const cachedChart = this.cacheService.getEntity<ChartModel>("chart", id);
 		if (cachedChart) {
 			try {
-				const parsed = Chart.parse(cachedChart);
-				if (parsed.versions.length > 0) return parsed;
+				return Chart.parse(cachedChart);
 			} catch (error) {
 				console.error("Failed to parse cached chart, fetching from remote:", error);
 			}

@@ -117,12 +117,25 @@ ng-glyph .mdc-icon-button {
 	margin-top: 0.125rem;
 }
 
+.mat-mdc-menu-panel {
+	max-width: unset !important;
+}
+
+.mat-mdc-menu-item {
+	padding-left: 1rem !important;
+	padding-right: 1rem !important;
+}
+
 .mat-mdc-menu-item-text {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
-	gap: 0.75rem;
+	gap: 1rem;
+}
+
+.mdc-tab-indicator__content {
+	border-radius: 0.25rem 0.25rem 0 0 !important;
 }
 
 .mdc-label {

@@ -3,7 +3,10 @@ import {
 	MatChipSelectionChange,
 	MatChipsModule,
 } from "@angular/material/chips";
-import { ContributorRole, getContributorRoleLabel } from "@/models/enums/role.enum";
+import {
+	ContributorRole,
+	getContributorRoleLabel,
+} from "@/models/enums/role.enum";
 
 @Component({
 	selector: "app-contributor-tags",
@@ -15,8 +18,10 @@ export class ContributorTagsComponent {
 	readonly getRoleLabel = getContributorRoleLabel;
 
 	readonly userId = input.required<string>();
-	readonly roles = input.required<WritableSignal<Map<string, ContributorRole[]>>>();
+	readonly roles =
+		input.required<WritableSignal<Map<string, ContributorRole[]>>>();
 	readonly availableRoles = input.required<ContributorRole[]>();
+	readonly disabled = input(false);
 
 	toggleRole(event: MatChipSelectionChange, role: ContributorRole): void {
 		const signal = this.roles();
@@ -24,7 +29,9 @@ export class ContributorTagsComponent {
 		let newRoles: ContributorRole[];
 
 		if (event.selected) {
-			newRoles = currentRoles.includes(role) ? currentRoles : [...currentRoles, role];
+			newRoles = currentRoles.includes(role)
+				? currentRoles
+				: [...currentRoles, role];
 		} else {
 			newRoles = currentRoles.filter((r: ContributorRole) => r !== role);
 		}

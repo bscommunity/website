@@ -45,7 +45,6 @@ import {
 
 // Services
 import { UserService } from "@/services/api/user.service";
-import { AuthService } from "@/services/auth.service";
 import type { WorkshopFilters } from "@/services/filter.service";
 import { FilterService } from "@/services/filter.service";
 import { BatchUploadQueueService } from "@/services/publish/batch-upload-queue.service";
@@ -53,6 +52,7 @@ import { PublishDialogService } from "@/services/publish/publish.service";
 import { ListSectionComponent } from "./subcomponents/list-section.component";
 import { TourpassPreviewComponent } from "@/components/tourpass-preview/tourpass-preview.component";
 import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.component";
+import { MatTabsModule } from "@angular/material/tabs";
 
 @Component({
 	selector: "app-uploads",
@@ -70,13 +70,13 @@ import { ThemePreviewComponent } from "@/components/theme-preview/theme-preview.
 		LargePanelComponent,
 		TourpassPreviewComponent,
 		ThemePreviewComponent,
+		MatTabsModule,
 	],
 	templateUrl: "./uploads.html",
 })
 export class Uploads implements OnInit, OnDestroy {
 	private filterService = inject(FilterService);
 	private userService = inject(UserService);
-	private authService = inject(AuthService);
 	private batchUploadQueue = inject(BatchUploadQueueService);
 	private publishDialogService = inject(PublishDialogService);
 	private cdr = inject(ChangeDetectorRef);
@@ -97,19 +97,25 @@ export class Uploads implements OnInit, OnDestroy {
 
 	// Unified content grouped by date, then by type
 	contentByMonth: ContentByMonth[] = [];
+	sharedContentByMonth: ContentByMonth[] = [];
 	totalCount = 0;
+	sharedTotalCount = 0;
 	currentOffset = 0;
+	sharedCurrentOffset = 0;
 	private readonly pageSize = 20;
 	hasMore = false;
+	sharedHasMore = false;
 
-	error: string | undefined = undefined;
+	selectedTab = 0;
+
+	ownedError: string | undefined = undefined;
+	sharedError: string | undefined = undefined;
 
 	placeholders = Array(20);
 
 	// Expose observables
 	filters$ = this.filterService.filters$;
 	isLoading$ = this.filterService.isLoading$;
-	error$ = this.filterService.error$;
 
 	ngOnInit(): void {
 		const initialFilters = this.filterService.getFilters();
@@ -144,11 +150,6 @@ export class Uploads implements OnInit, OnDestroy {
 			.subscribe((item) => {
 				this.addPublishedItem(item);
 			});
-
-		this.error$.pipe(takeUntil(this.destroy$)).subscribe((err) => {
-			this.error = err || undefined;
-			this.cdr.markForCheck();
-		});
 	}
 
 	ngOnDestroy(): void {
@@ -158,13 +159,19 @@ export class Uploads implements OnInit, OnDestroy {
 
 	fetchContent(disableCache = false, append = false) {
 		const filters: WorkshopFilters = this.filterService.getFilters();
-		this.error = undefined;
+		if (this.selectedTab === 1) {
+			this.sharedError = undefined;
+		} else {
+			this.ownedError = undefined;
+		}
 		this.filterService.setLoading(true);
 
 		const types = mapCategoriesToTypes(filters.categories);
+		const view = this.selectedTab === 1 ? "shared" : "owned";
 
 		this.userService
 			.getMyUploads({
+				view,
 				types,
 				query: filters.query || undefined,
 				sortBy: filters.sortBy || undefined,
@@ -178,7 +185,11 @@ export class Uploads implements OnInit, OnDestroy {
 					? filters.versions.join(",")
 					: undefined,
 				limit: this.pageSize,
-				offset: append ? this.currentOffset : 0,
+				offset: append
+					? this.selectedTab === 1
+						? this.sharedCurrentOffset
+						: this.currentOffset
+					: 0,
 				disableCache,
 			})
 			.pipe(takeUntil(this.destroy$))
@@ -186,22 +197,40 @@ export class Uploads implements OnInit, OnDestroy {
 				next: (response) => {
 					const items = response.items || [];
 
-					if (append) {
-						this.contentByMonth = this.mergeGroupedContent(
-							this.contentByMonth,
-							groupByMonth(items),
-						);
-						this.currentOffset += items.length;
+					if (this.selectedTab === 1) {
+						if (append) {
+							this.sharedContentByMonth = this.mergeGroupedContent(
+								this.sharedContentByMonth,
+								groupByMonth(items),
+							);
+							this.sharedCurrentOffset += items.length;
+						} else {
+							this.sharedContentByMonth = groupByMonth(items);
+							this.sharedCurrentOffset = items.length;
+						}
+						this.sharedTotalCount = response.total ?? 0;
+						this.sharedHasMore = items.length >= this.pageSize;
 					} else {
-						this.contentByMonth = groupByMonth(items);
-						this.currentOffset = items.length;
+						if (append) {
+							this.contentByMonth = this.mergeGroupedContent(
+								this.contentByMonth,
+								groupByMonth(items),
+							);
+							this.currentOffset += items.length;
+						} else {
+							this.contentByMonth = groupByMonth(items);
+							this.currentOffset = items.length;
+						}
+						this.totalCount = response.total ?? 0;
+						this.hasMore = items.length >= this.pageSize;
 					}
 
-					this.totalCount = response.total ?? 0;
-					this.hasMore = items.length >= this.pageSize;
-
 					this.filterService.setLoading(false);
-					this.filterService.setError(null);
+					if (this.selectedTab === 1) {
+						this.sharedError = undefined;
+					} else {
+						this.ownedError = undefined;
+					}
 					this.cdr.markForCheck();
 				},
 				error: (error) => {
@@ -210,7 +239,11 @@ export class Uploads implements OnInit, OnDestroy {
 						error?.error?.message ||
 						error?.error ||
 						"Failed to refresh uploads. Please try again.";
-					this.filterService.setError(msg);
+					if (this.selectedTab === 1) {
+						this.sharedError = msg;
+					} else {
+						this.ownedError = msg;
+					}
 					this.filterService.setLoading(false);
 					this.cdr.markForCheck();
 				},
@@ -218,7 +251,9 @@ export class Uploads implements OnInit, OnDestroy {
 	}
 
 	loadMore() {
-		if (this.hasMore) {
+		const currentHasMore =
+			this.selectedTab === 1 ? this.sharedHasMore : this.hasMore;
+		if (currentHasMore) {
 			this.fetchContent(false, true);
 		}
 	}
@@ -333,6 +368,32 @@ export class Uploads implements OnInit, OnDestroy {
 				m.tourPasses.length > 0 ||
 				m.themes.length > 0,
 		);
+	}
+
+	get hasAnySharedContent(): boolean {
+		return this.sharedContentByMonth.some(
+			(m) =>
+				m.charts.length > 0 ||
+				m.tourPasses.length > 0 ||
+				m.themes.length > 0,
+		);
+	}
+
+	get currentContentByMonth(): ContentByMonth[] {
+		return this.selectedTab === 1
+			? this.sharedContentByMonth
+			: this.contentByMonth;
+	}
+
+	get currentHasMore(): boolean {
+		return this.selectedTab === 1 ? this.sharedHasMore : this.hasMore;
+	}
+
+	onTabChange(index: number): void {
+		this.selectedTab = index;
+		this.currentOffset = 0;
+		this.sharedCurrentOffset = 0;
+		this.fetchContent();
 	}
 
 	hasActiveFilters(): boolean {
