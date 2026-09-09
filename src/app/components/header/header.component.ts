@@ -107,26 +107,49 @@ export class HeaderComponent implements OnInit {
 
 	deleteNotification(id: number, event: Event) {
 		event.stopPropagation();
+		const removed = this.notifications.find((n) => n.id === id);
+		if (!removed) return;
+
+		const previousNotifications = this.notifications;
+		const previousUnreadCount = this.unreadCount;
+
+		// Optimistic update: reflect removal immediately.
+		this.notifications = previousNotifications.filter(
+			(n) => n.id !== id,
+		);
+		this.unreadCount = Math.max(0, previousUnreadCount - 1);
+		this.cdr.markForCheck();
+
+		// API call in background; rollback on failure.
 		this.userService.deleteNotification(id).subscribe({
-			next: () => {
-				this.notifications = this.notifications.filter(
-					(n) => n.id !== id,
-				);
-				this.unreadCount = Math.max(0, this.unreadCount - 1);
+			next: () => {},
+			error: () => {
+				this.notifications = previousNotifications;
+				this.unreadCount = previousUnreadCount;
 				this.cdr.markForCheck();
 			},
-			error: () => {},
 		});
 	}
 
 	markAllAsRead() {
+		if (this.notifications.length === 0 && this.unreadCount === 0) return;
+
+		const previousNotifications = this.notifications;
+		const previousUnreadCount = this.unreadCount;
+
+		// Optimistic update: clear immediately.
+		this.notifications = [];
+		this.unreadCount = 0;
+		this.cdr.markForCheck();
+
+		// API call in background; rollback on failure.
 		this.userService.markAllNotificationsRead().subscribe({
-			next: () => {
-				this.notifications = [];
-				this.unreadCount = 0;
+			next: () => {},
+			error: () => {
+				this.notifications = previousNotifications;
+				this.unreadCount = previousUnreadCount;
 				this.cdr.markForCheck();
 			},
-			error: () => {},
 		});
 	}
 
